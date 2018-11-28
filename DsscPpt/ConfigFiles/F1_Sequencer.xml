@@ -1,0 +1,38 @@
+<!DOCTYPE Sequencer>
+<Sequencer mode="signalsCompiler" cycleLength="40" holdGenEnabled="0" singleSHCapMode="1" opMode="0">
+<cycleParameters integrationLength="40" resetHoldLength="0" flattopLength="42" rampLength="210" singleCapLoadLength="20" flattopHoldLength="0" resetIntegOffset="5" rampIntegOffset="20" resetLength="60" backFlipAtReset="2" backFlipToResetOffset="30"/>injectRisingEdgeOffset="0"/>lastIntPhase="21"/>emptyInjectCycles="0"/>rightShift="0"/>ftFlipOffset="7"/>ftInjectOffset="7"/>
+<SequencerTrack signalName="undefined" invHold="0" statVal="161">
+<Phase length="26" type="1"/>
+<Phase length="50" type="0"/>
+<Phase length="10" type="1"/>
+<Phase length="10" type="0"/>
+<Phase length="184" type="1"/>
+</SequencerTrack>
+<SequencerTrack signalName="undefined" invHold="0" statVal="33">
+<Phase length="38" type="0"/>
+<Phase length="40" type="1"/>
+<Phase length="158" type="0"/>
+<Phase length="40" type="1"/>
+<Phase length="4" type="0"/>
+</SequencerTrack>
+<SequencerTrack signalName="undefined" invHold="115" statVal="97">
+<Phase length="171" type="1"/>
+<Phase length="60" type="0"/>
+<Phase length="49" type="1"/>
+</SequencerTrack>
+<SequencerTrack signalName="undefined" invHold="99" statVal="97">
+<Phase length="3" type="1"/>
+<Phase length="168" type="0"/>
+<Phase length="109" type="1"/>
+</SequencerTrack>
+<SequencerTrack signalName="undefined" invHold="0" statVal="97">
+<Phase length="280" type="0"/>
+</SequencerTrack>
+<HoldGenerator enabled="0">
+<HoldCntsRegEntry length="7" hold="0"/>
+<HoldCntsRegEntry length="5" hold="1"/>
+<HoldCntsRegEntry length="26" hold="0"/>
+<HoldCntsRegEntry length="5" hold="1"/>
+<HoldCntsRegEntry length="47" hold="0"/>
+</HoldGenerator>
+</Sequencer>

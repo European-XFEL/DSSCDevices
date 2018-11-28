@@ -1,0 +1,28 @@
+<!DOCTYPE Sequencer>
+<Sequencer mode="signalsCompiler" cycleLength="38" holdGenEnabled="0" singleSHCapMode="0" opMode="2">
+<cycleParameters integrationLength="35" resetHoldLength="0" flattopLength="200" rampLength="200" singleCapLoadLength="15" flattopHoldLength="0" resetIntegOffset="50" rampIntegOffset="20" resetLength="50" backFlipAtReset="2" backFlipToResetOffset="0"/>injectRisingEdgeOffset="0"/>lastIntPhase="21"/>emptyInjectCycles="0"/>rightShift="0"/>ftFlipOffset="7"/>ftInjectOffset="7"/>
+<SequencerTrack signalName="ADC_RMP" invHold="0" statVal="118">
+<Phase length="199" type="1"/>
+<Phase length="66" type="0"/>
+<Phase length="1" type="1"/>
+</SequencerTrack>
+<SequencerTrack signalName="FCF_SwIn" invHold="0" statVal="158">
+<Phase length="266" type="0"/>
+</SequencerTrack>
+<SequencerTrack signalName="FCF_Res_B" invHold="0" statVal="198">
+<Phase length="266" type="0"/>
+</SequencerTrack>
+<SequencerTrack signalName="FCF_Flip" invHold="0" statVal="238">
+<Phase length="266" type="1"/>
+</SequencerTrack>
+<SequencerTrack signalName="Inject" invHold="0" statVal="0">
+<Phase length="266" type="1"/>
+</SequencerTrack>
+<HoldGenerator enabled="0">
+<HoldCntsRegEntry length="85" hold="0"/>
+<HoldCntsRegEntry length="25" hold="1"/>
+<HoldCntsRegEntry length="11" hold="0"/>
+<HoldCntsRegEntry length="25" hold="1"/>
+<HoldCntsRegEntry length="14" hold="0"/>
+</HoldGenerator>
+</Sequencer>

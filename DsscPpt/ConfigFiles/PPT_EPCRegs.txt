@@ -1,0 +1,448 @@
+#ModuleSet:10GE_Engine0_Control
+modules   :0
+numBits   :192
+numSignals:8
+reverse   :0
+address   :68
+#Signals:eth0_this_mac_addr0:eth0_this_mac_addr1:eth0_recv_mac_addr0:eth0_recv_mac_addr1:eth0_destination_address:eth0_source_address:eth0_destination_port:eth0_source_port:
+#SignalsAliases:::::::::
+#ReadOnly:0:0:0:0:0:0:0:0:
+#ActiveLow:0:0:0:0:0:0:0:0:
+#Positions:0-31:32-47:48-63:64-95:96-127:128-159:160-175:176-191:
+#AccessLevels:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:3437096688:43707:8136:1778005:3232235777:3232235781:8000:8000:
+#ModuleSet:10GE_Engine1_Control
+modules   :0
+numBits   :192
+numSignals:8
+reverse   :0
+address   :72
+#Signals:eth1_this_mac_addr0:eth1_this_mac_addr1:eth1_recv_mac_addr0:eth1_recv_mac_addr1:eth1_destination_address:eth1_source_address:eth1_destination_port:eth1_source_port:
+#SignalsAliases:::::::::
+#ReadOnly:0:0:0:0:0:0:0:0:
+#ActiveLow:0:0:0:0:0:0:0:0:
+#Positions:0-31:32-47:48-63:64-95:96-127:128-159:160-175:176-191:
+#AccessLevels:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:3437096689:43707:8136:1778005:3232235777:3232235782:8000:8000:
+#ModuleSet:10GE_Engine2_Control
+modules   :0
+numBits   :192
+numSignals:8
+reverse   :0
+address   :76
+#Signals:eth2_this_mac_addr0:eth2_this_mac_addr1:eth2_recv_mac_addr0:eth2_recv_mac_addr1:eth2_destination_address:eth2_source_address:eth2_destination_port:eth2_source_port:
+#SignalsAliases:::::::::
+#ReadOnly:0:0:0:0:0:0:0:0:
+#ActiveLow:0:0:0:0:0:0:0:0:
+#Positions:0-31:32-47:48-63:64-95:96-127:128-159:160-175:176-191:
+#AccessLevels:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:3437096690:43707:8136:1778005:3232235777:3232235783:8000:8000:
+#ModuleSet:10GE_Engine3_Control
+modules   :0
+numBits   :192
+numSignals:8
+reverse   :0
+address   :80
+#Signals:eth3_this_mac_addr0:eth3_this_mac_addr1:eth3_recv_mac_addr0:eth3_recv_mac_addr1:eth3_destination_address:eth3_source_address:eth3_destination_port:eth3_source_port:
+#SignalsAliases:::::::::
+#ReadOnly:0:0:0:0:0:0:0:0:
+#ActiveLow:0:0:0:0:0:0:0:0:
+#Positions:0-31:32-47:48-63:64-95:96-127:128-159:160-175:176-191:
+#AccessLevels:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:3437096692:43707:8136:1778005:3232235777:3232235784:8000:8000:
+#ModuleSet:ASIC_Temperature_Register
+modules   :0
+numBits   :32
+numSignals:5
+reverse   :0
+address   :168
+#Signals:sel_asic_channel:sel_module:temperature0:temperature1:nc:
+#SignalsAliases::::::
+#ReadOnly:0:0:1:1:1:
+#ActiveLow:0:0:0:0:0:
+#Positions:0-3:4;5:14-22:23-31:6-13:
+#AccessLevels:0:0:0:0:0:
+#Outputs:0:
+#Module:0:11:0:0:0:0:
+#ModuleSet:AuroraRX_Control
+modules   :0
+numBits   :32
+numSignals:8
+reverse   :0
+address   :84
+#Signals:num_frames_to_send:send_converted_data:send_reordered_data:send_raw_data:discard_missing_pixels:nc:rx_aurora_reset_in:send_dummy_dr_data:
+#SignalsAliases:::::::::
+#ReadOnly:0:0:0:0:1:1:0:0:
+#ActiveLow:0:0:0:0:0:0:0:0:
+#Positions:0-9:24:25:26:28:10-23;27;29:30:31:
+#AccessLevels:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:10:1:0:0:0:0:0:0:
+#ModuleSet:AuroraRX_ReadbackRegister1
+modules   :0
+numBits   :32
+numSignals:28
+reverse   :0
+address   :88
+#Signals:aurora_alive:nc:start_readout:out_fifo_full:data_receiver_busy:reset:send_converted_data:send_reordered_data:send_raw_data:send_trailer:discard_missing_pixels:aurora0 pll_locked:aurora0 rx_lane0_up:aurora0 rx_lane1_up:aurora0 rx_lane2_up:aurora0 rx_channel_up:aurora0 rx_soft_err:aurora0 rx_hard_err:aurora1 pll_locked:aurora1 rx_lane0_up:aurora1 rx_lane1_up:aurora1 rx_lane2_up:aurora1 rx_channel_up:aurora1 rx_soft_err:aurora1 rx_hard_err:aurora2 pll_locked:aurora2 rx_lane0_up:aurora2 rx_lane1_up:
+#SignalsAliases:::::::::::::::::::::::::::::
+#ReadOnly:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Positions:0-3:4;6:5:7:8:9:10:11:12:13:14:15:16:17:18:19:20:21:22:23:24:25:26:27:28:29:30:31:
+#AccessLevels:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:0:1:0:0:1:0:1:0:0:0:0:1:1:1:1:1:0:0:0:0:0:0:0:0:0:0:0:0:
+#ModuleSet:AuroraRX_ReadbackRegister2
+modules   :0
+numBits   :32
+numSignals:20
+reverse   :0
+address   :92
+#Signals:aurora2 rx_lane2_up:aurora2 rx_channel_up:aurora2 rx_soft_err:aurora2 rx_hard_err:aurora3 pll_locked:aurora3 rx_lane0_up:aurora3 rx_lane1_up:aurora3 rx_lane2_up:aurora3 rx_channel_up:aurora3 rx_soft_err:aurora3 rx_hard_err:aurora0 ready:aurora1 ready:aurora2 ready:aurora3 ready:reset_data_receiver_chan0_n:reset_data_receiver_chan1_n:reset_data_receiver_chan2_n:reset_data_receiver_chan3_n:nc:
+#SignalsAliases:::::::::::::::::::::
+#ReadOnly:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Positions:0:1:2:3:4:5:6:7:8:9:10:11:12:13:14:15:16:17:18:19-31:
+#AccessLevels:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:0:0:0:0:0:0:0:0:0:0:0:1:0:0:0:1:0:0:0:0:
+#ModuleSet:Build_Date
+modules   :0
+numBits   :32
+numSignals:1
+reverse   :0
+address   :128
+#Signals:Build_Date:
+#SignalsAliases::
+#ReadOnly:1:
+#ActiveLow:0:
+#Positions:0-31:
+#AccessLevels:0:
+#Outputs:0:
+#Module:0:20171120:
+#ModuleSet:Build_Info
+modules   :0
+numBits   :32
+numSignals:2
+reverse   :0
+address   :132
+#Signals:Build_Rev:Build_Time:
+#SignalsAliases:::
+#ReadOnly:1:1:
+#ActiveLow:0:0:
+#Positions:0-15:16-31:
+#AccessLevels:0:0:
+#Outputs:0:
+#Module:0:11297:1932:
+#ModuleSet:CLOCK_FANOUT_CONTROL
+modules   :0
+numBits   :32
+numSignals:8
+reverse   :0
+address   :44
+#Signals:CLIN_SEL:CLOUT_SEL:PLL_CLKINSEL:PLL_RST:SEN:PLL_DRP_RST:mmcm_locked:nc:
+#SignalsAliases:::::::::
+#ReadOnly:0:0:0:0:0:0:1:1:
+#ActiveLow:0:0:0:0:0:0:0:0:
+#Positions:0:1:2:3:4:5:6:7-31:
+#AccessLevels:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:1:0:1:0:0:0:1:0:
+#ModuleSet:CMD_PROT_ENGINE
+modules   :0
+numBits   :160
+numSignals:19
+reverse   :0
+address   :48
+#Signals:pre_burst_wait_time:refpulse_length:cycle_length:burst_length:veto_latency:send_testpattern_from_reg:bypass_refpulse:iprog_length:hold_length:start_burst_from_reg:iob_powerup_time:only_golden:start_readout_from_reg:enable_veto_reordering:num_pre_burst_wait_vetos:en_pre_burst_wait_vetos:sel_dbg_out(bin):bit_error_rate_test:nc:
+#SignalsAliases::::::::::::::::::::
+#ReadOnly:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Positions:0-31:32-35:36-42:43-54:55-61:62:63:64-79:80-94:95:96-127:128:129:130:131-142:143:144-147:148:149-159:
+#AccessLevels:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:537976:5:39:1850:80:0:0:200:0:0:346060:0:0:1:100:1:1:0:0:
+#ModuleSet:DDR_Readback_Register
+modules   :0
+numBits   :32
+numSignals:18
+reverse   :0
+address   :124
+#Signals:ddr3_ready:dbg_oclkdelay_calib_done:dbg_oclkdelay_calib_start:dbg_wrcal_err:dbg_wrcal_done:dbg_wrcal_start:dbg_pi_dqsfound_err:dbg_pi_dqsfound_done:dbg_pi_dqsfound_start:dbg_pi_phaselock_err:dbg_pi_phaselocked_done:dbg_pi_phaselock_start:ref_dll_lock:dbg_rddata_valid:dbg_wrlvl_start:dbg_wrlvl_err:dbg_wrlvl_done:nc:
+#SignalsAliases:::::::::::::::::::
+#ReadOnly:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Positions:0:1:2:3:4:5:6:7:8:9:10:11:12:13:14:15:16:17-31:
+#AccessLevels:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:1:1:1:0:1:1:0:1:1:0:1:1:1:0:0:0:1:0:
+#ModuleSet:DataRecv_to_Eth0_Register
+modules   :0
+numBits   :32
+numSignals:7
+reverse   :0
+address   :104
+#Signals:sel_eth0_datareceiver:clone_eth0_to_eth1:send_dummy_packets:ethernet_traffic_throttle_div:expected_test_pattern:reset_fail_data:nc:
+#SignalsAliases::::::::
+#ReadOnly:0:0:0:0:0:0:1:
+#ActiveLow:0:0:0:0:0:0:0:
+#Positions:0;1:2:3:9-18:20-28:19:4-8;29-31:
+#AccessLevels:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:0:0:0:127:5:0:0:
+#ModuleSet:Data_Monitor_Select
+modules   :0
+numBits   :32
+numSignals:6
+reverse   :0
+address   :188
+#Signals:channel_select:frame_select:asic_select:pixel_select:en_image_mode:nc:
+#SignalsAliases:::::::
+#ReadOnly:0:0:0:0:0:1:
+#ActiveLow:0:0:0:0:0:0:
+#Positions:0;1:2-11:12-15:16-27:28:29-31:
+#AccessLevels:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:0:0:0:0:1:0:
+#ModuleSet:Data_Monitor_Status
+modules   :0
+numBits   :32
+numSignals:3
+reverse   :0
+address   :192
+#Signals:monitor_train_id:image_available:nc:
+#SignalsAliases::::
+#ReadOnly:1:1:1:
+#ActiveLow:0:0:0:
+#Positions:0-15:16:17-31:
+#AccessLevels:0:0:0:
+#Outputs:0:
+#Module:0:0:0:0:
+#ModuleSet:Data_Receive_Status_0
+modules   :0
+numBits   :32
+numSignals:2
+reverse   :0
+address   :160
+#Signals:Failed_Asics_Module_1:Failed_Asics_Module_2:
+#SignalsAliases:::
+#ReadOnly:1:1:
+#ActiveLow:0:0:
+#Positions:0-15:16-31:
+#AccessLevels:0:0:
+#Outputs:0:
+#Module:0:65535:0:
+#ModuleSet:Data_Receive_Status_1
+modules   :0
+numBits   :32
+numSignals:2
+reverse   :0
+address   :164
+#Signals:Failed_Asics_Module_3:Failed_Asics_Module_4:
+#SignalsAliases:::
+#ReadOnly:1:1:
+#ActiveLow:0:0:
+#Positions:0-15:16-31:
+#AccessLevels:0:0:
+#Outputs:0:
+#Module:0:0:0:
+#ModuleSet:Det_Specific_Data_Register
+modules   :0
+numBits   :96
+numSignals:4
+reverse   :0
+address   :184
+#Signals:IOB1_Serial:IOB2_Serial:IOB3_Serial:IOB4_Serial:
+#SignalsAliases:::::
+#ReadOnly:0:0:0:0:
+#ActiveLow:0:0:0:0:
+#Positions:0-23:24-47:48-71:72-95:
+#AccessLevels:0:0:0:0:
+#Outputs:0:
+#Module:0:12748837:0:0:0:
+#ModuleSet:Ethernet_ReadbackRegister1
+modules   :0
+numBits   :32
+numSignals:32
+reverse   :0
+address   :96
+#Signals:chan0_tx_resetdone:chan1_tx_resetdone:chan2_tx_resetdone:chan3_tx_resetdone:ethernet0_in_data_ready:ethernet1_in_data_ready:ethernet2_in_data_ready:ethernet3_in_data_ready:ethernet_in_data_valid:qplllock:reset:ethernet_mmcm_locked:Chan0 PCS_Block_Lock:Chan0 rxreset322:Chan0 txreset322:Chan0 pma_resetout:Chan0 pcs_resetout:Chan0 resetdone:Chan0 tx_fault:Chan0 gt0_gttxreset_i:Chan1 PCS_Block_Lock:Chan1 rxreset322:Chan1 txreset322:Chan1 pma_resetout:Chan1 pcs_resetout:Chan1 resetdone:Chan1 tx_fault:Chan1 gt0_gttxreset_i:Chan2 PCS_Block_Lock:Chan2 rxreset322:Chan2 txreset322:Chan2 pma_resetout:
+#SignalsAliases:::::::::::::::::::::::::::::::::
+#ReadOnly:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Positions:0:1:2:3:4:5:6:7:8:9:10:11:12:13:14:15:16:17:18:19:20:21:22:23:24:25:26:27:28:29:30:31:
+#AccessLevels:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:1:1:1:1:0:0:0:0:0:1:0:1:1:0:0:0:0:1:0:0:0:0:0:0:0:1:0:0:0:0:0:0:
+#ModuleSet:Ethernet_ReadbackRegister2
+modules   :0
+numBits   :32
+numSignals:18
+reverse   :0
+address   :100
+#Signals:Chan2 pcs_resetout:Chan2 resetdone:Chan2 tx_fault:Chan2 gt0_gttxreset_i:Chan3 PCS_Block_Lock:Chan3 rxreset322:Chan3 txreset322:Chan3 pma_resetout:Chan3 pcs_resetout:Chan3 resetdone:Chan3 tx_fault:Chan3 gt0_gttxreset_i:ethernet_ready:channel0_fifos_full:channel1_fifos_full:channel2_fifos_full:channel3_fifos_full:nc:
+#SignalsAliases:::::::::::::::::::
+#ReadOnly:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Positions:0:1:2:3:4:5:6:7:8:9:10:11:12:13-15:16-18:19-21:22-24:25-31:
+#AccessLevels:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:0:1:0:0:0:0:0:0:0:1:0:0:1:0:0:0:0:0:
+#ModuleSet:Ethernet_Reset_Register
+modules   :0
+numBits   :32
+numSignals:6
+reverse   :0
+address   :108
+#Signals:Ethernet Reset channel 0:Ethernet Reset channel 1:Ethernet Reset channel 2:Ethernet Reset channel 3:Ethernet_Packet_Type:nc0:
+#SignalsAliases:::::::
+#ReadOnly:0:0:0:0:0:1:
+#ActiveLow:0:0:0:0:0:0:
+#Positions:0:1:2:3:4-19:20-31:
+#AccessLevels:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:0:0:0:0:2048:0:
+#ModuleSet:IOBTempReaderOut
+modules   :0
+numBits   :32
+numSignals:1
+reverse   :0
+address   :116
+#Signals:IOB Temperature:
+#SignalsAliases::
+#ReadOnly:1:
+#ActiveLow:0:
+#Positions:0-31:
+#AccessLevels:0:
+#Outputs:0:
+#Module:0:0:
+#ModuleSet:JTAG_1_Readback_Register
+modules   :0
+numBits   :32
+numSignals:25
+reverse   :0
+address   :144
+#Signals:jtag0_dev_out_fifo_empty:jtag0_dev_out_fifo_almost_empty:jtag0_iom_busy:jtag0_iom_almost_busy:jtag0_busy:jtag0_dev_in_fifo_empty:jtag1_dev_out_fifo_empty:jtag1_dev_out_fifo_almost_empty:jtag1_iom_busy:jtag1_iom_almost_busy:jtag1_busy:jtag1_dev_in_fifo_empty:jtag2_dev_out_fifo_empty:jtag2_dev_out_fifo_almost_empty:jtag2_iom_busy:jtag2_iom_almost_busy:jtag2_busy:jtag2_dev_in_fifo_empty:jtag3_dev_out_fifo_empty:jtag3_dev_out_fifo_almost_empty:jtag3_iom_busy:jtag3_iom_almost_busy:jtag3_busy:jtag3_dev_in_fifo_empty:nc:
+#SignalsAliases::::::::::::::::::::::::::
+#ReadOnly:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Positions:0:1:2:3:4:5:8:9:10:11:12:13:16:17:18:19:20:21:24:25:26:27:28:29:6-7;14-15;22-23;30-31:
+#AccessLevels:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:1:0:0:0:0:1:1:0:0:0:0:1:1:0:0:0:0:1:1:0:0:0:0:1:0:
+#ModuleSet:JTAG_Control_Register
+modules   :0
+numBits   :32
+numSignals:11
+reverse   :0
+address   :140
+#Signals:EnJTAG1:EnJTAG2:EnJTAG3:EnJTAG4:RESET_ASIC1_N:RESET_ASIC2_N:RESET_ASIC3_N:RESET_ASIC4_N:ASIC_JTAG_Clock_Divider:JTAG_Test_System:nc:
+#SignalsAliases::::::::::::
+#ReadOnly:0:0:0:0:0:1:1:1:0:0:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:0:0:
+#Positions:0:1:2:3:4:5:6:7:8-15:16:17-31:
+#AccessLevels:0:0:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:1:1:1:1:1:1:1:1:20:1:0:
+#ModuleSet:LinkID_Config_Register
+modules   :0
+numBits   :128
+numSignals:4
+reverse   :0
+address   :156
+#Signals:linkID1:linkID2:linkID3:linkID4:
+#SignalsAliases:::::
+#ReadOnly:0:0:0:0:
+#ActiveLow:0:0:0:0:
+#Positions:0-31:32-63:64-95:96-127:
+#AccessLevels:0:0:0:0:
+#Outputs:0:
+#Module:0:1:2:3:4:
+#ModuleSet:Multi_purpose_Register
+modules   :0
+numBits   :32
+numSignals:20
+reverse   :0
+address   :8
+#Signals:IOB_RESET1:IOB_RESET2:IOB_RESET3:IOB_RESET4:CmdProtocolEngine_enable:PLL_CE:datapath_channel_enable1:datapath_channel_enable2:datapath_channel_enable3:datapath_channel_enable4:EPC_devices_reset:ddr3_disable_block_rw:start_ddr3_readout (placeholder):ddr3_reset:ddr throttle divider:ICAPE2_CLK:ICAPE2_RDWRB:ICAPE2_CSIB:Sel_XFEL_Cmd_Negedge:nc:
+#SignalsAliases:::::::::::::::::::::
+#ReadOnly:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Positions:0:1:2:3:4:5:6:7:8:9:10:11:12:15:16-28:29:30:31:13:14:
+#AccessLevels:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:0:0:0:0:0:1:1:0:0:0:0:0:0:0:410:0:0:0:1:0:
+#ModuleSet:PLLReadbackRegister
+modules   :0
+numBits   :32
+numSignals:5
+reverse   :0
+address   :12
+#Signals:PLL_LD:PLL_MUXOUT:CLIN_SEL:CLOUT_SEL:nc:
+#SignalsAliases::::::
+#ReadOnly:1:1:1:1:1:
+#ActiveLow:0:0:0:0:0:
+#Positions:0:1:2:3:4-31:
+#AccessLevels:0:0:0:0:0:
+#Outputs:0:
+#Module:0:1:1:1:0:0:
+#ModuleSet:SIB_Receive_Register
+modules   :0
+numBits   :32
+numSignals:3
+reverse   :0
+address   :176
+#Signals:rd_data:byte_number:nc:
+#SignalsAliases::::
+#ReadOnly:1:1:1:
+#ActiveLow:0:0:0:
+#Positions:0-15:24-31:16-23:
+#AccessLevels:0:0:0:
+#Outputs:0:
+#Module:0:56578:129:0:
+#ModuleSet:Single_Cycle_Register
+modules   :0
+numBits   :32
+numSignals:9
+reverse   :0
+address   :180
+#Signals:single_cycle_done:continuous_mode:disable_sending:doSingleCycle:slow_mode:iterations:rotate_ladder:sort_asic_wise:nc:
+#SignalsAliases::::::::::
+#ReadOnly:1:0:0:0:0:0:0:0:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:
+#Positions:0:1:2:3:4-7:16-31:8:9:10-15:
+#AccessLevels:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:1:1:1:0:0:1:0:0:0:
+#ModuleSet:UART_Control_Register
+modules   :0
+numBits   :32
+numSignals:9
+reverse   :0
+address   :152
+#Signals:uart_clock_divide:invert_tx:invert_rx:loopback:manual_mode:rx_delay:UART_test_en:SIB_timeout_value:nc:
+#SignalsAliases::::::::::
+#ReadOnly:0:0:0:0:0:0:0:0:1:
+#ActiveLow:0:0:0:0:0:0:0:0:0:
+#Positions:0-10:12:13:14:15:16;17:18:22-31:11;19-21:
+#AccessLevels:0:0:0:0:0:0:0:0:0:
+#Outputs:0:
+#Module:0:434:0:0:0:0:1:0:200:0:
+#ModuleSet:XADC_Temp_out
+modules   :0
+numBits   :32
+numSignals:2
+reverse   :0
+address   :112
+#Signals:XADC Temperature:nc:
+#SignalsAliases:::
+#ReadOnly:1:1:
+#ActiveLow:0:0:
+#Positions:0-11:12-31:
+#AccessLevels:0:0:
+#Outputs:0:
+#Module:0:2724:0:
