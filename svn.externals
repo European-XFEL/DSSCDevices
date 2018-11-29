@@ -1,8 +1,0 @@
-DsscDependencies/src/libCHIPInterface https://sus.ziti.uni-heidelberg.de/repos/susmix/trunk/XFEL/DSSC_BASE/software/src/libCHIPInterface
-DsscDependencies/src/libUtils https://sus.ziti.uni-heidelberg.de/repos/susmix/trunk/XFEL/DSSC_BASE/software/src/libUtils
-DsscDependencies/src/libConfigReg https://sus.ziti.uni-heidelberg.de/repos/susmix/trunk/XFEL/tools/libConfigReg/ConfigReg
-DsscDependencies/src/Minuit2 https://sus.ziti.uni-heidelberg.de/repos/susmix/trunk/XFEL/tools/Minuit2
-DsscDependencies/src/libSequencer https://sus.ziti.uni-heidelberg.de/repos/susmix/trunk/XFEL/DSSC_BASE/software/src/libSequencer
-DsscDependencies/src/libPPT https://sus.ziti.uni-heidelberg.de/repos/susmix/trunk/XFEL/DSSC_PPT/software/Qt/src/libPPT
-DsscDependencies/src/libPPTDataReceiver https://sus.ziti.uni-heidelberg.de/repos/susmix/trunk/XFEL/DSSC_PPT/software/Qt/src/libPPTDataReceiver
-DsscDependencies/src/libDsscHdf5 https://sus.ziti.uni-heidelberg.de/repos/susmix/trunk/XFEL/DSSC_PPT/software/Qt/src/libDsscHdf5

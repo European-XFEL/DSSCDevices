@@ -17,10 +17,10 @@
 /**
  * The main Karabo namespace
  */
-//#define STATE_RUN karabo::util::State::STARTED,karabo::util::State::ACQUIRING
-//#define STATE_ON karabo::util::State::ON,karabo::util::State::STOPPED
-//#define STATE_INIT karabo::util::State::OFF
-//#define STATE_OFF karabo::util::State::UNKNOWN
+#define STATE_RUN karabo::util::State::STARTED,karabo::util::State::ACQUIRING
+#define STATE_ON karabo::util::State::ON,karabo::util::State::STOPPED
+#define STATE_INIT karabo::util::State::OFF
+#define STATE_OFF karabo::util::State::UNKNOWN
 
 #define HDF5
 
@@ -146,9 +146,8 @@ namespace karabo {
 
         void open();
         void close();
-        void stopAcquisition();     
+        void stopAcquisition();
         void startAcquisition();
-        void startBurstAcquisition();
         void runStandAlone();
         void stopStandalone();
         void runXFEL();
@@ -161,7 +160,6 @@ namespace karabo {
 
         void doFastInit();
         void initSystem();
-        void initSingleModule();
         void initGui();
         bool initIOBs();
         bool initChip();
@@ -369,8 +367,6 @@ namespace karabo {
         void LoadQSFPNetConfig();
         void SaveQSFPNetConfig();
 
-        void setThrottleDivider();
-
 
         class ContModeKeeper{
           public:
@@ -417,8 +413,6 @@ namespace karabo {
         std::string iob_CurrIOBNumber;
         std::string jtag_CurrIOBNumber;
         std::string pixel_CurrIOBNumber;
-
-        bool m_lastTrainIdPolling = false;
 
     };
 }

@@ -10,9 +10,13 @@
 #include "DsscDependencies.h"
 #include "DsscHDF5CorrectionFileReader.h"
 
+#include "DsscTrainDataSchema.h"
+
 using namespace std;
 
 USING_KARABO_NAMESPACES;
+
+#define VARCONFTAG "privVarConfTag"
 
 
 namespace karabo {
@@ -29,11 +33,13 @@ namespace karabo {
         SLOT_ELEMENT(expected).key("accumulate")
             .displayedName("Accumulate")
             .description("Start operation")
+            .allowedStates(State::STOPPED, State::OFF)
             .commit();
 
         SLOT_ELEMENT(expected).key("stop")
             .displayedName("Stop")
             .description("Start operation")
+            .allowedStates(State::ACQUIRING)
             .commit();
 
         SLOT_ELEMENT(expected).key("resetCounters")
@@ -66,25 +72,25 @@ namespace karabo {
           .commit();
 
         BOOL_ELEMENT(expected).key("sramBlacklistValid")
-            .displayedName("SRAM Blacklist Valid")
-            .readOnly().initialValue(false)
-            .commit();
+          .displayedName("SRAM Blacklist Valid")
+          .readOnly().initialValue(false)
+          .commit();
 
         SLOT_ELEMENT(expected).key("clearSramBlacklist")
-            .displayedName("Clear Sram Blacklist Data")
-            .description("remove sram blacklist data, wont be applied anymore")
-            .commit();
+          .displayedName("Clear Sram Blacklist Data")
+          .description("remove sram blacklist data, wont be applied anymore")
+          .commit();
 
         UINT16_ELEMENT(expected).key("blacklistPixel")
-            .displayedName("SRAM Blacklist Pixel")
-            .description("show sram blacklist of selected pixel")
-            .assignmentOptional().defaultValue(12345).reconfigurable()
-            .commit();
+          .displayedName("SRAM Blacklist Pixel")
+          .description("show sram blacklist of selected pixel")
+          .assignmentOptional().defaultValue(12345).reconfigurable()
+          .commit();
 
         VECTOR_BOOL_ELEMENT(expected).key("pixelSramBlacklistValues")
-            .displayedName("Pixel Valid Srams")
-            .readOnly().initialValue(std::vector<bool>(utils::s_numSram,true))
-            .commit();
+          .displayedName("Pixel Valid Srams")
+          .readOnly().initialValue(std::vector<bool>(utils::s_numSram,true))
+          .commit();
 
         PATH_ELEMENT(expected).key("sramCorrectionFileName")
           .displayedName("SRAM Correction  Filename")
@@ -93,95 +99,94 @@ namespace karabo {
           .commit();
 
         BOOL_ELEMENT(expected).key("sramCorrectionValid")
-            .displayedName("SRAM Correction Valid")
-            .readOnly().initialValue(false)
-            .commit();
-
-        BOOL_ELEMENT(expected).key("baselineValuesValid")
-            .displayedName("Baseline Valid")
-            .readOnly().initialValue(false)
-            .commit();
-
-        BOOL_ELEMENT(expected).key("subtractBaseline")
-            .displayedName("Subtract Baseline")
-            .description("Debug feature only, baseline for trimming funtions is applied by trimming device. If enabled in both devices, baseline is subtracted twice")
-            .assignmentOptional().defaultValue(false).reconfigurable()
-            .commit();
+          .displayedName("SRAM Correction Valid")
+          .readOnly().initialValue(false)
+          .commit();
 
         SLOT_ELEMENT(expected).key("clearSramCorrection")
-            .displayedName("Clear Sram Correction Data")
-            .description("remove sram correction data, wont be applied anymore")
-            .commit();
+          .displayedName("Clear Sram Correction Data")
+          .description("remove sram correction data, wont be applied anymore")
+          .commit();
+        
+        BOOL_ELEMENT(expected).key("showLadderImage")
+                  .displayedName("Output Ladder image")
+                  .description("Store histogram ascii files per measurement directory")
+                  .tags(VARCONFTAG)
+                  .assignmentOptional().defaultValue(false).reconfigurable()
+                  .allowedStates(State::STOPPED, State::ACQUIRING)
+                  .commit();
 
-
-        SLOT_ELEMENT(expected).key("acquireBaselineValues")
-            .displayedName("Acquire Baseline Values")
-            .description("start a train acquisition and update baseline values")
-            .commit();
-
+        STRING_ELEMENT(expected).key("sourceType")
+          .displayedName("Source Type")
+          .description("source Type: dummy (from dummy generator), Date Receiver or xfel DAQ.")
+          .assignmentMandatory()
+          .options({"XFELDAQ","DATARECEIVER", "DUMMY"})
+          .allowedStates(State::UNKNOWN)
+          .commit();
 
         STRING_ELEMENT(expected).key("sourceId")
-            .displayedName("Source id")
-            .description("DAQ source id, e.g. /SCS_DET_DSSC/DET/{}CH0."
-                         "Use {} to denote the position of the infix for each channel.")
-            .assignmentOptional().defaultValue("/SCS_DET_DSSC/DET/{}CH0")
-            .commit();
+          .displayedName("Source id")
+          .description("DAQ source id, e.g. /SCS_DET_DSSC/DET/{}CH0."
+                       "Use {} to denote the position of the infix for each channel.")
+          .assignmentOptional().defaultValue("/SCS_DET_DSSC/DET/{}CH0")
+          .allowedStates(State::OFF)
+          .commit();
 
         STRING_ELEMENT(expected).key("sendingASICs")
-            .displayedName("SendingASICs")
-            .description("Indicates which of the 16 ladder ASICs are sending data: 11110000_11110000")
-            .tags("general")
-            .assignmentOptional().defaultValue("00010000_00000000").reconfigurable()
-            .commit();
+          .displayedName("SendingASICs")
+          .description("Indicates which of the 16 ladder ASICs are sending data: 11110000_11110000")
+          .tags("general")
+          .assignmentOptional().defaultValue("11111111_11111111").reconfigurable()
+          .commit();
 
         UINT8_ELEMENT(expected).key("sourceInfix")
-            .displayedName("Source infix")
-            .description("Source id infix. Only used if {} denote its position in the source id field")
-            .assignmentOptional().defaultValue(0)
-            .commit();
+          .displayedName("Source infix")
+          .description("Source id infix. Only used if {} denote its position in the source id field")
+          .assignmentOptional().defaultValue(0)
+          .commit();
 
         UINT64_ELEMENT(expected).key("minValidTrainId")
-            .displayedName("Min Train ID")
-            .description("Device processes data only with a train id higher than specified")
-            .assignmentOptional().defaultValue(0).reconfigurable()
-            .commit();
+          .displayedName("Min Train ID")
+          .description("Device processes data only with a train id higher than specified")
+          .assignmentOptional().defaultValue(0).reconfigurable()
+          .commit();
 
         UINT64_ELEMENT(expected).key("currentTrainId")
-            .displayedName("CurrentTrainID")
-            .description("Current TrainID")
-            .readOnly()
-            .commit();
+          .displayedName("CurrentTrainID")
+          .description("Current TrainID")
+          .readOnly()
+          .commit();
 
         BOOL_ELEMENT(expected).key("run")
-            .displayedName("Run")
-            .description("Enable device where data should be received")
-            .assignmentOptional().defaultValue(false).reconfigurable()
-            .commit();
+          .displayedName("Run")
+          .description("Enable device where data should be received")
+          .assignmentOptional().defaultValue(false).reconfigurable()
+          .commit();
 
         BOOL_ELEMENT(expected).key("measureMean")
-            .displayedName("Measure Mean Values")
-            .description("Enabled by device where data should be received")
-            .assignmentOptional().defaultValue(false).reconfigurable()
-            .commit();
+          .displayedName("Measure Mean Values")
+          .description("Enabled by device where data should be received")
+          .assignmentOptional().defaultValue(false).reconfigurable()
+          .commit();
 
         BOOL_ELEMENT(expected).key("measureRMS")
-            .displayedName("Measure RMS Values")
-            .description("Enabled by device where data should be received")
-            .assignmentOptional().defaultValue(false).reconfigurable()
-            .commit();
+          .displayedName("Measure RMS Values")
+          .description("Enabled by device where data should be received")
+          .assignmentOptional().defaultValue(false).reconfigurable()
+          .commit();
 
         UINT32_ELEMENT(expected).key("numIterations")
-            .displayedName("Iterations")
-            .description("Number of iterations to accumulate")
-            .assignmentOptional().defaultValue(20).reconfigurable()
-            .commit();
+          .displayedName("Iterations")
+          .description("Number of iterations to accumulate")
+          .assignmentOptional().defaultValue(20).reconfigurable()
+          .commit();
 
 
         UINT16_ELEMENT(expected).key("minSram")
-            .displayedName("Min Sram")
-            .description("Minimum SRAM address for mean value computation")
-            .assignmentOptional().defaultValue(0).reconfigurable()
-            .commit();
+          .displayedName("Min Sram")
+          .description("Minimum SRAM address for mean value computation")
+          .assignmentOptional().defaultValue(0).reconfigurable()
+          .commit();
 
         UINT16_ELEMENT(expected).key("maxSram")
             .displayedName("Max Sram")
@@ -243,6 +248,24 @@ namespace karabo {
             .dataSchema(meanOutSchema)
             .commit();
 
+        /*Schema data;
+        DSSC_TRAINDATA_SCHEMA_SIMPLE(data);
+
+        OUTPUT_CHANNEL(expected).key("imageOutput")
+                .displayedName("ImageOutput")
+                .dataSchema(data)
+                .commit();//*/
+
+
+        Schema ladderSchema;
+        IMAGEDATA(ladderSchema).key("ladderImage")
+                  .setDimensions("128,512")
+                  .commit();
+
+        OUTPUT_CHANNEL(expected).key("ladderImageOutput")
+                .displayedName("Ladder Image Output")
+                .dataSchema(ladderSchema)
+                .commit();
 
     }
 
@@ -261,17 +284,43 @@ namespace karabo {
       KARABO_SLOT(clearSramCorrection)
       KARABO_SLOT(clearSramBlacklist)
 
-      KARABO_SLOT(acquireBaselineValues)
+      //Initialize function pointer for processing function
+      string sourceType;
+      config.get("sourceType", sourceType);
+      if(sourceType == "DATARECEIVER")
+      {
+          m_onDataImpl = boost::bind(&DsscProcessor::onDataDataReceiver, this, _1, _2);
+          m_sourceType = SourceTypeEnum::DATARECEIVER;
+      }
+      else
+      {
+          if(sourceType == "XFELDAQ")
+          {
+              m_onDataImpl = boost::bind(&DsscProcessor::onDataXFELDAQ, this, _1, _2);
+              m_sourceType = SourceTypeEnum::XFELDAQ;
+          }
+          else
+          {
+              m_onDataImpl = boost::bind(&DsscProcessor::onDataDummy, this, _1, _2);
+              m_sourceType = SourceTypeEnum::DUMMY;
+          }
+      }
 
+      m_dataViz.resize(m_imageNumPixs);
     }
 
 
     DsscProcessor::~DsscProcessor() {
-      set<bool>("run",false);
+      stopVizThread();
+      set<bool>("run",false);      
     }
 
     void DsscProcessor::preReconfigure(karabo::util::Hash& incomingReconfiguration)
-    {
+    {    
+        
+      Hash filtered = this->filterByTags(incomingReconfiguration, VARCONFTAG);
+      if(!filtered.empty()) UpdateVariablesConfig(filtered);
+        
       vector<string> paths;
       incomingReconfiguration.getPaths(paths);
 
@@ -313,7 +362,6 @@ namespace karabo {
                 KARABO_LOG_ERROR << "Correction file found, but structure invalid" << fileName;
               }
               set<bool>("sramCorrectionValid",valid);
-              set<bool>("baselineValuesValid",valid);
             }else{
               KARABO_LOG_ERROR << "File not found. Could not load SRAM Correction from " << fileName;
             }
@@ -349,6 +397,7 @@ namespace karabo {
       resetCounters();
       changeDeviceState(State::ACQUIRING);
       set<bool>("run",true);
+      if(m_vizualize) startVizThread();
     }
 
 
@@ -356,6 +405,7 @@ namespace karabo {
     {
       set<bool>("run",false);
       changeDeviceState(State::STOPPED);
+      if(m_vizualize) stopVizThread();
     }
 
     void DsscProcessor::changeDeviceState(const util::State & newState)
@@ -385,12 +435,8 @@ namespace karabo {
       clearData();
     }
 
-    void DsscProcessor::initialization()
-    {
+    void DsscProcessor::initialization() {
         KARABO_ON_DATA("input", onData)
-
-        m_acquireBaseLine = false;
-        m_acquireSramCorrection = false;
 
         m_inputFormat = DATAFORMAT::IMAGE;
 
@@ -403,59 +449,170 @@ namespace karabo {
         changeDeviceState(State::OFF);
     }
 
-    void DsscProcessor::onData(const karabo::util::Hash& data,
-                               const karabo::xms::InputChannel::MetaData& meta)  //find data for data source
+    void DsscProcessor::onData(const karabo::util::Hash& _data,
+                               const karabo::xms::InputChannel::MetaData& _meta)  //find data for data source
     {
-      if(get<bool>("run") == false){
-        changeDeviceState(State::STOPPED);
-        return; // dont send anything during idle+
-      }
-      changeDeviceState(State::ACQUIRING);
+        //
+        m_onDataImpl(_data, _meta);
+    }
 
-      // resend until stopped from remote
-      if(get<bool>("measureMean") || get<bool>("measureRMS")){
-        if(m_numIterations == m_iterationCnt){
-          sendMeanValues();
-          KARABO_LOG_INFO << "RESENT DATA ";
-          return;
+    void DsscProcessor::onDataDummy(const karabo::util::Hash& data,
+                     const karabo::xms::InputChannel::MetaData& meta)
+    {
+        if(get<bool>("run") == false){
+          changeDeviceState(State::STOPPED);
+          return; // dont send anything during idle+
         }
-      }
+        changeDeviceState(State::ACQUIRING);
+        //
+        // resend until stopped from remote
+        if(get<bool>("measureMean") || get<bool>("measureRMS"))
+        {
+            if(m_numIterations == m_iterationCnt){
+            sendMeanValues();
+            KARABO_LOG_INFO << "RESENT DATA ";
+            return;
+            }
+        }
         // verify data is sane
-      if (!data.has("image.data")){
-        cout << "No Image Data Found in input data " << m_sourceId << endl;
-        return;
-      }
+        if (!data.has("image.data"))
+        {
+            cout << "No Image Data Found in input data " << m_sourceId << endl;
+            return;
+        }
 
-      if (!data.has("image.cellId")){
-        cout << "No cellId Data Found in input data " << m_sourceId << endl;
-        return;
-      }
+        if (!data.has("image.cellId"))
+        {
+            cout << "No cellId Data Found in input data " << m_sourceId << endl;
+            return;
+        }
 
-      if (!data.has("image.trainId")){
-        cout << "No trainId Data Found in input data " << m_sourceId << endl;
-        return;
-      }
+        if (!data.has("image.trainId"))
+        {
+            cout << "No trainId Data Found in input data " << m_sourceId << endl;
+            return;
+        }
 
-      if (data.has("imageFormat"))
-      {
-        string format = data.get<string>("imageFormat");
-        m_inputFormat = utils::DsscTrainData::getFormat(format);
-        set<string>("inputDataFormat",format);
+        if (data.has("imageFormat"))
+        {
+            string format = data.get<string>("imageFormat");
+            m_inputFormat = utils::DsscTrainData::getFormat(format);
+            set<string>("inputDataFormat",format);
 
-        processTrain(data.get<util::NDArray>("image.data"),
-                     data.get<util::NDArray>("image.cellId"),
-                     data.get<util::NDArray>("image.trainId"));
-      }else{
-          m_inputFormat = utils::DsscTrainData::DATAFORMAT::IMAGE;
-          set<string>("inputDataFormat","imagewise");
-
-          processTrain(data.get<util::NDArray>("image.data"),
-                       data.get<util::NDArray>("image.cellId"),
-                       data.get<util::NDArray>("image.trainId"));
-      }
+            processTrain(data.get<util::NDArray>("image.data"),
+                         data.get<util::NDArray>("image.cellId"),
+                         data.get<util::NDArray>("image.trainId"));
+        }
 
     }
 
+
+    void DsscProcessor::onDataDataReceiver(const karabo::util::Hash& data,
+                     const karabo::xms::InputChannel::MetaData& meta)
+    {
+
+        if(get<bool>("run") == false)
+        {
+          changeDeviceState(State::STOPPED);
+          return; // dont send anything during idle+
+        }
+        changeDeviceState(State::ACQUIRING);
+        // resend until stopped from remote
+        if(get<bool>("measureMean") || get<bool>("measureRMS"))
+        {
+            if(m_numIterations == m_iterationCnt){
+            sendMeanValues();
+            KARABO_LOG_INFO << "RESENT DATA ";
+            return;
+            }
+        }
+        // verify data is sane
+        if (!data.has("image.data"))
+        {
+            cout << "No Image Data Found in input data " << m_sourceId << endl;
+            return;
+        }
+
+        if (!data.has("image.cellId"))
+        {
+            cout << "No cellId Data Found in input data " << m_sourceId << endl;
+            return;
+        }
+
+        if (!data.has("image.trainId"))
+        {
+            cout << "No trainId Data Found in input data " << m_sourceId << endl;
+            return;
+        }
+
+        if (data.has("imageFormat"))
+        {
+            string format = data.get<string>("imageFormat");
+            m_inputFormat = utils::DsscTrainData::getFormat(format);
+            set<string>("inputDataFormat",format);
+
+            processTrain(data.get<util::NDArray>("image.data"),
+                         data.get<util::NDArray>("image.cellId"),
+                         data.get<util::NDArray>("image.trainId"));
+        }
+    }
+
+    void DsscProcessor::onDataXFELDAQ(const karabo::util::Hash& data,
+                     const karabo::xms::InputChannel::MetaData& meta)
+    {
+
+//        cout << "in function onDataXFELDAQ" << endl;
+
+//        return;
+
+        if(get<bool>("run") == false)
+        {
+          changeDeviceState(State::STOPPED);
+          return; // don't send anything during idle+
+        }
+        changeDeviceState(State::ACQUIRING);
+        // resend until stopped from remote
+        if(get<bool>("measureMean") || get<bool>("measureRMS"))
+        {
+            if(m_numIterations == m_iterationCnt){
+            sendMeanValues();
+            KARABO_LOG_INFO << "RESENT DATA ";
+            return;
+            }
+        }
+
+//        string dataSourceId;
+//        dataSourceId = meta.getSource();
+//        cout << dataSourceId << endl;
+
+        auto imageData = data.get<util::NDArray>("image.data");
+        auto imageDataShape = data.get<vector<unsigned long long> >("image.data.shape");
+        //imageData.setShape(Dims(imageDataShape[0],imageDataShape[1],512,128));
+        auto cellIds = data.get<util::NDArray>("image.cellId");
+        auto trainId = data.get<util::NDArray>("image.trainId");
+
+
+
+        if(m_vizualize)
+        {
+            //copy data for output ladder image channel
+            if(!(m_frameIndxViz < imageDataShape[0]))
+            {
+                m_frameIndxViz = imageDataShape[0] - 1;
+                //ToDo add update of value in GUI
+            }
+            uint32_t indx = m_frameIndxViz*m_imageNumPixs;
+            auto dataPtr = imageData.getData<uint16_t>();
+            for(int i=0; i<m_imageNumPixs; i++)
+            {
+                m_dataViz[i] = dataPtr[indx];
+                indx++;
+            }//*/
+            //memcpy((void*)m_dataViz.data(), (void*)dataPtr[indx], m_imageNumPixs*sizeof(uint16_t));
+        }
+
+        processTrainXFELDAQ(imageData, cellIds, trainId);
+    }
 
     void DsscProcessor::processTrain(const karabo::util::NDArray& data, const karabo::util::NDArray& cellId, const karabo::util::NDArray& trainId)
     {
@@ -476,7 +633,8 @@ namespace karabo {
 
       m_availableAsics = utils::getUpCountingVector(numAsics);
 
-      if(m_maxSram >= m_numFrames){
+      if(m_maxSram >= m_numFrames)
+      {
         m_maxSram = m_numFrames-1;
         m_minSram = 0;
         set<unsigned short>("maxSram",m_maxSram);
@@ -485,9 +643,8 @@ namespace karabo {
       }
 
 
-      //cout << "DataSize = " << data_size << endl;
-      //cout << "cellId_size = " << cellId_size << endl;
-      //cout << "DataSize = " << data_size << endl;
+ //     cout << "DataSize = " << data_size << endl;
+ //     cout << "cellId_size = " << cellId_size << endl;
 
       const auto minValidTrainId = get<unsigned long long>("minValidTrainId");
 
@@ -506,21 +663,89 @@ namespace karabo {
 
           processMeanValues(train_data_ptr,m_inputFormat);
 
-          if(m_iterationCnt >= m_numIterations){
+          if(m_iterationCnt >= m_numIterations)
+          {
             sendMeanValues();
           }
 
           set<unsigned int>("iterationCnt",m_iterationCnt);
 
-        }else{
+        }else
+        {
           auto processedPixelData = processPixelData(train_data_ptr,m_inputFormat);
           sendPixelData(processedPixelData,trainId_ptr[train_idx]);
         }
 
         //KARABO_LOG_INFO << "Train Processed: " << trainId_ptr[train_idx] << "/" << minValidTrainId;
-      }
+      }//*/
     }
 
+
+    void DsscProcessor::processTrainXFELDAQ(const karabo::util::NDArray& data, const karabo::util::NDArray& cellId, const karabo::util::NDArray& trainId)
+    {
+      // standard c++ data structures to use for access in data
+
+      const uint16_t* data_ptr = data.getData<uint16_t>();
+      size_t data_size = data.size();
+
+      const uint16_t* cellId_ptr = cellId.getData<uint16_t>();
+      size_t cellId_size = cellId.size();
+
+      const unsigned long long* trainId_ptr = trainId.getData<unsigned long long>();
+      size_t trainId_size = trainId.size();
+
+      m_alsoRMS = get<bool>("measureRMS");
+      m_numFrames = cellId_size;
+      int numAsics = data_size/utils::s_numAsicPixels/cellId_size;
+
+      m_availableAsics = utils::getUpCountingVector(numAsics);
+
+      if(m_maxSram >= m_numFrames)
+      {
+        m_maxSram = m_numFrames-1;
+        m_minSram = 0;
+        set<unsigned short>("maxSram",m_maxSram);
+        set<unsigned short>("minSram",m_minSram);
+        KARABO_LOG_WARN << "Sram Range does not fit to number of frames, is corrected";
+      }
+
+
+ //     cout << "DataSize = " << data_size << endl;
+ //     cout << "cellId_size = " << cellId_size << endl;
+
+      const auto minValidTrainId = get<unsigned long long>("minValidTrainId");
+
+      // business logic starts here
+      for(size_t train_idx = 0; train_idx<trainId_size; train_idx++)
+      {
+        if(trainId_ptr[train_idx] <= minValidTrainId) continue;
+
+        set<unsigned long long>("currentTrainId",trainId_ptr[train_idx]);
+
+        size_t train_offset = train_idx*utils::s_totalNumPxs*m_numFrames;
+        const unsigned short* train_data_ptr = data_ptr + train_offset;
+        if(get<bool>("measureMean") || get<bool>("measureRMS"))
+        {
+          m_trainIds.push_back(trainId_ptr[train_idx]);
+
+          processMeanValues(train_data_ptr,m_inputFormat);
+
+          if(m_iterationCnt >= m_numIterations)
+          {
+            sendMeanValues();
+          }
+
+          set<unsigned int>("iterationCnt",m_iterationCnt);
+
+        }else
+        {
+          auto processedPixelData = processPixelData(train_data_ptr,m_inputFormat);
+          sendPixelData(processedPixelData,trainId_ptr[train_idx]);
+        }
+
+        //KARABO_LOG_INFO << "Train Processed: " << trainId_ptr[train_idx] << "/" << minValidTrainId;
+      }//*/
+    }
 
     void DsscProcessor::sendPixelData(const unsigned short * pixel_wise_data_ptr, unsigned long long train_id)
     {
@@ -540,26 +765,12 @@ namespace karabo {
     void DsscProcessor::sendMeanValues()
     {
       //cout << "num Train Ids " << m_trainIds.size() << endl;
-      if(m_acquireBaseLine){
-        setBackgroundData(utils::convertVectorType<double,float>(m_pixelMeanData));
-        set<bool>("baselineValuesValid",backgroundDataValid());
-      }
 
       util::Hash meanDataHash;
       if(get<bool>("measureRMS")){
         meanDataHash.set("asicMeanData",m_pixelRMSData);
         meanDataHash.set("dataType","rmsValues");
-      }
-      else
-      {
-        if(get<bool>("baselineValuesValid") && get<bool>("subtractBaseline"))
-        {
-      #pragma omp parallel for
-          for(size_t pixelIdx=0; pixelIdx<utils::s_totalNumPxs; pixelIdx++){
-            m_pixelMeanData[pixelIdx] -= m_pixelBackgroundData[pixelIdx];
-          }
-        }
-
+      }else{
         meanDataHash.set("asicMeanData",m_pixelMeanData);
         meanDataHash.set("dataType","meanValues");
       }
@@ -597,14 +808,70 @@ namespace karabo {
       clearSramBlacklistData();
     }
 
-    void DsscProcessor::acquireBaselineValues()
+    // display function
+    void DsscProcessor::fillImageData(vector<unsigned int> & imageData)
     {
-      m_pixelBackgroundData.clear();
+      imageData.resize(m_imageNumPixs);
 
-      m_acquireBaseLine = true;
-      set<bool>("measureMean", true);
-      set<bool>("measureRMS", false);
-      accumulate();
+      /*auto imageDataArr = m_trainDataToShow->getImageDataArray(frameNum);
+      for(size_t px=0; px<numImagePixels; px++)
+      {
+        imageData[px] = m_correctionFunction(frameNum,px,imageDataArr[px]);
+      }//*/
+
     }
+    
+    void DsscProcessor::UpdateVariablesConfig(const karabo::util::Hash& config)
+    {
+        if(config.has("showLadderImage"))
+        {
+           m_vizualize = config.get<bool>("showLadderImage");
+           if(getState() == State::ACQUIRING)
+           {
+               if(m_vizualize) startVizThread();
+               else stopVizThread();
+           }
+           
+        }
+    }
+
+    void DsscProcessor::vizThreadFunc()
+    {
+        vector<unsigned int> imageData(m_imageNumPixs);
+        util::Hash dataHash;
+
+        while(m_vizThreadRun)
+        {
+
+            for(int i=0; i<m_imageNumPixs; i++)
+            {
+                imageData[i] = m_dataViz[i];
+            }
+
+            NDArray imageArray(imageData.data(),
+                             m_imageNumPixs,
+                             NDArray::NullDeleter(),
+                             Dims(m_numRows,m_numCols));
+
+            dataHash.set("ladderImage",ImageData(imageArray));
+            writeChannel("ladderImageOutput", dataHash);
+
+        }
+        getOutputChannel("ladderImageOutput")->signalEndOfStream();
+    }
+
+    void DsscProcessor::startVizThread()
+    {
+        if(m_vizThreadRun) return;
+        m_vizThreadRun = true;
+        m_vizThread = std::thread(&DsscProcessor::vizThreadFunc, this);
+    }
+
+    void DsscProcessor::stopVizThread()
+    {
+        m_vizThreadRun = false;
+        if(m_vizThread.joinable()) m_vizThread.join();
+    }
+
 
 }

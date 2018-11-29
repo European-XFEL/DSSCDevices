@@ -88,11 +88,6 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("startAllChannelsDummyData").displayedName("Start all channels dummy data").description("After connection start dummy data from all channels")
-                .allowedStates(STATE_OFF,STATE_ON,STATE_INIT)
-                .commit();
-
-        SLOT_ELEMENT(expected)
                 .key("updateFirmwareFlash")
                 .displayedName("Update PPT Firmware")
                 .description("Update PPT Firmware Flash - takes about 15 minutes ")
@@ -720,13 +715,7 @@ namespace karabo {
 
         SLOT_ELEMENT(expected)
               .key("setPetraIIISetup").displayedName("Set Petra III Setup")
-              .description("Select PPT IP Address, number of ASICs, DPs and disables dummy data")
-              .allowedStates(STATE_OFF,STATE_INIT)
-              .commit();
-
-        SLOT_ELEMENT(expected)
-              .key("setQuadrantSetup").displayedName("Set Quadrant Setup")
-              .description("Select number of ASICs and DPs, disables dummy data")
+              .description("Select Config, IP Address and number of ASICs")
               .allowedStates(STATE_OFF,STATE_INIT)
               .commit();
 
@@ -758,6 +747,7 @@ namespace karabo {
                 .description("Set device in continuous running mode")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
+                .allowedStates(STATE_ON,STATE_RUN)
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -765,6 +755,7 @@ namespace karabo {
                 .description("Select if all frames are sent out in continuous mode ")
                 .tags("other")
                 .assignmentOptional().defaultValue(true).reconfigurable()
+                .allowedStates(STATE_ON,STATE_RUN)
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -772,6 +763,7 @@ namespace karabo {
                 .description("Enable sending of dummy data packets directly from ethernet engine in continous mode")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
+                .allowedStates(STATE_ON)
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -779,6 +771,7 @@ namespace karabo {
                 .description("Send dummy data generated in the aurora core as received from the IOBoard")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
+                .allowedStates(STATE_ON)
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -797,32 +790,11 @@ namespace karabo {
                 .allowedStates(STATE_ON)
                 .commit();
 
-        UINT16_ELEMENT(expected)
-                .key("enableDPChannels").displayedName("Enable datapath channels")
-                .description("One hot coded datapath enable")
-                .tags("other")
-                .assignmentOptional().defaultValue(1).reconfigurable()
-                .minInc(0).maxInc(15)
-                .commit();
-
         BOOL_ELEMENT(expected)
                 .key("clone_eth0_to_eth1").displayedName("Clone Eth1 to Eth2")
                 .description("Enable sending of ASIC data from Ladder1 to Ethernet Output 2")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("checkQSFPConnected")
-                .displayedName("Check QSFP Links")
-                .description("checks the number of connecte links")
-                .commit();
-
-        STRING_ELEMENT(expected).key("connectedETHChannels")
-                .displayedName("Connected ETH Channels")
-                .description("PPT can see if a fiber of the QSFP link is connected or not")
-                .readOnly()
-                .initialValue("nA")
                 .commit();
 
 
@@ -850,34 +822,9 @@ namespace karabo {
 
         PPT_CHANNEL_FAILED_ELEMENTS
 
-
-        SLOT_ELEMENT(expected)
-                .key("loadLastFileETHConfig").displayedName("Take over last ETH config")
-                .description("If a new config file was loaded one can take the ETH Config from the file as new valid config")
-                .commit();
-
        //Initial Ethernet Elements
        //Defined in DsscPptRegsInit.hh
         INIT_ETH_ELEMENTS
-
-        PATH_ELEMENT(expected).key("QSFPnetworkConfigFilePath")
-            .description("Name of the QSFP network configuration file")
-            .displayedName("QSFP network ConfigFile Name")
-            .isInputFile()
-            .tags("QSFPConfigPath")
-            .assignmentOptional().defaultValue( "~/QSFPnetworkConfig.xml").reconfigurable()
-            .commit();
-
-        SLOT_ELEMENT(expected)
-            .key("LoadQSFPNetConfig").displayedName("Load QSFP Network Configuration")
-            .description("Loading QSFP network configuration to config file")
-            .commit();
-
-        SLOT_ELEMENT(expected)
-            .key("SaveQSFPNetConfig").displayedName("Save QSFP Network Configuration")
-            .description("Saving QSFP network configuration to config file")
-            .commit();
-
 
         INIT_ENABLE_DATAPATH_ELEMENTS
 
@@ -910,7 +857,6 @@ namespace karabo {
       KARABO_SLOT(stopStandalone);
       KARABO_SLOT(stopAcquisition);
       KARABO_SLOT(startAcquisition);
-      KARABO_SLOT(startAllChannelsDummyData);
 
       KARABO_SLOT(updateFirmwareFlash);
       KARABO_SLOT(updateLinuxFlash);
@@ -965,7 +911,6 @@ namespace karabo {
       KARABO_SLOT(setInjectionMode);
 
       KARABO_SLOT(setPetraIIISetup);
-      KARABO_SLOT(setQuadrantSetup);
       //to pass key values with nodes use own Makro
       PROG_IOBSLOTS
 
@@ -984,14 +929,7 @@ namespace karabo {
       KARABO_SLOT(readLastPPTTrainID);
 
       KARABO_SLOT(waitJTAGEngineDone);
-      KARABO_SLOT(loadLastFileETHConfig);
-      KARABO_SLOT(checkQSFPConnected);
-
-      KARABO_SLOT(LoadQSFPNetConfig);
-      KARABO_SLOT(SaveQSFPNetConfig);
-
       //generateAllConfigRegElements();
-
     }
 
 
@@ -1013,8 +951,6 @@ namespace karabo {
         DEVICE_ERROR("FullConfigFile invalid");
         return;
       }
-
-      setQSFPEthernetConfig();
 
       iob_CurrIOBNumber  = "1";
       jtag_CurrIOBNumber = "1";
@@ -1247,51 +1183,10 @@ namespace karabo {
       getPixelParamsIntoGui();
     }
 
-    void DsscPpt::disableAllDummyData()
-    {
-      {
-        DsscScopedLock lock(&m_accessToPptMutex,__func__);
-        m_ppt->disableAllDummyData();
-      }
-      updateGuiOtherParameters();
-    }
-
-
-    void DsscPpt::startAllChannelsDummyData()
-    {
-      enableDPChannels(0xF);
-
-      {
-        set<bool>("send_dummy_dr_data",true);
-        DsscScopedLock lock(&m_accessToPptMutex,__func__);
-        m_ppt->enableDummyDRData(true);
-      }
-
-      runContMode(true);
-      runAcquisition(true);
-    }
-
 
     void DsscPpt::setPetraIIISetup()
     {
-      disableAllDummyData();
-      enableDPChannels(0x1);
-
       set<string>("pptHost","192.168.0.125");
-      set<unsigned int>("numActiveASICs",16);
-
-      const auto environment = "HAMBURG";
-      set<string>("selEnvironment",environment);
-      updateTestEnvironment();
-    }
-
-
-    void DsscPpt::setQuadrantSetup()
-    {
-      disableAllDummyData();
-      enableDPChannels(0xF);
-
-      //set<string>("pptHost","192.168.0.125");
       set<unsigned int>("numActiveASICs",16);
 
       const auto environment = "HAMBURG";
@@ -1571,17 +1466,21 @@ namespace karabo {
       if (m_ppt->isOpen()){
         DSSC::StateChangeKeeper keeper(this,State::OFF);
 
-        resetAll();
-
-        programPLL();
-
-        programPLLFine();
+        updateSequenceCounters();
 
         readSerialNumber();
 
-        updateTestEnvironment();
+        resetAll();
 
-        checkQSFPConnected();
+        programPLLFine();
+
+        programPLL();
+
+        programEPCConfig();
+
+        initIOBs();
+
+        updateTestEnvironment();
 
       }else{
         this->updateState(State::ERROR);
@@ -1712,8 +1611,7 @@ namespace karabo {
         m_ppt->setNumberOfActiveAsics(get<unsigned int>("numActiveASICs"));
 
         cout << "Test Environment is set to Hamburg" << endl;
-        cout << "QSFP and transceiver have to be defined according to setup" << endl;
-/*
+
         if(get<string>("qsfp.chan1.recv.macaddr") == "00:1b:21:55:1f:c8" ||
            get<string>("qsfp.chan1.recv.macaddr") == "0:1b:21:55:1f:c8"     )
         {
@@ -1724,7 +1622,72 @@ namespace karabo {
           set<string>("qsfp.chan4.recv.macaddr","00:1b:21:55:1f:c9");
           KARABO_LOG_WARN << "Set QSFP Receiver MAC to 00:1b:21:55:1f:c9";
         }
-*/
+
+#define DATA_PC
+
+#ifndef DATA_PC
+        {
+            set<string>("qsfp.chan1.recv.macaddr","00:02:c9:1f:4e:60");
+            set<string>("qsfp.chan2.recv.macaddr","00:02:c9:1f:40:40");
+            set<string>("qsfp.chan3.recv.macaddr","00:02:c9:1f:50:e0");
+            set<string>("qsfp.chan4.recv.macaddr","00:02:c9:1f:4e:c0");
+
+            set<string>("qsfp.chan1.recv.ipaddr","192.168.142.165");
+            set<string>("qsfp.chan2.recv.ipaddr","192.168.142.166");
+            set<string>("qsfp.chan3.recv.ipaddr","192.168.142.167");
+            set<string>("qsfp.chan4.recv.ipaddr","192.168.142.168");
+
+            set<string>("qsfp.chan1.send.macaddr","aa:bb:cc:dd:ee:01");
+            set<string>("qsfp.chan2.send.macaddr","aa:bb:cc:dd:ee:02");
+            set<string>("qsfp.chan3.send.macaddr","aa:bb:cc:dd:ee:03");
+            set<string>("qsfp.chan4.send.macaddr","aa:bb:cc:dd:ee:04");
+
+            set<string>("qsfp.chan1.send.ipaddr","192.168.142.11");
+            set<string>("qsfp.chan2.send.ipaddr","192.168.142.12");
+            set<string>("qsfp.chan3.send.ipaddr","192.168.142.13");
+            set<string>("qsfp.chan4.send.ipaddr","192.168.142.14");
+
+
+            set<unsigned int>("qsfp.chan1.recv.port",4321);
+            set<unsigned int>("qsfp.chan2.recv.port",4321);
+            set<unsigned int>("qsfp.chan3.recv.port",4321);
+            set<unsigned int>("qsfp.chan4.recv.port",4321);
+
+            set<unsigned int>("qsfp.chan1.send.port",4321);
+            set<unsigned int>("qsfp.chan2.send.port",4321);
+            set<unsigned int>("qsfp.chan3.send.port",4321);
+            set<unsigned int>("qsfp.chan4.send.port",4321);
+        }
+#else
+        {
+            set<string>("qsfp.chan1.recv.macaddr","00:1b:21:55:1f:c9");
+            set<string>("qsfp.chan2.recv.macaddr","00:1b:21:55:1f:c9");
+            set<string>("qsfp.chan3.recv.macaddr","00:1b:21:55:1f:c9");
+            set<string>("qsfp.chan4.recv.macaddr","00:1b:21:55:1f:c9");
+
+            set<string>("qsfp.chan1.recv.ipaddr","192.168.1.1");
+            set<string>("qsfp.chan2.recv.ipaddr","192.168.1.1");
+            set<string>("qsfp.chan3.recv.ipaddr","192.168.1.1");
+            set<string>("qsfp.chan4.recv.ipaddr","192.168.1.1");
+
+            set<string>("qsfp.chan1.send.macaddr","aa:bb:cc:dd:ee:01");
+            set<string>("qsfp.chan2.send.macaddr","aa:bb:cc:dd:ee:02");
+            set<string>("qsfp.chan3.send.macaddr","aa:bb:cc:dd:ee:03");
+            set<string>("qsfp.chan4.send.macaddr","aa:bb:cc:dd:ee:04");
+
+            set<string>("qsfp.chan1.send.ipaddr","192.168.1.101");
+            set<string>("qsfp.chan2.send.ipaddr","192.168.1.102");
+            set<string>("qsfp.chan3.send.ipaddr","192.168.1.103");
+            set<string>("qsfp.chan4.send.ipaddr","192.168.1.104");
+
+            set<unsigned int>("qsfp.chan1.recv.port", 8000);
+            set<unsigned int>("qsfp.chan2.recv.port", 8000);
+            set<unsigned int>("qsfp.chan3.recv.port", 8000);
+            set<unsigned int>("qsfp.chan4.recv.port", 8000);
+        }
+#endif
+
+
       }
 
       setSendingASICs();
@@ -1835,8 +1798,8 @@ namespace karabo {
       {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         checkPathExists(fileName);
-//        const auto h5config = m_ppt->getHDF5ConfigData();
-//        DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5",h5config);
+        const auto h5config = m_ppt->getHDF5ConfigData();
+        DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5",h5config);
       }
 #else
       KARABO_LOG_INFO << "HDF5 not installed";
@@ -1863,9 +1826,7 @@ namespace karabo {
     {
       DSSC::StateChangeKeeper keeper(this,State::ON);
 
-      resetAll();
-
-      programPLL();
+      initGui();
 
       if(checkAllIOBStatus() == 0){
         KARABO_LOG_INFO << "No IOBs detected. Will try to program IOB FPGAs";
@@ -1877,7 +1838,7 @@ namespace karabo {
 
         m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
 
-        int rc = m_ppt->initSystem();
+        int rc = m_ppt->initSystem(true);
         if( rc != SuS::DSSC_PPT::ERROR_OK ){
           printPPTErrorMessages();
         }
@@ -1887,10 +1848,29 @@ namespace karabo {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         m_ppt->checkAuroraReady();
       }
+    }
+
+
+    void DsscPpt::initGui()
+    {
+      //updateGui
+
+      resetAll();
+
+      programPLL();
+
+//      setNumFramesToSendOut();
+//
+//      readEthConfig();
+//
+//    ioBoardWidget->checkPRBStatus(true);
+//
+//    updateSystemStatus();
+
+      m_ppt->initEPCRegsFromJTAGConfigFile();
+      m_ppt->initIOBRegsFromJTAGConfigFile();
 
       updateGuiRegisters();
-
-      checkQSFPConnected();
     }
 
 
@@ -1925,8 +1905,6 @@ namespace karabo {
       DSSC::StateChangeKeeper keeper(this);
 
       KARABO_LOG_INFO << "resetAll";
-
-      enableDPChannels(0);
 
       resetAll();
 
@@ -2541,11 +2519,17 @@ namespace karabo {
 
     void DsscPpt::readLastPPTTrainID()
     {
+      static unsigned int lastTrainID = 0;
+
       {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
-        set<unsigned int>("lastTrainId",m_ppt->getCurrentTrainID());
+        //lastTrainID = m_ppt->getLastTrainID();
+        lastTrainID += 50;
       }
-      KARABO_LOG_INFO << "Read last Train ID: " << get<unsigned int>("lastTrainId");
+
+       set<unsigned int>("lastTrainId",lastTrainID);
+
+       KARABO_LOG_INFO << "Read last Train ID: " << lastTrainID;
     }
 
 
@@ -2892,7 +2876,7 @@ namespace karabo {
         set(tmp);
        */
 
-        //getEthernetConfigIntoGui();
+        getEthernetConfigIntoGui();
 
         updateGuiEnableDatapath();
 
@@ -2999,6 +2983,7 @@ namespace karabo {
           }
       }
       set(tmp);
+
     }
 
 
@@ -3086,13 +3071,6 @@ namespace karabo {
     }
 
 
-    void DsscPpt::loadLastFileETHConfig()
-    {
-      m_ppt->enableLastLoadedETHConfig();
-      getEthernetConfigIntoGui();
-    }
-
-
     void DsscPpt::getEthernetConfigIntoGui()
     {
       string keyString = "qsfp.chan";
@@ -3164,17 +3142,10 @@ namespace karabo {
 
     void DsscPpt::updateGuiEnableDatapath()
     {
-      uint8_t enOneHot=0;
       for(int i=1; i<5; i++){
         string keyName = "enDataPath.dp" + toString(i) + "Enable";
-        bool en = m_ppt->isDPEnabled(i);
-        if(en){
-          enOneHot += 1<<(i-1);
-        }
-        set<bool>(keyName,en);
+        set<bool>(keyName, m_ppt->isDPEnabled(i));
       }
-      set<unsigned short>("enableDPChannels",enOneHot);
-      KARABO_LOG_DEBUG << "OneHotvalue = " << enOneHot;
     }
 
 
@@ -3204,19 +3175,11 @@ namespace karabo {
 
     void DsscPpt::updateGuiOtherParameters()
     {
-      bool value = m_ppt->getEPCParam("DataRecv_to_Eth0_Register","0","send_dummy_packets") == 1;
+        /*
+      bool value = BOOL_CAST(m_ppt->getEPCParam("DataRecv_to_Eth0_Register","0","send_dummy_packets"));
       set<bool>("send_dummy_packets", value);
-
-      value = m_ppt->getEPCParam("AuroraRX_Control","0","send_dummy_dr_data") == 1;
+      value = BOOL_CAST(m_ppt->getEPCParam("AuroraRX_Control","0","send_dummy_dr_data"));
       set<bool>("send_dummy_dr_data", value);
-
-      value = m_ppt->getEPCParam("AuroraRX_Control","0","send_raw_data") == 1;
-      set<bool>("send_raw_data", value);
-
-      value = m_ppt->getIOBParam("ASIC_send_dummy_data","0","ASIC_send_dummy_data") == 1;
-      set<bool>("ASIC_send_dummy_data", value);
-
-      /*
       value = BOOL_CAST(m_ppt->getEPCParam("Single_Cycle_Register","0","disable_sending"));
       set<bool>("disable_sending", value);
       value = BOOL_CAST(m_ppt->inContinuousMode());
@@ -3377,7 +3340,6 @@ namespace karabo {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         m_ppt->setInjectionMode(m_ppt->getInjectionMode(injectionModeStr));
       }
-
     }
 
 
@@ -3755,13 +3717,8 @@ namespace karabo {
             int numASICs = filtered.getAs<int>(path);
             DsscScopedLock lock(&m_accessToPptMutex,__func__);
             m_ppt->setNumberOfActiveAsics(numASICs);
-
-
           }else if(path.compare("lmkOutputToProgram") == 0){
 
-          }else if(path.compare("enableDPChannels") == 0){
-            uint16_t dpEn = filtered.getAs<unsigned short>(path);
-            enableDPChannels(dpEn);
           }else{
 
             bool enable = filtered.getAs<bool>(path);
@@ -3891,7 +3848,6 @@ namespace karabo {
             boost::filesystem::path myfile(fullConfigFileName);
             if(boost::filesystem::exists(myfile)){
               readFullConfigFile(fullConfigFileName);
-              setQSFPEthernetConfig();
             }
           }
         }
@@ -4327,13 +4283,6 @@ namespace karabo {
     }
 
 
-    void DsscPpt::checkQSFPConnected()
-    {
-      boost::mutex::scoped_lock lock(m_accessToPptMutex);
-      set<string>("connectedETHChannels",m_ppt->getConnectedETHChannels());
-    }
-
-
     int DsscPpt::anyToInt(const boost::any anyVal, bool &ok) {
         int value = 0;
         ok = true;
@@ -4367,44 +4316,6 @@ namespace karabo {
         DsscHDF5TrimmingDataWriter writer("test123.h");
         SuS::CHIPGainConfigurator configurator;
     }
-
-    void DsscPpt::LoadQSFPNetConfig()
-    {
-        //
-        Hash hsh;
-        karabo::io::loadFromFile(hsh, get<string>("QSFPnetworkConfigFilePath"));
-        set<Hash>("qsfp", hsh);
-
-        setQSFPEthernetConfig();
-        checkQSFPConnected();
-    }
-
-    void DsscPpt::SaveQSFPNetConfig()
-    {
-         //
-         Hash thishash = get<Hash>("qsfp");
-         try
-         {
-             karabo::io::saveToFile(thishash, get<string>("QSFPnetworkConfigFilePath"));
-         }
-         catch (exception& e)
-         {
-             KARABO_LOG_ERROR << "Error QSFP network config file";
-             cout << "Exception: " << e.what() << '\n';
-         }
-    }
-
-    void DsscPpt::enableDPChannels(uint16_t enOneHot)
-    {
-      DsscScopedLock lock(&m_accessToPptMutex,__func__);
-      for(int i=0; i<4; i++){
-        bool enable = (enOneHot & (1<<i)) != 0;
-        m_ppt->setDPEnabled(i+1,enable);
-      }
-      updateGuiEnableDatapath();
-    }
-
-
 
 
 }

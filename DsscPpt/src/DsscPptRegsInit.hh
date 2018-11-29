@@ -37,7 +37,7 @@
           .displayedName("Register Value")                                      \
           .description("Selected Register Value")                               \
           .assignmentOptional().defaultValue(0).reconfigurable()                \
-          .allowedStates(State::ON, State::STOPPED)                                              \
+          .allowedStates(STATE_ON)                                              \
           .commit();                                                            \
                                                                                 \
         NODE_ELEMENT(expected).key("epcRegs.DataRecv_to_Eth0_Register")         \
@@ -59,7 +59,7 @@
           .displayedName("Gegister Value")                                      \
           .description("Selected Register Value")                               \
           .assignmentOptional().defaultValue(0).reconfigurable()                \
-          .allowedStates(State::ON, State::STOPPED)                                              \
+          .allowedStates(STATE_ON)                                              \
           .commit();                                                            \
                                                                                 \
         NODE_ELEMENT(expected).key("epcRegs.AuroraRX_Control")                  \
@@ -81,7 +81,7 @@
           .displayedName("Register Value")                                      \
           .description("Selected Register Value")                               \
           .assignmentOptional().defaultValue(0).reconfigurable()                \
-          .allowedStates(State::ON, State::STOPPED)                                              \
+          .allowedStates(STATE_ON)                                              \
           .commit();
 
 
@@ -94,7 +94,7 @@
         SLOT_ELEMENT(expected).key("sequencer.updateSequencer")                 \
                   .displayedName("Update Sequencer")                            \
                   .description("Update Sequencer configuration and program")    \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         STRING_ELEMENT(expected).key("sequencer.opMode")                        \
@@ -107,105 +107,105 @@
                   .displayedName("Cycle Length")                                \
                   .description("cycle length")                                  \
                   .assignmentOptional().defaultValue(50).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.integrationTime")               \
                   .displayedName("Integration Time")                            \
                   .description("Integration Time")                              \
                   .assignmentOptional().defaultValue(100).reconfigurable()      \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.flattopLength")                 \
                   .displayedName("Flattop")                                     \
                   .description("Flattop")                                       \
                   .assignmentOptional().defaultValue(20).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.rampLength")                    \
                   .displayedName("Ramp Length")                                 \
                   .description("Ramp length")                                   \
                   .assignmentOptional().defaultValue(250).reconfigurable()      \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.resetLength")                   \
                   .displayedName("Reset Length")                                \
                   .description("Reset length")                                  \
                   .assignmentOptional().defaultValue(21).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.resetIntegOffset")              \
                   .displayedName("Reset Integration Offset")                    \
                   .description("Reset Integration Offset")                      \
                   .assignmentOptional().defaultValue(15).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.resetHoldLength")               \
                   .displayedName("Reset Hold Length")                           \
                   .description("Reset Hold Length")                             \
                   .assignmentOptional().defaultValue(0).reconfigurable()        \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.flattopHoldLength")             \
                   .displayedName("Flattop Hold Length")                         \
                   .description("Flattop Hold Length")                           \
                   .assignmentOptional().defaultValue(0).reconfigurable()        \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.rampIntegOffset")               \
                   .displayedName("Ramp Integration Offset")                     \
                   .description("Ramp Integration Offset")                       \
                   .assignmentOptional().defaultValue(100).reconfigurable()      \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.backFlipAtReset")               \
                   .displayedName("Back Flip at Reset")                          \
                   .description("cycle length")                                  \
                   .assignmentOptional().defaultValue(0).reconfigurable()        \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.backFlipToResetOffset")         \
                   .displayedName("Back Flip To Reset Offset")                   \
                   .description("cycle length")                                  \
                   .assignmentOptional().defaultValue(10).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.singleCapLoadLength")           \
                   .displayedName("Single SH Cap Load Length")                   \
                   .description("duration of programming the second SH Cap")     \
                   .assignmentOptional().defaultValue(20).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         BOOL_ELEMENT(expected).key("sequencer.singleSHCapMode")                 \
                   .displayedName("Single SH Cap Mode")                          \
                   .description("Program Sequencer to use onle one SH Cap")      \
                   .assignmentOptional().defaultValue(true).reconfigurable()     \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.injectRisingEdgeOffset")        \
                   .displayedName("Inject Rising Edge Offset")                   \
                   .description("Offset of Inject rising Edge to Flip? ")        \
                   .assignmentOptional().defaultValue(20).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.emptyInjectCycles")             \
                   .displayedName("Empty Inject Cycles")                        \
                   .description("Number of Cycles without signal between two injections") \
                   .assignmentOptional().defaultValue(20).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(STATE_ON)                                      \
                   .commit();                                                    \
 
 
@@ -219,98 +219,98 @@
           .displayedName("Start Wait Time [?s] ")                       \
           .description("Wait after start signal received until burst")  \
           .assignmentOptional().defaultValue(13000).reconfigurable()    \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.start_wait_offs")           \
           .displayedName("Start Wait Offset [?s] ")                     \
           .description("Offset shift for fine alignement of start signal")  \
           .assignmentOptional().defaultValue(-50).reconfigurable()      \
-          .allowedStates(State::ON, State::STOPPED,State::STARTED,State::ACQUIRING)                            \
+          .allowedStates(STATE_ON,STATE_RUN)                            \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.gdps_on_time")            \
           .displayedName("GDPS On Time [?s]")                           \
           .description("Time GDPS is active before Burst")              \
           .assignmentOptional().defaultValue(3000).reconfigurable()     \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.iprogLength")             \
           .displayedName("Iprog Length [cyc]")                          \
           .description("Iprog Cycles")                                  \
           .assignmentOptional().defaultValue(200).reconfigurable()      \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.burstLength")             \
           .displayedName("Burst Length [cyc]")                          \
           .description("Burst Cycles")                                  \
           .assignmentOptional().defaultValue(1500).reconfigurable()     \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.refpulseLength")          \
           .displayedName("Refpulse Length [cyc]")                       \
           .description("Refpulse Cycles in 100 MHz cycles")             \
           .assignmentOptional().defaultValue(5).reconfigurable()        \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.fet_on_time")               \
           .displayedName("Fet On Time [?s]")                            \
           .description("Time GATE and SOURCE is ON before IProg ")      \
           .assignmentOptional().defaultValue(8).reconfigurable()        \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.clr_on_time")               \
           .displayedName("CLR On Time [?s]")                            \
           .description("Time CLRDIS is low before Iprog")               \
           .assignmentOptional().defaultValue(5).reconfigurable()        \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.clr_cycle")                \
           .displayedName("CLR On Cycle")                                \
           .description("Sequence Cycle number to activate CLR")         \
           .assignmentOptional().defaultValue(3).reconfigurable()        \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.clrDuty")                 \
           .displayedName("CLR Duty [10ns]")                             \
           .description("Clear Duty Cycle")                              \
           .assignmentOptional().defaultValue(4).reconfigurable()        \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.iprog_clr_en")            \
           .displayedName("Iprog Clr Enable")                            \
           .description("Extend Clear signal into IProg phase")          \
           .assignmentOptional().defaultValue(0).reconfigurable()        \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.iprog_clr_duty")          \
           .displayedName("IProg Clear Duty")                            \
           .description("Length of Clear Signal durin IProg phase")      \
           .assignmentOptional().defaultValue(20).reconfigurable()       \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.iprog_clr_offset")        \
           .displayedName("IProg clear Offset")                          \
           .description("Move Clear signal inside IProg phase")          \
           .assignmentOptional().defaultValue(10).reconfigurable()       \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();                                                    \
                                                                         \
         INT32_ELEMENT(expected).key("sequence.SW_PWR_ON")               \
           .displayedName("Power On Time [?s]")                          \
           .description("Time Switched Powers are active before Iprog")  \
           .assignmentOptional().defaultValue(20).reconfigurable()       \
-          .allowedStates(State::ON, State::STOPPED)                                      \
+          .allowedStates(STATE_ON)                                      \
           .commit();
 
 
@@ -326,7 +326,7 @@
                 .description("Value of internal DAC")                           \
                 .tags("calibration")                                            \
                 .assignmentOptional().defaultValue(5000).reconfigurable()       \
-                .allowedStates(State::ON, State::STOPPED)                                        \
+                .allowedStates(STATE_ON)                                        \
                 .commit();                                                      \
                                                                                 \
         STRING_ELEMENT(expected).key("calibration.powerDownPxs")                \
@@ -335,7 +335,7 @@
                 .tags("calibration")                                            \
                 .assignmentOptional().defaultValue("")                          \
                 .reconfigurable()                                               \
-                .allowedStates(State::ON, State::STOPPED)                                        \
+                .allowedStates(STATE_ON)                                        \
                 .commit();                                                      \
                                                                                 \
         BOOL_ELEMENT(expected)                                                  \
@@ -344,20 +344,20 @@
                 .description("Connect UDP Socket to uses Calibration routines") \
                 .tags("calibration")                                            \
                 .assignmentOptional().defaultValue(false).reconfigurable()      \
-                .allowedStates(State::ON, State::STOPPED)                                        \
+                .allowedStates(STATE_ON)                                        \
                 .commit();                                                      \
                                                                                 \
         SLOT_ELEMENT(expected)                                                  \
                 .key("calibration.calibCurrentCompDacSlot")                     \
                 .displayedName("Calibrate Current Comp DAC")                    \
                 .description("Set all DAC values to operation-range")           \
-                .allowedStates(State::ON, State::STOPPED)                                        \
+                .allowedStates(STATE_ON)                                        \
                 .commit();                                                      \
         SLOT_ELEMENT(expected)                                                  \
                 .key("calibration.checkCurrentCompDacCalibSlot")                \
                 .displayedName("Check DAC Calibration")                         \
                 .description("Check all pixels if DAC is calibrated")           \
-                .allowedStates(State::ON, State::STOPPED)                                        \
+                .allowedStates(STATE_ON)                                        \
                 .commit();                                                      \
         STRING_ELEMENT(expected)                                                \
                 .key("calibration.dacCalibStatus")                              \
@@ -370,7 +370,7 @@
                 .key("calibration.calibIrampSlot")                              \
                 .displayedName("Calibrate Iramp")                               \
                 .description("Calibrate Iramp in all pixels")                   \
-                .allowedStates(State::ON, State::STOPPED)                                        \
+                .allowedStates(STATE_ON)                                        \
                 .commit();                                                      \
         STRING_ELEMENT(expected).key("calibration.irampCalibSetup")             \
                 .displayedName("Iramp Calib Setup")                             \
@@ -378,13 +378,13 @@
                 .tags("calibration")                                            \
                 .assignmentOptional().defaultValue("0.0362;0;799")              \
                 .reconfigurable()                                               \
-                .allowedStates(State::ON, State::STOPPED)                                        \
+                .allowedStates(STATE_ON)                                        \
                 .commit();                                                      \
         SLOT_ELEMENT(expected)                                                  \
                 .key("calibration.checkIrampCalibSlot")                         \
                 .displayedName("Check Iramp Calibration")                       \
                 .description("Check all pixels if Iramp is calibrated")         \
-                .allowedStates(State::ON, State::STOPPED)                                        \
+                .allowedStates(STATE_ON)                                        \
                 .commit();                                                      \
         STRING_ELEMENT(expected)                                                \
                 .key("calibration.irampCalibStatus")                            \
@@ -401,7 +401,7 @@
                 .key("programIOB"#iobNum"FPGA")                           \
                 .displayedName("Program IOB "#iobNum " FPGA")             \
                 .description("Program IOB "#iobNum" firmware")            \
-                .allowedStates(State::OFF)                                \
+                .allowedStates(STATE_INIT)                                \
                 .commit();                                                \
 
 
@@ -410,7 +410,7 @@
                 .key("programAllIOBFPGAs")                                \
                 .displayedName("Program IOB FPGAs")                       \
                 .description("Program all available IOBs firmware ")      \
-                .allowedStates(State::OFF)                                \
+                .allowedStates(STATE_INIT)                                \
                 .commit();                                                \
                                                                           \
             INIT_PROGRAM_IOB_ELEMENT(1)                                   \
@@ -422,7 +422,7 @@
                 .key("checkAllIOBStatus")                                 \
                 .displayedName("Check IOB Status")                        \
                 .description("Checks if IOBoards are available")          \
-                .allowedStates(State::ON, State::STOPPED)                                  \
+                .allowedStates(STATE_ON)                                  \
                 .commit();
 
 
@@ -442,7 +442,7 @@
                 .key("jtagReadBackEnable").displayedName("Readback JTAG")               \
                 .description("Enable JTAG Readback")                                    \
                 .assignmentOptional().defaultValue(false).reconfigurable()              \
-                .allowedStates(State::ON, State::STOPPED)                                                \
+                .allowedStates(STATE_ON)                                                \
                 .commit();                                                                      \
                                                                                                 \
             PATH_ELEMENT(expected)                                                              \
@@ -458,7 +458,7 @@
                 .key("pixelReadBackEnable").displayedName("Readback PixelRegister")             \
                 .description("Enable PixelRegister Readback")                                   \
                 .assignmentOptional().defaultValue(false).reconfigurable()                      \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(STATE_ON)                                                        \
                 .commit();                                                                      \
                                                                                                 \
             PATH_ELEMENT(expected)                                                              \
@@ -475,7 +475,7 @@
                 .key("sequencerReadBackEnable").displayedName("Readback Sequencer")             \
                 .description("Enable Sequencer Readback")                                       \
                 .assignmentOptional().defaultValue(false).reconfigurable()                      \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(STATE_ON)                                                        \
                 .commit();                                                                      \
                                                                                                 \
             UINT32_ELEMENT(expected).key("activeModule")                                        \
@@ -489,35 +489,35 @@
                 .key("programJtag")                                                             \
                 .displayedName("Program Active JTAG")                                           \
                 .description("Program Sequencer via selected Module")                           \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(STATE_ON)                                                        \
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
                 .key("programPixelRegisterDefault")                                             \
                 .displayedName("Program PixelRegister Default")                                 \
                 .description("Program Pixelregister to default Content via selected Module")    \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(STATE_ON)                                                        \
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
                 .key("programPixelRegister")                                                    \
                 .displayedName("Program PixelRegister")                                         \
                 .description("Program Pixelregister via selected Module")                       \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(STATE_ON)                                                        \
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
                 .key("programSequencer")                                                        \
                 .displayedName("Program Sequencer")                                             \
                 .description("Program Sequencer via selected Module")                           \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(STATE_ON)                                                        \
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
                 .key("updateSequencer")                                                         \
                 .displayedName("Update Sequencer")                                              \
                 .description("Update sequencer counters from fields and program")               \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(STATE_ON)                                                        \
                 .commit();                                                                      \
 
 
@@ -528,7 +528,7 @@
                 .key("programPLL")                                                                              \
                 .displayedName("Reprogram PLL")                                                                 \
                 .description("Programs the PLL with the specified parameters")                                  \
-                .allowedStates(State::OFF,State::ON, State::STOPPED,State::STARTED,State::ACQUIRING)                                                                        \
+                .allowedStates(STATE_INIT,STATE_ON,STATE_RUN)                                                                        \
                 .commit();                                                                                      \
         NODE_ELEMENT(expected).key("pptPLL")                                                                    \
                 .displayedName("PLL")                                                                           \
@@ -545,7 +545,7 @@
                 .description("Activates clocks form XFEL, standalone mode deactivated = clock from xfel")  	\
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(false).reconfigurable()					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         BOOL_ELEMENT(expected)                                                                                  \
                 .key("pptPLL.internalPLL")                                                                      \
@@ -553,7 +553,7 @@
                 .description("Activates clocks form internal PLL, deactivated = clock from external pll")  		\
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(false).reconfigurable()					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         NODE_ELEMENT(expected).key("pptPLL.fineTuning")                                                         \
                 .displayedName("FineTuning")                                                                    \
@@ -565,7 +565,7 @@
                 .description("Enables Fine Tuning of clock in standalone mode - not recommended")  		\
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(false).reconfigurable()					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         STRING_ELEMENT(expected)                                                                                \
                 .key("pptPLL.fineTuning.resultingClockSpeed")                                                   \
@@ -579,28 +579,28 @@
                 .description("Int Value")                                                                       \
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(280).reconfigurable()     					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         UINT32_ELEMENT(expected).key("pptPLL.fineTuning.fracValue")                                             \
                 .displayedName("Frac Value")                                                                    \
                 .description("Frac Value")                                                                      \
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(0).reconfigurable()     					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         UINT32_ELEMENT(expected).key("pptPLL.fineTuning.modValue")						\
                 .displayedName("Mod Value")                                                                     \
                 .description("Mod Value")                                                                       \
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(25).reconfigurable()     					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         UINT32_ELEMENT(expected).key("pptPLL.fineTuning.PLLMultiplier")                                         \
                 .displayedName("Multiplier Value")								\
                 .description("Multiplier Value")								\
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(28).reconfigurable()     					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
 
 
@@ -610,25 +610,25 @@
                 .key("resetAurora"#iobNum)                                                                      \
                 .displayedName("IOB "#iobNum" Reset Aurora")                                                    \
                 .description("Reset Aurora and gives the channel a new chance to lock")                         \
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         SLOT_ELEMENT(expected)                                                                                  \
                 .key("programLMK"#iobNum)                                                                       \
                 .displayedName("IOB "#iobNum" Program LMK")                                                     \
                 .description("Initializes clock buffers")                                                       \
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         SLOT_ELEMENT(expected)                                                                                  \
                 .key("programIOBConfig"#iobNum)                                                                 \
                 .displayedName("IOB "#iobNum" Program Config")                                                  \
                 .description("Program IOB sysconfig register")                                                  \
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         SLOT_ELEMENT(expected)                                                                                  \
                 .key("readbackIOBConfig"#iobNum)                                                                \
                 .displayedName("IOB "#iobNum" Readback Config")                                                 \
                 .description("Readback IOB sysconfig register")                                                 \
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(STATE_ON)                                                                        \
                 .commit();                                                                                      \
         NODE_ELEMENT(expected).key("iob"#iobNum"Status")                                                        \
                 .displayedName("IOB "#iobNum)                                                                   \
@@ -718,7 +718,7 @@
                 .description("Enables datapath "#dp" to receive data from IOBoard "#dp)      \
                 .tags("enableDatapath")                                                      \
                 .assignmentOptional().defaultValue(false).reconfigurable()                   \
-                .allowedStates(State::ON, State::STOPPED)                                                     \
+                .allowedStates(STATE_ON)                                                     \
                 .commit();                                                                   \
 
 #define INIT_ENABLE_DATAPATH_ELEMENTS                                                        \
@@ -783,7 +783,6 @@
                 .tags("ethParam")                                                            \
                 .assignmentOptional().defaultValue(8000).reconfigurable()                    \
                 .commit();
-
 
 
 #define INIT_ETH_ELEMENTS                                                                    \

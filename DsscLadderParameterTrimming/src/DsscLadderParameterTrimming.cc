@@ -11,7 +11,6 @@
 #include "DsscHDF5TrimmingDataWriter.h"
 #include "DsscHDF5TrimmingDataReader.h"
 #include "FitUtils.h"
-#include "DsscModuleInfo.h"
 
 #define DSSCSTATUS(statStr) \
       KARABO_LOG_INFO << statStr;\
@@ -42,7 +41,7 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
   STRING_ELEMENT(expected).key("quadrantId")
     .displayedName("Dssc Quadrant Id")
     .description("Id Qualified for all Devices operating this Ladder")
-    .assignmentMandatory().options(utils::DsscModuleInfo::getQuadrantIdList(),",")
+    .assignmentMandatory()
     .commit();
 
   STRING_ELEMENT(expected).key("pptDeviceServerId")
@@ -143,26 +142,6 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
   STRING_ELEMENT(expected).key("gain.pixelDelay")
       .displayedName("Pixel Delay")
       .description("Selected Pixel Delay Setting")
-      .readOnly()
-      .commit();
-
-  NODE_ELEMENT(expected).key("moduleInfo")
-    .description("Current ModuleInfo as filled into HDF5 files")
-    .displayedName("ModuleInfo")
-    .commit();
-
-  STRING_ELEMENT(expected).key("moduleInfo.quadrantId")
-      .displayedName("Quadrant ID")
-      .readOnly()
-      .commit();
-
-  UINT32_ELEMENT(expected).key("moduleInfo.moduleNr")
-    .displayedName("ModuleNr")
-    .readOnly()
-    .commit();
-
-  STRING_ELEMENT(expected).key("moduleInfo.iobSerial")
-      .displayedName("IobSerial")
       .readOnly()
       .commit();
 
@@ -438,20 +417,9 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .description("Test function to trigger doSingleCycle")
     .commit();
 
-  BOOL_ELEMENT(expected).key("baselineAvailable")
-    .displayedName("Baseline Available")
-    .description("Signals if baseline was acquired")
-    .readOnly()
-    .commit();
-
   SLOT_ELEMENT(expected)
     .key("setBaseline").displayedName("Set Baseline")
-    .description("Function to trigger setBaseline")
-    .commit();
-
- SLOT_ELEMENT(expected)
-    .key("clearBaseline").displayedName("Clear Baseline")
-    .description("Clear Baseline Values")
+    .description("Test function to trigger setBaseline")
     .commit();
 
   SLOT_ELEMENT(expected)
@@ -780,7 +748,6 @@ DsscLadderParameterTrimming::DsscLadderParameterTrimming(const karabo::util::Has
   KARABO_SLOT(measureBurstData);
   KARABO_SLOT(doSingleCycle2);
   KARABO_SLOT(setBaseline);
-  KARABO_SLOT(clearBaseline);
   KARABO_SLOT(fillSramAndReadoutPattern);
   KARABO_SLOT(matrixSRAMTest);
   KARABO_SLOT(runPixelDelayTrimming);
@@ -909,7 +876,6 @@ void DsscLadderParameterTrimming::initialization()
   m_calibGenerator.setOutputDir(get<string>("outputDir"));
 
   updateActiveModule(get<int>("activeModule"));
-  updateBaselineValid();
 }
 
 
@@ -921,8 +887,6 @@ SuS::CHIPTrimmer DsscLadderParameterTrimming::getNewChipTrimmer(bool &ok)
   if (isDsscData()) {
     remote().set<bool>(m_dsscDataReceiverId, "enableDAQOutput",true);
   }
-
-  initDataWriter();
 
   SuS::CHIPTrimmer trimmer(this);
   trimmer.setAsicWise(false);
@@ -1300,6 +1264,7 @@ std::vector<double> DsscLadderParameterTrimming::measureBurstData(const std::vec
     remote().set(m_dsscDataReceiverId, "saveToHDF5", true);
   }
 
+
   const int numPixels = measurePixels.size();
 
   vector<double> binValues(numPixels);
@@ -1430,7 +1395,7 @@ void DsscLadderParameterTrimming::measureBurstData()
 
   static const auto measurePixels = utils::positionListToVector("0-32767");
 
-  const auto binValues = measureBurstData(measurePixels, m_trimStartAddr, m_trimEndAddr, baselineValuesValid);
+  const auto binValues = measureBurstData(measurePixels, m_trimStartAddr, m_trimEndAddr, false);
 
   for (int idx = 0; idx < 10; idx++) {
     cout << idx << " : " << binValues[idx] << endl;
@@ -1527,24 +1492,7 @@ void DsscLadderParameterTrimming::setBaseline()
 
   SuS::CHIPInterface::setBaseline(measurePixels, m_trimStartAddr, m_trimEndAddr);
 
-  updateBaselineValid();
-
   DSSCSTATUS("Baseline with " + to_string(m_iterations) + " acquired!");
-}
-
-
-void DsscLadderParameterTrimming::clearBaseline()
-{
-  SuS::CHIPInterface::clearBaseLine();
-
-  updateBaselineValid();
-
-  DSSCSTATUS("Baseline cleared");
-}
-
-void DsscLadderParameterTrimming::updateBaselineValid()
-{
-  set<bool>("baselineAvailable",baselineValuesValid);
 }
 
 int DsscLadderParameterTrimming::initSystem()
@@ -1780,8 +1728,10 @@ void DsscLadderParameterTrimming::preReconfigureMeanReceiver(karabo::util::Hash 
           remote().set<unsigned short>(m_mainProcessorId, "maxSram", m_trimEndAddr);
         }
       } else if (path.compare("numIterations") == 0) {
-        const uint iterations = filtered.getAs<unsigned int>(path);
-        setNumIterations(iterations);
+        m_iterations = filtered.getAs<unsigned int>(path);
+        if (isDeviceExisting(m_mainProcessorId)) {
+          remote().set<unsigned short>(m_mainProcessorId, "numIterations", m_iterations);
+        }
       }
     }
   }
@@ -1857,14 +1807,6 @@ void DsscLadderParameterTrimming::postReconfigure()
 {
 }
 
-
-void DsscLadderParameterTrimming::setNumIterations(uint iterations)
-{
-  m_iterations = iterations;
-  if (isDeviceExisting(m_mainProcessorId)) {
-    remote().set<unsigned short>(m_mainProcessorId, "numIterations", m_iterations);
-  }
-}
 
 bool DsscLadderParameterTrimming::isHardwareReady()
 {
@@ -2487,15 +2429,6 @@ bool DsscLadderParameterTrimming::fillSramAndReadout(uint16_t pattern, bool init
     KARABO_LOG_INFO << "Start DsscPpt and initialize before programming pattern via Jtag";
     return false;
   }
-
-  if(init)
-  {
-    remote().set<unsigned short>(m_pptDeviceId, "sramPattern", 0);
-    runContinuousMode(false);
-    // takes a while to program the whole ladder
-    remote().execute(m_pptDeviceId, "fillSramAndReadout", 600);
-  }
-
   remote().set<unsigned short>(m_pptDeviceId, "sramPattern", pattern);
 
   runContinuousMode(false);
@@ -2832,41 +2765,8 @@ void DsscLadderParameterTrimming::measureInjectionSweepSlopes()
   KARABO_LOG_INFO << "Pixel Slopes Measured";
 }
 
-
-void DsscLadderParameterTrimming::initDataWriter()
-{
-  std::string quadrantId = get<string>("quadrantId");
-  uint moduleNr   = 1;
-  uint iobSerial  = 0;
-  if(isDsscData())
-  {
-    moduleNr = remote().get<unsigned short>(m_dsscDataReceiverId,"specificData.moduleNr");
-    iobSerial = remote().get<unsigned int>(m_dsscDataReceiverId,"specificData.iobSerial");
-  }
-
-  if(!DsscHDF5Writer::checkModuleInfo(quadrantId,moduleNr,iobSerial)){
-    KARABO_LOG_WARN << "HDF5 File Writer already has different Module Information, will be overridden, maybe a wrong file was loaded";
-  }
-  DsscHDF5Writer::updateModuleInfo(quadrantId,moduleNr,iobSerial);
-
-  updateModuleInfo();
-}
-
-
-void DsscLadderParameterTrimming::updateModuleInfo()
-{
-  set<string>("moduleInfo.quadrantId",DsscHDF5Writer::s_writerModuleInfo.quadrantId);
-  set<unsigned int>("moduleInfo.moduleNr",DsscHDF5Writer::s_writerModuleInfo.moduleNr);
-  std::stringstream iss;
-  iss << "0x" << hex << setw(8) << setfill('0') << DsscHDF5Writer::s_writerModuleInfo.iobSerial;
-  set<string>("moduleInfo.iobSerial",iss.str());
-}
-
-
 void DsscLadderParameterTrimming::saveDataVector(const std::string & outputName, const std::vector<double> & dataVector)
 {
-  initDataWriter();
-
   const string outputDir = get<string>("outputDir");
   utils::makePath(outputDir);
 
@@ -2876,11 +2776,8 @@ void DsscLadderParameterTrimming::saveDataVector(const std::string & outputName,
   dataWriter.addImageData(outputName, 512, dataVector);
 }
 
-
 void DsscLadderParameterTrimming::saveDataHisto(const std::string & outputName, const utils::DataHisto & dataHisto, double scaleFactor)
 {
-  initDataWriter();
-
   const string outputDir = get<string>("outputDir");
   utils::makePath(outputDir);
 
@@ -2892,6 +2789,7 @@ void DsscLadderParameterTrimming::saveDataHisto(const std::string & outputName, 
 
 void DsscLadderParameterTrimming::measureBinningInformation()
 {
+
   StateChangeKeeper keeper(this);
 
   changeDeviceState(State::ACQUIRING);
@@ -2928,8 +2826,6 @@ void DsscLadderParameterTrimming::importBinningInformationFile()
   m_calibGenerator.importBinningInformationFile(get<string>("importDataFileName"));
 
   set<bool>("binningInfoLaoded",m_calibGenerator.isDNLMapLoaded());
-
-  updateModuleInfo();
 }
 
 
@@ -2941,8 +2837,6 @@ void DsscLadderParameterTrimming::importADCGainMapFile()
   m_calibGenerator.importADCGainMapFile(get<string>("importDataFileName"));
 
   set<bool>("pixelAdcGainMapLoaded",m_calibGenerator.isADCGainMapLoaded());
-
-  updateModuleInfo();
 }
 
 
@@ -2954,8 +2848,6 @@ void DsscLadderParameterTrimming::importSpektrumFitResultsFile()
   m_calibGenerator.importSpektrumFitResultsFile(get<string>("importDataFileName"));
 
   set<bool>("spectrumFitResultsLoaded",m_calibGenerator.isSpectrumFitResultsLoaded());
-
-  updateModuleInfo();
 }
 
 
@@ -3083,8 +2975,6 @@ void DsscLadderParameterTrimming::setGainConfigurationFromFitResultsFile()
   SuS::CHIPGainConfigurator configurator(this);
   configurator.loadGainConfiguration("RmpFineTrm",fileName,false);
 
-  updateModuleInfo();
-
   KARABO_LOG_INFO << "Calibrated Gain Configuration Programmed from " << fileName;
 }
 
@@ -3109,29 +2999,6 @@ void DsscLadderParameterTrimming::loadPxInjCalibData(SuS::CHIPTrimmer * trimmer)
     trimmer->setPixelInjectionCalibrationFactors(resultPair.second,resultPair.first);
     KARABO_LOG_INFO <<  "PixelInjectionCalibration factors loaded from: " << fileName;
   }
-
-  updateModuleInfo();
-}
-
-
-void DsscLadderParameterTrimming::sramTest(int iterations, bool init)
-{
-  const std::string baseDir = get<string>("outputDir");
-
-  for(int i=0; i<iterations; i++)
-  {
-    const std::string runDir = baseDir + "/RUN"+ to_string(i);
-    utils::makePath(runDir);
-    set<string>("outputDir",runDir);
-
-    if(init){
-      remote().set<unsigned short>(m_pptDeviceId, "sramPattern", 0);
-      runContinuousMode(false);
-      // takes a while to program the whole ladder
-      remote().execute(m_pptDeviceId, "fillSramAndReadout", 600);
-    }
-    matrixSRAMTest();
-  }
 }
 
 
@@ -3143,9 +3010,8 @@ bool DsscLadderParameterTrimming::matrixSRAMTest()
   int errCnt = 0;
   bool ok = true;
 
-  for (int i=0; i<5; ++i){
+  for (int i=0; i<5; ++i)
     ok &= matrixSRAMTest(i,errCnt);
-  }
 
   if(ok){
     KARABO_LOG_INFO  << "MatrixSRAMTest Successful";
@@ -3198,17 +3064,45 @@ bool DsscLadderParameterTrimming::matrixSRAMTest(int patternID, int &errCnt)
 
   KARABO_LOG_INFO << "Starting test "<< testName;
 
+
+  const int sramsize = getNumFramesToSend();
   if(!fillSramAndReadout(testpattern,true)){
     KARABO_LOG_ERROR << "Error during fillSramAndReadout, SRAM Test aborted";
     return false;
   }
-  const string testPath = get<string>("outputDir") + "/" + testName;
-  const auto moduleInfo = utils::DsscModuleInfo::getModuleInfoStr(get<string>("moduleInfo.quadrantID"),
-                                                                  get<unsigned int>("moduleInfo.moduleNr"),
-                                                                  std::stoul(get<string>("moduleInfo.iobSerial"),0,16));
 
-  int errCnt_thisPattern = saveSramTestResult(testPath,moduleInfo,testpattern);
+  const string testPath = get<string>("outputDir") + "/" + testName;
+  utils::makePath(testPath);
+
+  // testPath should be used to store Measurement Output files
+  const string fileName = testPath + "/" + utils::getLocalTimeStr() + "_Result.txt";
+  ofstream out(fileName);
+
+  int errCnt_thisPattern = 0;
+  const auto asicsVec = getSendingAsicsVec();
+  const int numASICs = asicsVec.size();
+  for(int asicIdx = 0; asicIdx < numASICs; asicIdx++)
+  {
+    const uint asic = asicsVec[asicIdx];
+    const string pxInfo = (numASICs>1)? "ASIC " + to_string(asic) + " pixel " : "pixel ";
+    const auto * asicOffs = utils::s_imagePixelMap.data() + asic * utils::s_numAsicPixels;
+    for (uint px = 0; px < utils::s_numAsicPixels; ++px){
+      const uint imagePixel = asicOffs[px];
+      const auto data = getPixelSramData(imagePixel);
+      for (int sramaddr = 0; sramaddr < sramsize; ++sramaddr)
+      {
+        if (data[sramaddr] != testpattern){
+          out << "Error in " << pxInfo << px << ", address " << sramaddr << ". Read value: " << data[sramaddr] << "\n";
+          errCnt_thisPattern++;
+        }
+      }
+    }
+  }
+
+  out << errCnt_thisPattern <<" errors found" << endl;
   errCnt += errCnt_thisPattern;
+
+  out.close();
 
   bool ok = (errCnt_thisPattern==0);
   if(!ok){

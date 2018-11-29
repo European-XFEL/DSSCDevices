@@ -31,21 +31,21 @@ public:
     void enBusInj(bool enable, std::string pixel = "all");
     void enBusInjRes(bool enable, std::string pixel = "all");
     void enPxInjDC(bool enable, std::string pixel = "all");
-
+    
     void generateInitialChipData(DataPacker *packer);
     void generateCalibrationInfo(DataPacker *packer);
 
-    bool doSingleCycle(DataPacker* packer=NULL, bool testPattern = false);
+    bool doSingleCycle(DataPacker* packer=NULL, bool testPattern = false);    
     bool doSingleCycle(int numTries, DataPacker* packer=NULL, bool testPattern = false);
 
     void updateDataPackerPixelOffsetsMap(){}
-
+    
     bool fillSramAndReadout(uint16_t pattern, bool init, bool jtagMode = false) override;
 
 
     bool isLadderReadout(){return false;}
     void setLadderReadout(bool enable){}
-
+    
     inline int setEPCParam(const std::string& moduleSet, const std::string& moduleStr, const std::string& signalName, uint32_t value)
     {
         DSSC_PPT::setEPCParam(moduleSet,moduleStr,signalName,value);
@@ -86,9 +86,6 @@ public:
         return ERROR_OK;
     }
 
-    void sramTest(int iterations, bool init = false){
-      std::cout << "SramTest can not be implemented in DSSC_PPT_API" << std::endl;
-    }
 
 private:
 

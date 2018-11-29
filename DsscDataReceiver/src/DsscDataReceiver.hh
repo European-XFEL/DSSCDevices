@@ -68,7 +68,6 @@ namespace karabo {
 
         void stopFileMode();
         void stopDataReceiver();
-        void stopDataSorting();
 
         bool waitDataReceived();
 
@@ -115,9 +114,6 @@ namespace karabo {
         void displayData();
 
         void processCurrentTrainData();
-        void displayTrainDataToShow();
-
-        void updateCurrentTrainIdAndCnt(uint64_t currTrainId);
 
         void setASICsToRecord();
         void getASICsToRecord();
@@ -178,26 +174,12 @@ namespace karabo {
     private:
 
         inline float rawData(int frame, int pixel, const  uint16_t & value) const;
-        inline float rawDataSramBL(int frame, int pixel, const  uint16_t & value) const;
         inline float gccWrapCorrect(int frame, int pixel, const  uint16_t & value) const;
         inline float sramCorrectData(int frame, int pixel, const uint16_t & value) const;
-        inline float sramCorrectSramBLData(int frame, int pixel, const uint16_t & value) const;
         inline float offsetCorrectData(int frame, int pixel, const uint16_t & value) const ;
-        inline float offsetCorrectSramBLData(int frame, int pixel, const uint16_t & value) const ;
-        inline float offsetCorrectTHData(int frame, int pixel, const uint16_t & value) const ;
-        inline float offsetCorrectTHSramBLData(int frame, int pixel, const uint16_t & value) const ;
+        inline float offsetTHCorrectData(int frame, int pixel, const uint16_t & value) const ;
         inline float fullCorrectData(int frame, int pixel, const uint16_t & value) const ;
-        inline float fullCorrectSramBLData(int frame, int pixel, const uint16_t & value) const ;
         inline float fullCorrectTHData(int frame, int pixel, const uint16_t & value) const ;
-        inline float fullCorrectTHSramBLData(int frame, int pixel, const uint16_t & value) const ;
-
-        std::function<float(int,int,const uint16_t & )> getGccCorrectionFunction();
-        std::function<float(int,int,const uint16_t & )> getSimpleCorrectionFunction();
-        std::function<float(int,int,const uint16_t & )> getThresholdFunction();
-        std::function<float(int,int,const uint16_t & )> getThresholdSramBLFunction();
-        std::function<float(int,int,const uint16_t & )> getSimpleSramBLCorrectionFunction();
-        std::function<float(int,int,const uint16_t & )> getSramBlacklistCorrectionFunction();
-        std::function<float(int,int,const uint16_t & )> getNoBlacklistCorrectionFunction();
 
         std::function<float(int,int,const uint16_t & )> getCorrectionFunction();
 
