@@ -11,7 +11,6 @@
 
 #include <string>
 #include <vector>
-#include <functional>
 
 #include <karabo/karabo.hpp>
 
@@ -73,13 +72,51 @@ namespace karabo {
          */
         virtual void postReconfigure();
 
+        /**
+         * starts the receiving of data from the input node
+         * several accumulation modes are available:
+         * - mean values over the given sram range
+         * - rms values over the given sram range
+         * - pixel data over the full sram range
+         * if sram correction or blacklist values are available they will also be applied before the data is
+         * sent out via the p2p output
+         * background values are only applied to the pixel data
+         */
         void accumulate();
+
         void stop();
+
+        /**
+         * Resets device counters and member variables
+         */
         void resetCounters();
+
+        /**
+         * This functions sets the sramBlacklist according to the selected value in the empty inject cycles and the injectOffset parameters
+         * If the sramBlacklistFileName is not empty the entries of the file are added on top of the empty inject cycles excludes
+         */
         void setEmptyInjectCycles();
 
+        /**
+         * Clears the sram blacklist if not further needed
+         */
         void clearSramBlacklist();
+
+
+        /**
+         * Clears the sram correction and background values, background values are used only for debugging.
+         * Sram correction is applied on the pixel data or the mean values if available
+         */
         void clearSramCorrection();
+
+        //void acquireSramCorrectionAndBaselineValues();
+
+        /**
+         * This functions updates the exising baseline values, by computing new mean values and overriding the existing values
+         * is sram blacklists or sram correction data is available, the data will be applied also the new baseline values
+         */
+        void acquireBaselineValues();
+        //void acquireSramCorrectionValues();
 
     private:
         void changeDeviceState(const util::State & newState);
@@ -93,49 +130,18 @@ namespace karabo {
 
         void processTrain(const karabo::util::NDArray& data, const karabo::util::NDArray& cellId, const karabo::util::NDArray& trainId);
 
-        void processTrainXFELDAQ(const karabo::util::NDArray& data, const karabo::util::NDArray& cellId, const karabo::util::NDArray& trainId);
-
-
         void sendPixelData(const unsigned short* train_data_ptr, unsigned long long train_id);
 
         void sendMeanValues();
 
         void clearData();
-        
-        void UpdateVariablesConfig(const karabo::util::Hash&);
-
-        void fillImageData(std::vector<unsigned int> & imageData);
-        
-        enum class SourceTypeEnum {DUMMY, DATARECEIVER, XFELDAQ};
-        
-        SourceTypeEnum m_sourceType;
-        boost::function<void(const karabo::util::Hash& data,
-                             const karabo::xms::InputChannel::MetaData& meta)> m_onDataImpl;
-        
-        void onDataDummy(const karabo::util::Hash& data,
-                         const karabo::xms::InputChannel::MetaData& meta);
-        void onDataXFELDAQ(const karabo::util::Hash& data,
-                         const karabo::xms::InputChannel::MetaData& meta);
-        void onDataDataReceiver(const karabo::util::Hash& data,
-                         const karabo::xms::InputChannel::MetaData& meta);
-
-        void vizThreadFunc();
-        void startVizThread();
-        void stopVizThread();
-
-        static constexpr size_t m_numCols = 512;
-        static constexpr size_t m_numRows = 128;
-        static constexpr size_t m_imageNumPixs = m_numCols*m_numRows;
 
 
         std::string m_sourceId;
         std::vector<unsigned long long> m_trainIds;
 
-        std::vector<uint16_t> m_dataViz; //array for data vizualization
-        uint16_t m_frameIndxViz = 0;
-        std::thread m_vizThread;
-        bool m_vizThreadRun = false;    
-        bool m_vizualize = false;        //settings variable
+        bool m_acquireBaseLine;
+        bool m_acquireSramCorrection;
     };
 }
 

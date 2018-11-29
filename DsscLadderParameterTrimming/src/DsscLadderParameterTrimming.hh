@@ -87,6 +87,9 @@ namespace karabo {
         void initialization();
         void initInjectionModeField();
         void initPixelSortMap();
+        void initDataWriter();
+        void updateModuleInfo();
+        void updateBaselineValid();
 
         util::Hash createInputChannelConfig(const std::vector<std::string> & outputChannels, const std::string & onSlowness = "drop");
 
@@ -237,6 +240,7 @@ namespace karabo {
         void runGainTrimming();
         void measureBurstData();
         void setBaseline();
+        void clearBaseline();
         void doSingleCycle2(){doSingleCycle();}
 
         void enableInjectionInSelPixels();
@@ -295,6 +299,7 @@ namespace karabo {
         bool isTestData();
         bool isDsscData();
         bool isXFELData();
+
     private: // members
         enum RecvStatus{OK=0,TESTPATTERN=1,TIMEOUT=2,DROP=3};
         enum RecvMode{RAW=0,PIXEL=1,MEAN=2, RMS=3, NO=4};
@@ -352,6 +357,11 @@ namespace karabo {
 
         bool matrixSRAMTest(int patternID, int &errCnt);
         bool matrixSRAMTest();
+
+        // is this function required?
+        void sramTest(int iterations, bool init = false) override;
+
+        void setNumIterations(uint iterations);
 
         class StateChangeKeeper{
           public:

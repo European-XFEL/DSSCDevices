@@ -17,6 +17,7 @@
 #include "ConfigReg.h"
 #include "CHIPTrimmer.h"
 #include "utils.h"
+#include "DsscModuleInfo.h"
 
 using namespace std;
 using namespace karabo::util;
@@ -67,55 +68,60 @@ namespace karabo {
                 .displayedName("PPT Host")
                 .description("PPT hostname or IP address")
                 .assignmentOptional().defaultValue("192.168.0.125").reconfigurable()
-                .allowedStates(STATE_OFF)
+                .allowedStates(karabo::util::State::UNKNOWN)
                 .commit();
 
         UINT32_ELEMENT(expected).key("pptPort")
                 .displayedName("PPT Port")
                 .description("PPT port number")
                 .assignmentOptional().defaultValue(2384).reconfigurable()
-                .allowedStates(STATE_OFF)
+                .allowedStates(State::UNKNOWN)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("open").displayedName("Connect PPT").description("Open connection to PPT")
-                .allowedStates(STATE_OFF,util::State::ERROR)
+                .allowedStates(State::UNKNOWN,util::State::ERROR)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("close").displayedName("Disconnect PPT").description("Close connection to PPT")
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("startAllChannelsDummyData").displayedName("Start all channels dummy data").description("After connection start dummy data from all channels")
-                .allowedStates(STATE_OFF,STATE_ON,STATE_INIT)
+                .allowedStates(State::UNKNOWN,State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("updateFirmwareFlash")
                 .displayedName("Update PPT Firmware")
                 .description("Update PPT Firmware Flash - takes about 15 minutes ")
-                .allowedStates(STATE_INIT)
+                .allowedStates(State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("updateLinuxFlash")
                 .displayedName("Update PPT Linux")
                 .description("Update PPT Linux Flash containing kernel and control software - takes about 10 minutes ")
-                .allowedStates(STATE_INIT)
+                .allowedStates(State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("updateIOBFirmware")
                 .displayedName("Update IOB Firmware")
                 .description("Update IOB Firmware, override bitfile in PPT with new version - takes about 10 minutes ")
-                .allowedStates(STATE_INIT)
+                .allowedStates(State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("initSystem").displayedName("Init System").description("Full PPT IOB and ASIC Init")
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
+                .commit();
+
+        SLOT_ELEMENT(expected)
+                .key("initSingleModule").displayedName("Init Single Module").description("Full PPT IOB and ASIC Init of selected Module")
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         PATH_ELEMENT(expected).key("fullConfigFileName")
@@ -129,18 +135,18 @@ namespace karabo {
 
         SLOT_ELEMENT(expected)
                 .key("updateGuiRegisters").displayedName("Update GUI Registers").description("Releoad all Reigsters")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
 
         SLOT_ELEMENT(expected)
                 .key("storeFullConfigFile").displayedName("Save Full Config").description("Store full config file")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("storeFullConfigHDF5").displayedName("Save HDF5 Config").description("Store Configuration as HDF5")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         PATH_ELEMENT(expected).key("linuxBinaryName")
@@ -194,13 +200,22 @@ namespace karabo {
                 .warnLow(10).needsAcknowledging(false).alarmLow(5).needsAcknowledging(false)
                 .warnHigh(75).needsAcknowledging(false).alarmHigh(80).needsAcknowledging(false)
                 .commit();
-
+/* not really working
+        UINT32_ELEMENT(expected).key("ethernetOutputRate")
+                .displayedName("SFP Ethernet Output Rate")
+                .description("Manages the ddr3 throttle divider which increases the gap between two packets")
+                .tags("other")
+                .assignmentOptional().defaultValue(9730).reconfigurable()
+                .minInc(3000).maxInc(9970)
+                .allowedStates(State::OFF)
+                .commit();
+*/
         UINT32_ELEMENT(expected).key("initDistance")
                 .displayedName("Init Distance")
                 .description("Wait cycles after power up digital voltage and start jtag programming")
                 .tags("fastInit")
                 .assignmentOptional().defaultValue(120).reconfigurable()
-                .allowedStates(STATE_OFF)
+                .allowedStates(State::UNKNOWN)
                 .commit();
 
         UINT32_ELEMENT(expected).key("fastInitJtagSpeed")
@@ -208,27 +223,27 @@ namespace karabo {
                 .description("JTAG Speed during fast initialization")
                 .tags("fastInit")
                 .assignmentOptional().defaultValue(14).reconfigurable()
-                .allowedStates(STATE_OFF)
+                .allowedStates(State::UNKNOWN)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("doFastInit").displayedName("Fast Init").description("Start Fast Init sequence")
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("initChip").displayedName("reprogram ASICs").description("Program ASICs without powercycling")
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("startManualBurstBtn").displayedName("Start Burst").description("Trigger one single Burst")
-                .allowedStates(STATE_ON)
+                .allowedStates(State::ON,State::STOPPED)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("readoutTestPattern").displayedName("Readout Testpattern").description("Trigger full readout with Testpattern")
-                .allowedStates(STATE_ON)
+                .allowedStates(State::ON,State::STOPPED)
                 .commit();
 
         UINT16_ELEMENT(expected).key("sramPattern")
@@ -250,33 +265,33 @@ namespace karabo {
 
         SLOT_ELEMENT(expected)
                 .key("readLastPPTTrainID").displayedName("read Last PPT Train ID").description("Reads last Train ID from PPT registers")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
 
         SLOT_ELEMENT(expected)
                 .key("resetAllBtn").displayedName("Reset All").description("Full PPT and IOB Reset")
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("resetEPC").displayedName("Reset EPC").description("EPC Reset, reprogramms EPC registers after reset")
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("resetDatapath").displayedName("Reset Datapath").description("Datapath reset, use if aurora is not locked")
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("resetIOBs").displayedName("Reset IOBoards").description("Full IOB Reset, reprogramms IOB registers after reset")
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("resetASICs").displayedName("Reset ASICs").description("Enable Asic and disable after e few milliseconds")
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -302,6 +317,17 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("startAcquisition").displayedName("Start Acquisition").description("Enable continuous data sending")
                 .allowedStates(State::STARTED)
+                .commit();
+
+        SLOT_ELEMENT(expected)
+                .key("startBurstAcquisition").displayedName("Start Burst Acquisition").description("Send burst of trains")
+                .allowedStates(State::ON)
+                .commit();
+
+        UINT32_ELEMENT(expected).key("numBurstTrains")
+                .displayedName("Number of Trains")
+                .description("Number of trains in the burst")
+                .assignmentOptional().defaultValue(10).reconfigurable()
                 .commit();
 
         STRING_ELEMENT(expected).key("selRegName")
@@ -356,7 +382,7 @@ namespace karabo {
                 .description("Program a logo using powerdown pixel register bit")
                 .tags("regAccess")
                 .assignmentOptional().defaultValue(false).reconfigurable()
-                .allowedStates(STATE_ON)
+                .allowedStates(State::ON,State::STOPPED)
                 .commit();
 
         NODE_ELEMENT(expected).key("gain")
@@ -433,19 +459,19 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("preProgSelReg").displayedName("Set Register")
                 .description("Set register value only in computer and don't program selected Register")
-                .allowedStates(STATE_ON,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("progSelReg").displayedName("Program Register")
                 .description("Program selected Register")
-                .allowedStates(STATE_ON,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("readSelReg").displayedName("Read Register Value")
                 .description("Read selected Register from locals")
-                .allowedStates(STATE_ON,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
                 .commit();
 
 
@@ -504,13 +530,13 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("programEPCConfig").displayedName("Program EPC Regs")
                 .description("Programming all EPC Regs with defined values")
-                .allowedStates(STATE_ON,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("readEPCRegisters").displayedName("Readback EPC Regs")
                 .description("Read all EPC regs and compare with defined ")
-                .allowedStates(STATE_ON,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
                 .commit();
 
 
@@ -523,19 +549,19 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("setInjectionValue").displayedName("Set Injection Value")
                 .description("Set the value current injection setting")
-                .allowedStates(STATE_ON,STATE_RUN,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING,State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setIntDACMode").displayedName("Set IntDAC Mode")
                 .description("Set filter in buffer mode and connect internal DAC to Monbus in high range mode")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setNormalMode").displayedName("Enable Normal Mode")
                 .description("Connect IntDAC to Monbus and enable sequencer normal mode")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         STRING_ELEMENT(expected).key("injectionMode")
@@ -549,13 +575,13 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("setInjectionMode").displayedName("Set Injection Mode")
                 .description("Enable selected Injection Mode")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setPixelInjectionMode").displayedName("En Pixel Injection Mode")
                 .description("Enable Pixel Injection in all pixels")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -566,19 +592,19 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("restorePoweredPixels").displayedName("Restore Powered Pixels")
                 .description("Restore currently remembered powered pixels")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setCurrentQuarterOn").displayedName("Set Current Quarter On")
                 .description("Enable currently selected quarter of pixels")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setCurrentColSkipOn").displayedName("Set Current Col Skip Pattern On")
                 .description("Enable currently selected colskip pattern")
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         STRING_ELEMENT(expected)
@@ -614,7 +640,7 @@ namespace karabo {
                 .description("Set D0 Mode")
                 .tags("measurements")
                 .assignmentOptional().defaultValue(true).reconfigurable()
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -623,7 +649,7 @@ namespace karabo {
                 .description("Bypass Compression")
                 .tags("measurements")
                 .assignmentOptional().defaultValue(false).reconfigurable()
-                .allowedStates(STATE_ON,STATE_INIT,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -665,13 +691,13 @@ namespace karabo {
         SLOT_ELEMENT(expected)
               .key("updateSequenceCounters").displayedName("Update Counters")
               .description("Set cycle counters in device")
-              .allowedStates(STATE_ON,STATE_RUN)
+              .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
               .commit();
 
         SLOT_ELEMENT(expected)
               .key("updateStartWaitOffset").displayedName("Update Burst Wait Offset")
               .description("Update Burst Wait Offset")
-              .allowedStates(STATE_ON,STATE_RUN)
+              .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
               .commit();
 
 
@@ -682,7 +708,7 @@ namespace karabo {
                 .tags("other")
                 .minInc(1).maxInc(16)
                 .assignmentOptional().defaultValue(1).reconfigurable()
-                .allowedStates(STATE_OFF)
+                .allowedStates(State::UNKNOWN)
                 .commit();
 
 
@@ -703,32 +729,40 @@ namespace karabo {
                 .description("Select LMK output for ASIC to reprogram. Check Active Module")
                 .tags("other")
                 .assignmentOptional().defaultValue(10).reconfigurable()
-                .allowedStates(STATE_ON,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
               .key("programLMKOutput").displayedName("Program ASIC LMK Out")
               .description("Reprogram LMK Output to restart ASIC")
-              .allowedStates(STATE_ON,STATE_RUN)
+              .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
               .commit();
 
         SLOT_ELEMENT(expected)
               .key("programLMKsAuto").displayedName("Program LMKs Auto")
               .description("Automatically initalize the ASIC clocks for correct data transmission")
-              .allowedStates(STATE_ON,STATE_RUN)
+              .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
               .commit();
 
         SLOT_ELEMENT(expected)
               .key("setPetraIIISetup").displayedName("Set Petra III Setup")
               .description("Select PPT IP Address, number of ASICs, DPs and disables dummy data")
-              .allowedStates(STATE_OFF,STATE_INIT)
+              .allowedStates(State::UNKNOWN,State::OFF)
               .commit();
 
         SLOT_ELEMENT(expected)
               .key("setQuadrantSetup").displayedName("Set Quadrant Setup")
               .description("Select number of ASICs and DPs, disables dummy data")
-              .allowedStates(STATE_OFF,STATE_INIT)
+              .allowedStates(State::UNKNOWN,State::OFF)
               .commit();
+
+        STRING_ELEMENT(expected)
+                .key("quadrantId").displayedName("QuadrantId")
+                .description("Quadrant Id")
+                .tags("other")
+                .assignmentOptional().defaultValue("FENICE").reconfigurable()
+                .options(utils::DsscModuleInfo::getQuadrantIdList(),",")
+                .commit();
 
         UINT32_ELEMENT(expected)
                 .key("numFramesToSendOut").displayedName("Num Frames in Train")
@@ -742,7 +776,7 @@ namespace karabo {
                 .description("Number of bursts at the beginning of a train, can be used to dismiss a number of unwanted events.")
                 .tags("other")
                 .assignmentOptional().defaultValue(10).reconfigurable()
-                .allowedStates(STATE_ON,STATE_RUN)
+                .allowedStates(State::ON,State::STOPPED,State::STARTED,State::ACQUIRING)
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -750,7 +784,7 @@ namespace karabo {
                 .description("Enable XFEL Mode. Get main clock from C&C network")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
-                .allowedStates(STATE_ON,STATE_INIT)
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -786,7 +820,7 @@ namespace karabo {
                 .description("Send dummy data generated in the IOBoard as received from the readoutASIC")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
-                .allowedStates(STATE_ON)
+                .allowedStates(State::ON,State::STOPPED)
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -794,7 +828,7 @@ namespace karabo {
                 .description("Send raw data or converted data.")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
-                .allowedStates(STATE_ON)
+                .allowedStates(State::ON,State::STOPPED)
                 .commit();
 
         UINT16_ELEMENT(expected)
@@ -878,6 +912,18 @@ namespace karabo {
             .description("Saving QSFP network configuration to config file")
             .commit();
 
+        UINT32_ELEMENT(expected)
+                .key("ethThrottleDivider").displayedName("Eth. throttle divider")
+                .description("Ethernet engine throttle divider parameter")
+                .assignmentOptional().defaultValue(0).reconfigurable()
+                .commit();
+
+        SLOT_ELEMENT(expected)
+            .key("setThrottleDivider")
+            .displayedName("Set eth. throttle divider")
+            .description("Set ethernet engine throttle divider")
+            .commit();
+
 
         INIT_ENABLE_DATAPATH_ELEMENTS
 
@@ -909,13 +955,16 @@ namespace karabo {
       KARABO_SLOT(runStandAlone);
       KARABO_SLOT(stopStandalone);
       KARABO_SLOT(stopAcquisition);
+      KARABO_SLOT(startManualBurstBtn);
       KARABO_SLOT(startAcquisition);
+      KARABO_SLOT(startBurstAcquisition);
       KARABO_SLOT(startAllChannelsDummyData);
 
       KARABO_SLOT(updateFirmwareFlash);
       KARABO_SLOT(updateLinuxFlash);
       KARABO_SLOT(updateIOBFirmware);
       KARABO_SLOT(initSystem);
+      KARABO_SLOT(initSingleModule);
       KARABO_SLOT(updateGuiRegisters);
 
 
@@ -989,6 +1038,7 @@ namespace karabo {
 
       KARABO_SLOT(LoadQSFPNetConfig);
       KARABO_SLOT(SaveQSFPNetConfig);
+      KARABO_SLOT(setThrottleDivider);
 
       //generateAllConfigRegElements();
 
@@ -1404,7 +1454,7 @@ namespace karabo {
                 .description("Select Module (IOB) to change Value, type all for all available Modules")
                 .tags(tagName)
                 .assignmentOptional().defaultValue("1").reconfigurable()
-                .allowedStates(STATE_ON)
+                .allowedStates(State::ON,State::STOPPED)
                 .commit();
       }
 
@@ -1444,7 +1494,7 @@ namespace karabo {
                         .description(keyName)
                         .tags(tagName)
                         .displayedName(sigName)
-                        .allowedStates(STATE_ON)
+                        .allowedStates(State::ON,State::STOPPED)
                         .readOnly()
                         .initialValue(value)
                         .commit();
@@ -1455,7 +1505,7 @@ namespace karabo {
                         .tags(tagName)
                         .displayedName(sigName)
                         .reconfigurable()
-                        .allowedStates(STATE_ON)
+                        .allowedStates(State::ON,State::STOPPED)
                         .assignmentOptional().defaultValue(value)
                         .commit();
               }
@@ -1466,7 +1516,7 @@ namespace karabo {
                         .description(keyName)
                         .tags(tagName)
                         .displayedName(sigName)
-                        .allowedStates(STATE_ON)
+                        .allowedStates(State::ON,State::STOPPED)
                         .readOnly()
                         .initialValue(value)
                         .commit();
@@ -1477,7 +1527,7 @@ namespace karabo {
                         .tags(tagName)
                         .displayedName(sigName)
                         .reconfigurable()
-                        .allowedStates(STATE_ON)
+                        .allowedStates(State::ON,State::STOPPED)
                         .maxInc(maxValue)
                         .assignmentOptional().defaultValue(value)
                         .commit();
@@ -1636,9 +1686,51 @@ namespace karabo {
       runAcquisition(true);
     }
 
+    void DsscPpt::startBurstAcquisition()
+    {
+        unsigned int num_trains = get<unsigned int>("numBurstTrains");
+        if(num_trains == 0) return;
+
+        const auto currentState = getState();
+        updateState(State::ACQUIRING);
+
+        m_lastTrainIdPolling = true;
+
+        start();
+
+        unsigned int last_trainId = m_ppt->getCurrentTrainID();
+        unsigned int sent_trains = 1;
+
+        while(m_lastTrainIdPolling)
+        {
+            unsigned int current_trainId = m_ppt->getCurrentTrainID();
+            if(last_trainId != current_trainId)
+            {
+                //
+                last_trainId = current_trainId;
+                sent_trains++;
+                if(sent_trains > num_trains)
+                {
+                    stop();
+                    break;
+                }
+            }
+            usleep(20000);
+        }
+         m_lastTrainIdPolling = false;
+        updateState(currentState);
+
+
+    }
+
 
     void DsscPpt::stopAcquisition()
     {
+      if(m_lastTrainIdPolling)
+      {
+          m_lastTrainIdPolling = false;
+          return;
+      }
       runAcquisition(false);
       if(m_ppt->isXFELMode()){
         runContMode(false);
@@ -1835,8 +1927,8 @@ namespace karabo {
       {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         checkPathExists(fileName);
-//        const auto h5config = m_ppt->getHDF5ConfigData();
-//        DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5",h5config);
+        const auto h5config = m_ppt->getHDF5ConfigData(fileName);
+        DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5",h5config);
       }
 #else
       KARABO_LOG_INFO << "HDF5 not installed";
@@ -1856,6 +1948,29 @@ namespace karabo {
       if(!printPPTErrorMessages()){
         KARABO_LOG_INFO << "ASIC Initialized successfully";
       }
+    }
+
+    void DsscPpt::initSingleModule()
+    {
+      DSSC::StateChangeKeeper keeper(this,State::ON);
+
+      int currentModule = get<uint32_t>("activeModule");
+      if(m_ppt->isIOBAvailable(currentModule)){
+        programIOBFPGA(currentModule);
+      }
+
+      {
+        DsscScopedLock lock(&m_accessToPptMutex,__func__);
+
+        int rc = m_ppt->initSingleModule(currentModule);
+        if( rc != SuS::DSSC_PPT::ERROR_OK ){
+          printPPTErrorMessages();
+        }
+      }
+
+      updateGuiRegisters();
+
+      checkQSFPConnected();
     }
 
 
@@ -1881,11 +1996,6 @@ namespace karabo {
         if( rc != SuS::DSSC_PPT::ERROR_OK ){
           printPPTErrorMessages();
         }
-      }
-
-      {
-        DsscScopedLock lock(&m_accessToPptMutex,__func__);
-        m_ppt->checkAuroraReady();
       }
 
       updateGuiRegisters();
@@ -2083,7 +2193,7 @@ namespace karabo {
 
 
     void DsscPpt::programIOBFPGA(int iobNumber)
-  {
+    {
       if(iobNumber < 1 || iobNumber > 4) {
         KARABO_LOG_ERROR << "Program IOB " << iobNumber << " not possible. Wrong ion number (1-4)";
         return;
@@ -2899,6 +3009,8 @@ namespace karabo {
         updateGuiPLLParameters();
 
         updateGuiOtherParameters();
+
+
     }
 
 
@@ -3215,6 +3327,9 @@ namespace karabo {
 
       value = m_ppt->getIOBParam("ASIC_send_dummy_data","0","ASIC_send_dummy_data") == 1;
       set<bool>("ASIC_send_dummy_data", value);
+
+      uint32_t throttleratio = m_ppt->getEthernetOutputThrottleDivider();
+      set<uint32_t>("ethThrottleDivider", throttleratio);
 
       /*
       value = BOOL_CAST(m_ppt->getEPCParam("Single_Cycle_Register","0","disable_sending"));
@@ -3737,6 +3852,18 @@ namespace karabo {
             {
               DsscScopedLock lock(&m_accessToPptMutex,__func__);
               m_ppt->setNumFramesToSend(numFrames);
+            }
+          }else if(path.compare("ethernetOutputRate") == 0){
+            unsigned int megabits = filtered.getAs<unsigned int>(path);
+            {
+              DsscScopedLock lock(&m_accessToPptMutex,__func__);
+              m_ppt->setEthernetOutputDatarate(megabits);
+            }
+          }else if(path.compare("quadrantId") == 0){
+            const auto quadrantId = filtered.getAs<string>(path);
+            {
+              DsscScopedLock lock(&m_accessToPptMutex,__func__);
+              m_ppt->setQuadrantId(quadrantId);
             }
           }else if(path.compare("numPreBurstVetos") == 0){
             unsigned int numVetos = filtered.getAs<unsigned int>(path);
@@ -4392,6 +4519,13 @@ namespace karabo {
              KARABO_LOG_ERROR << "Error QSFP network config file";
              cout << "Exception: " << e.what() << '\n';
          }
+    }
+
+    void DsscPpt::setThrottleDivider()
+    {
+        //
+        uint32_t throttle_divider = get<uint32_t>("ethThrottleDivider");
+        m_ppt->setEthernetOutputThrottleDivider(throttle_divider);
     }
 
     void DsscPpt::enableDPChannels(uint16_t enOneHot)
