@@ -12,16 +12,16 @@ CND_ARTIFACT_DIR_Debug=dist/Debug/GNU-Linux-x86
 CND_ARTIFACT_NAME_Debug=libdsscDevices.so
 CND_ARTIFACT_PATH_Debug=dist/Debug/GNU-Linux-x86/libdsscDevices.so
 CND_PACKAGE_DIR_Debug=dist/Debug/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Debug=libdsscDevicesCMake.so.tar
-CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/libdsscDevicesCMake.so.tar
+CND_PACKAGE_NAME_Debug=libdsscDevClean.so.tar
+CND_PACKAGE_PATH_Debug=dist/Debug/GNU-Linux-x86/package/libdsscDevClean.so.tar
 # Release configuration
 CND_PLATFORM_Release=GNU-Linux-x86
 CND_ARTIFACT_DIR_Release=dist/Release/GNU-Linux-x86
 CND_ARTIFACT_NAME_Release=libdsscDevices.so
 CND_ARTIFACT_PATH_Release=dist/Release/GNU-Linux-x86/libdsscDevices.so
 CND_PACKAGE_DIR_Release=dist/Release/GNU-Linux-x86/package
-CND_PACKAGE_NAME_Release=libdsscDevicesCMake.so.tar
-CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/libdsscDevicesCMake.so.tar
+CND_PACKAGE_NAME_Release=libdsscDevClean.so.tar
+CND_PACKAGE_PATH_Release=dist/Release/GNU-Linux-x86/package/libdsscDevClean.so.tar
 #
 # include compiler specific variables
 #

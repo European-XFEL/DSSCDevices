@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=dsscDevicesCMake
+PROJECTNAME=dsscDevClean
 
 # Active Configuration
 DEFAULTCONF=Debug

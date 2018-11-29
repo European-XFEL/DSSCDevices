@@ -13,6 +13,7 @@
       <itemPath>DsscPpt/src/DsscPpt.hh</itemPath>
       <itemPath>DsscPpt/src/DsscPptRegsInit.hh</itemPath>
       <itemPath>DsscProcessor/src/DsscProcessor.hh</itemPath>
+      <itemPath>DsscDataReceiver/src/DsscTrainDataSchema.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -67,7 +68,10 @@
             <pElem>${KARABO}/extern/include/dssc</pElem>
             <pElem>${KARABO}/extern/include</pElem>
           </incDir>
-          <commandLine>-DF2IO</commandLine>
+          <preprocessorList>
+            <Elem>F2IO</Elem>
+            <Elem>HAVE_HDF5</Elem>
+          </preprocessorList>
         </ccTool>
         <linkerTool>
           <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT}</output>
@@ -104,6 +108,11 @@
             flavor2="0">
       </item>
       <item path="DsscDataReceiver/src/DsscDataReceiver.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscTrainDataSchema.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -168,8 +177,22 @@
           <standard>8</standard>
           <incDir>
             <pElem>${KARABO}/include</pElem>
+            <pElem>${KARABO}/extern/include/dssc/utils</pElem>
+            <pElem>${KARABO}/extern/include/hdf5</pElem>
+            <pElem>${KARABO}/extern/include/dssc/chipinterface</pElem>
+            <pElem>${KARABO}/extern/include/dssc/configreg</pElem>
+            <pElem>${KARABO}/extern/include/dssc/dsschdf5</pElem>
+            <pElem>${KARABO}/extern/include/dssc/ppt</pElem>
+            <pElem>${KARABO}/extern/include/dssc/pptdatareceiver</pElem>
+            <pElem>${KARABO}/extern/include/dssc/sequence</pElem>
+            <pElem>${KARABO}/extern/dssc_minuit/include</pElem>
+            <pElem>${KARABO}/extern/include/dssc</pElem>
             <pElem>${KARABO}/extern/include</pElem>
           </incDir>
+          <preprocessorList>
+            <Elem>F2IO</Elem>
+            <Elem>HAVE_HDF5</Elem>
+          </preprocessorList>
         </ccTool>
         <fortranCompilerTool>
           <developmentMode>5</developmentMode>
@@ -180,11 +203,14 @@
         <linkerTool>
           <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT}</output>
           <linkerAddLib>
-            <pElem>${KARABO}/lib</pElem>
+            <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
+            <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
+            <pElem>${KARABO}/lib</pElem>
           </linkerAddLib>
           <linkerDynSerch>
             <pElem>${KARABO}/lib</pElem>
+            <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
           </linkerDynSerch>
           <linkerLibItems>
@@ -209,6 +235,11 @@
             flavor2="0">
       </item>
       <item path="DsscDataReceiver/src/DsscDataReceiver.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscTrainDataSchema.h"
             ex="false"
             tool="3"
             flavor2="0">

@@ -960,6 +960,8 @@ namespace karabo {
       m_pixelData.resize(utils::s_numSram,0);
 
       DsscHDF5Writer::enHDF5Compression = get<bool>("enHDF5Compression");
+
+      updateStatus("UDP closed");
     }
 
 
@@ -1023,7 +1025,7 @@ namespace karabo {
       }else{
         KARABO_LOG_WARN << "String has wrong format " << text;
       }
-      DsscDataSorter::setAvailableASICs(m_actASICs);
+      DsscPacketReceiverSimple::setSendingAsics(m_actASICs);
     }
 
     void DsscDataReceiver::getASICsToRecord()
@@ -1053,7 +1055,6 @@ namespace karabo {
     void DsscDataReceiver::startPolling()
     {
       stopPolling();
-
       m_keepPolling = true;
       m_pollThread.reset(new boost::thread(boost::bind(&DsscDataReceiver::getFillStands, this)));
       KARABO_LOG_INFO << "PollThread started...";
@@ -1093,68 +1094,6 @@ namespace karabo {
         callString += " gweiden@max-exfl.desy.de:/gpfs/exfel/data/scratch/gweiden/Measurements/";
         callString += distName + " && echo \"image data transfer done\" & ";
         system(callString.c_str());
-    }
-
-
-    void DsscDataReceiver::start()
-    {
-      lastState = getState();
-
-      if(getState() == State::OFF || getState() == State::UNKNOWN){
-        open();
-      }
-
-      if(getState() == State::STARTED){
-        activate();
-      }
-    }
-
-
-    void DsscDataReceiver::stopFileMode()
-    {
-      this->updateState(State::EXTRACTING);
-      m_trainSorter.stopSortThread();
-    }
-
-
-    void DsscDataReceiver::stop()
-    {
-      DSSC::StateChangeKeeper keeper(this,State::STARTED);
-
-      if(get<bool>("enFileMode")){
-        stopFileMode();
-      }
-
-      m_isStopped = true;
-
-      m_trainSorter.stopSortThread();
-
-      if(m_writingThread){
-        m_writingThread->join();
-        m_writingThread.reset();
-      }
-      m_writingThread = nullptr;
-
-      //stopWriteThreads();
-    }
-
-
-    void DsscDataReceiver::stopWriteThreads()
-    {
-      KARABO_LOG_INFO << "Stop m_writeHDFThreads!";
-
-      for(auto && th : m_writeHDFThreads){
-        if(th.joinable()){
-          th.join();
-        }
-      }
-      KARABO_LOG_INFO << "Stopped m_writeHDFThreads!";
-    }
-
-
-    void DsscDataReceiver::restart()
-    {
-      restartLadderMode(get<bool>("ladderMode"));
     }
 
 
@@ -1202,22 +1141,6 @@ namespace karabo {
 
       set<bool>("correction.bgDataValid",m_bgDataValid);
       set<bool>("correction.sramCorrectionValid",m_bgDataValid);
-    }
-
-
-    void DsscDataReceiver::restartLadderMode(bool ladderMode)
-    {
-      DSSC::StateChangeKeeper keeper(this);
-
-      // change ladder mode
-      m_ladderMode = ladderMode;
-      m_trainSorter.setActiveAsics(m_actASICs);
-    }
-
-
-    void DsscDataReceiver::setActiveAsic()
-    {
-      m_trainSorter.setActiveAsic(m_selAsic);
     }
 
 
@@ -1331,6 +1254,12 @@ namespace karabo {
 
     void DsscDataReceiver::updateStatus(const std::string & text)
     {
+      try{
+        set<string>("status",text);
+      }catch(...)
+      {
+        std::cout << "Status text catched " << text << std::endl;
+      }
       KARABO_LOG_INFO << text;
     }
 
@@ -1470,55 +1399,44 @@ namespace karabo {
     }
 
 
+    void DsscDataReceiver::start()
+    {
+      lastState = getState();
+
+      if(getState() == State::OFF || getState() == State::UNKNOWN){
+        open();
+      }
+
+      if(getState() == State::STARTED){
+        activate();
+      }
+    }
+
+
     void DsscDataReceiver::open()
     {
-      this->updateState(State::STARTING);
+      updateState(State::STARTING);
 
       KARABO_LOG_INFO << "Open";
 
       set<unsigned long long>("trainCnt",0);
 
       m_trainSorter.setActiveAsic(m_selAsic);
-      m_trainSorter.setActiveAsics(m_actASICs);
+      m_trainSorter.setSendingAsics(m_actASICs);
 
       if(get<bool>("enFileMode")){
-        this->updateState(State::EXTRACTING);
+        updateState(State::EXTRACTING);
       }else{
         m_trainSorter.setUDPPort(get<unsigned int>("udpPort"));
         m_trainSorter.start();
-        this->updateState(State::STARTED);
+        updateState(State::STARTED);
       }
 
       startPolling();
 
       startDisplay();
-    }
 
-
-    void DsscDataReceiver::close()
-    {
-      this->updateState(State::CLOSING);
-
-      KARABO_LOG_INFO << "Close Action";
-
-      stopPolling();
-
-      stop();
-
-      stopDataReceiver();
-
-      stopDisplay();
-
-      m_trainSorter.closeConnection();
-
-      this->updateState(State::OFF);
-    }
-
-
-    void DsscDataReceiver::stopDataReceiver()
-    {
-      m_trainSorter.stopSortThread();
-      m_trainSorter.stop();
+      updateStatus("Receiving from UDP");
     }
 
 
@@ -1543,11 +1461,106 @@ namespace karabo {
     }
 
 
+    void DsscDataReceiver::restart()
+    {
+      restartLadderMode(get<bool>("ladderMode"));
+    }
+
+    void DsscDataReceiver::restartLadderMode(bool ladderMode)
+    {
+      DSSC::StateChangeKeeper keeper(this);
+      // change ladder mode
+      m_ladderMode = ladderMode;
+      setActiveAsic();
+    }
+
+
+    void DsscDataReceiver::setActiveAsic()
+    {
+      m_trainSorter.setActiveAsic(m_selAsic);
+    }
+
     void DsscDataReceiver::reset()
     {
       KARABO_LOG_INFO << "Reset Action";
       set<unsigned long long>("trainCnt",0);
       close();
+    }
+
+
+    void DsscDataReceiver::close()
+    {
+      updateState(State::CLOSING);
+
+      KARABO_LOG_INFO << "Close Action";
+
+      stopPolling();
+
+      stop();
+
+      stopDataReceiver();
+
+      stopDisplay();
+
+      m_trainSorter.closeConnection();
+
+      updateState(State::OFF);
+    }
+
+    void DsscDataReceiver::stop()
+    {
+      DSSC::StateChangeKeeper keeper(this,State::STARTED);
+
+      if(get<bool>("enFileMode")){
+        stopFileMode();
+      }
+
+      stopDataSorting();
+
+      if(m_writingThread){
+        m_writingThread->join();
+        m_writingThread.reset();
+      }
+      m_writingThread = nullptr;
+
+      //stopWriteThreads();
+    }
+
+    void DsscDataReceiver::stopDataSorting()
+    {
+      m_isStopped = true;
+      m_trainSorter.stopSortThread();
+      updateStatus("Receiving from UDP");
+    }
+
+    void DsscDataReceiver::stopDataReceiver()
+    {
+      m_isStopped  = true;
+      m_runDisplay = false;
+
+      m_trainSorter.stopSortThread();
+      m_trainSorter.stop();
+
+      updateStatus("UDP closed");
+    }
+
+
+    void DsscDataReceiver::stopWriteThreads()
+    {
+      KARABO_LOG_INFO << "Stop m_writeHDFThreads!";
+
+      for(auto && th : m_writeHDFThreads){
+        if(th.joinable()){
+          th.join();
+        }
+      }
+      KARABO_LOG_INFO << "Stopped m_writeHDFThreads!";
+    }
+
+    void DsscDataReceiver::stopFileMode()
+    {
+      updateState(State::EXTRACTING);
+      m_trainSorter.stopSortThread();
     }
 
 
@@ -1620,6 +1633,7 @@ namespace karabo {
       m_writingThread.reset(new boost::thread(boost::bind(&Self::receiveData, this)));
     }
 
+
     void DsscDataReceiver::fillMetaData()
     {
       fillTrailer();
@@ -1629,13 +1643,113 @@ namespace karabo {
       fillSpecificData();
     }
 
-    std::function<float(int,int,const uint16_t & )> DsscDataReceiver::getCorrectionFunction()
+
+    // #####################################################################################################
+    // ########################## Correction Function Selection ############################################
+    // #####################################################################################################
+
+    std::function<float(int,int,const uint16_t & )> DsscDataReceiver::getGccCorrectionFunction()
     {
-      m_showThreshold = false;
+      if(m_gccwrap > 0){
+        return  [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->gccWrapCorrect(frame,pixel,value);
+        };
+      }else{
+        return  [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->rawData(frame,pixel,value);
+        };
+      }
+    }
 
-      clearHistograms();
-      clearThresholdMap();
+    std::function<float(int,int,const uint16_t & )> DsscDataReceiver::getSimpleCorrectionFunction()
+    {
+      // SramBL and BGData and Correction and/or Background
+      if(!m_correct){
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->offsetCorrectData(frame,pixel,value);
+        };
+      }else if(!m_subtract){
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->sramCorrectData(frame,pixel,value);
+        };
+      }else{
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->fullCorrectData(frame,pixel,value);
+        };
+      }
+    }
 
+    std::function<float(int,int,const uint16_t & )> DsscDataReceiver::getThresholdFunction()
+    {
+      // SramBL and BGData and Threshold
+      m_showThreshold = true;
+      if(!m_correct){
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->offsetCorrectTHData(frame,pixel,value);
+        };
+      }else{
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->fullCorrectTHData(frame,pixel,value);
+        };
+      }
+    }
+
+    std::function<float(int,int,const uint16_t & )> DsscDataReceiver::getThresholdSramBLFunction()
+    {
+      // SramBL and BGData and Threshold
+      m_showThreshold = true;
+      if(!m_correct){
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->offsetCorrectTHSramBLData(frame,pixel,value);
+        };
+      }else{
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->fullCorrectTHSramBLData(frame,pixel,value);
+        };
+      }
+    }
+
+    std::function<float(int,int,const uint16_t & )> DsscDataReceiver::getSimpleSramBLCorrectionFunction()
+    {
+      // SramBL and BGData and Correction and/or Background
+      if(!m_correct){
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->offsetCorrectSramBLData(frame,pixel,value);
+        };
+      }else if(!m_subtract){
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->sramCorrectSramBLData(frame,pixel,value);
+        };
+      }else{
+        return [&](int frame, int pixel, const uint16_t & value ) -> float {
+          return this->fullCorrectSramBLData(frame,pixel,value);
+        };
+      }
+    }
+
+    std::function<float(int,int,const uint16_t & )> DsscDataReceiver::getSramBlacklistCorrectionFunction()
+    {
+      if(m_showRawData){
+        if(m_bgDataValid){
+          return [&](int frame, int pixel, const uint16_t & value ) -> float {
+            return this->rawDataSramBL(frame,pixel,value);
+          };
+        }
+      }
+
+      if(m_bgDataValid){
+        if(!m_enThreshold){
+          return getSimpleSramBLCorrectionFunction();
+        }else{
+          return getThresholdSramBLFunction();
+        }
+      }
+
+      return getGccCorrectionFunction();
+    }
+
+    std::function<float(int,int,const uint16_t & )> DsscDataReceiver::getNoBlacklistCorrectionFunction()
+    {
       if(m_showRawData){
         return [&](int frame, int pixel, const uint16_t & value ) -> float {
           return this->rawData(frame,pixel,value);
@@ -1644,54 +1758,67 @@ namespace karabo {
 
       if(m_bgDataValid)
       {
+        // BGData and Correction and/or Background
         if(!m_enThreshold){
-          if(!m_correct){
-            return [&](int frame, int pixel, const uint16_t & value ) -> float {
-              return this->offsetCorrectData(frame,pixel,value);
-            };
-          }else if(!m_subtract){
-            return [&](int frame, int pixel, const uint16_t & value ) -> float {
-              return this->sramCorrectData(frame,pixel,value);
-            };
-          }else{
-            return [&](int frame, int pixel, const uint16_t & value ) -> float {
-              return this->fullCorrectData(frame,pixel,value);
-            };
-          }
+          return getSimpleCorrectionFunction();
         }else{
-          m_showThreshold = true;
-          if(!m_correct){
-            return [&](int frame, int pixel, const uint16_t & value ) -> float {
-              return this->offsetTHCorrectData(frame,pixel,value);
-            };
-          }else{
-            return [&](int frame, int pixel, const uint16_t & value ) -> float {
-              return this->fullCorrectTHData(frame,pixel,value);
-            };
-          }
+          return getThresholdFunction();
         }
       }
-      if(m_gccwrap > 0){
-        return  [&](int frame, int pixel, const uint16_t & value ) -> float {
-         return this->gccWrapCorrect(frame,pixel,value);
-        };
+
+      return getGccCorrectionFunction();
+    }
+
+    std::function<float(int,int,const uint16_t & )> DsscDataReceiver::getCorrectionFunction()
+    {
+      m_showThreshold = false;
+
+      clearHistograms();
+      clearThresholdMap();
+
+      if(m_processor.isSramBlacklistValid()){
+        return getSramBlacklistCorrectionFunction();
       }else{
-        return  [&](int frame, int pixel, const uint16_t & value ) -> float {
-         return this->rawData(frame,pixel,value);
-        };
+        return getNoBlacklistCorrectionFunction();
       }
     }
 
+    // #####################################################################################################
+    // ################################### Correction Function Definitions #################################
+    // #####################################################################################################
 
     float DsscDataReceiver::rawData(int frame, int pixel, const uint16_t & value) const
     {
       return (float)value;
     }
 
+    float DsscDataReceiver::rawDataSramBL(int frame, int pixel, const uint16_t & value) const
+    {
+      if(m_processor.frameNotBlacklisted(pixel,frame)){
+        return (float)value;
+      }
+      return m_pixelBackgroundData[pixel];
+    }
 
     float DsscDataReceiver::gccWrapCorrect(int frame, int pixel, const  uint16_t & value) const
     {
       return (value < m_gccwrap)? value + 256 : value;
+    }
+
+    float DsscDataReceiver::sramCorrectData(int frame, int pixel, const uint16_t & value) const
+    {
+      float correctedValue = gccWrapCorrect(frame,pixel,value);
+
+      correctedValue -= m_pixelCorrectionData[pixel][frame];
+      return std::max(0.0f,correctedValue + MAINOFFS);
+    }
+
+    float DsscDataReceiver::sramCorrectSramBLData(int frame, int pixel, const uint16_t & value) const
+    {
+      if(m_processor.frameNotBlacklisted(pixel,frame)){
+        return sramCorrectData(frame,pixel,value);
+      }
+      return m_pixelBackgroundData[pixel];
     }
 
 
@@ -1704,23 +1831,28 @@ namespace karabo {
       return std::max(0.0f,correctedValue + MAINOFFS);
     }
 
+    float DsscDataReceiver::offsetCorrectSramBLData(int frame, int pixel, const uint16_t & value) const
+    {
+      if(m_processor.frameNotBlacklisted(pixel,frame)){
+        return offsetCorrectData(frame,pixel,value);
+      }
+      return MAINOFFS;
+    }
 
-    float DsscDataReceiver::offsetTHCorrectData(int frame, int pixel, const uint16_t & value) const
+    float DsscDataReceiver::offsetCorrectTHData(int frame, int pixel, const uint16_t & value) const
     {
       float correctedValue = offsetCorrectData(frame,pixel,value)-MAINOFFS;
 
       return (correctedValue > m_threshold)? 1.0 : 0.0;
     }
 
-
-    float DsscDataReceiver::sramCorrectData(int frame, int pixel, const uint16_t & value) const
+    float DsscDataReceiver::offsetCorrectTHSramBLData(int frame, int pixel, const uint16_t & value) const
     {
-      float correctedValue = gccWrapCorrect(frame,pixel,value);
-
-      correctedValue -= m_pixelCorrectionData[pixel][frame];
-      return std::max(0.0f,correctedValue + MAINOFFS);
+      if(m_processor.frameNotBlacklisted(pixel,frame)){
+        return offsetCorrectTHData(frame,pixel,value);
+      }
+      return 0.0;
     }
-
 
     float DsscDataReceiver::fullCorrectData(int frame, int pixel, const uint16_t & value) const
     {
@@ -1729,6 +1861,13 @@ namespace karabo {
       return std::max(0.0f,correctedValue + MAINOFFS);
     }
 
+    float DsscDataReceiver::fullCorrectSramBLData(int frame, int pixel, const uint16_t & value) const
+    {
+      if(m_processor.frameNotBlacklisted(pixel,frame)){
+        return fullCorrectData(frame,pixel,value);
+      }
+      return MAINOFFS;
+    }
 
     float DsscDataReceiver::fullCorrectTHData(int frame, int pixel, const uint16_t & value) const
     {
@@ -1736,6 +1875,17 @@ namespace karabo {
 
       return (correctedValue > m_threshold)? 1.0 : 0.0;
     }
+
+    float DsscDataReceiver::fullCorrectTHSramBLData(int frame, int pixel, const uint16_t & value) const
+    {
+      if(m_processor.frameNotBlacklisted(pixel,frame)){
+        return fullCorrectTHData(frame,pixel,value);
+      }
+      return 0.0;
+    }
+
+    // #####################################################################################################
+    // #####################################################################################################
 
 
     // try not to copy data
@@ -1963,6 +2113,7 @@ namespace karabo {
         set<bool>("saveToHDF5",true);
       }
 
+      updateStatus("Measuring");
 
       updateState(State::ACTIVE);
     }
@@ -2151,417 +2302,434 @@ namespace karabo {
     }
 
 
-
-
-  void DsscDataReceiver::fillSpecificData()
-  {
-  //  sendData.set(getDir("pCellId"), packetVector.getCellIds());
-  //  sendData.set(getDir("pCellId"), packetVector.getCellIds());
-  //  sendData.set(getDir("pLength"), std::vector<unsigned int>(numFrames,0x200));
-    sendData.set(getDir("pPulseId"), currentTrainData->pulseIds);
-  //  sendData.set(getDir("pStatus"), std::vector<unsigned int>(numFrames,0));
-  //  sendData.set(getDir("ptrainId"), std::vector<unsigned int>(numFrames,trainId));
-
-  //  sendData.set(getDir("asicTrailer"), currentTrainData->asicTrailerData);
-  //  sendData.set(getDir("pptData"),     currentTrainData->pptData);
-  //  sendData.set(getDir("sibData"),     currentTrainData->sibData);
-
-  //  fillData(getHeaderData());
-  //  fillData(getTrailerData());
-  }
-
-
-  void DsscDataReceiver::fillHeader()
-  {
-    sendData.set<unsigned long long>(getDir("trainId"),          currentTrainData->trainId);
-    sendData.set<unsigned long long>(getDir("dataId"),           currentTrainData->dataId);
-    sendData.set<unsigned long long>(getDir("imageCount"),       currentTrainData->pulseCnt);
-    sendData.set<unsigned int>(getDir("tbLinkId"),               currentTrainData->tbLinkId);
-    sendData.set<unsigned int>(getDir("femLinkId"),              currentTrainData->detLinkId);
-    sendData.set<unsigned int>(getDir("detSpecificLength"),      currentTrainData->detSpecificLength);
-    sendData.set<unsigned int>(getDir("tbSpecificLength"),       currentTrainData->tbSpecificLength);
-  }
-
-
-  void DsscDataReceiver::fillTrailer()
-  {
- //   sendData.set<unsigned long long>(getDir("checkSum0"),      trailer.checkSum0);
- //   sendData.set<unsigned long long>(getDir("checkSum1"),      trailer.checkSum1);
- //   sendData.set<unsigned long long>(getDir("status"),         trailer.status);
- //   sendData.set<unsigned long long>(getDir("magicNumberEnd"), trailer.magicNumber);
-  }
-
-
-  void DsscDataReceiver::initStatsAcc()
-  {
-    m_dataStatsAcc.assign(utils::s_totalNumPxs,utils::StatsAcc());
-    m_sramCorrectionAcc.assign(utils::s_totalNumPxs,utils::StatsAccVec(utils::s_numSram));
-    m_pixelCorrectionData.assign(utils::s_totalNumPxs,std::vector<float>(utils::s_numSram));
-
-    m_pixelHistoVec.assign(utils::s_totalNumPxs,utils::DataHisto());
-  }
-
-
-  void DsscDataReceiver::updatePixelHistos()
-  {
-    //KARABO_LOG_INFO << "Update Pixel Histos";
-    m_processor.fillDataHistoVec(currentTrainData,m_pixelHistoVec,false);
-    //cout << "Pixel data to histogram vector added" << endl;
-  }
-
-
-  void DsscDataReceiver::savePixelHistos()
-  {
-    static const auto pixelNumbers = utils::getUpCountingVector<unsigned int>(utils::s_totalNumPxs);
-
-    utils::fillBufferToDataHistoVec(m_pixelHistoVec);
-
-    const string fileName = get<string>("outputDir") + "/PixelHistogramExport.dat";
-    const string h5FileName = get<string>("outputDir") + "/PixelHistogramExport.h5";
-    utils::DataHisto::dumpHistogramsToASCII(fileName,pixelNumbers,m_pixelHistoVec);
-
-    DsscHDF5TrimmingDataWriter dataWriter(h5FileName);
-    dataWriter.setMeasurementName("LadderSpectrum");
-    dataWriter.addHistoData("SpektrumData",m_pixelHistoVec,pixelNumbers);
-
-    const auto imageValues = utils::calcMeanImageFromHistograms(m_pixelHistoVec,pixelNumbers);
-    dataWriter.addImageData("SpectrumPedestalImage",512,imageValues);
-
-    KARABO_LOG_INFO << "Stored Pixel Histograms to " << h5FileName;
-  }
-
-  void DsscDataReceiver::displayPixelHistogram()
-  {
-    vector<unsigned short> bins;
-    vector<unsigned int> binValues;
-    size_t histoValueCount = 0;
-    if(get<bool>("showOnlineHistogram")){
-      auto imagePixel = get<unsigned int>("monitor.ladderPixelToShow");
-      m_pixelHistoVec[imagePixel].fillBufferToHistoMap();
-      m_pixelHistoVec[imagePixel].getDrawValues(bins,binValues);
-      histoValueCount = m_pixelHistoVec[imagePixel].getCount();
-    }else{
-      pixelHisto.fillBufferToHistoMap();
-      pixelHisto.getDrawValues(bins,binValues);
-      histoValueCount = pixelHisto.getCount();
-    }
-
-    if(!bins.empty()){
-      set<unsigned long long>("histoGen.pixelhistoCnt",histoValueCount);
-      set<vector<unsigned short>>("histoGen.pixelHistoBins",std::move(bins));
-      if(get<bool>("displayHistoLogscale")){
-        std::transform(binValues.begin(),binValues.end(),binValues.begin(),[](int x){if(x==0) return 1; return x;});
-      }
-      set<vector<unsigned int>>("histoGen.pixelHistoBinValues",std::move(binValues));
-    }
-
-    if(get<bool>("histoGen.constantReset")){
-      pixelHisto.clear();
-    }
-  }
-
-  void DsscDataReceiver::displayAsicHistogram()
-  {
-    vector<unsigned short> bins;
-    vector<unsigned int> binValues;
-
-    asicHisto.fillBufferToHistoMap();
-    asicHisto.getDrawValues(bins,binValues);
-    set<vector<unsigned short>>("histoGen.asicHistoBins",std::move(bins));
-    set<vector<unsigned int>>("histoGen.asicHistoBinValues",std::move(binValues));
-
-    if(get<bool>("histoGen.constantReset")){
-      asicHisto.clear();
-    }
-  }
-
-  void DsscDataReceiver::clearPixelHistos()
-  {
-    for(auto && pixelHisto : m_pixelHistoVec){
-      pixelHisto.clear();
-    }
-  }
-
-  void DsscDataReceiver::startDisplay()
-  {
-    m_runDisplay = true;
-
-    if(m_displayThread){
-      KARABO_LOG_INFO << "Old display thread to join in write()!";
-      m_displayThread->join();
-      m_displayThread.reset();
-    }
-    m_displayThread.reset(new boost::thread(boost::bind(&Self::displayData, this)));
-  }
-
-  void DsscDataReceiver::stopDisplay()
-  {
-    m_runDisplay = false;
-
-    if(m_displayThread){
-      KARABO_LOG_INFO << "Old display thread to join in write()!";
-      m_displayThread->join();
-      m_displayThread.reset();
-    }
-    m_displayThread = nullptr;
-  }
-
-
-  void DsscDataReceiver::displayData()
-  {
-    m_numCheckedData = 0;
-    m_errorCnt = 0;
-
-    TrainDataRingStorage * trainDataRingStorage = ((TrainDataRingStorage*)&m_trainSorter);
-    while(m_runDisplay)
+    void DsscDataReceiver::fillSpecificData()
     {
-      m_trainDataToShow = trainDataRingStorage->getNextValidStorage();
-      if(m_trainDataToShow == nullptr) return;
+    //  sendData.set(getDir("pCellId"), packetVector.getCellIds());
+    //  sendData.set(getDir("pCellId"), packetVector.getCellIds());
+    //  sendData.set(getDir("pLength"), std::vector<unsigned int>(numFrames,0x200));
+      sendData.set(getDir("pPulseId"), currentTrainData->pulseIds);
+    //  sendData.set(getDir("pStatus"), std::vector<unsigned int>(numFrames,0));
+    //  sendData.set(getDir("ptrainId"), std::vector<unsigned int>(numFrames,trainId));
 
-      if(m_trainDataToShow->isValid())
-      {
-        if(m_nextHistoReset){
-          clearHistograms();
-          m_nextHistoReset = false;
-        }
+    //  sendData.set(getDir("asicTrailer"), currentTrainData->asicTrailerData);
+    //  sendData.set(getDir("pptData"),     currentTrainData->pptData);
+    //  sendData.set(getDir("sibData"),     currentTrainData->sibData);
 
-        if(m_nextThresholdReset){
-          clearThresholdMap();
-          m_nextThresholdReset = false;
-        }
+    //  fillData(getHeaderData());
+    //  fillData(getTrailerData());
+    }
 
-        if(m_isStopped){
-          set<unsigned long long>("currentTrainId",m_trainDataToShow->trainId);
-          auto trainCnt = get<unsigned long long>("trainCnt") + 1;
-          set<unsigned long long>("trainCnt",trainCnt);
-        }
 
-        updateTempADCValues(m_trainDataToShow);
+    void DsscDataReceiver::fillHeader()
+    {
+      sendData.set<unsigned long long>(getDir("trainId"),          currentTrainData->trainId);
+      sendData.set<unsigned long long>(getDir("dataId"),           currentTrainData->dataId);
+      sendData.set<unsigned long long>(getDir("imageCount"),       currentTrainData->pulseCnt);
+      sendData.set<unsigned int>(getDir("tbLinkId"),               currentTrainData->tbLinkId);
+      sendData.set<unsigned int>(getDir("femLinkId"),              currentTrainData->detLinkId);
+      sendData.set<unsigned int>(getDir("detSpecificLength"),      currentTrainData->detSpecificLength);
+      sendData.set<unsigned int>(getDir("tbSpecificLength"),       currentTrainData->tbSpecificLength);
+    }
 
-        uint updateFrequency = get<unsigned int>("updateFrequency");
-        if((m_trainDataToShow->trainId%updateFrequency) == 0)
-        {
-          updateSpecificData(m_trainDataToShow);
 
-          if(get<bool>("enableLadderPreview") ){
-            writeChannel("ladderImageOutput",getImageData(m_selFrame));
-          }
+    void DsscDataReceiver::fillTrailer()
+    {
+      //   sendData.set<unsigned long long>(getDir("checkSum0"),      trailer.checkSum0);
+      //   sendData.set<unsigned long long>(getDir("checkSum1"),      trailer.checkSum1);
+      //   sendData.set<unsigned long long>(getDir("status"),         trailer.status);
+      //   sendData.set<unsigned long long>(getDir("magicNumberEnd"), trailer.magicNumber);
+    }
 
-          if(get<bool>("enableASICPreview"))
-          {
-            writeChannel("asicImageOutput",getImageData(m_selFrame,m_selAsic));
 
-            displayAsicHistogram();
-          }
+    void DsscDataReceiver::initStatsAcc()
+    {
+      m_dataStatsAcc.assign(utils::s_totalNumPxs,utils::StatsAcc());
+      m_sramCorrectionAcc.assign(utils::s_totalNumPxs,utils::StatsAccVec(utils::s_numSram));
+      m_pixelCorrectionData.assign(utils::s_totalNumPxs,std::vector<float>(utils::s_numSram));
 
-          if(get<bool>("checkTestPatternData")){
-            checkTestPatternData(m_trainDataToShow);
-          }else{
-            m_numCheckedData = 0;
-            m_errorCnt = 0;
-          }
-        }
+      m_pixelHistoVec.assign(utils::s_totalNumPxs,utils::DataHisto());
+    }
 
-        if(get<bool>("enablePixelPreview"))
-        {
-          writeChannel("pixelImageOutput",getPixelData(m_asicPixelToShow, m_asicToShow));
 
-          displayPixelHistogram();
-        }
-      }
+    void DsscDataReceiver::updatePixelHistos()
+    {
+      //KARABO_LOG_INFO << "Update Pixel Histos";
+      m_processor.fillDataHistoVec(currentTrainData,m_pixelHistoVec,false);
+      //cout << "Pixel data to histogram vector added" << endl;
+    }
 
-      if(get<bool>("saveImageWiseSorted")){
-        currentTrainData = m_trainDataToShow;
-        processCurrentTrainData();
-      }
 
-      if(m_isStopped){
-        trainDataRingStorage->addFreeStorage(m_trainDataToShow);
+    void DsscDataReceiver::savePixelHistos()
+    {
+      static const auto pixelNumbers = utils::getUpCountingVector<unsigned int>(utils::s_totalNumPxs);
+
+      utils::fillBufferToDataHistoVec(m_pixelHistoVec);
+
+      const string fileName = get<string>("outputDir") + "/PixelHistogramExport.dat";
+      const string h5FileName = get<string>("outputDir") + "/PixelHistogramExport.h5";
+      utils::DataHisto::dumpHistogramsToASCII(fileName,pixelNumbers,m_pixelHistoVec);
+
+      DsscHDF5TrimmingDataWriter dataWriter(h5FileName);
+      dataWriter.setMeasurementName("LadderSpectrum");
+      dataWriter.addHistoData("SpektrumData",m_pixelHistoVec,pixelNumbers);
+
+      const auto imageValues = utils::calcMeanImageFromHistograms(m_pixelHistoVec,pixelNumbers);
+      dataWriter.addImageData("SpectrumPedestalImage",512,imageValues);
+
+      KARABO_LOG_INFO << "Stored Pixel Histograms to " << h5FileName;
+    }
+
+
+    void DsscDataReceiver::displayPixelHistogram()
+    {
+      vector<unsigned short> bins;
+      vector<unsigned int> binValues;
+      size_t histoValueCount = 0;
+      if(get<bool>("showOnlineHistogram")){
+        auto imagePixel = get<unsigned int>("monitor.ladderPixelToShow");
+        m_pixelHistoVec[imagePixel].fillBufferToHistoMap();
+        m_pixelHistoVec[imagePixel].getDrawValues(bins,binValues);
+        histoValueCount = m_pixelHistoVec[imagePixel].getCount();
       }else{
-        // put back that it can also be stored
-        trainDataRingStorage->addValidStorage(m_trainDataToShow);
+        pixelHisto.fillBufferToHistoMap();
+        pixelHisto.getDrawValues(bins,binValues);
+        histoValueCount = pixelHisto.getCount();
       }
-      m_trainDataToShow = nullptr;
+
+      if(!bins.empty()){
+        set<unsigned long long>("histoGen.pixelhistoCnt",histoValueCount);
+        set<vector<unsigned short>>("histoGen.pixelHistoBins",std::move(bins));
+        if(get<bool>("displayHistoLogscale")){
+          std::transform(binValues.begin(),binValues.end(),binValues.begin(),[](int x){if(x==0) return 1; return x;});
+        }
+        set<vector<unsigned int>>("histoGen.pixelHistoBinValues",std::move(binValues));
+      }
+
+      if(get<bool>("histoGen.constantReset")){
+        pixelHisto.clear();
+      }
     }
-  }
 
-
-  void DsscDataReceiver::receiveData()
-  {
-    cout << "RUN receiveData" << endl;
-
-    bool keepReceiving = get<bool>("keepReceiving");
-
-    int errorCnt = 0;
-    string errorMsg = "";
-
-    m_trainSorter.startSortThread();
-    m_isStopped = false;
-
-    try
+    void DsscDataReceiver::displayAsicHistogram()
     {
-      do
+      vector<unsigned short> bins;
+      vector<unsigned int> binValues;
+
+      asicHisto.fillBufferToHistoMap();
+      asicHisto.getDrawValues(bins,binValues);
+      set<vector<unsigned short>>("histoGen.asicHistoBins",std::move(bins));
+      set<vector<unsigned int>>("histoGen.asicHistoBinValues",std::move(binValues));
+
+      if(get<bool>("histoGen.constantReset")){
+        asicHisto.clear();
+      }
+    }
+
+    void DsscDataReceiver::clearPixelHistos()
+    {
+      for(auto && pixelHisto : m_pixelHistoVec){
+        pixelHisto.clear();
+      }
+    }
+
+    void DsscDataReceiver::startDisplay()
+    {
+      m_runDisplay = true;
+
+      if(m_displayThread){
+        KARABO_LOG_INFO << "Old display thread to join in write()!";
+        m_displayThread->join();
+        m_displayThread.reset();
+      }
+      m_displayThread.reset(new boost::thread(boost::bind(&Self::displayData, this)));
+    }
+
+    void DsscDataReceiver::stopDisplay()
+    {
+      m_runDisplay = false;
+
+      if(m_displayThread){
+        KARABO_LOG_INFO << "Old display thread to join in write()!";
+        m_displayThread->join();
+        m_displayThread.reset();
+      }
+      m_displayThread = nullptr;
+    }
+
+
+    void DsscDataReceiver::displayData()
+    {
+      m_numCheckedData = 0;
+      m_errorCnt = 0;
+
+      TrainDataRingStorage * trainDataRingStorage = ((TrainDataRingStorage*)&m_trainSorter);
+      while(m_runDisplay)
       {
-        // in image wise mode this function should directly return
-        // data is hanled in display thread
-        if(get<bool>("saveImageWiseSorted")){
-          m_isStopped = true;
-          m_trainSorter.stopSortThread();
+        m_trainDataToShow = trainDataRingStorage->getNextValidStorage();
+        if(m_trainDataToShow == nullptr){
+          m_runDisplay = false;
+          return;
         }
 
-        // If user pressed stop, we stop any writing
-        if (m_isStopped) {
-          keepReceiving = false;
-          break;
+        if(m_trainDataToShow->isValid())
+        {
+          displayTrainDataToShow();
+
+          if(get<bool>("saveImageWiseSorted")){
+            currentTrainData = m_trainDataToShow;
+            processCurrentTrainData();
+          }
         }
 
-        currentTrainData = m_trainSorter.getNextTrainData();
-        if(currentTrainData == nullptr) break;
+        if(m_isStopped){ // maybe one train pointer is lost during activation of imagewise data
+          trainDataRingStorage->addFreeStorage(m_trainDataToShow);
+        }else{
+          // put back that it can also be stored otherwise trains are lost when visualized
+          trainDataRingStorage->addValidStorage(m_trainDataToShow);
+        }
+        m_trainDataToShow = nullptr;
+      }
+    }
 
-        if(!currentTrainData->isValid()){
-          KARABO_LOG_ERROR << "Current TRAIN Data is invalid";
+
+    void DsscDataReceiver::receiveData()
+    {
+      cout << "RUN receiveData" << endl;
+
+      bool keepReceiving = get<bool>("keepReceiving");
+
+      int errorCnt = 0;
+      string errorMsg = "";
+
+      updateStatus("Sorting Data");
+      m_trainSorter.startSortThread();
+      m_isStopped = false;
+
+      try
+      {
+        do
+        {
+          // in image wise mode this function should directly return
+          // data is hanled in display thread
+          if(get<bool>("saveImageWiseSorted")){
+            m_isStopped = true;
+            stopDataSorting();
+          }
+
+          // If user pressed stop, we stop any writing
+          if (m_isStopped) {
+            keepReceiving = false;
+            break;
+          }
+
+          currentTrainData = m_trainSorter.getNextTrainData();
+          if(currentTrainData == nullptr){
+            keepReceiving = false;
+            m_isStopped = true;
+            break;
+          }
+
+          if(!currentTrainData->isValid()){
+            KARABO_LOG_ERROR << "Current TRAIN Data is invalid";
+            m_trainSorter.returnTrainData(currentTrainData);
+            currentTrainData = nullptr;
+            continue;
+          }
+
+          processCurrentTrainData();
+
           m_trainSorter.returnTrainData(currentTrainData);
           currentTrainData = nullptr;
-          continue;
-        }
+        }while(keepReceiving);
 
-        processCurrentTrainData();
-
-        m_trainSorter.returnTrainData(currentTrainData);
-        currentTrainData = nullptr;
-      }while(keepReceiving);
-
-    } catch (const Exception &e) {
-      errorMsg =  ":\n" + e.detailedMsg();
-    } catch (const std::exception &eStd) {
-      errorMsg =  ":\n" + string(eStd.what());
-    } catch (...) {
-      errorMsg =  " unknown exception";
-    }
+      } catch (const Exception &e) {
+        errorMsg =  ":\n" + e.detailedMsg();
+      } catch (const std::exception &eStd) {
+        errorMsg =  ":\n" + string(eStd.what());
+      } catch (...) {
+        errorMsg =  " unknown exception";
+      }
 
 
-    if(!errorMsg.empty()){
-      KARABO_LOG_ERROR << "Stop writing because:" << errorMsg;
-      this->signalEndOfStream("imageOutput");
-      this->signalEndOfStream("ladderImageOutput");
-      this->signalEndOfStream("asicImageOutput");
-      this->signalEndOfStream("pixelImageOutput");
-      this->updateState(State::ERROR);
-      exit(0);
-    }else{
-      KARABO_LOG_INFO << get<unsigned long long>("trainCnt") << " trains correctly received. " << errorCnt << " Errors found.";
-      this->updateState(State::STARTED);
-    }
-  }
-
-
-  void DsscDataReceiver::processCurrentTrainData()
-  {
-    m_currentTrainID = currentTrainData->trainId;
-
-    checkTestPattern(currentTrainData);
-
-    set<unsigned long long>("currentTrainId",m_currentTrainID);
-    auto trainCnt = get<unsigned long long>("trainCnt");
-    set<unsigned long long>("trainCnt",trainCnt+1);
-
-    //fillMetaData();
-    //writeChannel("imageOutput",sendData);
-
-    // dont send data if not all ASICs have valid test pattern (little protection)
-    bool allAsicsDataValid = allASICTestPatternsValid(currentTrainData);
-
-    if(!allASICTempValuesValid(currentTrainData)){
-      utils::CoutColorKeeper keeper(utils::STDRED);
-      KARABO_LOG_WARN << "ASIC TEMP VALUES PROBLEM... Check if this trains have to be removed";
-    }
-
-    updateProcessorParams();
-
-    // save only every nth frame: return data directly
-    if(get<bool>("enableDataReduction")){
-      if((m_currentTrainID % get<unsigned>("storeNthFrame") )!= 0){
-        return;
+      if(!errorMsg.empty()){
+        KARABO_LOG_ERROR << "Stop writing because:" << errorMsg;
+        this->signalEndOfStream("imageOutput");
+        this->signalEndOfStream("ladderImageOutput");
+        this->signalEndOfStream("asicImageOutput");
+        this->signalEndOfStream("pixelImageOutput");
+        this->updateState(State::ERROR);
+        updateStatus("Exception in DataReceiving");
+        exit(0);
+      }else{
+        KARABO_LOG_INFO << get<unsigned long long>("trainCnt") << " trains correctly received. " << errorCnt << " Errors found.";
+        updateState(State::STARTED);
       }
     }
 
-    if(allAsicsDataValid)
+
+    void DsscDataReceiver::displayTrainDataToShow()
     {
-      if(get<bool>("enableDAQOutput")){ // send pixelWise data
-        writeChannel("monitorOutput",getMonitorData());
+      if(m_nextHistoReset){
+        clearHistograms();
+        m_nextHistoReset = false;
       }
 
-      if(get<bool>("saveToHDF5") && !get<bool>("saveJustSpectra")){
-        saveToHDF(currentTrainData);
+      if(m_nextThresholdReset){
+        clearThresholdMap();
+        m_nextThresholdReset = false;
       }
 
-      if(get<bool>("acquiring"))
+      if(m_isStopped && !get<bool>("saveImageWiseSorted")){
+        updateCurrentTrainIdAndCnt(m_trainDataToShow->trainId);
+      }
+
+      updateTempADCValues(m_trainDataToShow);
+
+      uint updateFrequency = get<unsigned int>("updateFrequency");
+      if((m_trainDataToShow->trainId%updateFrequency) == 0)
       {
-        if(m_genTrainStats){
-          updateCorrectionMap();
+        updateSpecificData(m_trainDataToShow);
+
+        if(get<bool>("enableLadderPreview") ){
+          writeChannel("ladderImageOutput",getImageData(m_selFrame));
         }
 
-        if(get<bool>("storeHistograms")){
-          updatePixelHistos();
+        if(get<bool>("enableASICPreview"))
+        {
+          writeChannel("asicImageOutput",getImageData(m_selFrame,m_selAsic));
+
+          displayAsicHistogram();
         }
 
-        uint32_t numTrainsToStore = get<unsigned int>("numTrainsToStore");
-        uint32_t numStoredTrains = get<unsigned int>("numStoredTrains") + 1;
-        set<unsigned int>("numStoredTrains",numStoredTrains);
-
-        if(numStoredTrains >= numTrainsToStore){
-          finishAcquisition();
+        if(get<bool>("checkTestPatternData")){
+          checkTestPatternData(m_trainDataToShow);
+        }else{
+          m_numCheckedData = 0;
+          m_errorCnt = 0;
         }
       }
 
-      m_availableASICs = currentTrainData->availableASICs;
-    }else{
-      KARABO_LOG_WARN << "not all ASICs sent correct data, or test pattern is wrong, dod not send any data";
+      if(get<bool>("enablePixelPreview"))
+      {
+        writeChannel("pixelImageOutput",getPixelData(m_asicPixelToShow, m_asicToShow));
+
+        displayPixelHistogram();
+      }
     }
-  }
 
-  void DsscDataReceiver::finishAcquisition()
-  {
-    uint numStoredTrains = get<unsigned int>("numStoredTrains");
 
-    if(m_genTrainStats)
+    void DsscDataReceiver::updateCurrentTrainIdAndCnt(uint64_t currTrainId)
     {
-      computeMeanBursts();
-      utils::MeanRMSVectors meanRMSValuesVec = DsscHDF5Writer::saveToFile(get<string>("outputDir") + "/TrainMeanRMSImage.h5",m_dataStatsAcc,currentTrainData->availableASICs,numStoredTrains);
+      m_currentTrainID = currTrainId;
+      set<unsigned long long>("currentTrainId",m_currentTrainID);
+      auto trainCnt = get<unsigned long long>("trainCnt") + 1;
+      set<unsigned long long>("trainCnt",trainCnt);
+    }
 
-      if(m_acquireBG){
-        m_pixelBackgroundData = std::move(meanRMSValuesVec.meanValues);
-        computeSramCorrectionData();
 
-        DsscHDF5Writer::saveBaselineAndSramCorrection(get<string>("outputDir") + "/SRAMCorrectionImage.h5",m_pixelBackgroundData,m_pixelCorrectionData,currentTrainData->availableASICs,numStoredTrains);
+    void DsscDataReceiver::processCurrentTrainData()
+    {
+      checkTestPattern(currentTrainData);
 
-        set<bool>("correction.bgDataValid",true);
-        set<bool>("correction.sramCorrectionValid",true);
-        m_bgDataValid = true;
-        m_acquireBG     = false;
+      updateCurrentTrainIdAndCnt(currentTrainData->trainId);
+
+      //fillMetaData();
+      //writeChannel("imageOutput",sendData);
+
+      // dont send data if not all ASICs have valid test pattern (little protection)
+      bool allAsicsDataValid = allASICTestPatternsValid(currentTrainData);
+
+      if(!allASICTempValuesValid(currentTrainData)){
+        utils::CoutColorKeeper keeper(utils::STDRED);
+        KARABO_LOG_WARN << "ASIC TEMP VALUES PROBLEM... Check if this trains have to be removed";
       }
 
-      m_genTrainStats = get<bool>("storeMeanAndRMS");
-      set<vector<float>>("measOutput.meanValuesVec",std::move(meanRMSValuesVec.meanValues));
-      set<vector<float>>("measOutput.rmsValuesVec",std::move(meanRMSValuesVec.rmsValues));
-      set<unsigned long long>("measOutput.numValues",numStoredTrains*800);
+      updateProcessorParams();
+
+      // save only every nth frame: return data directly
+      if(get<bool>("enableDataReduction")){
+        if((m_currentTrainID % get<unsigned>("storeNthFrame") )!= 0){
+          return;
+        }
+      }
+
+      if(allAsicsDataValid)
+      {
+        if(get<bool>("enableDAQOutput")){ // send pixelWise data
+          writeChannel("monitorOutput",getMonitorData());
+        }
+
+        if(get<bool>("saveToHDF5") && !get<bool>("saveJustSpectra")){
+          saveToHDF(currentTrainData);
+        }
+
+        if(get<bool>("acquiring"))
+        {
+          if(m_genTrainStats){
+            updateCorrectionMap();
+          }
+
+          if(get<bool>("storeHistograms")){
+            updatePixelHistos();
+          }
+
+          uint32_t numTrainsToStore = get<unsigned int>("numTrainsToStore");
+          uint32_t numStoredTrains = get<unsigned int>("numStoredTrains") + 1;
+          set<unsigned int>("numStoredTrains",numStoredTrains);
+
+          if(numStoredTrains >= numTrainsToStore){
+            finishAcquisition();
+          }
+        }
+
+        m_availableASICs = currentTrainData->availableASICs;
+      }else{
+        KARABO_LOG_WARN << "not all ASICs sent correct data, or test pattern is wrong, dod not send any data";
+      }
     }
 
-    if(get<bool>("storeHistograms")){
-      savePixelHistos();
+    void DsscDataReceiver::finishAcquisition()
+    {
+      uint numStoredTrains = get<unsigned int>("numStoredTrains");
+
+      if(m_genTrainStats)
+      {
+        computeMeanBursts();
+        utils::MeanRMSVectors meanRMSValuesVec = DsscHDF5Writer::saveToFile(get<string>("outputDir") + "/TrainMeanRMSImage.h5",m_dataStatsAcc,currentTrainData->availableASICs,numStoredTrains);
+
+        if(m_acquireBG){
+          m_pixelBackgroundData = std::move(meanRMSValuesVec.meanValues);
+          computeSramCorrectionData();
+
+          DsscHDF5Writer::saveBaselineAndSramCorrection(get<string>("outputDir") + "/SRAMCorrectionImage.h5",m_pixelBackgroundData,m_pixelCorrectionData,currentTrainData->availableASICs,numStoredTrains);
+
+          set<bool>("correction.bgDataValid",true);
+          set<bool>("correction.sramCorrectionValid",true);
+          m_bgDataValid = true;
+          m_acquireBG     = false;
+        }
+
+        m_genTrainStats = get<bool>("storeMeanAndRMS");
+        set<vector<float>>("measOutput.meanValuesVec",std::move(meanRMSValuesVec.meanValues));
+        set<vector<float>>("measOutput.rmsValuesVec",std::move(meanRMSValuesVec.rmsValues));
+        set<unsigned long long>("measOutput.numValues",numStoredTrains*800);
+      }
+
+      if(get<bool>("storeHistograms")){
+        savePixelHistos();
+      }
+
+      set<bool>("acquiring",false);
+      set<bool>("saveToHDF5",false);
+      if(lastState == State::STARTED){
+        m_isStopped = true;
+      }
+
+      this->updateState(lastState);
+
+      KARABO_LOG_INFO << "All Trains stored: " << numStoredTrains;
+      set<unsigned int>("numStoredTrains",0);
     }
-
-    set<bool>("acquiring",false);
-    set<bool>("saveToHDF5",false);
-    if(lastState == State::STARTED){
-      m_isStopped = true;
-    }
-
-    this->updateState(lastState);
-
-    KARABO_LOG_INFO << "All Trains stored: " << numStoredTrains;
-    set<unsigned int>("numStoredTrains",0);
-  }
 
 
 }
