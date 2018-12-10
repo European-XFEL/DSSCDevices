@@ -85,11 +85,19 @@
           <linkerDynSerch>
             <pElem>${KARABO}/lib</pElem>
             <pElem>${KARABO}/extern/lib/dssc</pElem>
+            <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs karaboDependencies`</linkerOptionItem>
+            <linkerOptionItem>-lDsscDependencies</linkerOptionItem>
+            <linkerOptionItem>-lCHIPInterface</linkerOptionItem>
+            <linkerOptionItem>-lSequencer</linkerOptionItem>
+            <linkerOptionItem>-lUtils</linkerOptionItem>
+            <linkerOptionItem>-lDsscHdf5</linkerOptionItem>
+            <linkerOptionItem>-lPPT</linkerOptionItem>
+            <linkerOptionItem>-lPPTDataReceiver</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
@@ -217,11 +225,20 @@
           <linkerDynSerch>
             <pElem>${KARABO}/lib</pElem>
             <pElem>${KARABO}/extern/lib/dssc</pElem>
+            <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
             <linkerOptionItem>`pkg-config --libs karaboDependencies`</linkerOptionItem>
+            <linkerOptionItem>-lDsscDependencies</linkerOptionItem>
+            <linkerOptionItem>-lCHIPInterface</linkerOptionItem>
+            <linkerOptionItem>-lSequencer</linkerOptionItem>
+            <linkerOptionItem>-lUtils</linkerOptionItem>
+            <linkerOptionItem>-lDsscHdf5</linkerOptionItem>
+            <linkerOptionItem>-lPPT</linkerOptionItem>
+            <linkerOptionItem>-lPPTDataReceiver</linkerOptionItem>
+            <linkerOptionItem>-lConfigReg</linkerOptionItem>
           </linkerLibItems>
         </linkerTool>
       </compileType>
