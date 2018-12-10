@@ -12,6 +12,9 @@ address   :1552
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:10:0:
+#Module:2:10:0:
+#Module:3:10:0:
+#Module:4:10:0:
 #ModuleSet:ASIC_invert_chan11
 modules   :1-4
 numBits   :32
@@ -25,10 +28,7 @@ address   :1560
 #Positions:0:1-4:5-31:
 #AccessLevels:0:0:0:
 #Outputs:1:2:3:4:
-#Module:1:1:10:0:
-#Module:2:1:10:0:
-#Module:3:1:10:0:
-#Module:4:1:10:0:
+#Module:1:0:10:0:
 #ModuleSet:ASIC_readout_enable
 modules   :1-4
 numBits   :32
@@ -43,9 +43,6 @@ address   :1536
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:1:0:
-#Module:2:1:0:
-#Module:3:1:0:
-#Module:4:1:0:
 #ModuleSet:ASIC_reset
 modules   :1-4
 numBits   :32
@@ -77,9 +74,9 @@ address   :1564
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:
-#Module:2:0:0:
-#Module:3:0:0:
-#Module:4:0:0:
+#Module:2:1:0:
+#Module:3:1:0:
+#Module:4:1:0:
 #ModuleSet:ASIC_send_dummy_data
 modules   :1-4
 numBits   :32
@@ -94,9 +91,6 @@ address   :1540
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:
-#Module:2:0:0:
-#Module:3:0:0:
-#Module:4:0:0:
 #ModuleSet:ASIC_status
 modules   :1-4
 numBits   :32
@@ -128,9 +122,6 @@ address   :1284
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:2:0:
-#Module:2:2:0:
-#Module:3:2:0:
-#Module:4:2:0:
 #ModuleSet:Aurora_Reset
 modules   :1-4
 numBits   :32
@@ -145,9 +136,6 @@ address   :1300
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:
-#Module:2:0:0:
-#Module:3:0:0:
-#Module:4:0:0:
 #ModuleSet:Aurora_Status
 modules   :1-4
 numBits   :32
@@ -179,9 +167,6 @@ address   :1280
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:10:0:
-#Module:2:10:0:
-#Module:3:10:0:
-#Module:4:10:0:
 #ModuleSet:Board_Type
 modules   :1-4
 numBits   :32
@@ -247,9 +232,6 @@ address   :1060
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:1:0:
-#Module:2:1:0:
-#Module:3:1:0:
-#Module:4:1:0:
 #ModuleSet:CLR_clrdis_duty
 modules   :1-4
 numBits   :32
@@ -306,9 +288,6 @@ address   :1040
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:3:0:
-#Module:2:3:0:
-#Module:3:3:0:
-#Module:4:3:0:
 #ModuleSet:CLR_gate_on_offset
 modules   :1-4
 numBits   :32
@@ -323,9 +302,6 @@ address   :1036
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:1:0:
-#Module:2:1:0:
-#Module:3:1:0:
-#Module:4:1:0:
 #ModuleSet:CLR_off_offset
 modules   :1-4
 numBits   :32
@@ -340,9 +316,6 @@ address   :1032
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:
-#Module:2:0:0:
-#Module:3:0:0:
-#Module:4:0:0:
 #ModuleSet:CLR_on_offset
 modules   :1-4
 numBits   :32
@@ -357,9 +330,6 @@ address   :1028
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:
-#Module:2:0:0:
-#Module:3:0:0:
-#Module:4:0:0:
 #ModuleSet:CLR_period
 modules   :1-4
 numBits   :32
@@ -387,7 +357,7 @@ address   :1024
 #Positions:0-31:
 #AccessLevels:0:
 #Outputs:1:2:3:4:
-#Module:1:191406:
+#Module:1:290691:
 #ModuleSet:Dummy_Register
 modules   :1-4
 numBits   :32
@@ -402,6 +372,9 @@ address   :65532
 #AccessLevels:0:
 #Outputs:1:2:3:4:
 #Module:1:0:
+#Module:2:0:
+#Module:3:0:
+#Module:4:0:
 #ModuleSet:FET_controller_enable
 modules   :1-4
 numBits   :32
@@ -416,6 +389,9 @@ address   :768
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:1:0:
+#Module:2:1:0:
+#Module:3:1:0:
+#Module:4:1:0:
 #ModuleSet:FET_gate_off_delay
 modules   :1-4
 numBits   :32
@@ -443,7 +419,7 @@ address   :772
 #Positions:0-31:
 #AccessLevels:0:
 #Outputs:1:2:3:4:
-#Module:1:191066:
+#Module:1:290351:
 #ModuleSet:FET_source_off_delay
 modules   :1-4
 numBits   :32
@@ -471,7 +447,7 @@ address   :776
 #Positions:0-31:
 #AccessLevels:0:
 #Outputs:1:2:3:4:
-#Module:1:190669:
+#Module:1:289954:
 #ModuleSet:IProg_clr_delay
 modules   :1-4
 numBits   :32
@@ -513,7 +489,7 @@ address   :256
 #Positions:0:1:2-5:6:7:8-23:24-31:
 #AccessLevels:0:0:0:0:0:0:0:
 #Outputs:1:2:3:4:
-#Module:1:0:0:0:0:1:511:0:
+#Module:1:1:1:15:0:1:511:0:
 #Module:2:0:0:0:0:0:511:0:
 #Module:3:0:0:0:0:0:511:0:
 #Module:4:0:0:0:0:0:511:0:
@@ -530,7 +506,10 @@ address   :260
 #Positions:0-31:
 #AccessLevels:0:
 #Outputs:1:2:3:4:
-#Module:1:0:
+#Module:1:1744830478:
+#Module:2:0:
+#Module:3:0:
+#Module:4:0:
 #ModuleSet:PPTData_Delay
 modules   :1-4
 numBits   :32
@@ -545,9 +524,6 @@ address   :1556
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:20:0:
-#Module:2:20:0:
-#Module:3:20:0:
-#Module:4:20:0:
 #ModuleSet:PRB_GDPS_delay
 modules   :1-4
 numBits   :32
@@ -575,7 +551,7 @@ address   :512
 #Positions:0:1:2-4:5:6:7-31:
 #AccessLevels:0:0:0:0:0:0:
 #Outputs:1:2:3:4:
-#Module:1:1:0:1:1:0:0:
+#Module:1:1:0:0:0:0:0:
 #Module:2:1:0:0:1:0:0:
 #Module:3:1:0:0:1:0:0:
 #Module:4:1:0:0:1:0:0:
@@ -593,9 +569,6 @@ address   :532
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:
-#Module:2:0:0:
-#Module:3:0:0:
-#Module:4:0:0:
 #ModuleSet:PRB_en_static_sel
 modules   :1-4
 numBits   :32
@@ -609,7 +582,7 @@ address   :544
 #Positions:0-15:16-31:
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
-#Module:1:8:0:
+#Module:1:32768:0:
 #Module:2:8:0:
 #Module:3:8:0:
 #Module:4:8:0:
@@ -626,7 +599,7 @@ address   :548
 #Positions:0-15:16-19:20-31:
 #AccessLevels:0:0:0:
 #Outputs:1:2:3:4:
-#Module:1:8:1:0:
+#Module:1:32768:8:0:
 #Module:2:8:1:0:
 #Module:3:8:1:0:
 #Module:4:8:1:0:
@@ -644,9 +617,6 @@ address   :536
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:
-#Module:2:0:0:
-#Module:3:0:0:
-#Module:4:0:0:
 #ModuleSet:PRB_manual_ctrl1
 modules   :1-4
 numBits   :32
@@ -661,9 +631,6 @@ address   :540
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:
-#Module:2:0:0:
-#Module:3:0:0:
-#Module:4:0:0:
 #ModuleSet:PRB_max_power_on_time
 modules   :1-4
 numBits   :32
@@ -692,9 +659,6 @@ address   :528
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:4:0:
-#Module:2:4:0:
-#Module:3:4:0:
-#Module:4:4:0:
 #ModuleSet:PRB_power_on_delay
 modules   :1-4
 numBits   :32
@@ -708,7 +672,7 @@ address   :520
 #Positions:0-31:
 #AccessLevels:0:
 #Outputs:1:2:3:4:
-#Module:1:188540:
+#Module:1:287826:
 #ModuleSet:SYSFSM_burst_cyclelength
 modules   :1-4
 numBits   :32
@@ -751,9 +715,6 @@ address   :1816
 #AccessLevels:0:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:0:
-#Module:2:0:0:0:
-#Module:3:0:0:0:
-#Module:4:0:0:0:
 #ModuleSet:SYSFSM_iprog_cyclelength
 modules   :1-4
 numBits   :32
@@ -796,9 +757,6 @@ address   :1812
 #AccessLevels:0:0:0:
 #Outputs:1:2:3:4:
 #Module:1:4:0:0:
-#Module:2:4:0:0:
-#Module:3:4:0:0:
-#Module:4:4:0:0:
 #ModuleSet:SYSFSM_self_trigger
 modules   :1-4
 numBits   :32
@@ -813,9 +771,6 @@ address   :1792
 #AccessLevels:0:0:
 #Outputs:1:2:3:4:
 #Module:1:0:0:
-#Module:2:0:0:
-#Module:3:0:0:
-#Module:4:0:0:
 #ModuleSet:SerialNumber_LSB
 modules   :1-4
 numBits   :32
@@ -829,7 +784,7 @@ address   :0
 #Positions:0-31:
 #AccessLevels:0:
 #Outputs:1:2:3:4:
-#Module:1:3263702273:
+#Module:1:2741805825:
 #Module:2:0:
 #Module:3:0:
 #Module:4:0:
@@ -846,7 +801,7 @@ address   :4
 #Positions:0-31:
 #AccessLevels:0:
 #Outputs:1:2:3:4:
-#Module:1:2600468503:
+#Module:1:2986344470:
 #Module:2:0:
 #Module:3:0:
 #Module:4:0:

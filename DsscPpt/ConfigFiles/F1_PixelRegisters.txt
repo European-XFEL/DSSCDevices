@@ -5,6 +5,7 @@ numSignals:31
 reverse   :1
 address   :27
 #Signals:LOC_PWRD:DisableFilterCC:EnDecCapVDDA:EnDecCapVDDD_ADC:EnDecCapVDDD:LocSubcToVSSA:DecVPToMon:DecVNToMon:RmpFineTrm:RmpCurrDouble:RmpEnFineDelayCntrl:RmpDelayCntrl:ADC_EnExtLatch:TestIRmpCurr:CompCoarse:FCF_HDR:FCF_SelExtRef:FCF_SelectLowVref:IProgEnAllCaps:BumpToMon:FCF_EnCap:FCF_EnIntRes:BypassFE:EnD0:D0_NCap:D0_EnMimCap:D0_BypComprResistor:InvertInject:EnPxInjDC:EnPxInj:InjHG:
+#SignalsAliases::::::::::::::::::::::::::::::::
 #ReadOnly:0:1:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
 #ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
 #Positions:1:0:40:26:39:21:12:25:31;45;34;44;33;46:43:32:41;37;27;42:36:35:9;22;15;2:30:29:28:18:14:20;7;3;16:4:8:11:10:38;23;13:24:5:6:17:19:
