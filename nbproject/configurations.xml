@@ -4,14 +4,13 @@
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
-      <itemPath>DsscPpt/src/DSSC_PPT_API.h</itemPath>
       <itemPath>DsscAsicProcessor/src/DsscAsicProcessor.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.hh</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.hh</itemPath>
-      <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.hh</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.hh</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.hh</itemPath>
       <itemPath>DsscPpt/src/DsscPpt.hh</itemPath>
+      <itemPath>DsscPpt/src/DsscPptAPI.hh</itemPath>
       <itemPath>DsscPpt/src/DsscPptRegsInit.hh</itemPath>
       <itemPath>DsscProcessor/src/DsscProcessor.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscRecvFsm.hh</itemPath>
@@ -25,14 +24,13 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <itemPath>DsscPpt/src/DSSC_PPT_API.cpp</itemPath>
       <itemPath>DsscAsicProcessor/src/DsscAsicProcessor.cc</itemPath>
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.cc</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.cc</itemPath>
-      <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.cc</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cc</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.cc</itemPath>
       <itemPath>DsscPpt/src/DsscPpt.cc</itemPath>
+      <itemPath>DsscPpt/src/DsscPptAPI.cc</itemPath>
       <itemPath>DsscProcessor/src/DsscProcessor.cc</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -116,16 +114,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="DsscDataReceiver/src/DsscImageReceiveThread.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="DsscDataReceiver/src/DsscImageReceiveThread.hh"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="DsscDataReceiver/src/DsscRecvFsm.hh"
             ex="false"
             tool="3"
@@ -171,13 +159,13 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="DsscPpt/src/DSSC_PPT_API.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="DsscPpt/src/DSSC_PPT_API.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="DsscPpt/src/DsscPpt.cc" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DsscPpt/src/DsscPpt.hh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DsscPpt/src/DsscPptAPI.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DsscPpt/src/DsscPptAPI.hh" ex="false" tool="3" flavor2="0">
       </item>
       <item path="DsscPpt/src/DsscPptRegsInit.hh" ex="false" tool="3" flavor2="0">
       </item>
@@ -263,16 +251,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="DsscDataReceiver/src/DsscImageReceiveThread.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="DsscDataReceiver/src/DsscImageReceiveThread.hh"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="DsscDataReceiver/src/DsscRecvFsm.hh"
             ex="false"
             tool="3"
@@ -318,13 +296,13 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="DsscPpt/src/DSSC_PPT_API.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="DsscPpt/src/DSSC_PPT_API.h" ex="false" tool="3" flavor2="0">
-      </item>
       <item path="DsscPpt/src/DsscPpt.cc" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DsscPpt/src/DsscPpt.hh" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="DsscPpt/src/DsscPptAPI.cc" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="DsscPpt/src/DsscPptAPI.hh" ex="false" tool="3" flavor2="0">
       </item>
       <item path="DsscPpt/src/DsscPptRegsInit.hh" ex="false" tool="3" flavor2="0">
       </item>

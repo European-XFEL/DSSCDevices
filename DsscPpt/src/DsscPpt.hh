@@ -13,7 +13,7 @@
 
 #include <karabo/karabo.hpp>
 
-#include "DSSC_PPT_API.h"
+#include "DsscPptAPI.hh"
 /**
  * The main Karabo namespace
  */

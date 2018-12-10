@@ -4,7 +4,7 @@
  * 
  * Created on 26. Juni 2015, 10:46
  */
-#include "DSSC_PPT_API.h"
+#include "DsscPptAPI.hh"
 
 using namespace SuS;
 
