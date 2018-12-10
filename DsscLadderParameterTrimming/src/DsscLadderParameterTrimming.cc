@@ -1492,7 +1492,7 @@ void DsscLadderParameterTrimming::measureMeanSramContentAllPix()
 
   const string outputDir = get<string>("outputDir");
   const string fileName =  outputDir + "/" + utils::getLocalTimeStr() + "_LadderSramCorrectionMap.h5";
-  DsscHDF5Writer::saveBaselineAndSramCorrection(fileName,meanSramContent,getSendingAsicsVec(),m_iterations);
+  DsscHDF5Writer::saveBaselineAndSramCorrection(fileName,meanSramAccs,getSendingAsicsVec(),m_iterations);
 
   DSSCSTATUS("Mean SRAM Measurement Done");
 }
@@ -2325,11 +2325,24 @@ void DsscLadderParameterTrimming::setActiveModule(int modNumber)
 {
   SuS::MultiModuleInterface::setActiveModule(modNumber);
 
+  updateSendingAsics(modNumber);
+
   if (isDeviceExisting(m_pptDeviceId)) {
     programPixelRegs();
     programJtag();
   }
 }
+
+void DsscLadderParameterTrimming::updateSendingAsics(int moduleNr)
+{
+  std::string quadrantId = get<string>("quadrantId");
+  uint16_t value = utils::DsscModuleInfo::getSendingAsics(quadrantId,moduleNr);
+
+  set<string>("sendingASICs",utils::bitEnableValueToString(value));
+
+  setSendingAsics(value);
+}
+
 
 void DsscLadderParameterTrimming::sendBurstParams()
 {

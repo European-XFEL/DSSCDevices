@@ -8,9 +8,8 @@
       <itemPath>DsscAsicProcessor/src/DsscAsicProcessor.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.hh</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.hh</itemPath>
-      <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.h</itemPath>
       <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.hh</itemPath>
-      <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.h</itemPath>
+      <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.hh</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.hh</itemPath>
       <itemPath>DsscPpt/src/DsscPpt.hh</itemPath>
       <itemPath>DsscPpt/src/DsscPptRegsInit.hh</itemPath>
@@ -31,8 +30,7 @@
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.cc</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.cc</itemPath>
       <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.cc</itemPath>
-      <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.cpp</itemPath>
-      <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cpp</itemPath>
+      <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cc</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.cc</itemPath>
       <itemPath>DsscPpt/src/DsscPpt.cc</itemPath>
       <itemPath>DsscProcessor/src/DsscProcessor.cc</itemPath>
@@ -123,16 +121,6 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="DsscDataReceiver/src/DsscImageReceiveThread.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="DsscDataReceiver/src/DsscImageReceiveThread.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="DsscDataReceiver/src/DsscImageReceiveThread.hh"
             ex="false"
             tool="3"
@@ -163,12 +151,12 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cpp"
+      <item path="DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cc"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.h"
+      <item path="DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.hh"
             ex="false"
             tool="3"
             flavor2="0">
@@ -280,16 +268,6 @@
             tool="1"
             flavor2="0">
       </item>
-      <item path="DsscDataReceiver/src/DsscImageReceiveThread.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="DsscDataReceiver/src/DsscImageReceiveThread.h"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="DsscDataReceiver/src/DsscImageReceiveThread.hh"
             ex="false"
             tool="3"
@@ -320,12 +298,12 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cpp"
+      <item path="DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cc"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.h"
+      <item path="DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.hh"
             ex="false"
             tool="3"
             flavor2="0">
