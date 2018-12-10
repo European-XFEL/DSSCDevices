@@ -6,7 +6,7 @@
             <name>dsscDevices</name>
             <c-extensions/>
             <cpp-extensions>cc</cpp-extensions>
-            <header-extensions>h,hh</header-extensions>
+            <header-extensions>hh</header-extensions>
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList/>

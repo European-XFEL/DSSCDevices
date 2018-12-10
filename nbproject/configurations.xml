@@ -14,7 +14,6 @@
       <itemPath>DsscPpt/src/DsscPptRegsInit.hh</itemPath>
       <itemPath>DsscProcessor/src/DsscProcessor.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscRecvFsm.hh</itemPath>
-      <itemPath>DsscDataReceiver/src/DsscTrainDataSchema.h</itemPath>
       <itemPath>DsscDataReceiver/src/DsscTrainDataSchema.hh</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -115,11 +114,6 @@
             flavor2="0">
       </item>
       <item path="DsscDataReceiver/src/DsscRecvFsm.hh"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="DsscDataReceiver/src/DsscTrainDataSchema.h"
             ex="false"
             tool="3"
             flavor2="0">
@@ -252,11 +246,6 @@
             flavor2="0">
       </item>
       <item path="DsscDataReceiver/src/DsscRecvFsm.hh"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="DsscDataReceiver/src/DsscTrainDataSchema.h"
             ex="false"
             tool="3"
             flavor2="0">

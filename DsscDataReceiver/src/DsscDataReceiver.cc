@@ -10,7 +10,7 @@
 #include <iostream>
 #include "utils.h"
 
-#include "DsscTrainDataSchema.h"
+#include "DsscTrainDataSchema.hh"
 #include "DsscDataReceiver.hh"
 #include "DsscHDF5CorrectionFileReader.h"
 #include "CHIPInterface.h"
