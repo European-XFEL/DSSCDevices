@@ -12,7 +12,6 @@
 #include "DsscPpt.hh"
 #include "DsscPptRegsInit.hh"
 #include "DsscDependencies.h"
-#include "DsscHDF5TrimmingDataWriter.h"
 #include "CHIPGainConfigurator.h"
 #include "ConfigReg.h"
 #include "CHIPTrimmer.h"
@@ -4491,8 +4490,6 @@ namespace karabo {
 
     void DsscPpt::test1()
     {
-        DsscHDF5TrimmingDataWriter writer("test123.h");
-        SuS::CHIPGainConfigurator configurator;
     }
 
     void DsscPpt::LoadQSFPNetConfig()

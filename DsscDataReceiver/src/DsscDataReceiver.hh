@@ -40,7 +40,7 @@ namespace karabo {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
-        KARABO_CLASSINFO(DsscDataReceiver, "DsscDataReceiver", "3.0")
+        KARABO_CLASSINFO(DsscDataReceiver, "DsscDataReceiver", "3.1")
 
         /**
          * Necessary method as part of the factory/configuration system
@@ -175,6 +175,9 @@ namespace karabo {
 
         util::Dims getDims();
 
+        //module Info initialization for HDF5 file writing
+        void initDataWriter();
+        void updateModuleInfo();
     private:
 
         inline float rawData(int frame, int pixel, const  uint16_t & value) const;

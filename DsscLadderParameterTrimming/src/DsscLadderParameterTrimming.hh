@@ -28,7 +28,7 @@ namespace karabo {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
-        KARABO_CLASSINFO(DsscLadderParameterTrimming, "DsscLadderParameterTrimming", "3.0")
+        KARABO_CLASSINFO(DsscLadderParameterTrimming, "DsscLadderParameterTrimming", "3.1")
 
         /**
          * Necessary method as part of the factory/configuration system

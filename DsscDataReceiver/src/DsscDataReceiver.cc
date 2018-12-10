@@ -17,6 +17,7 @@
 #include "DsscHDF5TrimmingDataWriter.h"
 #include "DsscTrainDataProcessor.h"
 #include "DsscDependencies.h"
+#include "DsscModuleInfo.h"
 
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
@@ -73,6 +74,32 @@ namespace karabo {
               .tags("receiver")
               .assignmentMandatory().reconfigurable()
               .commit();
+
+      STRING_ELEMENT(expected).key("quadrantId")
+        .displayedName("Dssc Quadrant Id")
+        .description("Id Qualified for all Devices operating this Ladder")
+        .assignmentMandatory().options(utils::DsscModuleInfo::getQuadrantIdList(),",")
+        .commit();
+
+      NODE_ELEMENT(expected).key("moduleInfo")
+        .description("Current ModuleInfo as filled into HDF5 files")
+        .displayedName("ModuleInfo")
+        .commit();
+
+      STRING_ELEMENT(expected).key("moduleInfo.quadrantId")
+          .displayedName("Quadrant ID")
+          .readOnly()
+          .commit();
+
+      UINT32_ELEMENT(expected).key("moduleInfo.moduleNr")
+        .displayedName("ModuleNr")
+        .readOnly()
+        .commit();
+
+      STRING_ELEMENT(expected).key("moduleInfo.iobSerial")
+          .displayedName("IobSerial")
+          .readOnly()
+          .commit();
 
       BOOL_ELEMENT(expected).key("saveImageWiseSorted")
               .displayedName("SaveImageWise Sorted Data")
@@ -2253,6 +2280,8 @@ namespace karabo {
     // display function
     void DsscDataReceiver::updateSpecificData(const utils::DsscTrainData * trainData)
     {
+      uint16_t modNrRem = get<unsigned short>("specificData.moduleNr");
+
       const auto specific = trainData->getSpecificData();
       set<unsigned short>("specificData.pulseCnt",trainData->pulseCnt);
       set<unsigned short>("specificData.pptVetoCnt",specific.pptVetoCnt);
@@ -2266,6 +2295,10 @@ namespace karabo {
       set<bool>("specificData.rotate_ladder",specific.rotate_ladder);
       set<bool>("specificData.send_dummy_dr_data",specific.send_dummy_dr_data);
       set<string>("specificData.dataFormat",m_trainSorter.getInputFormat());
+
+      if(modNrRem != specific.moduleNr){
+        initDataWriter();
+      }
     }
 
 
@@ -2732,5 +2765,28 @@ namespace karabo {
       set<unsigned int>("numStoredTrains",0);
     }
 
+    void DsscDataReceiver::initDataWriter()
+    {
+      std::string quadrantId = get<string>("quadrantId");
+      uint moduleNr   = get<unsigned short>("specificData.moduleNr");
+      uint iobSerial  = get<unsigned short>("specificData.iobSerial");
+
+      if(!DsscHDF5Writer::checkModuleInfo(quadrantId,moduleNr,iobSerial)){
+        KARABO_LOG_WARN << "HDF5 File Writer already has different Module Information, will be overridden, maybe a wrong file was loaded";
+      }
+      DsscHDF5Writer::updateModuleInfo(quadrantId,moduleNr,iobSerial);
+
+      updateModuleInfo();
+    }
+
+
+    void DsscDataReceiver::updateModuleInfo()
+    {
+      set<string>("moduleInfo.quadrantId",DsscHDF5Writer::s_writerModuleInfo.quadrantId);
+      set<unsigned int>("moduleInfo.moduleNr",DsscHDF5Writer::s_writerModuleInfo.moduleNr);
+      std::stringstream iss;
+      iss << "0x" << hex << setw(8) << setfill('0') << DsscHDF5Writer::s_writerModuleInfo.iobSerial;
+      set<string>("moduleInfo.iobSerial",iss.str());
+    }
 
 }
