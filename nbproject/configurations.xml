@@ -8,12 +8,16 @@
       <itemPath>DsscAsicProcessor/src/DsscAsicProcessor.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.hh</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.hh</itemPath>
+      <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.h</itemPath>
+      <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.hh</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.h</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.hh</itemPath>
       <itemPath>DsscPpt/src/DsscPpt.hh</itemPath>
       <itemPath>DsscPpt/src/DsscPptRegsInit.hh</itemPath>
       <itemPath>DsscProcessor/src/DsscProcessor.hh</itemPath>
+      <itemPath>DsscDataReceiver/src/DsscRecvFsm.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscTrainDataSchema.h</itemPath>
+      <itemPath>DsscDataReceiver/src/DsscTrainDataSchema.hh</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -26,6 +30,8 @@
       <itemPath>DsscAsicProcessor/src/DsscAsicProcessor.cc</itemPath>
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.cc</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.cc</itemPath>
+      <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.cc</itemPath>
+      <itemPath>DsscDataReceiver/src/DsscImageReceiveThread.cpp</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cpp</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.cc</itemPath>
       <itemPath>DsscPpt/src/DsscPpt.cc</itemPath>
@@ -112,7 +118,37 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="DsscDataReceiver/src/DsscImageReceiveThread.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscImageReceiveThread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscImageReceiveThread.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscImageReceiveThread.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscRecvFsm.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="DsscDataReceiver/src/DsscTrainDataSchema.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscTrainDataSchema.hh"
             ex="false"
             tool="3"
             flavor2="0">
@@ -239,7 +275,37 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="DsscDataReceiver/src/DsscImageReceiveThread.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscImageReceiveThread.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscImageReceiveThread.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscImageReceiveThread.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscRecvFsm.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="DsscDataReceiver/src/DsscTrainDataSchema.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscDataReceiver/src/DsscTrainDataSchema.hh"
             ex="false"
             tool="3"
             flavor2="0">

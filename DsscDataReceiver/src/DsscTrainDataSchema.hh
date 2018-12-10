@@ -10,13 +10,13 @@
 
 #define DSSC_TRAINDATA_SCHEMA_SIMPLE(schema)                                    \
                                                                                 \
-    NODE_ELEMENT(schema).key("INSTRUMENT")                                      \
+    SLOT_ELEMENT(schema).key("INSTRUMENT")                                      \
                 .commit();                                                      \
                                                                                 \
-    NODE_ELEMENT(schema).key("INSTRUMENT.DSSC")                                 \
+    SLOT_ELEMENT(schema).key("INSTRUMENT.DSSC")                                 \
                 .commit();                                                      \
                                                                                 \
-    NODE_ELEMENT(schema).key("INSTRUMENT.DSSC.imageData")                       \
+    SLOT_ELEMENT(schema).key("INSTRUMENT.DSSC.imageData")                       \
                 .commit();                                                      \
                                                                                 \
     IMAGEDATA(schema).key("INSTRUMENT.DSSC.imageData.data")                     \
@@ -44,42 +44,22 @@
                 .commit();                                                      \
                                                                                 \
 
-#define XFEL_DAQ_SCHEMA(schema)                                                 \
-                                                                                \
-        NODE_ELEMENT(data).key("image")                                         \
-                .displayedName("Image")                                         \
-                .commit();                                                      \
-                                                                                \
-        NDARRAY_ELEMENT(data).key("image.data")                                 \
-                .shape("800,16,64,64")                                          \
-                .readOnly()                                                     \
-                .commit();                                                      \
-                                                                                \
-        NDARRAY_ELEMENT(data).key("image.cellId")                               \
-                .shape("800")                                                   \
-                .readOnly()                                                     \
-                .commit();                                                      \
-                                                                                \
-        NDARRAY_ELEMENT(data).key("image.trainId")                              \
-                .shape("800")                                                   \
-                .readOnly()                                                     \
-                .commit();                                                      \
 
 #define DSSC_TRAINDATA_SCHEMA(schema)                                           \
                                                                                 \
-    NODE_ELEMENT(schema).key("INSTRUMENT")                                      \
+    SLOT_ELEMENT(schema).key("INSTRUMENT")                                      \
                 .commit();                                                      \
                                                                                 \
-    NODE_ELEMENT(schema).key("INSTRUMENT.DSSC")                                 \
+    SLOT_ELEMENT(schema).key("INSTRUMENT.DSSC")                                 \
                 .commit();                                                      \
                                                                                 \
-    NODE_ELEMENT(schema).key("INSTRUMENT.DSSC.imageData")                       \
+    SLOT_ELEMENT(schema).key("INSTRUMENT.DSSC.imageData")                       \
                 .commit();                                                      \
                                                                                 \
     IMAGEDATA(schema).key("INSTRUMENT.DSSC.imageData.data")                     \
                 .commit();                                                      \
                                                                                 \
-    NODE_ELEMENT(schema).key("INSTRUMENT.DSSC.pulseData")                       \
+    SLOT_ELEMENT(schema).key("INSTRUMENT.DSSC.pulseData")                       \
                 .commit();                                                      \
                                                                                 \
     VECTOR_UINT32_ELEMENT(schema).key("INSTRUMENT.DSSC.pulseData.cellId")       \
@@ -107,7 +87,7 @@
                 .readOnly().initialValue({0})                                   \
                 .commit();                                                      \
                                                                                 \
-    NODE_ELEMENT(schema).key("INSTRUMENT.DSSC.specificData")                    \
+    SLOT_ELEMENT(schema).key("INSTRUMENT.DSSC.specificData")                    \
                 .commit();                                                      \
                                                                                 \
     VECTOR_UINT8_ELEMENT(schema).key("INSTRUMENT.DSSC.specificData.asicTrailer")\
@@ -126,7 +106,7 @@
                 .commit();                                                      \
                                                                                 \
                                                                                 \
-    NODE_ELEMENT(schema).key("INSTRUMENT.DSSC.trainData")                       \
+    SLOT_ELEMENT(schema).key("INSTRUMENT.DSSC.trainData")                       \
                 .commit();                                                      \
                                                                                 \
     UINT64_ELEMENT(schema).key("INSTRUMENT.DSSC.trainData.dataId")              \
