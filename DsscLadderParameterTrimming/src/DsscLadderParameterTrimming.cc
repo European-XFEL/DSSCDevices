@@ -862,7 +862,7 @@ void DsscLadderParameterTrimming::initialization()
 
   m_recvServerId = get<string>("recvDeviceServerId");
 
-  m_mainProcessorId = "DsscMainProcessor_" + m_quadrantId;
+  m_mainProcessorId = "DsscMainProcessor_" + m_quadrantId + "_Mod" + to_string(get<int>("activeModule"));
 
   m_testDataGeneratorId = "DsscDummyTrainDataGenerator_" + m_quadrantId;
 
@@ -2102,7 +2102,10 @@ bool DsscLadderParameterTrimming::startMainProcessorInstance()
 
     initialConfig.set("input", inputConfig);
   } else if (isXFELData()) {
-    //connect a special pcLayouer output by name
+    //connect a special pcLayer output by name
+      vector<string> outputChannels{("DETLAB_DSSC_DAQ_DATA_DET_" + to_string(get<int>("activeModule")) + "CH" + m_quadrantId + "@monitorOutput")};
+      util::Hash inputConfig = createInputChannelConfig(outputChannels);
+      initialConfig.set("input", inputConfig);      
   }
 
   auto pair = remote().instantiate(m_recvServerId, "DsscProcessor", initialConfig);
