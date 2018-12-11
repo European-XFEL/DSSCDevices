@@ -2769,7 +2769,7 @@ namespace karabo {
     {
       std::string quadrantId = get<string>("quadrantId");
       uint moduleNr   = get<unsigned short>("specificData.moduleNr");
-      uint iobSerial  = get<unsigned short>("specificData.iobSerial");
+      uint iobSerial  = get<unsigned int>("specificData.iobSerial");
 
       if(!DsscHDF5Writer::checkModuleInfo(quadrantId,moduleNr,iobSerial)){
         KARABO_LOG_WARN << "HDF5 File Writer already has different Module Information, will be overridden, maybe a wrong file was loaded";
@@ -2784,9 +2784,7 @@ namespace karabo {
     {
       set<string>("moduleInfo.quadrantId",DsscHDF5Writer::s_writerModuleInfo.quadrantId);
       set<unsigned int>("moduleInfo.moduleNr",DsscHDF5Writer::s_writerModuleInfo.moduleNr);
-      std::stringstream iss;
-      iss << "0x" << hex << setw(8) << setfill('0') << DsscHDF5Writer::s_writerModuleInfo.iobSerial;
-      set<string>("moduleInfo.iobSerial",iss.str());
+      set<string>("moduleInfo.iobSerial",utils::getIOBSerialStr(DsscHDF5Writer::s_writerModuleInfo.iobSerial));
     }
 
 }

@@ -178,6 +178,7 @@ namespace karabo {
         //module Info initialization for HDF5 file writing
         void initDataWriter();
         void updateModuleInfo();
+
     private:
 
         inline float rawData(int frame, int pixel, const  uint16_t & value) const;

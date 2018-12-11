@@ -606,7 +606,7 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
 
   BOOL_ELEMENT(expected).key("saveTrimmingRawData")
     .displayedName("Save Image Data During Trimming")
-    .description("Save Raw Image Data during Trimming.")
+    .description("Save Raw Image Data during Trimming. Only available for DsscDataReceiver")
     .tags("trimming")
     .assignmentOptional().defaultValue(false).reconfigurable()
     .commit();
@@ -1026,8 +1026,9 @@ bool DsscLadderParameterTrimming::waitDataReceived()
 
   remote().execute(m_mainProcessorId, "stop");
 
-  // disable raw data recording
+  // disable raw data recording m_saveRawData is set only in dssc mode
   if (m_saveRawData) {
+
     remote().set(m_dsscDataReceiverId, "saveToHDF5", false);
 
     m_runSettingsVec.push_back(m_runSettingIdx);
@@ -1360,7 +1361,7 @@ void DsscLadderParameterTrimming::onPixelData(const util::Hash& data,
   m_lastTrainId = data.get<unsigned long long>("trainId");
   if (m_lastTrainId <= m_lastPptTrainId) {
     cout << "Got invalid Train Data: " << m_lastTrainId << " wait for train " << m_lastPptTrainId << endl;
-    m_runFastAcquisition = true;
+    //m_runFastAcquisition = true;
     return;
   }
 
@@ -1545,6 +1546,7 @@ void DsscLadderParameterTrimming::clearBaseline()
 void DsscLadderParameterTrimming::updateBaselineValid()
 {
   set<bool>("baselineAvailable",baselineValuesValid);
+  set<bool>("subtractBaseline",baselineValuesValid);
 }
 
 int DsscLadderParameterTrimming::initSystem()
@@ -2033,7 +2035,6 @@ bool DsscLadderParameterTrimming::startDsscPptInstance()
     KARABO_LOG_ERROR << "DsscPpt initialisation failed: " << pair.second;
     return false;
   }
-
 
   KARABO_LOG_INFO << "DsscPpt initialized successfully: " << pair.second;
   return true;
@@ -2678,12 +2679,12 @@ unsigned int DsscLadderParameterTrimming::getLastValidTrainId()
 void DsscLadderParameterTrimming::resetDataReceiver()
 {
   if(isDsscData()){
-    remote().execute(m_dsscDataReceiverId, "flushTrainStorage");
+    //remote().execute(m_dsscDataReceiverId, "flushTrainStorage");
   }
 
   getLastValidTrainId();
 
-  //KARABO_LOG_DEBUG << "Set Min Train ID "<< m_lastPptTrainId << " at " << m_mainProcessorId << endl;
+  //KARABO_LOG_DEBUG << "Set Min Train ID "<< m_lastPptTrainId << " at " << m_mainProcessorId;
 
   remote().set<unsigned long long>(m_mainProcessorId, "minValidTrainId", m_lastPptTrainId);
   remote().set<bool>(m_mainProcessorId, "measureMean", m_recvMode == RecvMode::MEAN);
