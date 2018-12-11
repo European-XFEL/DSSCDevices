@@ -89,6 +89,7 @@ namespace karabo {
         void initPixelSortMap();
         void initDataWriter();
         void updateModuleInfo();
+        void updateSendingAsics(int moduleNr);
         void updateBaselineValid();
 
         util::Hash createInputChannelConfig(const std::vector<std::string> & outputChannels, const std::string & onSlowness = "drop");

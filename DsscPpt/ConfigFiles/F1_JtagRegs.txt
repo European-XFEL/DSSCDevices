@@ -5,6 +5,7 @@ numSignals:23
 reverse   :0
 address   :25
 #Signals:Pixel Injection Signal Trim:Pixel Injection Bias Current Trim:VDAC_lowrange:VDAC_highrange:VDAC_En_i1a_B:VDAC_Bin_B:VDAC_Bin:LVDS_TX_Vref:LVDS_TX_Ibias:LVDS_RX_Ibias:Filter_Outbuf_SD:Filter_Outbuf_Ibias:ClkDeskew_1:ClkDeskew_0:GCC_LT:GCC_StartVal_1:GCC_StartVal_0:SC_EnChainLd:2 Phase Gen - SelDelay:Monitor Select (DDyn, Iprog, RO, Cycle_done, Sel[0]):Mute XDATA:nc:nc2:
+#SignalsAliases::::::::::::::::::::::::
 #ReadOnly:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:1:1:
 #ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
 #Positions:7-0:11-8:12:13:14-21:22-24:37-43:25;26:27-29:44-46:47:48;49:50-54:63-67:55;68:62-56:75-69:76:86-89:90-92:93:30-36:77-85:
@@ -18,6 +19,7 @@ numSignals:1
 reverse   :1
 address   :26
 #Signals:TX_Disable:
+#SignalsAliases::
 #ReadOnly:0:
 #ActiveLow:0:
 #Positions:0-31:
@@ -31,6 +33,7 @@ numSignals:1
 reverse   :1
 address   :27
 #Signals:TX_Disable:
+#SignalsAliases::
 #ReadOnly:0:
 #ActiveLow:0:
 #Positions:0-31:
@@ -44,6 +47,7 @@ numSignals:15
 reverse   :0
 address   :7
 #Signals:Enable SRAM Control through JTAG:SRAM_PrechargeBitLines:SRAM_PrechargeBitBus:SRAM_ColBlockSel:SRAM_SendTestData:SRAM_Write:RO_SramRead:RO_LdNewRow:RO_ClkWordRow_1:RO_ClkWordRow_0:RO_Phi2:RO_Phi1:SRAM_ColEn:SRAM_RowEn:Data from right RO row (only read back):
+#SignalsAliases::::::::::::::::
 #ReadOnly:0:0:0:0:0:0:0:0:0:0:0:0:0:0:1:
 #ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:0:0:
 #Positions:0:1:2:3:4:5:6:7:8:9:10:11:12:13:14-22:
@@ -57,6 +61,7 @@ numSignals:13
 reverse   :0
 address   :5
 #Signals:Cycle Length:Burst Length:Iprog Length:FSM Refpulse:FSM Veto:FSM SendTestPattern:FSM Readout:FSM Burst:FSM Iprog:FSM Idle:Use JTAG State:Bypass Refpulse:Refpulse Length:
+#SignalsAliases::::::::::::::
 #ReadOnly:0:0:0:0:0:0:0:0:0:0:0:0:0:
 #ActiveLow:0:0:0:0:0:0:0:0:0:0:0:0:0:
 #Positions:0-6:7-18:19-34:35:36:37:38:39:40:41:42:43:44-47:
@@ -70,6 +75,7 @@ numSignals:8
 reverse   :0
 address   :6
 #Signals:Use Fixed Address:Fixed Col Block Sel:Readout Bypass SRAM:Disable SRAM Write:Send Test Data:Veto Latency:Fixed Row Address:Fixed Col Address:
+#SignalsAliases:::::::::
 #ReadOnly:0:0:0:0:0:0:0:0:
 #ActiveLow:0:0:0:0:0:0:0:0:
 #Positions:22:21:20:19:18:11-17:5-10:0-4:
@@ -83,6 +89,7 @@ numSignals:6
 reverse   :0
 address   :15
 #Signals:Static IPROG Values:Static IDLE values:Invert Hold:Sel Ext Sourced Tracks:Select Monitor Track:Enable Monitor Output:
+#SignalsAliases:::::::
 #ReadOnly:0:0:0:0:0:0:
 #ActiveLow:0:0:0:0:0:0:
 #Positions:0-4:5-9:10-14:15-19:20-22:23:
@@ -96,6 +103,7 @@ numSignals:3
 reverse   :0
 address   :24
 #Signals:Serializer Output Test Pattern:nc:Number of ColWordsToReadOut:
+#SignalsAliases::::
 #ReadOnly:0:0:0:
 #ActiveLow:0:0:0:
 #Positions:0-8:9:10-15:
@@ -109,6 +117,7 @@ numSignals:5
 reverse   :0
 address   :16
 #Signals:Temperature:RMP Length:DSTAT:JTAG RMP:Enable JTAG Cntrl:
+#SignalsAliases::::::
 #ReadOnly:1:0:0:0:0:
 #ActiveLow:0:0:0:0:0:
 #Positions:22-30:14-21:2-13:1:0:
@@ -122,6 +131,7 @@ numSignals:1
 reverse   :0
 address   :29
 #Signals:nc:
+#SignalsAliases::
 #ReadOnly:1:
 #ActiveLow:0:
 #Positions:0-20:

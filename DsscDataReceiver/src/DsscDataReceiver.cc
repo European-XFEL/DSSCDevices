@@ -10,7 +10,7 @@
 #include <iostream>
 #include "utils.h"
 
-#include "DsscTrainDataSchema.h"
+#include "DsscTrainDataSchema.hh"
 #include "DsscDataReceiver.hh"
 #include "DsscHDF5CorrectionFileReader.h"
 #include "CHIPInterface.h"
@@ -2138,7 +2138,7 @@ namespace karabo {
         auto & pixelCorrectionData = m_pixelCorrectionData[pxIdx];
         const uint pixelBackground = m_pixelBackgroundData[pxIdx];
         for(uint sram=0; sram < utils::s_numSram; sram++){
-          pixelCorrectionData[sram] = pixelCorrectionAcc[sram].calcStats().mean - pixelBackground;
+          pixelCorrectionData[sram] = pixelCorrectionAcc[sram].calcMean() - pixelBackground;
         }
       }
     }
@@ -2695,13 +2695,14 @@ namespace karabo {
       if(m_genTrainStats)
       {
         computeMeanBursts();
+
         utils::MeanRMSVectors meanRMSValuesVec = DsscHDF5Writer::saveToFile(get<string>("outputDir") + "/TrainMeanRMSImage.h5",m_dataStatsAcc,currentTrainData->availableASICs,numStoredTrains);
 
         if(m_acquireBG){
-          m_pixelBackgroundData = std::move(meanRMSValuesVec.meanValues);
+          m_pixelBackgroundData = meanRMSValuesVec.meanValues;
           computeSramCorrectionData();
 
-          DsscHDF5Writer::saveBaselineAndSramCorrection(get<string>("outputDir") + "/SRAMCorrectionImage.h5",m_pixelBackgroundData,m_pixelCorrectionData,currentTrainData->availableASICs,numStoredTrains);
+          DsscHDF5Writer::saveBaselineAndSramCorrection(get<string>("outputDir") + "/SRAMCorrectionImage.h5",m_dataStatsAcc,currentTrainData->availableASICs,numStoredTrains);
 
           set<bool>("correction.bgDataValid",true);
           set<bool>("correction.sramCorrectionValid",true);
