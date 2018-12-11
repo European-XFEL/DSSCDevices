@@ -2065,6 +2065,7 @@ bool DsscLadderParameterTrimming::startDsscDataGeneratorInstance()
   initialConfig.set<string>("asicsToRecord", get<string>("sendingASICs"));
   initialConfig.set<string>("deviceId", m_dsscDataReceiverId);
   initialConfig.set<unsigned int>("testPattern", getExpectedTestPattern());
+  initialConfig.set<string>("quadrantId", get<string>("quadrantId"));
   initialConfig.set<bool>("enableDAQOutput", false);
   initialConfig.set<unsigned int>("udpPort", get<unsigned int>("recvDeviceUDPPort"));
 
