@@ -765,6 +765,12 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .displayedName("Ladder Image Output")
     .dataSchema(ladderSchema)
     .commit();
+  
+  STRING_ELEMENT(expected).key("daqConTempl")
+    .displayedName("DAQ Connection template")
+    .assignmentOptional().defaultValue("DETLAB_DSSC_DAQ_DATA/DET/{CHAN}CH0@monitorOutput")
+    .reconfigurable()
+    .commit();
 
 }
 
@@ -862,7 +868,7 @@ void DsscLadderParameterTrimming::initialization()
 
   m_recvServerId = get<string>("recvDeviceServerId");
 
-  m_mainProcessorId = "DsscMainProcessor_" + m_quadrantId;
+  m_mainProcessorId = "DsscMainProcessor_" + m_quadrantId + "_Mod" + to_string(get<int>("activeModule"));
 
   m_testDataGeneratorId = "DsscDummyTrainDataGenerator_" + m_quadrantId;
 
@@ -2102,7 +2108,13 @@ bool DsscLadderParameterTrimming::startMainProcessorInstance()
 
     initialConfig.set("input", inputConfig);
   } else if (isXFELData()) {
-    //connect a special pcLayouer output by name
+    //connect a special pcLayer output by name
+    std::string daqConTempl = get<std::string>("daqConTempl");
+    const int qid = boost::lexical_cast<int>(m_quadrantId.substr(1, m_quadrantId.size()-1));
+    boost::replace_first(daqConTempl, "{CHAN}", karabo::util::toString(qid*4+get<int>("activeModule")));
+    const std::vector<string>& outputChannels{daqConTempl};
+    const util::Hash& inputConfig = createInputChannelConfig(outputChannels);
+    initialConfig.set("input", inputConfig);      
   }
 
   auto pair = remote().instantiate(m_recvServerId, "DsscProcessor", initialConfig);
