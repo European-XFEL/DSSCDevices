@@ -2110,7 +2110,8 @@ bool DsscLadderParameterTrimming::startMainProcessorInstance()
   } else if (isXFELData()) {
     //connect a special pcLayer output by name
     std::string daqConTempl = get<std::string>("daqConTempl");
-    boost::replace_first(daqConTempl, "{CHAN}", karabo::util::toString(m_quadrantId*4+get<int>("activeModule")));
+    const int qid = boost::lexical_cast<int>(m_quadrantId.substr(1, m_quadrantId.size()-1));
+    boost::replace_first(daqConTempl, "{CHAN}", karabo::util::toString(qid*4+get<int>("activeModule")));
     const std::vector<string>& outputChannels{daqConTempl};
     const util::Hash& inputConfig = createInputChannelConfig(outputChannels);
     initialConfig.set("input", inputConfig);      
