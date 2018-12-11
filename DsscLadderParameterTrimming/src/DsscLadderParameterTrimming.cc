@@ -606,7 +606,7 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
 
   BOOL_ELEMENT(expected).key("saveTrimmingRawData")
     .displayedName("Save Image Data During Trimming")
-    .description("Save Raw Image Data during Trimming.")
+    .description("Save Raw Image Data during Trimming. Only available for DsscDataReceiver")
     .tags("trimming")
     .assignmentOptional().defaultValue(false).reconfigurable()
     .commit();
@@ -1026,8 +1026,9 @@ bool DsscLadderParameterTrimming::waitDataReceived()
 
   remote().execute(m_mainProcessorId, "stop");
 
-  // disable raw data recording
+  // disable raw data recording m_saveRawData is set only in dssc mode
   if (m_saveRawData) {
+
     remote().set(m_dsscDataReceiverId, "saveToHDF5", false);
 
     m_runSettingsVec.push_back(m_runSettingIdx);
@@ -1545,6 +1546,7 @@ void DsscLadderParameterTrimming::clearBaseline()
 void DsscLadderParameterTrimming::updateBaselineValid()
 {
   set<bool>("baselineAvailable",baselineValuesValid);
+  set<bool>("subtractBaseline",baselineValuesValid);
 }
 
 int DsscLadderParameterTrimming::initSystem()
@@ -2033,7 +2035,6 @@ bool DsscLadderParameterTrimming::startDsscPptInstance()
     KARABO_LOG_ERROR << "DsscPpt initialisation failed: " << pair.second;
     return false;
   }
-
 
   KARABO_LOG_INFO << "DsscPpt initialized successfully: " << pair.second;
   return true;

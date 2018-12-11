@@ -2516,8 +2516,7 @@ namespace karabo {
 
         if(m_isStopped){ // maybe one train pointer is lost during activation of imagewise data
           trainDataRingStorage->addFreeStorage(m_trainDataToShow);
-        }else{   
-          //cout << "add valid data" << endl;          
+        }else{
           // put back that it can also be stored otherwise trains are lost when visualized
           trainDataRingStorage->addValidStorage(m_trainDataToShow);
         }
@@ -2558,7 +2557,6 @@ namespace karabo {
 
           currentTrainData = m_trainSorter.getNextTrainData();
           if(currentTrainData == nullptr){
-            KARABO_LOG_INFO << "Current TRAIN Data was zero";
             keepReceiving = false;
             m_isStopped = true;
             break;
@@ -2570,7 +2568,7 @@ namespace karabo {
             currentTrainData = nullptr;
             continue;
           }
-          
+
           processCurrentTrainData();
 
           m_trainSorter.returnTrainData(currentTrainData);
