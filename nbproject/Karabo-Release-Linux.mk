@@ -21,7 +21,7 @@ FC=gfortran
 AS=as
 
 # Macros
-CND_PLATFORM=GNU-Linux-x86
+CND_PLATFORM=GNU-Linux
 CND_DLIB_EXT=so
 CND_CONF=Release
 CND_DISTDIR=dist
@@ -59,7 +59,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L${KARABO}/extern/dssc_minuit/lib -L${KARABO}/extern/lib/dssc -L${KARABO}/extern/lib -L${KARABO}/lib -Wl,-rpath,${KARABO}/lib -Wl,-rpath,${KARABO}/extern/lib/dssc -Wl,-rpath,${KARABO}/extern/dssc_minuit/lib -Wl,-rpath,${KARABO}/extern/lib -lkarabo `pkg-config --libs karaboDependencies` -lDsscDependencies -lCHIPInterface -lSequencer -lUtils -lDsscHdf5 -lPPT -lPPTDataReceiver -lConfigReg  
+LDLIBSOPTIONS=-L${KARABO}/extern/dssc_minuit/lib -L${KARABO}/extern/lib/dssc -L${KARABO}/extern/lib -L${KARABO}/lib -Wl,-rpath,'${KARABO}/lib' -Wl,-rpath,'${KARABO}/extern/lib/dssc' -Wl,-rpath,'${KARABO}/extern/dssc_minuit/lib' -Wl,-rpath,'${KARABO}/extern/lib' -lkarabo `pkg-config --libs karaboDependencies` -lDsscDependencies -lCHIPInterface -lSequencer -lUtils -lDsscHdf5 -lPPT -lPPTDataReceiver -lConfigReg  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -69,42 +69,42 @@ ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT}: ${OBJ
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
 	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT} ${OBJECTFILES} ${LDLIBSOPTIONS} -shared -fPIC
 
-${OBJECTDIR}/DsscAsicProcessor/src/DsscAsicProcessor.o: DsscAsicProcessor/src/DsscAsicProcessor.cc 
+${OBJECTDIR}/DsscAsicProcessor/src/DsscAsicProcessor.o: DsscAsicProcessor/src/DsscAsicProcessor.cc
 	${MKDIR} -p ${OBJECTDIR}/DsscAsicProcessor/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscAsicProcessor/src/DsscAsicProcessor.o DsscAsicProcessor/src/DsscAsicProcessor.cc
 
-${OBJECTDIR}/DsscDataReceiver/src/DsscDataReceiver.o: DsscDataReceiver/src/DsscDataReceiver.cc 
+${OBJECTDIR}/DsscDataReceiver/src/DsscDataReceiver.o: DsscDataReceiver/src/DsscDataReceiver.cc
 	${MKDIR} -p ${OBJECTDIR}/DsscDataReceiver/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscDataReceiver/src/DsscDataReceiver.o DsscDataReceiver/src/DsscDataReceiver.cc
 
-${OBJECTDIR}/DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.o: DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.cc 
+${OBJECTDIR}/DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.o: DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.cc
 	${MKDIR} -p ${OBJECTDIR}/DsscDummyTrainGenerator/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.o DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.cc
 
-${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.o: DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cc 
+${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.o: DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cc
 	${MKDIR} -p ${OBJECTDIR}/DsscLadderParameterTrimming/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.o DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cc
 
-${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.o: DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.cc 
+${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.o: DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.cc
 	${MKDIR} -p ${OBJECTDIR}/DsscLadderParameterTrimming/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.o DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.cc
 
-${OBJECTDIR}/DsscPpt/src/DsscPpt.o: DsscPpt/src/DsscPpt.cc 
+${OBJECTDIR}/DsscPpt/src/DsscPpt.o: DsscPpt/src/DsscPpt.cc
 	${MKDIR} -p ${OBJECTDIR}/DsscPpt/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscPpt/src/DsscPpt.o DsscPpt/src/DsscPpt.cc
 
-${OBJECTDIR}/DsscPpt/src/DsscPptAPI.o: DsscPpt/src/DsscPptAPI.cc 
+${OBJECTDIR}/DsscPpt/src/DsscPptAPI.o: DsscPpt/src/DsscPptAPI.cc
 	${MKDIR} -p ${OBJECTDIR}/DsscPpt/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscPpt/src/DsscPptAPI.o DsscPpt/src/DsscPptAPI.cc
 
-${OBJECTDIR}/DsscProcessor/src/DsscProcessor.o: DsscProcessor/src/DsscProcessor.cc 
+${OBJECTDIR}/DsscProcessor/src/DsscProcessor.o: DsscProcessor/src/DsscProcessor.cc
 	${MKDIR} -p ${OBJECTDIR}/DsscProcessor/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscProcessor/src/DsscProcessor.o DsscProcessor/src/DsscProcessor.cc
@@ -115,7 +115,6 @@ ${OBJECTDIR}/DsscProcessor/src/DsscProcessor.o: DsscProcessor/src/DsscProcessor.
 # Clean Targets
 .clean-conf: ${CLEAN_SUBPROJECTS}
 	${RM} -r ${CND_BUILDDIR}/${CND_CONF}
-	${RM} ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT}
 
 # Subprojects
 .clean-subprojects:

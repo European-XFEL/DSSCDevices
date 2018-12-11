@@ -1360,7 +1360,7 @@ void DsscLadderParameterTrimming::onPixelData(const util::Hash& data,
   m_lastTrainId = data.get<unsigned long long>("trainId");
   if (m_lastTrainId <= m_lastPptTrainId) {
     cout << "Got invalid Train Data: " << m_lastTrainId << " wait for train " << m_lastPptTrainId << endl;
-    m_runFastAcquisition = true;
+    //m_runFastAcquisition = true;
     return;
   }
 
@@ -2678,12 +2678,12 @@ unsigned int DsscLadderParameterTrimming::getLastValidTrainId()
 void DsscLadderParameterTrimming::resetDataReceiver()
 {
   if(isDsscData()){
-    remote().execute(m_dsscDataReceiverId, "flushTrainStorage");
+    //remote().execute(m_dsscDataReceiverId, "flushTrainStorage");
   }
 
   getLastValidTrainId();
 
-  //KARABO_LOG_DEBUG << "Set Min Train ID "<< m_lastPptTrainId << " at " << m_mainProcessorId << endl;
+  //KARABO_LOG_DEBUG << "Set Min Train ID "<< m_lastPptTrainId << " at " << m_mainProcessorId;
 
   remote().set<unsigned long long>(m_mainProcessorId, "minValidTrainId", m_lastPptTrainId);
   remote().set<bool>(m_mainProcessorId, "measureMean", m_recvMode == RecvMode::MEAN);
