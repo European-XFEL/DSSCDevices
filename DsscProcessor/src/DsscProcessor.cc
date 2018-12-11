@@ -464,6 +464,7 @@ namespace karabo {
       const uint16_t* data_ptr = data.getData<uint16_t>();
       size_t data_size = data.size();
 
+
       const uint16_t* cellId_ptr = cellId.getData<uint16_t>();
       size_t cellId_size = cellId.size();
 
