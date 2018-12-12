@@ -136,6 +136,7 @@ namespace karabo {
 
         void sendMeanValues();
         void savePixelHistos();
+        void saveMeasurementInfo();
         void displayPixelHistogram();
 
         void clearData();

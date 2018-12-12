@@ -10,6 +10,7 @@
 #include "DsscDependencies.h"
 #include "DsscHDF5CorrectionFileReader.h"
 #include "DsscHDF5TrimmingDataWriter.h"
+#include "DsscHDF5MeasurementInfoWriter.h"
 using namespace std;
 
 USING_KARABO_NAMESPACES;
@@ -693,11 +694,12 @@ namespace karabo {
       utils::fillBufferToDataHistoVec(m_pixelHistoVec);
 
       const string path = get<string>("outputDir");
-      utils::makePath(path);
-      const string fileName   = path+"/"+utils::getLocalTimeStr()+"_PixelHistogramExport.dat";
+      const string outDir = path + "/SpectrumHisto";
+      utils::makePath(outDir);
+      const string fileName   = outDir + "/" + utils::getLocalTimeStr() + "_PixelHistogramExport.dat";
       utils::DataHisto::dumpHistogramsToASCII(fileName,m_pixelsToProcess,m_pixelHistoVec);
 
-      const string h5FileName = path+"/"+utils::getLocalTimeStr()+"_PixelHistogramExport.h5";
+      const string h5FileName = outDir + "/" + utils::getLocalTimeStr() + "_PixelHistogramExport.h5";
       DsscHDF5TrimmingDataWriter dataWriter(h5FileName);
       dataWriter.setMeasurementName("LadderSpectrum");
       dataWriter.addHistoData("SpektrumData",m_pixelHistoVec,m_pixelsToProcess);
@@ -705,12 +707,33 @@ namespace karabo {
       const auto imageValues = utils::calcMeanImageFromHistograms(m_pixelHistoVec,m_pixelsToProcess);
       dataWriter.addImageData("SpectrumPedestalImage",512,imageValues);
 
+      saveMeasurementInfo();
+      
       KARABO_LOG_INFO << "Stored Pixel Histograms to " << h5FileName;
       
       m_acquireHistograms = false;
       set<bool>("acquireHistograms",m_acquireHistograms);
     }
     
+    void DsscProcessor::saveMeasurementInfo()
+    {
+      const std::string infoFileName = get<string>("outputDir") + "/MeasurementInfo.h5";      
+      
+      DsscHDF5MeasurementInfoWriter::MeasurementConfig config;
+      config.configFileName = infoFileName;
+      config.measurementName = "BurstMeasurement";
+      config.measurementSettingName = "Spectrum";
+      config.numIterations = m_numIterations;
+      config.numPreBurstVetos = 0xFFFF;
+      config.ladderMode = 1;
+      config.columnSelection = "all";
+      config.activeASICs = m_availableAsics;
+      config.measurementDirectories = {"SpectrumHisto"};
+      config.measurementSettings = {1};
+           
+      DsscHDF5MeasurementInfoWriter infoWriter(infoFileName);
+      infoWriter.addMeasurementConfig(config);
+    }
     
     void DsscProcessor::displayPixelHistogram()
     {
