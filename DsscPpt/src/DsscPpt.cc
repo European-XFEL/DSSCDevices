@@ -4369,10 +4369,11 @@ namespace karabo {
             while (m_keepPolling) {
                 {
                     boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                    m_ppt->readBackEPCRegister("Eth_Output_Data_Rate");
+
                     int value = m_ppt->readFPGATemperature();
                     set<int>("pptTemp", value);
                     
-                    m_ppt->readbackEPCRegister("Eth_Output_Data_Rate");
                 }
                 
                 uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate","0","Eth_Output_Data_Rate")*128/1E6;
