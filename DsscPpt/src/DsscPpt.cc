@@ -199,6 +199,14 @@ namespace karabo {
                 .warnLow(10).needsAcknowledging(false).alarmLow(5).needsAcknowledging(false)
                 .warnHigh(75).needsAcknowledging(false).alarmHigh(80).needsAcknowledging(false)
                 .commit();
+        
+        STRING_ELEMENT(expected).key("ethOutputRate")
+                .displayedName("SFP Output Rate")
+                .description("Ouput rate of the QSFP link, measured in MBit/s, averaged over one second")
+                .readOnly()
+                .initialValue("nA")
+                .commit();
+        
 /* not really working
         UINT32_ELEMENT(expected).key("ethernetOutputRate")
                 .displayedName("SFP Ethernet Output Rate")
@@ -4367,7 +4375,7 @@ namespace karabo {
                     m_ppt->readbackEPCRegister("Eth_Output_Data_Rate");
                 }
                 
-                uint32_t ouputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate","0","Eth_Output_Data_Rate")*128/1E6;
+                uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate","0","Eth_Output_Data_Rate")*128/1E6;
                 set<string>("ethOutputRate",to_string(outputRate) + " MBit/s");           
 
                 boost::this_thread::sleep(boost::posix_time::seconds(5));
