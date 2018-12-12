@@ -266,6 +266,27 @@ namespace karabo {
                 .key("readLastPPTTrainID").displayedName("read Last PPT Train ID").description("Reads last Train ID from PPT registers")
                 .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
                 .commit();
+        
+        SLOT_ELEMENT(expected)
+                .key("startSingleCycle").displayedName("Start Single Cycles").description("Start Single Cylce, module and num cycles should be enabled")
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
+                .commit();
+        
+        NODE_ELEMENT(expected).key("singleCycleFields")
+            .displayedName("Single Cycle Fields")
+            .commit();
+
+        UINT32_ELEMENT(expected).key("singleCycleFields.moduloValue")
+                .displayedName("Modulo Value")
+                .description("")
+                .assignmentOptional().defaultValue(0).reconfigurable()
+                .commit();
+        
+        UINT32_ELEMENT(expected).key("singleCycleFields.iterations")
+                .displayedName("Number of SingleCycles")
+                .description("Number of Single Cycles")
+                .assignmentOptional().defaultValue(1000).reconfigurable()
+                .commit();
 
 
         SLOT_ELEMENT(expected)
@@ -1038,6 +1059,8 @@ namespace karabo {
       KARABO_SLOT(LoadQSFPNetConfig);
       KARABO_SLOT(SaveQSFPNetConfig);
       KARABO_SLOT(setThrottleDivider);
+      
+      KARABO_SLOT(startSingleCycle);
 
       //generateAllConfigRegElements();
 
@@ -4535,6 +4558,22 @@ namespace karabo {
       updateGuiEnableDatapath();
     }
 
+    void DsscPpt::startSingleCycle()
+    {
+      const auto iterations = get<unsigned int>("singleCycleFields.iterations");
+      const auto slow_mode  = get<unsigned int>("singleCycleFields.moduloValue");
+      
+      DsscScopedLock lock(&m_accessToPptMutex,__func__);
+      m_ppt->setEPCParam("Single_Cycle_Register","all","iterations",iterations);
+      m_ppt->setEPCParam("Single_Cycle_Register","all","slow_mode",slow_mode);
+      m_ppt->setEPCParam("Single_Cycle_Register","all","continuous_mode",0);      
+      m_ppt->setEPCParam("Single_Cycle_Register","all","disable_sending",0); 
+      m_ppt->setEPCParam("Single_Cycle_Register","all","doSingleCycle",1); 
+      m_ppt->programEPCRegister("Single_Cycle_Register");
+      
+      m_ppt->setEPCParam("Single_Cycle_Register","all","doSingleCycle",0); 
+      m_ppt->programEPCRegister("Single_Cycle_Register");     
+    }
 
 
 
