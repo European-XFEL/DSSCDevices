@@ -2675,11 +2675,9 @@ unsigned int DsscLadderParameterTrimming::getLastValidTrainId()
       m_lastPptTrainId = 1;
     } else if (isTestData()) {
       m_lastPptTrainId = remote().get<unsigned long long>(m_testDataGeneratorId, "trainId");
-    } else if (isDsscData()) {
+    } else {
       m_lastPptTrainId = remote().get<unsigned int>(m_pptDeviceId,"lastTrainId") + 1;
       //m_lastPptTrainId = remote().get<unsigned long long>(m_dsscDataReceiverId, "currentTrainId")+11;
-    } else {
-      KARABO_LOG_WARN << "PCLAYER no train id implemented, or not known yet";
     }
   } catch (...) {
     KARABO_LOG_WARN << "Could not read train id from receiver device";
