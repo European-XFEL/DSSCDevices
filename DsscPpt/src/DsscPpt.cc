@@ -4363,13 +4363,12 @@ namespace karabo {
                     boost::mutex::scoped_lock lock(m_accessToPptMutex);
                     int value = m_ppt->readFPGATemperature();
                     set<int>("pptTemp", value);
+                    
+                    m_ppt->readbackEPCRegister("Eth_Output_Data_Rate");
                 }
-                //update IOB Temperatures
-                for(size_t i=0; i<m_ppt->activeIOBs.size();i++)
-                {
-                  //int iobNumber = m_ppt->activeIOBs.at(i);
-                  //getIOBTempIntoGui(iobNumber); <-- produces race condition
-                }
+                
+                uint32_t ouputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate","0","Eth_Output_Data_Rate")*128/1E6;
+                set<string>("ethOutputRate",to_string(outputRate) + " MBit/s");           
 
                 boost::this_thread::sleep(boost::posix_time::seconds(5));
             }
