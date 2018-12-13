@@ -523,6 +523,15 @@ namespace karabo {
 
       const unsigned long long* trainId_ptr = trainId.getData<unsigned long long>();
       size_t trainId_size = trainId.size();
+      
+      std::map<unsigned long long, size_t> unique_trains;
+      for(size_t train_idx = 0; train_idx<trainId_size; train_idx++)
+      {
+          size_t train_offset = train_idx*utils::s_totalNumPxs*m_numFrames;
+          if(unique_trains.find(trainId_ptr[train_idx]) == unique_trains.end()) {
+            unique_trains.insert(std::make_pair(trainId_ptr[train_idx], train_offset));
+          }
+      }
 
       m_alsoRMS = get<bool>("measureRMS");
       m_numFrames = cellId_size;
@@ -546,17 +555,18 @@ namespace karabo {
       const auto minValidTrainId = get<unsigned long long>("minValidTrainId");
 
       // business logic starts here
-      for(size_t train_idx = 0; train_idx<trainId_size; train_idx++)
+      
+      for(auto this_train = unique_trains.begin(); this_train != unique_trains.end(); ++this_train)
       {
-        if(trainId_ptr[train_idx] <= minValidTrainId) continue;
+        if(this_train->first <= minValidTrainId) continue;
 
-        set<unsigned long long>("currentTrainId",trainId_ptr[train_idx]);
+        set<unsigned long long>("currentTrainId",this_train->first);
 
-        size_t train_offset = train_idx*utils::s_totalNumPxs*m_numFrames;
-        const unsigned short* train_data_ptr = data_ptr + train_offset;
+        
+        const unsigned short* train_data_ptr = data_ptr + this_train->second;
         if(get<bool>("measureMean") || get<bool>("measureRMS"))
         {
-          m_trainIds.push_back(trainId_ptr[train_idx]);
+          m_trainIds.push_back(this_train->first);
 
           processMeanValues(train_data_ptr,m_inputFormat);
 
@@ -583,10 +593,10 @@ namespace karabo {
         else
         {
           auto processedPixelData = processPixelData(train_data_ptr,m_inputFormat);
-          sendPixelData(processedPixelData,trainId_ptr[train_idx]);
+          sendPixelData(processedPixelData,this_train->first);
         }
 
-        //KARABO_LOG_INFO << "Train Processed: " << trainId_ptr[train_idx] << "/" << minValidTrainId;
+        //KARABO_LOG_INFO << "Train Processed: " << this_train->first << "/" << minValidTrainId;
       }
     }
 
