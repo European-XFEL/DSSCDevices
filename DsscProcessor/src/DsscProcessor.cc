@@ -525,11 +525,13 @@ namespace karabo {
       size_t trainId_size = trainId.size();
       
       std::map<unsigned long long, size_t> unique_trains;
+      size_t train_id_offset = 0;
       for(size_t train_idx = 0; train_idx<trainId_size; train_idx++)
       {
-          size_t train_offset = train_idx*utils::s_totalNumPxs*m_numFrames;
           if(unique_trains.find(trainId_ptr[train_idx]) == unique_trains.end()) {
+            size_t train_offset = train_id_offset*utils::s_totalNumPxs*m_numFrames;          
             unique_trains.insert(std::make_pair(trainId_ptr[train_idx], train_offset));
+            train_id_offset++;
           }
       }
 
