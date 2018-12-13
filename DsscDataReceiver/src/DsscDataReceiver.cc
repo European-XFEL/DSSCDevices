@@ -953,6 +953,7 @@ namespace karabo {
       setASICsToRecord();
 
       KARABO_LOG_INFO << "DsscDataReceiver: LadderMode = " << m_ladderMode;
+      
       m_asicPixelToShow = get<unsigned int>("monitor.asicPixelToShow");
       m_asicToShow      = get<unsigned int>("monitor.asicToShow");
       set<unsigned int>("monitor.ladderPixelToShow",utils::calcImagePixel(m_asicToShow,m_asicPixelToShow));
@@ -976,15 +977,20 @@ namespace karabo {
       m_acquireBG     = false;
       m_genTrainStats = false;
 
+      //function pointer for efficient selection of correction type
       m_correctionFunction = getCorrectionFunction();
 
+      m_pixelData.resize(utils::s_numSram,0);
+      m_pixelHistoVec.assign(utils::s_totalNumPxs,utils::DataHisto());
+      
       clearHistograms();
       clearThresholdMap();
 
-      initStatsAcc();
-
+      initStatsAcc(); 
+      
+      clearSramCorrection();
+      
       m_notSendingASICs.assign(16,0);
-      m_pixelData.resize(utils::s_numSram,0);
 
       DsscHDF5Writer::enHDF5Compression = get<bool>("enHDF5Compression");
 
@@ -1013,9 +1019,10 @@ namespace karabo {
 
     void DsscDataReceiver::clearSramCorrection()
     {
-      m_processor.clearSramCorrectionData();
-      m_pixelBackgroundData.clear();
-      m_pixelCorrectionData.clear();
+      m_processor.clearSramCorrectionData(); // for histogram generation
+      m_pixelCorrectionData.assign(utils::s_totalNumPxs,std::vector<float>(utils::s_numSram)); // for displaying 
+      m_pixelBackgroundData.assign(utils::s_totalNumPxs,0);  // for displaying 
+      
       m_bgDataValid = false;
       set<bool>("correction.bgDataValid",false);
       set<bool>("correction.sramCorrectionValid",false);
@@ -1025,15 +1032,12 @@ namespace karabo {
     {
       auto selectedPixel = get<unsigned int>("monitor.ladderPixelToShow");
       std::vector<uint32_t> pixels(1,selectedPixel);
-      utils::DataHistoVec dataHistoVec;
-      if(get<bool>("showOnlineHistogram")){
-        dataHistoVec.push_back(m_pixelHistoVec[selectedPixel]);
-      }else{
-        dataHistoVec.push_back(pixelHisto);
-      }
-      string fileName = get<string>("outputDir") + "/OnlineHisto_Px" + to_string(selectedPixel) + ".dat";
-      string h5FileName = get<string>("outputDir") + "/OnlineHisto_Px" + to_string(selectedPixel) + ".h5";
-      utils::DataHisto::dumpHistogramsToASCII(fileName,pixels, dataHistoVec,0);
+      const auto dataHisto = get<bool>("showOnlineHistogram")? m_pixelHistoVec[selectedPixel] : pixelHisto;
+      const utils::DataHistoVec dataHistoVec{dataHisto};
+
+      const string fileName = get<string>("outputDir") + "/OnlineHisto_Px" + to_string(selectedPixel) + ".dat";
+      const string h5FileName = get<string>("outputDir") + "/OnlineHisto_Px" + to_string(selectedPixel) + ".h5";
+      utils::DataHisto::dumpHistogramsToASCII(fileName,pixels,dataHistoVec,0);
 
       DsscHDF5TrimmingDataWriter dataWriter(h5FileName);
       dataWriter.setMeasurementName("PixelSpectrum");
@@ -1121,6 +1125,9 @@ namespace karabo {
         callString += " gweiden@max-exfl.desy.de:/gpfs/exfel/data/scratch/gweiden/Measurements/";
         callString += distName + " && echo \"image data transfer done\" & ";
         system(callString.c_str());
+        
+        KARABO_LOG_DEBUG << "DataTransfer Command:";
+        KARABO_LOG_DEBUG << callString;
     }
 
 
@@ -1138,6 +1145,7 @@ namespace karabo {
 
       acquireTrains();
 
+      //wait until data was received completely
       while(get<bool>("acquiring")){
         boost::this_thread::sleep(boost::posix_time::seconds(1));
       }
@@ -1162,12 +1170,11 @@ namespace karabo {
       if(corrFileReader.isValid()){
         corrFileReader.loadCorrectionData(m_pixelBackgroundData,m_pixelCorrectionData);
         m_bgDataValid = true;
-      }else{
-        m_processor.clearSramCorrectionData();
+        set<bool>("correction.bgDataValid",m_bgDataValid);
+        set<bool>("correction.sramCorrectionValid",m_bgDataValid);
+      }else{        
+        clearSramCorrection();
       }
-
-      set<bool>("correction.bgDataValid",m_bgDataValid);
-      set<bool>("correction.sramCorrectionValid",m_bgDataValid);
     }
 
 
@@ -1402,7 +1409,7 @@ namespace karabo {
               }else{
                 m_processor.clearSramCorrectionData();
               }
-            }
+            }            
           }else if(path.compare("correction.subtract") == 0){
             m_subtract = filtered.getAs<bool>(path);
             if(!m_bgDataValid){
@@ -1984,11 +1991,9 @@ namespace karabo {
       if(m_showThreshold)
       {
         const auto asicsToSort = m_trainDataToShow->availableASICs;
-        const int numAsics = asicsToSort.size();
-        const unsigned short minSram = get<unsigned short>("minSram");
-        const unsigned short maxSram = get<unsigned short>("maxSram");
+        const int numAsics = asicsToSort.size();    
 
-        auto accumulateData = accumulateImageData(minSram,maxSram);
+        auto accumulateData = accumulateImageData();
 
         for(int asicIdx = 0; asicIdx < numAsics; asicIdx++){
           const int asicOffs = asicsToSort[asicIdx] * utils::s_numAsicPixels;
@@ -2148,7 +2153,13 @@ namespace karabo {
     void DsscDataReceiver::updateProcessorParams()
     {
       static const std::vector<uint32_t> availableAsics = utils::getUpCountingVector(16);
-      m_processor.setParameters(availableAsics,currentTrainData->pulseCnt,get<unsigned short>("minSram"),get<unsigned short>("maxSram"),currentTrainData->getFormat());
+      
+      const unsigned short pulseCnt = currentTrainData->pulseCnt;
+      const unsigned short minSram = get<unsigned short>("minSram");
+      const unsigned short maxSram = get<unsigned short>("maxSram");
+      const auto format = currentTrainData->getFormat();
+      
+      m_processor.setParameters(availableAsics,pulseCnt,minSram,maxSram,format);
     }
 
 
@@ -2177,7 +2188,8 @@ namespace karabo {
 
       const auto asicsToSort = currentTrainData->availableASICs;
       const int numAsics     = asicsToSort.size();
-
+      const uint pulseCnt    = currentTrainData->pulseCnt;
+      
 #pragma omp parallel for num_threads(nthreads)
       for(int asicIdx = 0; asicIdx < numAsics; asicIdx++)
       {
@@ -2186,7 +2198,7 @@ namespace karabo {
           const uint32_t imagePixel = asicSortMap[px];
           auto pixelDataArr    = currentTrainData->getPixelDataPixelWise(imagePixel);
           auto & pixelCorrectAcc = m_sramCorrectionAcc[imagePixel];
-          for(uint sram=0; sram<utils::s_numSram; sram++){
+          for(uint sram=0; sram<pulseCnt; sram++){
             const auto value = pixelDataArr[sram];
             pixelCorrectAcc[sram].addValue(value);
           }
@@ -2196,13 +2208,17 @@ namespace karabo {
 
 
     // display function
-    std::vector<uint32_t> DsscDataReceiver::accumulateImageData(int minSram, int maxSram)
+    std::vector<uint32_t> DsscDataReceiver::accumulateImageData()
     {
+      const unsigned short minSram = get<unsigned short>("minSram");
+      const unsigned short maxSram = get<unsigned short>("maxSram");
+        
       static const unsigned int nthreads = std::min(4u,std::thread::hardware_concurrency());
 
       std::vector<uint32_t> accumulateVector(utils::s_totalNumPxs,0);
 
       const auto asicsToSort = m_trainDataToShow->availableASICs;
+            
       const uint32_t numAsics = asicsToSort.size();
 
 #pragma omp parallel for num_threads(nthreads)
@@ -2224,9 +2240,8 @@ namespace karabo {
 
     void DsscDataReceiver::updateStatsAcc()
     {
-      const unsigned short pulseCnt = currentTrainData->pulseCnt;
-      const unsigned short minSram = std::min(get<unsigned short>("minSram"),pulseCnt);
-      const unsigned short maxSram = std::min(get<unsigned short>("maxSram"),pulseCnt);
+      const unsigned short minSram = get<unsigned short>("minSram");
+      const unsigned short maxSram = get<unsigned short>("maxSram");
 
       const auto asicsToSort = currentTrainData->availableASICs;
       const int numAsics = asicsToSort.size();
@@ -2248,9 +2263,8 @@ namespace karabo {
 
     void DsscDataReceiver::computeMeanBursts()
     {
-      const unsigned short pulseCnt = currentTrainData->pulseCnt;
-      const unsigned short minSram = std::min(get<unsigned short>("minSram"),pulseCnt);
-      const unsigned short maxSram = std::min(get<unsigned short>("maxSram"),pulseCnt);
+      const unsigned short minSram = get<unsigned short>("minSram");
+      const unsigned short maxSram = get<unsigned short>("maxSram");
 
       const auto asicsToSort = currentTrainData->availableASICs;
       const int numAsics = asicsToSort.size();
@@ -2378,15 +2392,14 @@ namespace karabo {
     {
       m_dataStatsAcc.assign(utils::s_totalNumPxs,utils::StatsAcc());
       m_sramCorrectionAcc.assign(utils::s_totalNumPxs,utils::StatsAccVec(utils::s_numSram));
-      m_pixelCorrectionData.assign(utils::s_totalNumPxs,std::vector<float>(utils::s_numSram));
-
-      m_pixelHistoVec.assign(utils::s_totalNumPxs,utils::DataHisto());
     }
 
 
     void DsscDataReceiver::updatePixelHistos()
     {
       //KARABO_LOG_INFO << "Update Pixel Histos";
+      // applies SramBlacklist is blacklist is set
+      // applies SramCorrection is sram correction is valid      
       m_processor.fillDataHistoVec(currentTrainData,m_pixelHistoVec,false);
       //cout << "Pixel data to histogram vector added" << endl;
     }
@@ -2459,7 +2472,7 @@ namespace karabo {
     }
 
     void DsscDataReceiver::clearPixelHistos()
-    {
+    {      
       for(auto && pixelHisto : m_pixelHistoVec){
         pixelHisto.clear();
       }
@@ -2615,6 +2628,8 @@ namespace karabo {
       if(m_isStopped && !get<bool>("saveImageWiseSorted")){
         updateCurrentTrainIdAndCnt(m_trainDataToShow->trainId);
       }
+      
+      checkSramRange();
 
       updateTempADCValues(m_trainDataToShow);
 
@@ -2644,7 +2659,7 @@ namespace karabo {
 
       if(get<bool>("enablePixelPreview"))
       {
-        writeChannel("pixelImageOutput",getPixelData(m_asicPixelToShow, m_asicToShow));
+        writeChannel("pixelImageOutput",getPixelData(m_asicPixelToShow,m_asicToShow));
 
         displayPixelHistogram();
       }
@@ -2785,6 +2800,24 @@ namespace karabo {
       set<string>("moduleInfo.quadrantId",DsscHDF5Writer::s_writerModuleInfo.quadrantId);
       set<unsigned int>("moduleInfo.moduleNr",DsscHDF5Writer::s_writerModuleInfo.moduleNr);
       set<string>("moduleInfo.iobSerial",utils::getIOBSerialStr(DsscHDF5Writer::s_writerModuleInfo.iobSerial));
+    }
+    
+    void DsscDataReceiver::checkSramRange()
+    {
+      const unsigned int pulseCnt = m_trainDataToShow->pulseCnt;
+      const unsigned short maxSram = get<unsigned short>("maxSram");
+      
+      if(maxSram>=pulseCnt){
+        set<unsigned short>("minSram",0);
+        set<unsigned short>("maxSram",pulseCnt-1);
+        KARABO_LOG_INFO << "SRAM Range updates, fits now to pulse cnt " << pulseCnt;
+      }
+      
+
+      if(m_selFrame>pulseCnt){
+        set<unsigned int>("displayFrame",pulseCnt);
+        m_selFrame = pulseCnt;
+      }
     }
 
 }

@@ -143,7 +143,7 @@ namespace karabo {
         util::Hash getPixelData(int asicPixel, int asic);
 
         void fillImageData(std::vector<unsigned int> & imageData, int frameNum);
-        std::vector<uint32_t> accumulateImageData(int minSram, int maxSram);
+        std::vector<uint32_t> accumulateImageData();
         static std::string getDir(const std::string & name);
 
         void fillMetaData();
@@ -216,6 +216,7 @@ namespace karabo {
         void startDisplay();
         void displayPixelHistogram();
         void displayAsicHistogram();
+        void checkSramRange();
 
         DsscTrainSorter m_trainSorter;
 
