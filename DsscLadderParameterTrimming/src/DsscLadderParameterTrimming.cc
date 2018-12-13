@@ -779,7 +779,8 @@ DsscLadderParameterTrimming::DsscLadderParameterTrimming(const karabo::util::Has
   SuS::MultiModuleInterface(new SuS::PPTFullConfig(INITIALCONF)),
   m_asicMeanValues(utils::s_totalNumPxs),
   m_pixelData(utils::s_totalNumPxs*utils::s_numSram),
-  m_currentTrimmer(nullptr)
+  m_currentTrimmer(nullptr),
+  m_deviceInitialized(false)
 {
   KARABO_INITIAL_FUNCTION(initialization)
 
@@ -916,6 +917,8 @@ void DsscLadderParameterTrimming::initialization()
 
   updateActiveModule(get<int>("activeModule"));
   updateBaselineValid();
+  
+  m_deviceInitialized = true;
 }
 
 

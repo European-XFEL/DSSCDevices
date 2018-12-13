@@ -295,7 +295,9 @@ namespace karabo {
         unsigned int getLastValidTrainId();
         util::State dsscPptState();
         util::State deviceState(const std::string & deviceId);
-        bool isDeviceExisting(const std::string & deviceId){return remote().exists(deviceId).first;}
+        bool isDeviceExisting(const std::string & deviceId){
+            return (m_deviceInitialized ? remote().exists(deviceId).first : false);
+        }
 
         bool isTestData();
         bool isDsscData();
@@ -354,6 +356,8 @@ namespace karabo {
         DsscHDF5MeasurementInfoWriter::MeasurementConfig m_currentMeasurementConfig;
         DsscHDF5CalibrationDataGenerator m_calibGenerator;
 
+        bool m_deviceInitialized;
+        
         void changeDeviceState(const util::State & newState);
 
         bool matrixSRAMTest(int patternID, int &errCnt);
