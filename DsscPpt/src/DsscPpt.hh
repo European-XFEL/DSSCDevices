@@ -46,6 +46,8 @@ namespace karabo {
         void trylock(const std::string & info){
           if(!try_lock()){
             std::cout << "---- SmarMutex could not lock mutex at " << info << ". Has been reserved by " << m_origin << std::endl;
+          }else{
+           // this->lock();
           }
           m_origin = info;
           //std::cout << "---- SmarMutex locked mutex at " << info << "." << std::endl;
