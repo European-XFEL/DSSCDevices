@@ -1855,10 +1855,17 @@ namespace karabo {
 */
       }
 
+      setNumFramesToSend();      
+
       setSendingASICs();
       setQSFPEthernetConfig();
     }
 
+    void DsscPpt::updateNumFramesToSend()
+    {
+      DsscScopedLock lock(&m_accessToPptMutex,__func__);
+      m_ppt->setNumFramesToSend(get<unsigned int>("numFramesToSendOut"));
+    }
 
     void DsscPpt::readSerialNumber()
     {

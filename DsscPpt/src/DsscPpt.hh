@@ -253,6 +253,7 @@ namespace karabo {
         
         void startSingleCycle();
 
+        void updateNumFramesToSend();
         void setSendingASICs();
         void programLMKsAuto();
 
