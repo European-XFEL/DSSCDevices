@@ -9,7 +9,8 @@
 #include "DsscProcessor.hh"
 #include "DsscDependencies.h"
 #include "DsscHDF5CorrectionFileReader.h"
-
+#include "DsscHDF5TrimmingDataWriter.h"
+#include "DsscHDF5MeasurementInfoWriter.h"
 using namespace std;
 
 USING_KARABO_NAMESPACES;
@@ -33,7 +34,7 @@ namespace karabo {
 
         SLOT_ELEMENT(expected).key("stop")
             .displayedName("Stop")
-            .description("Start operation")
+            .description("Stop operation")
             .commit();
 
         SLOT_ELEMENT(expected).key("resetCounters")
@@ -193,6 +194,56 @@ namespace karabo {
             .displayedName("IterationCnt")
             .readOnly()
             .commit();
+        
+        SLOT_ELEMENT(expected).key("runHistogramAcquisition")
+            .displayedName("Start Histogram Acquisition")
+            .description("remove sram correction data, wont be applied anymore")
+            .commit();
+        
+        PATH_ELEMENT(expected).key("outputDir")
+            .displayedName("Output Directory")
+            .description("Output directory for Histograms")
+            .isDirectory()
+            .assignmentOptional().defaultValue("./").reconfigurable()
+            .commit();
+        
+        BOOL_ELEMENT(expected).key("acquireHistograms")
+            .displayedName("Acquire Online Histograms")
+            .readOnly()
+            .commit();
+      
+        NODE_ELEMENT(expected).key("histoGen")
+              .description("Vectors for Histogram Generation")
+              .displayedName("Online Histogram View")
+              .commit();
+        
+        UINT32_ELEMENT(expected).key("histoGen.ladderPixelToShow")
+                .displayedName("Pixel To Show")
+                .assignmentOptional().defaultValue(true).reconfigurable()
+                .commit();
+      
+        UINT64_ELEMENT(expected).key("histoGen.pixelhistoCnt")
+            .displayedName("Pixel Histo Entry County")
+            .readOnly().initialValue(0)
+            .commit();
+
+        VECTOR_UINT16_ELEMENT(expected).key("histoGen.pixelHistoBins")
+                  .displayedName("Pixel Histo Bins")
+                  .readOnly().initialValue(std::vector<unsigned short>(20,0))
+                  .commit();
+
+        VECTOR_UINT32_ELEMENT(expected).key("histoGen.pixelHistoBinValues")
+                  .displayedName("Pixel Histo Bin Values")
+                  .readOnly().initialValue(std::vector<unsigned int>(20,0))
+                  .commit();
+        
+      BOOL_ELEMENT(expected).key("histoGen.displayHistoLogscale")
+                .displayedName("Display Histogram Logscale")
+                .description("Switch display of Histograms to Logscale")
+                .assignmentOptional().defaultValue(false)
+                .reconfigurable()
+                .commit();
+
 
         INPUT_CHANNEL(expected).key("input")
                 .displayedName("Input")
@@ -400,6 +451,9 @@ namespace karabo {
 
         m_availableAsics = utils::bitEnableStringToVector(get<string>("sendingASICs"));
 
+        m_acquireHistograms = false;          
+        set<bool>("acquireHistograms",m_acquireHistograms);
+        
         changeDeviceState(State::OFF);
     }
 
@@ -512,7 +566,22 @@ namespace karabo {
 
           set<unsigned int>("iterationCnt",m_iterationCnt);
 
-        }else{
+        }
+        else if(m_acquireHistograms)
+        {          
+          fillDataHistoVec(train_data_ptr,m_pixelHistoVec,false);
+          m_iterationCnt++;
+          
+          KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
+          
+          if(m_iterationCnt == m_numIterations)
+          {
+            savePixelHistos();    
+            stop();
+          }
+        }
+        else
+        {
           auto processedPixelData = processPixelData(train_data_ptr,m_inputFormat);
           sendPixelData(processedPixelData,trainId_ptr[train_idx]);
         }
@@ -606,5 +675,84 @@ namespace karabo {
       set<bool>("measureRMS", false);
       accumulate();
     }
+    
+    void DsscProcessor::runHistogramAcquisition()
+    {      
+      m_pixelHistoVec.assign(m_pixelsToProcess.size(),utils::DataHisto());
+      m_acquireHistograms = true;      
+      
+      set<bool>("acquireHistograms",m_acquireHistograms);
+      set<bool>("measureMean",false);
+      set<bool>("measureRMS",false);
 
+      accumulate();   
+      KARABO_LOG_INFO << "Histogram Generation started";
+    }
+    
+    void DsscProcessor::savePixelHistos()
+    {
+      utils::fillBufferToDataHistoVec(m_pixelHistoVec);
+
+      const string path = get<string>("outputDir");
+      const string outDir = path + "/SpectrumHisto";
+      utils::makePath(outDir);
+      const string fileName   = outDir + "/" + utils::getLocalTimeStr() + "_PixelHistogramExport.dat";
+      utils::DataHisto::dumpHistogramsToASCII(fileName,m_pixelsToProcess,m_pixelHistoVec);
+
+      const string h5FileName = outDir + "/" + utils::getLocalTimeStr() + "_PixelHistogramExport.h5";
+      DsscHDF5TrimmingDataWriter dataWriter(h5FileName);
+      dataWriter.setMeasurementName("LadderSpectrum");
+      dataWriter.addHistoData("SpektrumData",m_pixelHistoVec,m_pixelsToProcess);
+
+      const auto imageValues = utils::calcMeanImageFromHistograms(m_pixelHistoVec,m_pixelsToProcess);
+      dataWriter.addImageData("SpectrumPedestalImage",512,imageValues);
+
+      saveMeasurementInfo();
+      
+      KARABO_LOG_INFO << "Stored Pixel Histograms to " << h5FileName;
+      
+      m_acquireHistograms = false;
+      set<bool>("acquireHistograms",m_acquireHistograms);
+    }
+    
+    void DsscProcessor::saveMeasurementInfo()
+    {
+      const std::string infoFileName = get<string>("outputDir") + "/MeasurementInfo.h5";      
+      
+      DsscHDF5MeasurementInfoWriter::MeasurementConfig config;
+      config.configFileName = infoFileName;
+      config.measurementName = "BurstMeasurement";
+      config.measurementSettingName = "Spectrum";
+      config.numIterations = m_numIterations;
+      config.numPreBurstVetos = 0xFFFF;
+      config.ladderMode = 1;
+      config.columnSelection = "all";
+      config.activeASICs = m_availableAsics;
+      config.measurementDirectories = {"SpectrumHisto"};
+      config.measurementSettings = {1};
+           
+      DsscHDF5MeasurementInfoWriter infoWriter(infoFileName);
+      infoWriter.addMeasurementConfig(config);
+    }
+    
+    void DsscProcessor::displayPixelHistogram()
+    {
+      static vector<unsigned short> bins;
+      static vector<unsigned int> binValues;
+
+      const auto imagePixel = get<unsigned int>("histoGen.ladderPixelToShow");      
+      m_pixelHistoVec[imagePixel].fillBufferToHistoMap();
+      m_pixelHistoVec[imagePixel].getDrawValues(bins,binValues);
+      
+      size_t histoValueCount = m_pixelHistoVec[imagePixel].getCount();
+ 
+      if(!bins.empty()){
+        set<unsigned long long>("histoGen.pixelhistoCnt",histoValueCount);
+        set<vector<unsigned short>>("histoGen.pixelHistoBins",std::move(bins));
+        if(get<bool>("istoGen.displayHistoLogscale")){
+          std::transform(binValues.begin(),binValues.end(),binValues.begin(),[](int x){if(x==0) return 1; return x;});
+        }
+        set<vector<unsigned int>>("histoGen.pixelHistoBinValues",std::move(binValues));
+      }
+    }
 }

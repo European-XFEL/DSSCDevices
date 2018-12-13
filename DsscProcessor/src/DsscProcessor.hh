@@ -117,6 +117,8 @@ namespace karabo {
          */
         void acquireBaselineValues();
         //void acquireSramCorrectionValues();
+        
+        void runHistogramAcquisition();
 
     private:
         void changeDeviceState(const util::State & newState);
@@ -133,6 +135,9 @@ namespace karabo {
         void sendPixelData(const unsigned short* train_data_ptr, unsigned long long train_id);
 
         void sendMeanValues();
+        void savePixelHistos();
+        void saveMeasurementInfo();
+        void displayPixelHistogram();
 
         void clearData();
 
@@ -140,8 +145,11 @@ namespace karabo {
         std::string m_sourceId;
         std::vector<unsigned long long> m_trainIds;
 
+        bool m_acquireHistograms;
         bool m_acquireBaseLine;
         bool m_acquireSramCorrection;
+        utils::DataHistoVec m_pixelHistoVec;
+
     };
 }
 
