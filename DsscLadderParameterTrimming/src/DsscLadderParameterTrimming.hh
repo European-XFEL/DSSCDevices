@@ -295,7 +295,9 @@ namespace karabo {
         unsigned int getLastValidTrainId();
         util::State dsscPptState();
         util::State deviceState(const std::string & deviceId);
-        bool isDeviceExisting(const std::string & deviceId){return (m_deviceInitialized?remote().exists(deviceId).first : false);}
+        bool isDeviceExisting(const std::string & deviceId){
+            return (m_deviceInitialized ? remote().exists(deviceId).first : false);
+        }
 
         bool isTestData();
         bool isDsscData();
