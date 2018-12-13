@@ -771,6 +771,14 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .assignmentOptional().defaultValue("DETLAB_DSSC_DAQ_DATA/DET/{CHAN}CH0@monitorOutput")
     .reconfigurable()
     .commit();
+  
+  STRING_ELEMENT(expected).key("mainProcessorTempl")
+    .displayedName("Main processor dev id template")
+    .description("Template to create main processor device id from. Use {QUAD} to express quad id replacement,"
+                 "{MOD} to express module id replacement. Both are optional.")
+    .assignmentOptional().defaultValue("DsscMainProcessor_{QUAD}_Mod{MOD}")
+    .init()
+    .commit();
 
 }
 
@@ -869,7 +877,11 @@ void DsscLadderParameterTrimming::initialization()
 
   m_recvServerId = get<string>("recvDeviceServerId");
 
-  m_mainProcessorId = "DsscMainProcessor_" + m_quadrantId + "_Mod" + to_string(get<int>("activeModule"));
+  std::string main_processor_templ = get<std::string>("mainProcessorTempl");
+  boost::replace_all(main_processor_templ, "{QUAD}", m_quadrantId);
+  boost::replace_all(main_processor_templ, "{MOD}", to_string(get<int>("activeModule")));
+  m_mainProcessorId = main_processor_templ;
+  KARABO_LOG_INFO<<"Using "<<m_mainProcessorId<<" as main processor device";
 
   m_testDataGeneratorId = "DsscDummyTrainDataGenerator_" + m_quadrantId;
 
