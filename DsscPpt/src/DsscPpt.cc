@@ -1570,10 +1570,12 @@ namespace karabo {
 
 
     void DsscPpt::startPolling()
-    {  return;
-        m_keepPolling = true;
-        m_pollThread.reset(new boost::thread(boost::bind(&DsscPpt::pollHardware, this)));
-        KARABO_LOG_INFO << "PollThread started...";
+    {  
+      if(m_keepPolling) return;
+      
+      m_keepPolling = true;
+      m_pollThread.reset(new boost::thread(boost::bind(&DsscPpt::pollHardware, this)));
+      KARABO_LOG_INFO << "PollThread started...";
     }
 
 
@@ -1690,6 +1692,10 @@ namespace karabo {
       {
         KARABO_LOG_INFO << "runAcquisition mutex";
         m_ppt->disableSending(false);
+      }
+      
+      if(run){
+        startPolling();
       }
     }
 
@@ -2063,10 +2069,8 @@ namespace karabo {
     void DsscPpt::resetAllBtn()
     {
       DSSC::StateChangeKeeper keeper(this);
-
+      
       KARABO_LOG_INFO << "resetAll";
-
-      enableDPChannels(0);
 
       resetAll();
 
@@ -2075,10 +2079,11 @@ namespace karabo {
 
       checkAllIOBStatus();
 
-      if( m_ppt->activeIOBs.size()==0 ) return;
+      if( m_ppt->activeIOBs.size()==0 ){
+        return;
+      }
 
       //set Everything in Ready state
-
       programAvailableIOBsConfig();
     }
 
@@ -2088,6 +2093,10 @@ namespace karabo {
       DSSC::StateChangeKeeper keeper(this,State::OFF);
       DsscScopedLock lock(&m_accessToPptMutex,__func__);
 
+      stopPolling();
+
+      enableDPChannels(0);
+      
       m_ppt->resetAll(true);
       boost::this_thread::sleep(boost::posix_time::seconds(1));
       m_ppt->resetAll(false);
