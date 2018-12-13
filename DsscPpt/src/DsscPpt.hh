@@ -250,6 +250,8 @@ namespace karabo {
         void startManualBurst();
         void startManualBurstBtn();
         void readoutTestPattern();
+        
+        void startSingleCycle();
 
         void setSendingASICs();
         void programLMKsAuto();

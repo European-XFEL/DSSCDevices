@@ -199,6 +199,14 @@ namespace karabo {
                 .warnLow(10).needsAcknowledging(false).alarmLow(5).needsAcknowledging(false)
                 .warnHigh(75).needsAcknowledging(false).alarmHigh(80).needsAcknowledging(false)
                 .commit();
+        
+        STRING_ELEMENT(expected).key("ethOutputRate")
+                .displayedName("SFP Output Rate")
+                .description("Ouput rate of the QSFP link, measured in MBit/s, averaged over one second")
+                .readOnly()
+                .initialValue("nA")
+                .commit();
+        
 /* not really working
         UINT32_ELEMENT(expected).key("ethernetOutputRate")
                 .displayedName("SFP Ethernet Output Rate")
@@ -265,6 +273,27 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("readLastPPTTrainID").displayedName("read Last PPT Train ID").description("Reads last Train ID from PPT registers")
                 .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
+                .commit();
+        
+        SLOT_ELEMENT(expected)
+                .key("startSingleCycle").displayedName("Start Single Cycles").description("Start Single Cylce, module and num cycles should be enabled")
+                .allowedStates(State::ON,State::STOPPED,State::OFF)
+                .commit();
+        
+        NODE_ELEMENT(expected).key("singleCycleFields")
+            .displayedName("Single Cycle Fields")
+            .commit();
+
+        UINT32_ELEMENT(expected).key("singleCycleFields.moduloValue")
+                .displayedName("Modulo Value")
+                .description("")
+                .assignmentOptional().defaultValue(0).reconfigurable()
+                .commit();
+        
+        UINT32_ELEMENT(expected).key("singleCycleFields.iterations")
+                .displayedName("Number of SingleCycles")
+                .description("Number of Single Cycles")
+                .assignmentOptional().defaultValue(1000).reconfigurable()
                 .commit();
 
 
@@ -1038,6 +1067,8 @@ namespace karabo {
       KARABO_SLOT(LoadQSFPNetConfig);
       KARABO_SLOT(SaveQSFPNetConfig);
       KARABO_SLOT(setThrottleDivider);
+      
+      KARABO_SLOT(startSingleCycle);
 
       //generateAllConfigRegElements();
 
@@ -4338,15 +4369,15 @@ namespace karabo {
             while (m_keepPolling) {
                 {
                     boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                    m_ppt->readBackEPCRegister("Eth_Output_Data_Rate");
+
                     int value = m_ppt->readFPGATemperature();
                     set<int>("pptTemp", value);
+                    
                 }
-                //update IOB Temperatures
-                for(size_t i=0; i<m_ppt->activeIOBs.size();i++)
-                {
-                  //int iobNumber = m_ppt->activeIOBs.at(i);
-                  //getIOBTempIntoGui(iobNumber); <-- produces race condition
-                }
+                
+                uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate","0","Eth_Output_Data_Rate")*128/1E6;
+                set<string>("ethOutputRate",to_string(outputRate) + " MBit/s");           
 
                 boost::this_thread::sleep(boost::posix_time::seconds(5));
             }
@@ -4535,6 +4566,22 @@ namespace karabo {
       updateGuiEnableDatapath();
     }
 
+    void DsscPpt::startSingleCycle()
+    {
+      const auto iterations = get<unsigned int>("singleCycleFields.iterations");
+      const auto slow_mode  = get<unsigned int>("singleCycleFields.moduloValue");
+      
+      DsscScopedLock lock(&m_accessToPptMutex,__func__);
+      m_ppt->setEPCParam("Single_Cycle_Register","all","iterations",iterations);
+      m_ppt->setEPCParam("Single_Cycle_Register","all","slow_mode",slow_mode);
+      m_ppt->setEPCParam("Single_Cycle_Register","all","continuous_mode",0);      
+      m_ppt->setEPCParam("Single_Cycle_Register","all","disable_sending",0); 
+      m_ppt->setEPCParam("Single_Cycle_Register","all","doSingleCycle",1); 
+      m_ppt->programEPCRegister("Single_Cycle_Register");
+      
+      m_ppt->setEPCParam("Single_Cycle_Register","all","doSingleCycle",0); 
+      m_ppt->programEPCRegister("Single_Cycle_Register");     
+    }
 
 
 
