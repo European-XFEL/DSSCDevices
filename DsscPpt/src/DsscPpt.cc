@@ -1855,7 +1855,7 @@ namespace karabo {
 */
       }
 
-      setNumFramesToSend();      
+      updateNumFramesToSend();
 
       setSendingASICs();
       setQSFPEthernetConfig();
@@ -2098,12 +2098,13 @@ namespace karabo {
     void DsscPpt::resetAll()
     {
       DSSC::StateChangeKeeper keeper(this,State::OFF);
-      DsscScopedLock lock(&m_accessToPptMutex,__func__);
 
       stopPolling();
 
       enableDPChannels(0);
-      
+
+      DsscScopedLock lock(&m_accessToPptMutex,__func__);
+
       m_ppt->resetAll(true);
       boost::this_thread::sleep(boost::posix_time::seconds(1));
       m_ppt->resetAll(false);
@@ -4574,10 +4575,12 @@ namespace karabo {
 
     void DsscPpt::enableDPChannels(uint16_t enOneHot)
     {
-      DsscScopedLock lock(&m_accessToPptMutex,__func__);
-      for(int i=0; i<4; i++){
-        bool enable = (enOneHot & (1<<i)) != 0;
-        m_ppt->setDPEnabled(i+1,enable);
+      {
+        DsscScopedLock lock(&m_accessToPptMutex,__func__);
+        for(int i=0; i<4; i++){
+          bool enable = (enOneHot & (1<<i)) != 0;
+          m_ppt->setDPEnabled(i+1,enable);
+        }
       }
       updateGuiEnableDatapath();
     }
