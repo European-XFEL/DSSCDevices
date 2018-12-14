@@ -905,14 +905,13 @@ void DsscLadderParameterTrimming::initialization()
   setD0Mode(true);
 
   setActiveAsics(0xFFFF);
-  cout << "helloxxxx1" << endl;
+
   setLadderReadout(true);
 
   // pixel sort map is always in ladder mode filled
   initPixelSortMap();
 
-  setSendingAsics(utils::bitEnableStringToValue(get<string>("sendingASICs")));
-
+  m_deviceInitialized = true;
   if (allDevicesAvailable()) {
     KARABO_LOG_INFO << "All Devices started, ready for trimming routines";
   } else {
@@ -924,13 +923,13 @@ void DsscLadderParameterTrimming::initialization()
 
   loadCoarseGainParamsIntoGui();
 
+  setSendingAsics(utils::bitEnableStringToValue(get<string>("sendingASICs")));
+
   m_calibGenerator.setCurrentPixels(utils::positionListToVector<int>("0-65535"));
   m_calibGenerator.setOutputDir(get<string>("outputDir"));
 
   updateActiveModule(get<int>("activeModule"));
   updateBaselineValid();
-  
-  m_deviceInitialized = true;
 }
 
 
@@ -998,11 +997,11 @@ void DsscLadderParameterTrimming::setBufferMode()
 void DsscLadderParameterTrimming::initPixelSortMap()
 {
   KARABO_LOG_INFO << "Init Pixel Sort Map";
-  m_pixelSortMap.assign(totalNumPxs, 0);
+  m_pixelSortMap.assign(utils::s_totalNumPxs, 0);
 
 #pragma omp parallel for
-  for (int px = 0; px < totalNumPxs; px++) {
-    m_pixelSortMap[px] = utils::s_dataPixelMap[px]*sramSize;
+  for (int px = 0; px < utils::s_totalNumPxs; px++) {
+    m_pixelSortMap[px] = utils::s_dataPixelMap[px]*utils::s_numSram;
   }
 }
 
@@ -1985,9 +1984,15 @@ bool DsscLadderParameterTrimming::isPPTDeviceAvailable()
     }
   }
 
+  cout << m_pptDeviceId << " Request PPT State " << endl;
+  
+  auto pptState = dsscPptState();
+
+  cout << m_pptDeviceId << " State is " << pptState.name() << endl;
+
   startPptDevice();
 
-  auto pptState = dsscPptState();
+  pptState = dsscPptState();
 
   cout << m_pptDeviceId << " State is " << pptState.name() << endl;
 
@@ -2023,6 +2028,7 @@ bool DsscLadderParameterTrimming::startDsscPptInstance()
 {
   //auto initialConfig = remote().getClassSchema(m_quadrantServerId,"DsscPpt").getParameterHash();
 
+  std::cout << "Start PPT Instance because no was found : " << m_pptDeviceId << std::endl;
   const auto env = get<string>("environment");
 
   util::Hash initialConfig;
@@ -2132,6 +2138,7 @@ bool DsscLadderParameterTrimming::startMainProcessorInstance()
     initialConfig.set("input", inputConfig);      
   }
 
+  std::cout << "Will try to initiate DsscProcessor now!!!!!!!!!!!!" << std::endl;
   auto pair = remote().instantiate(m_recvServerId, "DsscProcessor", initialConfig);
   bool ok = pair.first;
 
@@ -2407,6 +2414,10 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone()
 bool DsscLadderParameterTrimming::checkPPTInputConnected()
 {
   if (!isPPTDeviceAvailable()) return false;
+
+  std::cout << " will not check if PPT input is really connected" << std::endl;  
+  std::cout <<m_pptDeviceId << "  registerConfigInput.connectedOutputChannels" << std::endl;
+  return true;
 
   auto inputConnection = remote().get<vector < string >> (m_pptDeviceId, "registerConfigInput.connectedOutputChannels");
 
