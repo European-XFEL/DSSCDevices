@@ -1088,7 +1088,7 @@ void DsscLadderParameterTrimming::acquireDisplayData()
       const size_t numPixels = m_asicMeanValues.size();
 #pragma omp parallel for
       for (size_t idx = 0; idx < numPixels; idx++) {
-        m_asicMeanValues[idx] = m_asicMeanValues[idx] - baselineValues[idx];
+        m_asicMeanValues[idx] = m_asicMeanValues[idx] - baselineValues[idx] + 10;
       }
     }
   } else if (displayMode == "FinalSlopes") {
@@ -1751,6 +1751,7 @@ void DsscLadderParameterTrimming::updateActiveModule(int newActiveModule)
     set<int>("activeModule", currentModule);
   } else {
     setActiveModule(newActiveModule);
+    loadCoarseGainParamsIntoGui();
   }
 }
 

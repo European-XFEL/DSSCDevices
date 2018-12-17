@@ -252,8 +252,8 @@ namespace karabo {
         std::vector<float> m_pixelData;
         std::vector<float> m_pixelBackgroundData;
         std::vector<unsigned int> m_thresholdMap;
-        std::vector<utils::StatsAcc> m_dataStatsAcc;
-        std::vector<std::vector<utils::StatsAcc>> m_sramCorrectionAcc;
+        utils::StatsAccVec m_dataStatsAcc;
+        utils::StatsAccVec m_sramCorrectionAcc;
         std::vector<std::vector<float>> m_pixelCorrectionData;
 
         utils::DataHisto pixelHisto;
