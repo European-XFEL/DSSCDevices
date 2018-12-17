@@ -1000,7 +1000,7 @@ void DsscLadderParameterTrimming::initPixelSortMap()
   m_pixelSortMap.assign(utils::s_totalNumPxs, 0);
 
 #pragma omp parallel for
-  for (int px = 0; px < utils::s_totalNumPxs; px++) {
+  for (uint px = 0; px < utils::s_totalNumPxs; px++) {
     m_pixelSortMap[px] = utils::s_dataPixelMap[px]*utils::s_numSram;
   }
 }
@@ -2415,11 +2415,9 @@ bool DsscLadderParameterTrimming::checkPPTInputConnected()
 {
   if (!isPPTDeviceAvailable()) return false;
 
-  std::cout << " will not check if PPT input is really connected" << std::endl;  
-  std::cout <<m_pptDeviceId << "  registerConfigInput.connectedOutputChannels" << std::endl;
-  return true;
-
   auto inputConnection = remote().get<vector < string >> (m_pptDeviceId, "registerConfigInput.connectedOutputChannels");
+
+  if(inputConnection.empty()) return false;
 
   auto elem = find(inputConnection.begin(), inputConnection.end(), get<string>("deviceId") + "@registerConfigOutput");
   return elem != inputConnection.end();
@@ -2703,7 +2701,6 @@ unsigned int DsscLadderParameterTrimming::getLastValidTrainId()
       m_lastPptTrainId = remote().get<unsigned long long>(m_testDataGeneratorId, "trainId");
     } else {
       m_lastPptTrainId = remote().get<unsigned int>(m_pptDeviceId,"lastTrainId") + 1;
-      //m_lastPptTrainId = remote().get<unsigned long long>(m_dsscDataReceiverId, "currentTrainId")+11;
     }
   } catch (...) {
     KARABO_LOG_WARN << "Could not read train id from receiver device";

@@ -678,12 +678,15 @@ namespace karabo {
     void DsscProcessor::clearSramCorrection()
     {
       clearSramCorrectionData();
+      set<bool>("sramCorrectionValid",false); 
+      set<bool>("baselineValuesValid",false);
     }
 
 
     void DsscProcessor::clearSramBlacklist()
     {
       clearSramBlacklistData();
+      set<bool>("sramBlacklistValid",false); 
     }
 
     void DsscProcessor::acquireBaselineValues()
