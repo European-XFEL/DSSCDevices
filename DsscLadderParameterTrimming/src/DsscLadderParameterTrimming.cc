@@ -2786,7 +2786,10 @@ void DsscLadderParameterTrimming::measureBurstOffsetSweep()
 
   auto binValues = sweepBurstWaitOffset(measurePixel, paramValues, m_trimStartAddr, m_trimEndAddr);
   // save data
-  saveDataVector("BurstWaitOffset", binValues);
+  const string fileName = get<string>("output") + "/" + utils::getLocalTimeStr() + "_BurstWaitOffset.h5";
+  DsscHDF5TrimmingDataWriter dataWriter(fileName);
+  dataWriter.setMeasurementName("BurstWaitOffsetSweep");
+  dataWriter.addVectorData(outputName,binValues);
 
   // display data in PixelData vector output
   std::vector<double> pixelBurstOffsetData(paramValues.back()+1,0);
