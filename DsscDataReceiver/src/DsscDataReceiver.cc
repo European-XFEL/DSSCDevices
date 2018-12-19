@@ -2172,7 +2172,7 @@ namespace karabo {
 #pragma omp parallel for num_threads(nthreads)
       for(size_t pxIdx = 0;pxIdx<numPixels; pxIdx++)
       {
-        auto & pixelCorrectionAcc = m_sramCorrectionAcc[pxIdx];
+        auto pixelCorrectionAcc = m_sramCorrectionAcc.data() + utils::s_numSram * pxIdx;
         auto & pixelCorrectionData = m_pixelCorrectionData[pxIdx];
         const uint pixelBackground = m_pixelBackgroundData[pxIdx];
         for(uint sram=0; sram < utils::s_numSram; sram++){
@@ -2197,7 +2197,7 @@ namespace karabo {
         for(uint32_t px = 0; px<utils::s_numAsicPixels; px++){
           const uint32_t imagePixel = asicSortMap[px];
           auto pixelDataArr    = currentTrainData->getPixelDataPixelWise(imagePixel);
-          auto & pixelCorrectAcc = m_sramCorrectionAcc[imagePixel];
+          auto pixelCorrectAcc = m_sramCorrectionAcc.data() + utils::s_numSram * imagePixel;
           for(uint sram=0; sram<pulseCnt; sram++){
             const auto value = pixelDataArr[sram];
             pixelCorrectAcc[sram].addValue(value);
@@ -2275,7 +2275,7 @@ namespace karabo {
         const auto * asicOffs = utils::s_imagePixelMap.data() + asicsToSort[asicIdx] * utils::s_numAsicPixels;
         for(uint pxIdx = 0; pxIdx<utils::s_numAsicPixels; pxIdx++){
           const auto imagePixel = asicOffs[pxIdx];
-          const auto & pixelCorrectAcc = m_sramCorrectionAcc[imagePixel];
+          const auto pixelCorrectAcc = m_sramCorrectionAcc.data() + utils::s_numSram * imagePixel;
           auto & pixelStatsAcc = m_dataStatsAcc[imagePixel];
           for(uint sram=minSram; sram<=maxSram; sram++){
             pixelStatsAcc += pixelCorrectAcc[sram];
@@ -2391,7 +2391,7 @@ namespace karabo {
     void DsscDataReceiver::initStatsAcc()
     {
       m_dataStatsAcc.assign(utils::s_totalNumPxs,utils::StatsAcc());
-      m_sramCorrectionAcc.assign(utils::s_totalNumPxs,utils::StatsAccVec(utils::s_numSram));
+      m_sramCorrectionAcc.assign(utils::s_totalNumPxs*utils::s_numSram,utils::StatsAcc());
     }
 
 
@@ -2633,11 +2633,11 @@ namespace karabo {
 
       updateTempADCValues(m_trainDataToShow);
 
+      updateSpecificData(m_trainDataToShow);
+
       uint updateFrequency = get<unsigned int>("updateFrequency");
       if((m_trainDataToShow->trainId%updateFrequency) == 0)
       {
-        updateSpecificData(m_trainDataToShow);
-
         if(get<bool>("enableLadderPreview") ){
           writeChannel("ladderImageOutput",getImageData(m_selFrame));
         }
@@ -2750,7 +2750,7 @@ namespace karabo {
           m_pixelBackgroundData = meanRMSValuesVec.meanValues;
           computeSramCorrectionData();
 
-          DsscHDF5Writer::saveBaselineAndSramCorrection(get<string>("outputDir") + "/SRAMCorrectionImage.h5",m_dataStatsAcc,currentTrainData->availableASICs,numStoredTrains);
+          DsscHDF5Writer::saveBaselineAndSramCorrection(get<string>("outputDir") + "/SRAMCorrectionImage.h5",m_sramCorrectionAcc,currentTrainData->availableASICs,numStoredTrains);
 
           set<bool>("correction.bgDataValid",true);
           set<bool>("correction.sramCorrectionValid",true);

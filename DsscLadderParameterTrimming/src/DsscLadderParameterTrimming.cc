@@ -1088,7 +1088,7 @@ void DsscLadderParameterTrimming::acquireDisplayData()
       const size_t numPixels = m_asicMeanValues.size();
 #pragma omp parallel for
       for (size_t idx = 0; idx < numPixels; idx++) {
-        m_asicMeanValues[idx] = m_asicMeanValues[idx] - baselineValues[idx];
+        m_asicMeanValues[idx] = m_asicMeanValues[idx] - baselineValues[idx] + 10;
       }
     }
   } else if (displayMode == "FinalSlopes") {
@@ -1751,6 +1751,7 @@ void DsscLadderParameterTrimming::updateActiveModule(int newActiveModule)
     set<int>("activeModule", currentModule);
   } else {
     setActiveModule(newActiveModule);
+    loadCoarseGainParamsIntoGui();
   }
 }
 
@@ -2785,7 +2786,10 @@ void DsscLadderParameterTrimming::measureBurstOffsetSweep()
 
   auto binValues = sweepBurstWaitOffset(measurePixel, paramValues, m_trimStartAddr, m_trimEndAddr);
   // save data
-  saveDataVector("BurstWaitOffset", binValues);
+  const string fileName = get<string>("output") + "/" + utils::getLocalTimeStr() + "_BurstWaitOffset.h5";
+  DsscHDF5TrimmingDataWriter dataWriter(fileName);
+  dataWriter.setMeasurementName("BurstWaitOffsetSweep");
+  dataWriter.addVectorData("BurstWaitOffsetData",binValues);
 
   // display data in PixelData vector output
   std::vector<double> pixelBurstOffsetData(paramValues.back()+1,0);
