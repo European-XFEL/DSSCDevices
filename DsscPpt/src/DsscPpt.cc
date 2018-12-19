@@ -2079,6 +2079,7 @@ namespace karabo {
       
       KARABO_LOG_INFO << "resetAll";
 
+
       resetAll();
 
       //reprogramm all EPC register to reset to last configuration
@@ -2086,11 +2087,10 @@ namespace karabo {
 
       checkAllIOBStatus();
 
-      if( m_ppt->activeIOBs.size()==0 ){
-        return;
-      }
+      if( m_ppt->activeIOBs.size()==0 ) return;
 
       //set Everything in Ready state
+
       programAvailableIOBsConfig();
     }
 

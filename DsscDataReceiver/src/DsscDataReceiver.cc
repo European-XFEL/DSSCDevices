@@ -1157,6 +1157,7 @@ namespace karabo {
     {
       m_bgDataValid = false;
       set<bool>("correction.bgDataValid",m_bgDataValid);
+      set<bool>("correction.sramCorrectionValid",m_bgDataValid);
 
       auto corrPath = get<string>("outputDir");
       corrPath += "/SRAMCorrectionImage.h5";
@@ -1409,7 +1410,7 @@ namespace karabo {
               }else{
                 m_processor.clearSramCorrectionData();
               }
-            }            
+            }
           }else if(path.compare("correction.subtract") == 0){
             m_subtract = filtered.getAs<bool>(path);
             if(!m_bgDataValid){
@@ -2472,7 +2473,7 @@ namespace karabo {
     }
 
     void DsscDataReceiver::clearPixelHistos()
-    {      
+    {
       for(auto && pixelHisto : m_pixelHistoVec){
         pixelHisto.clear();
       }
