@@ -788,8 +788,9 @@ namespace karabo {
                 .key("quadrantId").displayedName("QuadrantId")
                 .description("Quadrant Id")
                 .tags("other")
-                .assignmentOptional().defaultValue("FENICE").reconfigurable()
+                .assignmentMandatory()
                 .options(utils::DsscModuleInfo::getQuadrantIdList(),",")
+                .reconfigurable()
                 .commit();
 
         UINT32_ELEMENT(expected)
@@ -1102,6 +1103,9 @@ namespace karabo {
       m_ppt->setInitDist(120);
       m_ppt->setFastInitConfigSpeed(30);
       m_ppt->setEPCParam("JTAG_Control_Register","all","ASIC_JTAG_Clock_Divider",30);
+
+      const auto quadrantId = this->get<string>("quadrantId");
+      m_ppt->setQuadrantId(quadrantId);
 
       set<string>("epcRegisterFilePath",m_ppt->getEPCRegisters()->getFileName());
       set<string>("iobRegisterFilePath",m_ppt->getIOBRegisters()->getFileName());
@@ -3905,12 +3909,6 @@ namespace karabo {
             {
               DsscScopedLock lock(&m_accessToPptMutex,__func__);
               m_ppt->setEthernetOutputDatarate(megabits);
-            }
-          }else if(path.compare("quadrantId") == 0){
-            const auto quadrantId = filtered.getAs<string>(path);
-            {
-              DsscScopedLock lock(&m_accessToPptMutex,__func__);
-              m_ppt->setQuadrantId(quadrantId);
             }
           }else if(path.compare("numPreBurstVetos") == 0){
             unsigned int numVetos = filtered.getAs<unsigned int>(path);
