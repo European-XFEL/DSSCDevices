@@ -1183,7 +1183,7 @@ namespace karabo {
       utils::split(data.get<string>("moduleSets"),';',moduleSetNames,0);
 
       if(moduleSetNames.empty()){
-        KARABO_LOG_ERROR << "ERROR: no ModuleSet found in incomng configuration";
+        KARABO_LOG_ERROR << "ERROR: no ModuleSet found in incoming configuration";
         return;
       }
 
@@ -1974,12 +1974,14 @@ namespace karabo {
       {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         checkPathExists(fileName);
-        const auto h5config = m_ppt->getHDF5ConfigData(fileName);
+        const auto h5config = m_ppt->getHDF5ConfigData(fileName); // no need to use an object of class for calling static function,\
+                                                                  // could be resolved like SuS::DSSC_PPT_API::getHDF5ConfigData(fileName)  
         DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5",h5config);
       }
 #else
-      KARABO_LOG_INFO << "HDF5 not installed";
-#endif
+      KARABO_LOG_INFO << "HDF5 not installed";     
+      
+#endif    
     }
 
 
