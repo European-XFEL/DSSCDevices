@@ -106,15 +106,19 @@ void DsscConfigHashWriter::addConfiguration(Hash& _hash, const DsscHDF5RegisterC
 
     hsize_t datasize = registerConfig.numberOfModules[modSet];
     
-    std::vector<uint32_t> modulesvec(datasize);
+    /*std::vector<uint32_t> modulesvec(datasize); 
     std::vector<uint32_t> outputsvec(datasize);
     std::copy(registerConfig.modules[modSet].data(),
             registerConfig.modules[modSet].data() + datasize, modulesvec.begin());
     std::copy(registerConfig.outputs[modSet].data(), 
             registerConfig.outputs[modSet].data() + datasize, outputsvec.begin());
+    //*/
     
-    _hash.set<std::vector<uint32_t>>(setDirName + "Modules", modulesvec);
-    _hash.set<std::vector<uint32_t>>(setDirName + "Outputs", outputsvec);
+    karabo::util::NDArray modulesvec((uint32_t*)registerConfig.modules[modSet].data(), datasize);
+    karabo::util::NDArray outputsvec((uint32_t*)registerConfig.outputs[modSet].data(), datasize);
+    
+    _hash.set<karabo::util::NDArray>(setDirName + "Modules", modulesvec);
+    _hash.set<karabo::util::NDArray>(setDirName + "Outputs", outputsvec);
 
     _hash.set<uint32_t>(setDirName + "NumBitsPerModule", registerConfig.numBitsPerModule[modSet]);
     _hash.set<uint32_t>(setDirName + "Address", registerConfig.addresses[modSet]);
@@ -132,10 +136,12 @@ void DsscConfigHashWriter::addConfiguration(Hash& _hash, const DsscHDF5RegisterC
       _hash.set<uint32_t>(sigDirName + "ActiveLow", registerConfig.activeLow[modSet][sig]);
       _hash.set<uint32_t>(sigDirName + "AccessLevel", registerConfig.accessLevels[modSet][sig]);
       
-      std::vector<uint32_t> regdatavec(datasize);
+      /*std::vector<uint32_t> regdatavec(datasize);
       std::copy(registerConfig.registerData[modSet][sig].data(),
-              registerConfig.registerData[modSet][sig].data() + datasize, regdatavec.begin());
-      _hash.set<std::vector<uint32_t>>(sigDirName + "ConfigValues", regdatavec);
+              registerConfig.registerData[modSet][sig].data() + datasize, regdatavec.begin());//*/
+      
+      karabo::util::NDArray regdatavec((uint32_t*)registerConfig.registerData[modSet][sig].data(), datasize);
+      _hash.set<karabo::util::NDArray>(sigDirName + "ConfigValues", regdatavec);
 
       sig++;
     }
