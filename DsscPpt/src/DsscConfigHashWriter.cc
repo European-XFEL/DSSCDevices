@@ -25,18 +25,21 @@ const std::string DsscConfigHashWriter::m_baseNode = "RUN.DSSC.configuration.";
 DsscConfigHashWriter::DsscConfigHashWriter() {
 }
 
-DsscConfigHashWriter::DsscConfigHashWriter(const DsscConfigHashWriter& orig) {
+DsscConfigHashWriter& DsscConfigHashWriter::getInstance()
+{
+    static DsscConfigHashWriter instance;
+    return instance;
 }
+
 
 DsscConfigHashWriter::~DsscConfigHashWriter() {
 }
 
-void DsscConfigHashWriter::getFullConfigHash(std::string& _fileName, Hash& _hash) {
+void DsscConfigHashWriter::getFullConfigHash(const std::string& _fileName, Hash& _hash) {
     
     const auto h5config = SuS::DSSC_PPT_API::getHDF5ConfigData(_fileName);
 
-    addConfiguration(_hash, h5config);     
-  
+    addConfiguration(_hash, h5config);    
 }
 
 
@@ -94,7 +97,7 @@ void DsscConfigHashWriter::addConfiguration(Hash& _hash, const DsscHDF5RegisterC
   for(const auto & modSetStr : registerConfig.moduleSets){
     moduleSetsStr += modSetStr + ";";
   }
-  _hash.set<std::string>(baseName + ".ModuleSets", moduleSetsStr);
+  _hash.set<std::string>(baseNode + ".ModuleSets", moduleSetsStr);
 
 
   int modSet = 0;
@@ -105,13 +108,13 @@ void DsscConfigHashWriter::addConfiguration(Hash& _hash, const DsscHDF5RegisterC
     
     std::vector<uint32_t> modulesvec(datasize);
     std::vector<uint32_t> outputsvec(datasize);
-    modulesvec.copy(registerConfig.modules[modSet].data(),
+    std::copy(registerConfig.modules[modSet].data(),
             registerConfig.modules[modSet].data() + datasize, modulesvec.begin());
-    outputsvec.copy(registerConfig.outputs[modSet].data(), 
+    std::copy(registerConfig.outputs[modSet].data(), 
             registerConfig.outputs[modSet].data() + datasize, outputsvec.begin());
     
-    _hash.set<uint32_t>(setDirName + "Modules", modulesvec);
-    _hash.set<uint32_t>(setDirName + "Outputs", outputsvec);
+    _hash.set<std::vector<uint32_t>>(setDirName + "Modules", modulesvec);
+    _hash.set<std::vector<uint32_t>>(setDirName + "Outputs", outputsvec);
 
     _hash.set<uint32_t>(setDirName + "NumBitsPerModule", registerConfig.numBitsPerModule[modSet]);
     _hash.set<uint32_t>(setDirName + "Address", registerConfig.addresses[modSet]);
@@ -130,9 +133,9 @@ void DsscConfigHashWriter::addConfiguration(Hash& _hash, const DsscHDF5RegisterC
       _hash.set<uint32_t>(sigDirName + "AccessLevel", registerConfig.accessLevels[modSet][sig]);
       
       std::vector<uint32_t> regdatavec(datasize);
-      regdatavec.copy(registerConfig.registerData[modSet][sig].data(),
-              egisterConfig.registerData[modSet][sig].data() + datasize, regdatavec.begin());
-      _hash.set<uint32_t>(sigDirName + "ConfigValues", regdatavec);
+      std::copy(registerConfig.registerData[modSet][sig].data(),
+              registerConfig.registerData[modSet][sig].data() + datasize, regdatavec.begin());
+      _hash.set<std::vector<uint32_t>>(sigDirName + "ConfigValues", regdatavec);
 
       sig++;
     }

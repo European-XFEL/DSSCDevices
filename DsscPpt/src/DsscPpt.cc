@@ -17,6 +17,7 @@
 #include "CHIPTrimmer.h"
 #include "utils.h"
 #include "DsscModuleInfo.h"
+#include "DsscConfigHashWriter.hh"
 
 using namespace std;
 using namespace karabo::util;
@@ -25,6 +26,7 @@ using namespace karabo::io;
 using namespace karabo::net;
 using namespace karabo::xms;
 using namespace karabo::core;
+
 
 // cwd is karabo/var/data/
 #define DEFAULTCONF "ConfigFiles/session.conf"
@@ -146,6 +148,11 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("storeFullConfigHDF5").displayedName("Save HDF5 Config").description("Store Configuration as HDF5")
                 .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
+                .commit();
+        
+        SLOT_ELEMENT(expected)
+                .key("writeFullConfigHashOut").displayedName("Send Config Data Hash").description("Sending full config data hash through chennel")
+                .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::UNKNOWN)
                 .commit();
 
         PATH_ELEMENT(expected).key("linuxBinaryName")
@@ -1051,6 +1058,7 @@ namespace karabo {
       KARABO_SLOT(saveConfiguration);
       KARABO_SLOT(storeFullConfigFile);
       KARABO_SLOT(storeFullConfigHDF5);
+      KARABO_SLOT(writeFullConfigHashOut);
 
       KARABO_SLOT(setSendingASICs);
       KARABO_SLOT(programLMKsAuto);
@@ -1091,7 +1099,7 @@ namespace karabo {
 
       m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(new SuS::PPTFullConfig(get<string>("fullConfigFileName"))));
       if(!m_ppt->fullChipConfig->isGood()){
-        DEVICE_ERROR("FullConfigFile invalid");
+        DEVICE_ERROR("FullConfigFile invalid");        
         return;
       }
 
@@ -1982,6 +1990,23 @@ namespace karabo {
       KARABO_LOG_INFO << "HDF5 not installed";     
       
 #endif    
+    }
+    
+    void DsscPpt::writeFullConfigHashOut()
+    {
+      Hash hash;  
+      const auto fileName = get<string>("fullConfigFileName");
+      {
+        DsscScopedLock lock(&m_accessToPptMutex,__func__);
+        if(checkPathExists(fileName)){
+            DsscConfigHashWriter::getInstance().getFullConfigHash(fileName, hash);        
+        }else return;
+      }      
+      
+      std::cout << "Hash is generated!!!" << std::endl; 
+      
+      std::cout << hash << std::endl;
+  
     }
 
 

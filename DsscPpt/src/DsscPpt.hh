@@ -14,6 +14,7 @@
 #include <karabo/karabo.hpp>
 
 #include "DsscPptAPI.hh"
+#include "DsscConfigHashWriter.hh"
 /**
  * The main Karabo namespace
  */
@@ -376,6 +377,8 @@ namespace karabo {
 
         void setThrottleDivider();
 
+        void writeFullConfigHashOut();
+
         class ContModeKeeper {
         public:
 
@@ -421,7 +424,6 @@ namespace karabo {
         std::string pixel_CurrIOBNumber;
 
         bool m_lastTrainIdPolling = false;
-
     };
 }
 
