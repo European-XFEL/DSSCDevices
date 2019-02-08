@@ -972,6 +972,11 @@ namespace karabo {
         INPUT_CHANNEL(expected).key("registerConfigInput")
                 .displayedName("Input")
                 .commit();
+        
+            // Output channel for the DAQ
+        OUTPUT_CHANNEL(expected).key("daqOutput")
+                .displayedName("DAQ Output")                                   
+                .commit();
 
     }
 
@@ -1091,6 +1096,7 @@ namespace karabo {
       if (m_pollThread->joinable()) {
         m_pollThread->join();
       }
+      this->signalEndOfStream("daqOutput"); 
     }
 
     void DsscPpt::initialize()
@@ -1994,18 +2000,18 @@ namespace karabo {
     
     void DsscPpt::writeFullConfigHashOut()
     {
-      Hash hash;  
+      Hash hashout;  
       const auto fileName = get<string>("fullConfigFileName");
       {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         if(checkPathExists(fileName)){
-            DsscConfigHashWriter::getInstance().getFullConfigHash(fileName, hash);        
+            karabo::getFullConfigHash(fileName, hashout);        
         }else return;
-      }      
+      }             
+      std::cout << hashout << std::endl;
+      const karabo::util::Timestamp& actualTimestamp = this->getActualTimestamp(); 
       
-      std::cout << "Hash is generated!!!" << std::endl; 
-      
-      std::cout << hash << std::endl;
+      this->writeChannel("daqOutput", hashout, actualTimestamp);
   
     }
 

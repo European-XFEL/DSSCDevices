@@ -30,30 +30,12 @@ using namespace karabo::core;
 
 namespace karabo {
 
-    class DsscConfigHashWriter {
-    public:
-        DsscConfigHashWriter(const DsscConfigHashWriter& orig) = delete;
-        virtual ~DsscConfigHashWriter();
 
-        void getFullConfigHash(const std::string&, Hash&);
+    void getFullConfigHash(const std::string&, Hash&);
 
-        void addMapData(Hash&, const std::string&, const std::map<std::string, uint32_t>&);
-
-        const static std::string m_baseNode;
-
-        static DsscConfigHashWriter& getInstance();
+    void addMapData(Hash&, const std::string&, const std::map<std::string, uint32_t>&);
 
 
-    private:
-        DsscConfigHashWriter();
-
-
-        void addConfiguration(Hash& _resHash, const DsscHDF5ConfigData& _h5config);
-        void addConfiguration(Hash&, const DsscHDF5RegisterConfigVec&);
-        void addConfiguration(Hash&, const DsscHDF5RegisterConfig & registerConfig);
-        void addConfiguration(Hash&, std::string, const DsscHDF5SequenceData&);
-
-    };
 } //namespace karabo
 
 #endif /* DSSCCONFIGHASHWRITER_HH */
