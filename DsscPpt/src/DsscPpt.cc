@@ -974,8 +974,8 @@ namespace karabo {
                 .commit();
         
             // Output channel for the DAQ
-        OUTPUT_CHANNEL(expected).key("daqOutput")
-                .displayedName("DAQ Output")                                   
+        NODE_ELEMENT(expected).key(karabo::s_dsscConfBaseNode)
+                .displayedName("Meta Data")                             
                 .commit();
 
     }
@@ -985,7 +985,7 @@ namespace karabo {
       : Device<>(config),
         m_keepAcquisition(false), m_keepPolling(false),
         m_pollThread(), m_acquisitionThread(),
-        epcTag("epcParam")
+        epcTag("epcParam"), m_dsscConfigtoSchema()
     {
 
       KARABO_INITIAL_FUNCTION(initialize);
@@ -2004,14 +2004,16 @@ namespace karabo {
       const auto fileName = get<string>("fullConfigFileName");
       {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
-        if(checkPathExists(fileName)){
-            karabo::getFullConfigHash(fileName, hashout);        
+        if(checkPathExists(fileName)){            
+            bool schemaUpdateRequired = m_dsscConfigtoSchema.getFullConfigHash(fileName, hashout);        
+            if (schemaUpdateRequired) {
+                const karabo::util::Schema& update = m_dsscConfigtoSchema.getUpdatedSchema();
+                this->updateSchema(update, true);                
+            }
+            this->set(hashout);
+            
         }else return;
-      }             
-      std::cout << hashout << std::endl;
-      const karabo::util::Timestamp& actualTimestamp = this->getActualTimestamp(); 
-      
-      this->writeChannel("daqOutput", hashout, actualTimestamp);
+      }                  
   
     }
 

@@ -19,24 +19,42 @@
 
 #include <karabo/karabo.hpp>
 
-#include "DsscPpt.hh"
-
-using namespace karabo::util;
-using namespace karabo::log;
-using namespace karabo::io;
-using namespace karabo::net;
-using namespace karabo::xms;
-using namespace karabo::core;
+#include "DsscPptAPI.hh"
 
 namespace karabo {
 
 
-    void getFullConfigHash(const std::string&, Hash&);
+    static const std::string s_dsscConfBaseNode = "RunMetaData";
 
-    void addMapData(Hash&, const std::string&, const std::map<std::string, uint32_t>&);
+    class DsscPpt;
+
+    class DsscH5ConfigToSchema {
+
+    public:
+        DsscH5ConfigToSchema();
+        virtual ~DsscH5ConfigToSchema();
+
+        bool getFullConfigHash(const std::string& filename, karabo::util::Hash& hash);
+        karabo::util::Schema getUpdatedSchema();
 
 
-} //namespace karabo
+        void addConfiguration(karabo::util::Hash& hash, const DsscHDF5ConfigData& configData);
+        void addConfiguration(karabo::util::Hash& hash, const DsscHDF5RegisterConfigVec& registerConfigVec);
+        void addConfiguration(karabo::util::Hash& hash, const DsscHDF5RegisterConfig & registerConfig);
+        void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscHDF5SequenceData& sequenceData);
+
+        void addMapData(karabo::util::Hash& hash, const std::string& node, const std::map<std::string, uint32_t>& mapData);
+
+    private:
+
+        void HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path);
+
+        karabo::util::Hash m_lastHash;
+
+
+    };
+
+}//namespace karabo
 
 #endif /* DSSCCONFIGHASHWRITER_HH */
 

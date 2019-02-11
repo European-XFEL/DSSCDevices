@@ -35,7 +35,7 @@
  *         sendData -> ACQUIRING
  */
 namespace karabo {
-
+    
     class SmartMutex : public boost::mutex {
     public:
         using boost::mutex::mutex;
@@ -424,6 +424,7 @@ namespace karabo {
         std::string pixel_CurrIOBNumber;
 
         bool m_lastTrainIdPolling = false;
+        DsscH5ConfigToSchema m_dsscConfigtoSchema;
     };
 }
 
