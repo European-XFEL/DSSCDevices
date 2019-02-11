@@ -15,6 +15,7 @@
 
 #include "DsscPptAPI.hh"
 #include "DsscConfigHashWriter.hh"
+
 /**
  * The main Karabo namespace
  */
@@ -35,39 +36,38 @@
  *         sendData -> ACQUIRING
  */
 namespace karabo {
-    
-    class SmartMutex : public boost::mutex {
+
+    class SmartMutex : public boost::mutex{
     public:
         using boost::mutex::mutex;
 
-        void unlock() {
-            m_origin = "";
-            boost::mutex::unlock();
+        void unlock(){
+          m_origin = "";
+          boost::mutex::unlock();
         }
-
-        void trylock(const std::string & info) {
-            if (!try_lock()) {
-                std::cout << "---- SmarMutex could not lock mutex at " << info << ". Has been reserved by " << m_origin << std::endl;
-            } else {
-                // this->lock();
-            }
-            m_origin = info;
-            //std::cout << "---- SmarMutex locked mutex at " << info << "." << std::endl;
+        void trylock(const std::string & info){
+          if(!try_lock()){
+            std::cout << "---- SmarMutex could not lock mutex at " << info << ". Has been reserved by " << m_origin << std::endl;
+          }else{
+           // this->lock();
+          }
+          m_origin = info;
+          //std::cout << "---- SmarMutex locked mutex at " << info << "." << std::endl;
         }
         std::string m_origin;
     };
 
-    class DsscScopedLock {
+    class DsscScopedLock{
     public:
-
         DsscScopedLock(SmartMutex * mutex, const std::string & info = "")
-        : m_mutex(mutex) {
-            m_mutex->trylock(info);
-        }
+         : m_mutex(mutex)
+         {
+           m_mutex->trylock(info);
+         }
 
-        ~DsscScopedLock() {
-            m_mutex->unlock();
-            //std::cout << "---- SmarMutex unlocked mutex at " << m_mutex->m_origin << "." << std::endl;
+        ~DsscScopedLock(){
+          m_mutex->unlock();
+          //std::cout << "---- SmarMutex unlocked mutex at " << m_mutex->m_origin << "." << std::endl;
         }
     private:
         SmartMutex * m_mutex;
@@ -76,6 +76,7 @@ namespace karabo {
     /** DSSC Patch Panel Transceiver C++ Karabo device
      */
     class DsscPpt : public karabo::core::Device<> {
+
     public:
 
         // Add reflection and version information to this class
@@ -109,7 +110,7 @@ namespace karabo {
     private: // State-machine call-backs (override)
 
         void receiveRegisterConfiguration(const util::Hash& data,
-                const xms::InputChannel::MetaData& meta);
+                                          const xms::InputChannel::MetaData& meta);
 
         void receiveSequencerConfig(const util::Hash& data);
         void receiveBurstParams(const util::Hash& data);
@@ -149,7 +150,7 @@ namespace karabo {
 
         void open();
         void close();
-        void stopAcquisition();
+        void stopAcquisition();     
         void startAcquisition();
         void startBurstAcquisition();
         void runStandAlone();
@@ -253,7 +254,7 @@ namespace karabo {
         void startManualBurst();
         void startManualBurstBtn();
         void readoutTestPattern();
-
+        
         void startSingleCycle();
 
         void updateNumFramesToSend();
@@ -314,11 +315,11 @@ namespace karabo {
         void updateGuiMeasurementParameters();
         void updateGuiEnableDatapath();
 
-        void updateEPCConfigSchema(const std::string & configFileName);
-        void updateIOBConfigSchema(const std::string & configFileName);
-        void updateJTAGConfigSchema(const std::string & configFileName);
-        void updatePixelConfigSchema(const std::string & configFileName);
-        void updateSeqConfigSchema(const std::string & configFileName);
+        void updateEPCConfigSchema( const std::string & configFileName );
+        void updateIOBConfigSchema( const std::string & configFileName );
+        void updateJTAGConfigSchema( const std::string & configFileName );
+        void updatePixelConfigSchema( const std::string & configFileName );
+        void updateSeqConfigSchema( const std::string & configFileName );
 
         void getIOBSerialIntoGui(int iobNumber);
         void getIOBTempIntoGui(int iobNumber);
@@ -376,33 +377,36 @@ namespace karabo {
         void SaveQSFPNetConfig();
 
         void setThrottleDivider();
-
         void writeFullConfigHashOut();
 
-        class ContModeKeeper {
-        public:
 
-            ContModeKeeper(DsscPpt *ppt) : dsscPpt(ppt), lastState(ppt->getState()) {
-                if (lastState == util::State::ACQUIRING || lastState == util::State::STARTED) {
-                    if (lastState == util::State::ACQUIRING) {
-                        dsscPpt->runAcquisition(false);
-                    }
-                    dsscPpt->runContMode(false);
+
+        class ContModeKeeper{
+          public:
+            ContModeKeeper(DsscPpt *ppt) : dsscPpt(ppt),lastState(ppt->getState()){
+              if(lastState == util::State::ACQUIRING || lastState == util::State::STARTED)
+              {
+                if(lastState == util::State::ACQUIRING){
+                  dsscPpt->runAcquisition(false);
                 }
-                dsscPpt->updateState(util::State::CHANGING);
+                dsscPpt->runContMode(false);
+              }
+              dsscPpt->updateState(util::State::CHANGING);
             }
 
-            ~ContModeKeeper() {
-                if (lastState == util::State::ACQUIRING || lastState == util::State::STARTED) {
-                    dsscPpt->runContMode(true);
-                    if (lastState == util::State::ACQUIRING) {
-                        dsscPpt->runAcquisition(true);
-                    }
+
+            ~ContModeKeeper(){
+              if(lastState == util::State::ACQUIRING || lastState == util::State::STARTED)
+              {
+                dsscPpt->runContMode(true);
+                if(lastState == util::State::ACQUIRING){
+                  dsscPpt->runAcquisition(true);
                 }
-                dsscPpt->updateState(lastState);
+              }
+              dsscPpt->updateState(lastState);
             }
 
-        private:
+          private:
             DsscPpt *dsscPpt;
             util::State lastState;
         };
@@ -412,10 +416,10 @@ namespace karabo {
         bool m_keepPolling;
         boost::shared_ptr<boost::thread> m_pollThread;
         boost::shared_ptr<boost::thread> m_acquisitionThread;
-        SmartMutex m_accessToPptMutex;
-        boost::mutex m_outMutex;
-        PPT_Pointer m_ppt; // Use your main PPT class here
-        karabo::util::Schema m_schema;
+        SmartMutex                       m_accessToPptMutex;
+        boost::mutex                     m_outMutex;
+        PPT_Pointer                      m_ppt;   // Use your main PPT class here
+        karabo::util::Schema             m_schema;
         std::string epcTag;
         std::string ethTag;
 
@@ -425,6 +429,7 @@ namespace karabo {
 
         bool m_lastTrainIdPolling = false;
         DsscH5ConfigToSchema m_dsscConfigtoSchema;
+
     };
 }
 
