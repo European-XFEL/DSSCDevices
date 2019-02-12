@@ -157,7 +157,8 @@ namespace karabo {
 
                 int sig = 0;
                 for (const auto & signalName : registerConfig.signalNames[modSet]) {
-                    const std::string sigDirName = setDirName + "." + signalName + ".";
+                    //const std::string sigDirName = setDirName + "." + signalName + ".";
+                    const std::string sigDirName = setDirName + signalName + ".";
                     hash.set<std::string>(sigDirName + "BitPositions", registerConfig.bitPositions[modSet][sig]);
 
                     hash.set<uint32_t>(sigDirName + "ReadOnly", registerConfig.readOnly[modSet][sig]);

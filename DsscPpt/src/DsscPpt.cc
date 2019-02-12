@@ -147,7 +147,7 @@ namespace karabo {
 
         SLOT_ELEMENT(expected)
                 .key("storeFullConfigHDF5").displayedName("Save HDF5 Config").description("Store Configuration as HDF5")
-                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::UNKNOWN,State::STARTED,State::ACQUIRING)
                 .commit();
         
         SLOT_ELEMENT(expected)
@@ -1989,7 +1989,7 @@ namespace karabo {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         checkPathExists(fileName);
         const auto h5config = m_ppt->getHDF5ConfigData(fileName); // no need to use an object of class for calling static function,\
-                                                                  // could be resolved like SuS::DSSC_PPT_API::getHDF5ConfigData(fileName)  
+                                                                  // could be resolved like SuS::DSSC_PPT_API::getHDF5ConfigData(fileName)          
         DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5",h5config);
       }
 #else
