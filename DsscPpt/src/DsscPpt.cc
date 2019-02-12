@@ -975,7 +975,7 @@ namespace karabo {
         
             // Output channel for the DAQ
         NODE_ELEMENT(expected).key(karabo::s_dsscConfBaseNode)
-                .displayedName("Meta Data")                             
+                .displayedName("Meta Data")
                 .commit();
 
     }
@@ -2005,12 +2005,17 @@ namespace karabo {
       {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         if(checkPathExists(fileName)){            
-            bool schemaUpdateRequired = m_dsscConfigtoSchema.getFullConfigHash(fileName, hashout);        
+            bool schemaUpdateRequired = m_dsscConfigtoSchema.getFullConfigHash(fileName, hashout);
+            KARABO_LOG_INFO<<"Updating meta config schema: "<<schemaUpdateRequired;
+            
             if (schemaUpdateRequired) {
                 const karabo::util::Schema& update = m_dsscConfigtoSchema.getUpdatedSchema();
                 this->updateSchema(update, true);                
             }
-            this->set(hashout);
+            
+            for (auto it = hashout.get<Hash>(karabo::s_dsscConfBaseNode).begin(); it != hashout.get<Hash>(karabo::s_dsscConfBaseNode).end(); ++it) {
+                set(karabo::s_dsscConfBaseNode+"."+it->getKey(), it->getValueAsAny());
+            }
             
         }else return;
       }                  

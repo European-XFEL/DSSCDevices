@@ -25,10 +25,9 @@ using namespace karabo::core;
 
 namespace karabo {
 
-        DsscH5ConfigToSchema::DsscH5ConfigToSchema() {
-
-        }
-
+        //DsscH5ConfigToSchema::DsscH5ConfigToSchema() {
+        //}
+        
 
         bool DsscH5ConfigToSchema::getFullConfigHash(const std::string& filename, Hash& hash) {
 
@@ -37,10 +36,10 @@ namespace karabo {
 
             if (!karabo::util::similar(hash, m_lastHash)) { // check on similarity of structure, not content
                 m_lastHash = hash;
-                return false;
+                return true;
             }
 
-            return true;
+            return false;
         }
 
 
@@ -56,17 +55,20 @@ namespace karabo {
 
                     case Types::UINT32:
                         UINT32_ELEMENT(expected).key(path + it->getKey())
+                                .daqPolicy(DAQPolicy::OMIT)
                                 .readOnly()
                                 .commit();
                         break;
 
                     case Types::STRING:
                         STRING_ELEMENT(expected).key(path + it->getKey())
+                                .daqPolicy(DAQPolicy::OMIT)
                                 .readOnly()
                                 .commit();
                         break;
                     case Types::VECTOR_UINT32:
                         VECTOR_UINT32_ELEMENT(expected).key(path + it->getKey())
+                                .daqPolicy(DAQPolicy::OMIT)
                                 .readOnly()
                                 .commit();
                         break;
@@ -81,7 +83,7 @@ namespace karabo {
 
         karabo::util::Schema DsscH5ConfigToSchema::getUpdatedSchema() {
             Schema expected;
-            HashToSchema(m_lastHash, expected, s_dsscConfBaseNode);
+            HashToSchema(m_lastHash, expected, "");
             return expected;
         }
 
