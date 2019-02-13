@@ -17,6 +17,7 @@
 #include "CHIPTrimmer.h"
 #include "utils.h"
 #include "DsscModuleInfo.h"
+#include "DsscConfigHashWriter.hh"
 
 using namespace std;
 using namespace karabo::util;
@@ -25,6 +26,7 @@ using namespace karabo::io;
 using namespace karabo::net;
 using namespace karabo::xms;
 using namespace karabo::core;
+
 
 // cwd is karabo/var/data/
 #define DEFAULTCONF "ConfigFiles/session.conf"
@@ -145,7 +147,12 @@ namespace karabo {
 
         SLOT_ELEMENT(expected)
                 .key("storeFullConfigHDF5").displayedName("Save HDF5 Config").description("Store Configuration as HDF5")
-                .allowedStates(State::ON,State::STOPPED,State::OFF,State::STARTED,State::ACQUIRING)
+                .allowedStates(State::ON,State::STOPPED,State::OFF,State::UNKNOWN,State::STARTED,State::ACQUIRING)
+                .commit();
+        
+        SLOT_ELEMENT(expected)
+                .key("writeFullConfigHashOut").displayedName("Send Config Data Hash").description("Sending full config data hash through chennel")
+                .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::UNKNOWN)
                 .commit();
 
         PATH_ELEMENT(expected).key("linuxBinaryName")
@@ -965,6 +972,11 @@ namespace karabo {
         INPUT_CHANNEL(expected).key("registerConfigInput")
                 .displayedName("Input")
                 .commit();
+        
+            // Output channel for the DAQ
+        NODE_ELEMENT(expected).key(karabo::s_dsscConfBaseNode)
+                .displayedName("Meta Data")
+                .commit();
 
     }
 
@@ -973,7 +985,7 @@ namespace karabo {
       : Device<>(config),
         m_keepAcquisition(false), m_keepPolling(false),
         m_pollThread(), m_acquisitionThread(),
-        epcTag("epcParam")
+        epcTag("epcParam"), m_dsscConfigtoSchema()
     {
 
       KARABO_INITIAL_FUNCTION(initialize);
@@ -1051,6 +1063,7 @@ namespace karabo {
       KARABO_SLOT(saveConfiguration);
       KARABO_SLOT(storeFullConfigFile);
       KARABO_SLOT(storeFullConfigHDF5);
+      KARABO_SLOT(writeFullConfigHashOut);
 
       KARABO_SLOT(setSendingASICs);
       KARABO_SLOT(programLMKsAuto);
@@ -1083,6 +1096,7 @@ namespace karabo {
       if (m_pollThread->joinable()) {
         m_pollThread->join();
       }
+      this->signalEndOfStream("daqOutput"); 
     }
 
     void DsscPpt::initialize()
@@ -1091,7 +1105,7 @@ namespace karabo {
 
       m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(new SuS::PPTFullConfig(get<string>("fullConfigFileName"))));
       if(!m_ppt->fullChipConfig->isGood()){
-        DEVICE_ERROR("FullConfigFile invalid");
+        DEVICE_ERROR("FullConfigFile invalid");        
         return;
       }
 
@@ -1183,7 +1197,7 @@ namespace karabo {
       utils::split(data.get<string>("moduleSets"),';',moduleSetNames,0);
 
       if(moduleSetNames.empty()){
-        KARABO_LOG_ERROR << "ERROR: no ModuleSet found in incomng configuration";
+        KARABO_LOG_ERROR << "ERROR: no ModuleSet found in incoming configuration";
         return;
       }
 
@@ -1974,12 +1988,38 @@ namespace karabo {
       {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         checkPathExists(fileName);
-        const auto h5config = m_ppt->getHDF5ConfigData(fileName);
+        const auto h5config = m_ppt->getHDF5ConfigData(fileName); // no need to use an object of class for calling static function,\
+                                                                  // could be resolved like SuS::DSSC_PPT_API::getHDF5ConfigData(fileName)          
         DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5",h5config);
       }
 #else
-      KARABO_LOG_INFO << "HDF5 not installed";
-#endif
+      KARABO_LOG_INFO << "HDF5 not installed";     
+      
+#endif    
+    }
+    
+    void DsscPpt::writeFullConfigHashOut()
+    {
+      Hash hashout;  
+      const auto fileName = get<string>("fullConfigFileName");
+      {
+        DsscScopedLock lock(&m_accessToPptMutex,__func__);
+        if(checkPathExists(fileName)){            
+            bool schemaUpdateRequired = m_dsscConfigtoSchema.getFullConfigHash(fileName, hashout);
+            KARABO_LOG_INFO<<"Updating meta config schema: "<<schemaUpdateRequired;
+            
+            if (schemaUpdateRequired) {
+                const karabo::util::Schema& update = m_dsscConfigtoSchema.getUpdatedSchema();
+                this->updateSchema(update, true);                
+            }
+            
+            for (auto it = hashout.get<Hash>(karabo::s_dsscConfBaseNode).begin(); it != hashout.get<Hash>(karabo::s_dsscConfBaseNode).end(); ++it) {
+                set(karabo::s_dsscConfBaseNode+"."+it->getKey(), it->getValueAsAny());
+            }
+            
+        }else return;
+      }                  
+  
     }
 
 

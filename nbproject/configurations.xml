@@ -5,6 +5,7 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>DsscAsicProcessor/src/DsscAsicProcessor.hh</itemPath>
+      <itemPath>DsscPpt/src/DsscConfigHashWriter.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.hh</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.hh</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.hh</itemPath>
@@ -24,6 +25,7 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>DsscAsicProcessor/src/DsscAsicProcessor.cc</itemPath>
+      <itemPath>DsscPpt/src/DsscConfigHashWriter.cc</itemPath>
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.cc</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.cc</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cc</itemPath>
@@ -157,6 +159,16 @@
             flavor2="0">
       </item>
       <item path="DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscPpt/src/DsscConfigHashWriter.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="DsscPpt/src/DsscConfigHashWriter.hh"
             ex="false"
             tool="3"
             flavor2="0">
@@ -298,6 +310,16 @@
             flavor2="0">
       </item>
       <item path="DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscPpt/src/DsscConfigHashWriter.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="DsscPpt/src/DsscConfigHashWriter.hh"
             ex="false"
             tool="3"
             flavor2="0">
