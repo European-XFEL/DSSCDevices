@@ -776,7 +776,7 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .displayedName("Main processor dev id template")
     .description("Template to create main processor device id from. Use {QUAD} to express quad id replacement,"
                  "{MOD} to express module id replacement. Both are optional.")
-    .assignmentOptional().defaultValue("DsscMainProcessor_{QUAD}_Mod{MOD}")
+    .assignmentOptional().defaultValue("DET_LAB_DSSC1M-1/CAL/PROC_{QUAD}M{MOD}")
     .init()
     .commit();
 
