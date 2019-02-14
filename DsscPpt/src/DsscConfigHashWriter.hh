@@ -43,9 +43,9 @@ namespace karabo {
 
         void HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path);
 
-        void addConfiguration(karabo::util::Hash& hash, const DsscHDF5ConfigData& configData);
-        void addConfiguration(karabo::util::Hash& hash, const DsscHDF5RegisterConfigVec& registerConfigVec);
-        void addConfiguration(karabo::util::Hash& hash, const DsscHDF5RegisterConfig & registerConfig);
+        void addConfiguration(karabo::util::Hash& hash, DsscHDF5ConfigData& configData);
+        void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfigVec& registerConfigVec);
+        void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfig & registerConfig);
         void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscHDF5SequenceData& sequenceData);
 
         karabo::util::Hash m_lastHash;
