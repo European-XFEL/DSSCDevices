@@ -59,20 +59,23 @@ namespace karabo {
                     case Types::UINT32:
                         UINT32_ELEMENT(expected).key(path + it->getKey())
                                 .daqPolicy(DAQPolicy::OMIT)
-                                .readOnly()
+                                .init()
+                                .assignmentOptional().noDefaultValue()
                                 .commit();
                         break;
 
                     case Types::STRING:
                         STRING_ELEMENT(expected).key(path + it->getKey())
                                 .daqPolicy(DAQPolicy::OMIT)
-                                .readOnly()
+                                .init()
+                                .assignmentOptional().noDefaultValue()
                                 .commit();
                         break;
                     case Types::VECTOR_UINT32:
                         VECTOR_UINT32_ELEMENT(expected).key(path + it->getKey())
                                 .daqPolicy(DAQPolicy::OMIT)
-                                .readOnly()
+                                .init()
+                                .assignmentOptional().noDefaultValue()
                                 .commit();
                         break;
 
