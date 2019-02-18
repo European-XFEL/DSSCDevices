@@ -765,6 +765,12 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .displayedName("Ladder Image Output")
     .dataSchema(ladderSchema)
     .commit();
+
+  STRING_ELEMENT(expected).key("dsscPptTempl")
+    .displayedName("DSSC PPT Connection template")
+    .assignmentOptional().defaultValue("DET_LAB_DSSC1M-1/FPGA/PPT_{QUAD}")
+    .reconfigurable()
+    .commit();
   
   STRING_ELEMENT(expected).key("daqConTempl")
     .displayedName("DAQ Connection template")
@@ -776,7 +782,7 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .displayedName("Main processor dev id template")
     .description("Template to create main processor device id from. Use {QUAD} to express quad id replacement,"
                  "{MOD} to express module id replacement. Both are optional.")
-    .assignmentOptional().defaultValue("DET_LAB_DSSC1M-1/CAL/PROC_{QUAD}M{MOD}")
+    .assignmentOptional().defaultValue("DET_LAB_DSSC1M-1/CAL/PROC_{QUAD}")
     .init()
     .commit();
 
@@ -873,7 +879,10 @@ void DsscLadderParameterTrimming::initialization()
 
   m_quadrantServerId = get<string>("pptDeviceServerId"); //"pptDeviceServer1"; // "Dssc" + m_quadrantId + "DeviceServer";
 
-  m_pptDeviceId = "DsscPpt_" + m_quadrantId;
+
+  std::string main_ppt_templ = get<std::string>("dsscPptTempl");
+  boost::replace_all(main_ppt_templ, "{QUAD}", m_quadrantId);
+  m_pptDeviceId = main_ppt_templ;  
 
   m_recvServerId = get<string>("recvDeviceServerId");
 
