@@ -1926,10 +1926,22 @@ void DsscLadderParameterTrimming::initTrimming()
 
 bool DsscLadderParameterTrimming::allDevicesAvailable()
 {
-  if(!isPPTDeviceAvailable()) return false;
+  if(!isPPTDeviceAvailable()) 
+  {
+     std::cout << "Ppt is not connected." << std::endl;
+     return false;
+  }
 
-  if(!checkPPTInputConnected()) return false;
-  if(!allReceiverDevicesAvailable()) return false;
+  if(!checkPPTInputConnected())
+  {
+     std::cout << "Ppt input is not connected." << std::endl;
+     return false;
+  }
+  if(!allReceiverDevicesAvailable()) 
+  {
+     std::cout << "Not all receiver devices are avilable" <<std::endl;
+     return false;
+  }
 
   return true;
 }
@@ -2046,10 +2058,12 @@ bool DsscLadderParameterTrimming::startDsscPptInstance()
     initialConfig.set<string>("selEnvironment", "MANNHEIM");
     initialConfig.set<string>("pptHost", "192.168.0.120");
     initialConfig.set<unsigned int>("numActiveASICs", 1);
+    initialConfig.set<string>("quadrantId", get<std::string>("quadrantId"));
   } else if (env == "FENICE") {
     initialConfig.set<string>("selEnvironment", "HAMBURG");
     initialConfig.set<string>("pptHost", "192.168.0.125");
     initialConfig.set<unsigned int>("numActiveASICs", 16);
+    initialConfig.set<string>("quadrantId", get<std::string>("quadrantId"));
   }
 
 
