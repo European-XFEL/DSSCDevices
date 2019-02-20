@@ -313,6 +313,7 @@ namespace karabo {
       KARABO_SLOT(clearSramBlacklist)
 
       KARABO_SLOT(acquireBaselineValues)
+      KARABO_SLOT(runHistogramAcquisition)
 
     }
 
@@ -596,7 +597,8 @@ namespace karabo {
           
           if(m_iterationCnt == m_numIterations)
           {
-            savePixelHistos();    
+            //savePixelHistos();    
+            displayPixelHistogram();  
             stop();
           }
         }
@@ -772,10 +774,11 @@ namespace karabo {
       if(!bins.empty()){
         set<unsigned long long>("histoGen.pixelhistoCnt",histoValueCount);
         set<vector<unsigned short>>("histoGen.pixelHistoBins",std::move(bins));
-        if(get<bool>("istoGen.displayHistoLogscale")){
+        if(get<bool>("histoGen.displayHistoLogscale")){
           std::transform(binValues.begin(),binValues.end(),binValues.begin(),[](int x){if(x==0) return 1; return x;});
         }
         set<vector<unsigned int>>("histoGen.pixelHistoBinValues",std::move(binValues));
       }
+
     }
 }
