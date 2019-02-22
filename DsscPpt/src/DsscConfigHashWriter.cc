@@ -24,7 +24,7 @@ using namespace karabo::net;
 using namespace karabo::xms;
 using namespace karabo::core;
 
-auto NOSPACES = [](std::string& str)->std::string& {std::replace(str.begin(), str.end(), ' ', '_'); return str;};
+#define NOSPACES(str) [](std::string& p)->std::string& {std::replace(p.begin(), p.end(), ' ', '_'); return p;}(str)
 
 namespace karabo {
     
