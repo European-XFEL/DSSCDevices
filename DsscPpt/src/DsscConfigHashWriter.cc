@@ -24,7 +24,7 @@ using namespace karabo::net;
 using namespace karabo::xms;
 using namespace karabo::core;
 
-#define NOSPACES(str) std::replace(str.begin(), str.end(), ' ', '_')
+auto NOSPACES = [](std::string& str)->std::string& {std::replace(str.begin(), str.end(), ' ', '_'); return str;};
 
 namespace karabo {
     
@@ -133,8 +133,7 @@ namespace karabo {
 
             const std::string baseNodeMain(s_dsscConfBaseNode + ".");
 
-            NOSPACES(registerConfig.registerName);
-            const std::string baseNode = baseNodeMain + registerConfig.registerName;
+            const std::string baseNode = baseNodeMain + NOSPACES(registerConfig.registerName);
 
             hash.set<uint32_t>(baseNode + ".NumModuleSets", registerConfig.numModuleSets);
 
@@ -147,8 +146,7 @@ namespace karabo {
 
             int modSet = 0;
             for (auto & modSetName : registerConfig.moduleSets) {
-                NOSPACES(modSetName);
-                const std::string setDirName = baseNode + "." + modSetName + ".";
+                const std::string setDirName = baseNode + "." + NOSPACES(modSetName) + ".";
 
                 hsize_t datasize = registerConfig.numberOfModules[modSet];
 
@@ -164,8 +162,7 @@ namespace karabo {
 
                 int sig = 0;
                 for (auto & signalName : registerConfig.signalNames[modSet]) {
-                    NOSPACES(signalName);
-                    const std::string sigDirName = setDirName + signalName + ".";
+                    const std::string sigDirName = setDirName + NOSPACES(signalName) + ".";
                     hash.set<std::string>(sigDirName + "BitPositions", registerConfig.bitPositions[modSet][sig]);
 
                     hash.set<uint32_t>(sigDirName + "ReadOnly", registerConfig.readOnly[modSet][sig]);
@@ -189,8 +186,7 @@ namespace karabo {
             
             for (const auto & mapItem : sequenceData) {
                 std::string path = mapItem.first;
-                NOSPACES(path);
-                hash.set<uint32_t>(basenode + path, mapItem.second);
+                hash.set<uint32_t>(basenode + NOSPACES(path), mapItem.second);
             }
         }
 
