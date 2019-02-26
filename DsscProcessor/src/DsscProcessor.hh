@@ -83,6 +83,8 @@ namespace karabo {
          * background values are only applied to the pixel data
          */
         void accumulate();
+   
+        void saveHistograms();
 
         void stop();
 

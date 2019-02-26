@@ -199,6 +199,11 @@ namespace karabo {
             .displayedName("Start Histogram Acquisition")
             .description("remove sram correction data, wont be applied anymore")
             .commit();
+
+        SLOT_ELEMENT(expected).key("saveHistograms")
+            .displayedName("Save Histograms")
+            .description("save acquired histograms")
+            .commit();
         
         PATH_ELEMENT(expected).key("outputDir")
             .displayedName("Output Directory")
@@ -315,6 +320,8 @@ namespace karabo {
       KARABO_SLOT(acquireBaselineValues)
       KARABO_SLOT(runHistogramAcquisition)
 
+      KARABO_SLOT(saveHistograms)
+
     }
 
 
@@ -408,6 +415,11 @@ namespace karabo {
     {
       set<bool>("run",false);
       changeDeviceState(State::STOPPED);
+    }
+
+    void DsscProcessor::saveHistograms()
+    {
+      savePixelHistos();
     }
 
     void DsscProcessor::changeDeviceState(const util::State & newState)
