@@ -509,6 +509,12 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .assignmentOptional().defaultValue(12345).reconfigurable()
     .commit();
 
+  UINT32_ELEMENT(expected).key("discrValPixelProc")
+    .displayedName("Discr. param for pixel processing")
+    .description("Specify the amplitude discrimination parameter for pixel processing routines.")
+    .assignmentOptional().defaultValue(50).reconfigurable()
+    .commit();
+
   UINT32_ELEMENT(expected).key("numFramesToReceive")
     .displayedName("Num Frames to Receive")
     .description("Number of frame to process for all asics")
@@ -529,6 +535,12 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .key("measureBurstOffsetSweep").displayedName("Measure Burst Offset Sweep")
     .description("Starts a parameter sweep of the burst_wait_offset parameter in 10 ns steps")
     .commit();
+
+  SLOT_ELEMENT(expected)
+    .key("measureBurstOffsetSweepDiscr").displayedName("Measure Burst Offset Sweep using discr values")
+    .description("Starts a parameter sweep of the burst_wait_offset parameter in 10 ns steps using integral discriminated pixel number/amplitudes")
+    .commit();
+
 
   SLOT_ELEMENT(expected)
     .key("measureADCGainMap").displayedName("Measure ADC Gain Map")
@@ -673,6 +685,12 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
             .readOnly().initialValue(std::vector<double>(20,0.0))
             .commit();
 
+  VECTOR_UINT32_ELEMENT(expected).key("pixelBurstSweepPts")
+            .displayedName("Burst Data Values")
+            .readOnly().initialValue(std::vector<unsigned int>(50,0))
+            .commit();
+
+
   BOOL_ELEMENT(expected).key("meanBurstData.showMeanBurstData")
             .displayedName("Show Mean burst Data Graph")
             .description("Prints a graph for selected pixel after all settings are done")
@@ -765,6 +783,12 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .displayedName("Ladder Image Output")
     .dataSchema(ladderSchema)
     .commit();
+
+  STRING_ELEMENT(expected).key("dsscPptTempl")
+    .displayedName("DSSC PPT Connection template")
+    .assignmentOptional().defaultValue("DET_LAB_DSSC1M-1/FPGA/PPT_{QUAD}")
+    .reconfigurable()
+    .commit();
   
   STRING_ELEMENT(expected).key("daqConTempl")
     .displayedName("DAQ Connection template")
@@ -776,7 +800,7 @@ void DsscLadderParameterTrimming::expectedParameters(Schema& expected)
     .displayedName("Main processor dev id template")
     .description("Template to create main processor device id from. Use {QUAD} to express quad id replacement,"
                  "{MOD} to express module id replacement. Both are optional.")
-    .assignmentOptional().defaultValue("DET_LAB_DSSC1M-1/CAL/PROC_{QUAD}M{MOD}")
+    .assignmentOptional().defaultValue("DET_LAB_DSSC1M-1/CAL/PROC_{QUAD}")
     .init()
     .commit();
 
@@ -808,6 +832,7 @@ DsscLadderParameterTrimming::DsscLadderParameterTrimming(const karabo::util::Has
   KARABO_SLOT(addValueToPxRegSignal);
   KARABO_SLOT(enableMonBusInCols);
   KARABO_SLOT(measureBurstOffsetSweep);
+  KARABO_SLOT(measureBurstOffsetSweepDiscr);
   KARABO_SLOT(measureInjectionSweepSlopes);
   KARABO_SLOT(measureADCGainMap);
   KARABO_SLOT(measureBinningInformation);
@@ -873,7 +898,10 @@ void DsscLadderParameterTrimming::initialization()
 
   m_quadrantServerId = get<string>("pptDeviceServerId"); //"pptDeviceServer1"; // "Dssc" + m_quadrantId + "DeviceServer";
 
-  m_pptDeviceId = "DsscPpt_" + m_quadrantId;
+
+  std::string main_ppt_templ = get<std::string>("dsscPptTempl");
+  boost::replace_all(main_ppt_templ, "{QUAD}", m_quadrantId);
+  m_pptDeviceId = main_ppt_templ;  
 
   m_recvServerId = get<string>("recvDeviceServerId");
 
@@ -1917,10 +1945,22 @@ void DsscLadderParameterTrimming::initTrimming()
 
 bool DsscLadderParameterTrimming::allDevicesAvailable()
 {
-  if(!isPPTDeviceAvailable()) return false;
+  if(!isPPTDeviceAvailable()) 
+  {
+     std::cout << "Ppt is not connected." << std::endl;
+     return false;
+  }
 
-  if(!checkPPTInputConnected()) return false;
-  if(!allReceiverDevicesAvailable()) return false;
+  if(!checkPPTInputConnected())
+  {
+     std::cout << "Ppt input is not connected." << std::endl;
+     return false;
+  }
+  if(!allReceiverDevicesAvailable()) 
+  {
+     std::cout << "Not all receiver devices are avilable" <<std::endl;
+     return false;
+  }
 
   return true;
 }
@@ -2037,10 +2077,12 @@ bool DsscLadderParameterTrimming::startDsscPptInstance()
     initialConfig.set<string>("selEnvironment", "MANNHEIM");
     initialConfig.set<string>("pptHost", "192.168.0.120");
     initialConfig.set<unsigned int>("numActiveASICs", 1);
+    initialConfig.set<string>("quadrantId", get<std::string>("quadrantId"));
   } else if (env == "FENICE") {
     initialConfig.set<string>("selEnvironment", "HAMBURG");
     initialConfig.set<string>("pptHost", "192.168.0.125");
     initialConfig.set<unsigned int>("numActiveASICs", 16);
+    initialConfig.set<string>("quadrantId", get<std::string>("quadrantId"));
   }
 
 
@@ -2783,7 +2825,7 @@ void DsscLadderParameterTrimming::measureBurstOffsetSweep()
 
   auto binValues = sweepBurstWaitOffset(measurePixel, paramValues, m_trimStartAddr, m_trimEndAddr);
   // save data
-  const string fileName = get<string>("output") + "/" + utils::getLocalTimeStr() + "_BurstWaitOffset.h5";
+  const string fileName = get<string>("outputDir") + "/" + utils::getLocalTimeStr() + "_BurstWaitOffset.h5";
   DsscHDF5TrimmingDataWriter dataWriter(fileName);
   dataWriter.setMeasurementName("BurstWaitOffsetSweep");
   dataWriter.addVectorData("BurstWaitOffsetData",binValues);
@@ -2804,6 +2846,55 @@ void DsscLadderParameterTrimming::measureBurstOffsetSweep()
   auto maxElement = std::max_element(binValues.begin(), binValues.end());
   int maxIdx = maxElement - binValues.begin();
   KARABO_LOG_INFO << "Max Value = " << *maxElement << " at setting " << paramValues[maxIdx];
+}
+
+void DsscLadderParameterTrimming::measureBurstOffsetSweepDiscr()
+{
+  StateChangeKeeper keeper(this);
+
+  const unsigned int discrVal = get<unsigned int>("discrValPixelProc");
+
+  //std::pair<uint32_t, uint64_t> res_pair = SuS::CHIPInterface::measureDiscrSramCounterValues(utils::getUpCountingVector(utils::s_totalNumPxs), 10, 99, discrVal);
+  //std::cout << "Number of pixels: " << res_pair.first << std::endl;
+  //std::cout << "Integral amplitude: " << res_pair.second << std::endl;
+  //return;
+
+
+  std::vector<int> paramValues;
+  bool ok = utils::getSimpleSweepVector<int>(get<string>("burstWaitOffsetRange"), paramValues);
+  if (!ok) {
+    KARABO_LOG_ERROR << "burstWaitOffsetRange has a bad range";
+    return;
+  }
+
+  auto resValues = sweepBurstWaitOffsetDiscr(paramValues, m_trimStartAddr, m_trimEndAddr, discrVal);
+  // save data
+  //const string fileName = get<string>("outputDir") + "/" + utils::getLocalTimeStr() + "_BurstWaitOffset.h5";
+  //DsscHDF5TrimmingDataWriter dataWriter(fileName);
+  //dataWriter.setMeasurementName("BurstWaitOffsetSweep");
+  //dataWriter.addVectorData("BurstWaitOffsetData",binValues);
+
+  // display data in PixelData vector output
+  //std::vector<double> pixelBurstOffsetData(paramValues.back()+1,0);
+
+  //std::vector<unsigned int> sweepvec(50,0);
+  const uint numParams = resValues.size();
+  int idx = 0;
+  for(const auto it: resValues){
+    std::cout << "Number of pixels in " << idx << " sweep: "  << it.first << std::endl;
+    //sweepvec[idx] = it.first;
+    ++idx;
+  }
+
+
+  //set<vector<unsigned int> >("pixelBurstSweepPts", sweepvec);
+
+
+  //show max value
+  //auto maxElement = std::max_element(binValues.begin(), binValues.end());
+  //int maxIdx = maxElement - binValues.begin();
+  //KARABO_LOG_INFO << "Max Value = " << *maxElement << " at setting " << paramValues[maxIdx];
+//*/
 }
 
 
