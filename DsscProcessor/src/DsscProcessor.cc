@@ -6,6 +6,8 @@
  * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
  */
 
+#include <thread>
+
 #include "DsscProcessor.hh"
 #include "DsscDependencies.h"
 #include "DsscHDF5CorrectionFileReader.h"
@@ -195,6 +197,11 @@ namespace karabo {
             .readOnly()
             .commit();
         
+        FLOAT_ELEMENT(expected).key("dataRate")
+            .displayedName("Data rate")
+            .readOnly()
+            .commit();     
+        
         SLOT_ELEMENT(expected).key("runHistogramAcquisition")
             .displayedName("Start Histogram Acquisition")
             .description("remove sram correction data, wont be applied anymore")
@@ -253,7 +260,22 @@ namespace karabo {
         INPUT_CHANNEL(expected).key("input")
                 .displayedName("Input")
                 .commit();
-
+        
+        SLOT_ELEMENT(expected).key("startPreview")
+            .displayedName("Start preview")
+            .description("Start sending pixel data to output visualization channel")
+            .commit();
+        
+        SLOT_ELEMENT(expected).key("stopPreview")
+            .displayedName("Stop preview")
+            .description("Stop sending pixel data to output visualization channel")
+            .commit();
+        
+        BOOL_ELEMENT(expected).key("preview")
+            .displayedName("Preview")
+            .description("Enabled preview of pixeldata on output channel")
+            .readOnly()
+            .commit();
 
         Schema asicOutSchema;
 
@@ -298,6 +320,17 @@ namespace karabo {
             .displayedName("Mean and RMS Data Output")
             .dataSchema(meanOutSchema)
             .commit();
+        
+        Schema ladderSchema;
+        IMAGEDATA(ladderSchema).key("ladderImage")
+            .setDimensions("128,512")
+            .commit();
+
+        OUTPUT_CHANNEL(expected).key("ladderImageOutput")
+            .displayedName("Ladder Image Output")
+            .dataSchema(ladderSchema)
+            .commit();
+
 
 
     }
@@ -321,11 +354,17 @@ namespace karabo {
       KARABO_SLOT(runHistogramAcquisition)
 
       KARABO_SLOT(saveHistograms)
+              
+      KARABO_SLOT(startPreview)
+      KARABO_SLOT(stopPreview)              
+
+      m_starttime = std::chrono::high_resolution_clock::now();
 
     }
 
 
     DsscProcessor::~DsscProcessor() {
+        m_run = false;
       set<bool>("run",false);
     }
 
@@ -377,6 +416,10 @@ namespace karabo {
               KARABO_LOG_ERROR << "File not found. Could not load SRAM Correction from " << fileName;
             }
           }
+          else if(path.compare("run") == 0)
+          {
+            m_run = incomingReconfiguration.getAs<bool>(path);                
+          }
         }
       }
     }
@@ -408,12 +451,14 @@ namespace karabo {
       resetCounters();
       changeDeviceState(State::ACQUIRING);
       set<bool>("run",true);
+      m_run = true;
     }
 
 
     void DsscProcessor::stop()
     {
       set<bool>("run",false);
+      m_run = false;
       changeDeviceState(State::STOPPED);
     }
 
@@ -440,6 +485,7 @@ namespace karabo {
       m_iterationCnt = 0;
       m_numIterations = get<unsigned int>("numIterations");
       set<bool>("run",false);
+      m_run = false;
 
       set<unsigned int>("iterationCnt",m_iterationCnt);
 
@@ -468,26 +514,25 @@ namespace karabo {
         set<bool>("acquireHistograms",m_acquireHistograms);
         
         changeDeviceState(State::OFF);
+        
+        m_run = get<bool>("run");
+        m_preview = false;
+        set<bool>("preview", false);
+        m_previewImageData = std::vector<uint16_t>(m_imageSize, 0);
     }
 
     void DsscProcessor::onData(const karabo::util::Hash& data,
                                const karabo::xms::InputChannel::MetaData& meta)  //find data for data source
     {
-      if(get<bool>("run") == false){
-        changeDeviceState(State::STOPPED);
-        return; // dont send anything during idle+
-      }
-      changeDeviceState(State::ACQUIRING);
-
-      // resend until stopped from remote
-      if(get<bool>("measureMean") || get<bool>("measureRMS")){
-        if(m_numIterations == m_iterationCnt){
-          sendMeanValues();
-          KARABO_LOG_INFO << "RESENT DATA ";
-          return;
-        }
-      }
-        // verify data is sane
+  
+    
+      auto timenow = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double> diff = timenow - m_starttime;
+      m_starttime = timenow;
+      set<float>("dataRate", 1.0/diff.count());
+      
+      
+                    // verify data is sane
       if (!data.has("image.data")){
         cout << "No Image Data Found in input data " << m_sourceId << endl;
         return;
@@ -501,24 +546,45 @@ namespace karabo {
       if (!data.has("image.trainId")){
         cout << "No trainId Data Found in input data " << m_sourceId << endl;
         return;
-      }
+      } 
 
+      if(m_preview) UpdatePreviewData(data);
+      
+      auto image_data = data.get<util::NDArray>("image.data");
+      auto image_cellId = data.get<util::NDArray>("image.data");
+      auto image_trainId = data.get<util::NDArray>("image.trainId");          
+
+      if(m_run == false){
+        changeDeviceState(State::STOPPED);
+        return; // don't send anything during idle+
+      }
+      changeDeviceState(State::ACQUIRING);
+
+      // resend until stopped from remote
+      if(get<bool>("measureMean") || get<bool>("measureRMS")){
+        if(m_numIterations == m_iterationCnt){
+          sendMeanValues();
+          KARABO_LOG_INFO << "RESENT DATA ";
+          return;
+        }
+      }
+      
       if (data.has("imageFormat"))
       {
         string format = data.get<string>("imageFormat");
         m_inputFormat = utils::DsscTrainData::getFormat(format);
         set<string>("inputDataFormat",format);
 
-        processTrain(data.get<util::NDArray>("image.data"),
-                     data.get<util::NDArray>("image.cellId"),
-                     data.get<util::NDArray>("image.trainId"));
+        processTrain(image_data,
+                     image_cellId,
+                     image_trainId);
       }else{
           m_inputFormat = utils::DsscTrainData::DATAFORMAT::IMAGE;
           set<string>("inputDataFormat","imagewise");
 
-          processTrain(data.get<util::NDArray>("image.data"),
-                       data.get<util::NDArray>("image.cellId"),
-                       data.get<util::NDArray>("image.trainId"));
+          processTrain(image_data,
+                       image_cellId,
+                       image_trainId);
       }
 
     }
@@ -540,17 +606,6 @@ namespace karabo {
       m_numFrames = cellId_size;
       m_alsoRMS = get<bool>("measureRMS");
           
-      std::map<unsigned long long, size_t> unique_trains;
-      size_t train_id_offset = 0;
-      for(size_t train_idx = 0; train_idx<trainId_size; train_idx++)
-      {
-          if(unique_trains.find(trainId_ptr[train_idx]) == unique_trains.end()) {
-            size_t train_offset = train_id_offset*utils::s_totalNumPxs*m_numFrames;          
-            unique_trains.insert(std::make_pair(trainId_ptr[train_idx], train_offset));
-            train_id_offset++;
-          }
-      }
-
       for(uint idx = 0; idx < 10 ; idx++){
             cout << idx << " : " << data_ptr[idx] << std::endl;
         }
@@ -577,51 +632,44 @@ namespace karabo {
 
       // business logic starts here
       
-      for(auto this_train = unique_trains.begin(); this_train != unique_trains.end(); ++this_train)
+      set<unsigned long long>("currentTrainId",trainId_ptr[0]);
+
+  
+
+      if(get<bool>("measureMean") || get<bool>("measureRMS"))
       {
-        if(this_train->first <= minValidTrainId) continue;
+        m_trainIds.push_back(trainId_ptr[0]);
 
-        set<unsigned long long>("currentTrainId",this_train->first);
+        processMeanValues(data_ptr,m_inputFormat);
 
-        
-        const unsigned short* train_data_ptr = data_ptr + this_train->second;
-
-
-        if(get<bool>("measureMean") || get<bool>("measureRMS"))
-        {
-          m_trainIds.push_back(this_train->first);
-
-          processMeanValues(train_data_ptr,m_inputFormat);
-
-          if(m_iterationCnt >= m_numIterations){
-            sendMeanValues();
-          }
-
-          set<unsigned int>("iterationCnt",m_iterationCnt);
-
+        if(m_iterationCnt >= m_numIterations){
+          sendMeanValues();
         }
-        else if(m_acquireHistograms)
-        {          
-          fillDataHistoVec(train_data_ptr,m_pixelHistoVec,false);
-          m_iterationCnt++;
+
+        set<unsigned int>("iterationCnt",m_iterationCnt);
+
+      }
+      else if(m_acquireHistograms)
+      {          
+        fillDataHistoVec(data_ptr,m_pixelHistoVec,false);
+        m_iterationCnt++;
           
-          KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
+        KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
           
-          if(m_iterationCnt == m_numIterations)
-          {
-            //savePixelHistos();    
-            displayPixelHistogram();  
-            stop();
-          }
-        }
-        else
+        if(m_iterationCnt == m_numIterations)
         {
-          auto processedPixelData = processPixelData(train_data_ptr,m_inputFormat);
-          sendPixelData(processedPixelData,this_train->first);
+          //savePixelHistos();    
+          displayPixelHistogram();  
+          stop();
         }
+      }
+      else
+      {
+        auto processedPixelData = processPixelData(data_ptr,m_inputFormat);
+        sendPixelData(processedPixelData,trainId_ptr[0]);
+      }
 
         //KARABO_LOG_INFO << "Train Processed: " << this_train->first << "/" << minValidTrainId;
-      }
     }
 
 
@@ -793,4 +841,91 @@ namespace karabo {
       }
 
     }
+    
+    void DsscProcessor::startPreview()
+    {
+      //
+      {
+        std::lock_guard< std::mutex > lock( m_previewMutex );
+        if(m_preview) return;
+        m_preview = true; 
+        m_previewThread = std::thread(&DsscProcessor::previewThreadFunc, this);
+      }
+      set<bool>("preview", true);  
+    }
+
+    void DsscProcessor::stopPreview()
+    {
+      //
+      {
+        std::lock_guard< std::mutex > lock( m_previewMutex );  
+        if(!m_preview) return;
+        m_preview = false;
+        if(m_previewThread.joinable()) m_previewThread.join();
+      }
+      set<bool>("preview", false);     
+    }
+    
+    void DsscProcessor::UpdatePreviewData(const karabo::util::Hash& data)
+    {
+      //
+        
+        auto imageData = data.get<util::NDArray>("image.data");
+        auto imageDataShape = data.get<vector<unsigned long long> >("image.data.shape");
+        //copy data for output ladder image channel
+        unsigned int frameIndxViz = imageDataShape[0] - 1;
+        //ToDo add update of value in GUI
+            
+        uint32_t indx = frameIndxViz*m_imageSize;
+        auto dataPtr = imageData.getData<uint16_t>();
+        
+        for(int i=0; i<m_imageSize; i++)
+        {
+            m_previewImageData[i] = dataPtr[indx];
+            indx++;
+        }
+    }
+    
+    void DsscProcessor::previewThreadFunc()
+    {
+      //
+        NDArray imageArray(m_previewImageData.data(),
+                m_imageSize,
+                NDArray::NullDeleter(),
+                Dims(128,512));
+        util::Hash dataHash;
+        dataHash.set("ladderImage",ImageData(imageArray));
+        while(m_preview)
+        {
+            //
+            writeChannel("ladderImageOutput", dataHash);
+        }
+        
+    }
+    
+    /*void DsscProcessor::fillImageData(,vector<uint16_t> & imageData, int frameNum)
+    {
+      const size_t numCols = m_ladderMode? 512 : 64;
+      const size_t numRows = m_ladderMode? 128 : 64;
+      const size_t numImagePixels = numCols * numRows;
+
+      imageData.resize(numImagePixels);
+
+      if(!m_ladderMode){
+        auto asicDataArr = m_trainDataToShow->getAsicDataArray(0,frameNum);
+        std::copy(asicDataArr.begin(),asicDataArr.end(),imageData.begin());
+        for(size_t px=0; px<numImagePixels; px++){
+          imageData[px] = m_correctionFunction(frameNum,px,asicDataArr[px]);
+        }
+      }else{
+        auto imageDataArr = m_trainDataToShow->getImageDataArray(frameNum);
+        for(size_t px=0; px<numImagePixels; px++){
+          imageData[px] = m_correctionFunction(frameNum,px,imageDataArr[px]);
+        }
+      }
+    }//*/
+
+    
 }
+
+

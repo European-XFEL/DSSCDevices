@@ -11,6 +11,8 @@
 
 #include <string>
 #include <vector>
+#include <chrono>
+
 
 #include <karabo/karabo.hpp>
 
@@ -21,8 +23,7 @@
  */
 namespace karabo {
 
-   class DsscProcessor : public karabo::core::Device<> , public utils::DsscTrainDataProcessor {
-
+    class DsscProcessor : public karabo::core::Device<>, public utils::DsscTrainDataProcessor {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
@@ -83,7 +84,7 @@ namespace karabo {
          * background values are only applied to the pixel data
          */
         void accumulate();
-   
+
         void saveHistograms();
 
         void stop();
@@ -119,7 +120,7 @@ namespace karabo {
          */
         void acquireBaselineValues();
         //void acquireSramCorrectionValues();
-        
+
         void runHistogramAcquisition();
 
     private:
@@ -130,7 +131,7 @@ namespace karabo {
 
 
         void onData(const karabo::util::Hash& data,
-            const karabo::xms::InputChannel::MetaData& meta);
+                const karabo::xms::InputChannel::MetaData& meta);
 
         void processTrain(const karabo::util::NDArray& data, const karabo::util::NDArray& cellId, const karabo::util::NDArray& trainId);
 
@@ -143,15 +144,30 @@ namespace karabo {
 
         void clearData();
 
+        void startPreview();
+        void stopPreview();
+        void UpdatePreviewData(const karabo::util::Hash& data);
+        void previewThreadFunc();
+
+
+        constexpr static uint m_imageSize = 512 * 128;
 
         std::string m_sourceId;
         std::vector<unsigned long long> m_trainIds;
+
+        bool m_run;
+        bool m_preview;
+
+        std::thread m_previewThread;
+        std::mutex m_previewMutex;
 
         bool m_acquireHistograms;
         bool m_acquireBaseLine;
         bool m_acquireSramCorrection;
         utils::DataHistoVec m_pixelHistoVec;
+        std::chrono::time_point<std::chrono::high_resolution_clock> m_starttime;
 
+        std::vector<uint16_t> m_previewImageData;
     };
 }
 
