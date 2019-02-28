@@ -146,7 +146,7 @@ namespace karabo {
 
         void startPreview();
         void stopPreview();
-        void UpdatePreviewData(const karabo::util::Hash& data);
+        void updatePreviewData(const karabo::util::Hash& data);
         void previewThreadFunc();
 
 
@@ -157,6 +157,10 @@ namespace karabo {
 
         bool m_run;
         bool m_preview;
+	uint16_t m_previewCell;
+        bool m_previewMaximum;        
+        uint32_t m_previewMaxCounter;        
+        uint32_t m_previewMaxCounterValue;
 
         std::thread m_previewThread;
         std::mutex m_previewMutex;

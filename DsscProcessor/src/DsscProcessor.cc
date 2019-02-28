@@ -277,6 +277,27 @@ namespace karabo {
             .readOnly()
             .commit();
 
+        UINT32_ELEMENT(expected).key("previewCell")
+            .displayedName("Preview cell number")
+            .description("Cell number used in preview")
+            .assignmentOptional().defaultValue(0)
+	    .minInc(0).maxInc(799)
+            .reconfigurable()
+            .commit();
+
+       BOOL_ELEMENT(expected).key("previewMaximum")
+            .displayedName("Preview max value in Cells")
+            .description("Enabled by device where data should be received")
+            .assignmentOptional().defaultValue(false).reconfigurable()
+            .commit();
+
+        UINT32_ELEMENT(expected).key("resetPreviewImageAtCount")
+            .displayedName("Reset preview image counter value")
+            .description("Reset preview image after getting trains number")
+            .assignmentOptional().defaultValue(100)
+            .reconfigurable()
+            .commit();
+
         Schema asicOutSchema;
 
         NDARRAY_ELEMENT(asicOutSchema).key("asicData")
@@ -420,6 +441,18 @@ namespace karabo {
           {
             m_run = incomingReconfiguration.getAs<bool>(path);                
           }
+          else if(path.compare("previewCell") == 0)
+          {
+            m_previewCell = incomingReconfiguration.getAs<uint32_t>(path);                
+          }
+          else if(path.compare("previewMaximum") == 0)
+          {
+            m_previewMaximum = incomingReconfiguration.getAs<bool>(path);                
+          }
+          else if(path.compare("resetPreviewImageAtCount") == 0)
+          {
+            m_previewMaxCounter = incomingReconfiguration.getAs<uint32_t>(path);                
+          }
         }
       }
     }
@@ -516,8 +549,12 @@ namespace karabo {
         changeDeviceState(State::OFF);
         
         m_run = get<bool>("run");
-        m_preview = false;
         set<bool>("preview", false);
+        m_preview = false;
+	m_previewCell = 0;
+        m_previewMaximum = false;
+        m_previewMaxCounter = get<uint32_t>("resetPreviewImageAtCount");     
+        m_previewMaxCounterValue = 0;
         m_previewImageData = std::vector<uint16_t>(m_imageSize, 0);
     }
 
@@ -548,11 +585,7 @@ namespace karabo {
         return;
       } 
 
-      if(m_preview) UpdatePreviewData(data);
-      
-      auto image_data = data.get<util::NDArray>("image.data");
-      auto image_cellId = data.get<util::NDArray>("image.data");
-      auto image_trainId = data.get<util::NDArray>("image.trainId");          
+      if(m_preview) updatePreviewData(data);
 
       if(m_run == false){
         changeDeviceState(State::STOPPED);
@@ -575,17 +608,18 @@ namespace karabo {
         m_inputFormat = utils::DsscTrainData::getFormat(format);
         set<string>("inputDataFormat",format);
 
-        processTrain(image_data,
-                     image_cellId,
-                     image_trainId);
+        processTrain(data.get<util::NDArray>("image.data"),
+                     data.get<util::NDArray>("image.cellId"),
+                     data.get<util::NDArray>("image.trainId"));
       }else{
           m_inputFormat = utils::DsscTrainData::DATAFORMAT::IMAGE;
           set<string>("inputDataFormat","imagewise");
 
-          processTrain(image_data,
-                       image_cellId,
-                       image_trainId);
+          processTrain(data.get<util::NDArray>("image.data"),
+                       data.get<util::NDArray>("image.cellId"),
+                       data.get<util::NDArray>("image.trainId"));
       }
+
 
     }
 
@@ -866,24 +900,52 @@ namespace karabo {
       set<bool>("preview", false);     
     }
     
-    void DsscProcessor::UpdatePreviewData(const karabo::util::Hash& data)
+    void DsscProcessor::updatePreviewData(const karabo::util::Hash& data)
     {
       //
         
         auto imageData = data.get<util::NDArray>("image.data");
-        auto imageDataShape = data.get<vector<unsigned long long> >("image.data.shape");
-        //copy data for output ladder image channel
-        unsigned int frameIndxViz = imageDataShape[0] - 1;
-        //ToDo add update of value in GUI
-            
-        uint32_t indx = frameIndxViz*m_imageSize;
+	auto cellData = data.get<util::NDArray>("image.cellId");
         auto dataPtr = imageData.getData<uint16_t>();
-        
-        for(int i=0; i<m_imageSize; i++)
-        {
+
+	if(m_previewMaximum)
+	{
+	  //
+	  if(m_previewMaxCounterValue > m_previewMaxCounter)  
+	  {
+	    for(int j=0; j<m_imageSize; j++)
+	    {
+              m_previewImageData[j] = 0;   
+            }
+	    m_previewMaxCounterValue = 0;   
+       
+          }
+	  for(int i=0; i<cellData.size(); i++)
+	    for(int j=0; j<m_imageSize; j++)
+	      {
+                if(m_previewImageData[j] < dataPtr[i*m_imageSize + j]) m_previewImageData[j] = dataPtr[i*m_imageSize + j];   
+              }
+
+	  m_previewMaxCounterValue++;
+	  return;
+	}
+	else
+	{
+	  if(m_previewCell >= cellData.size()) 
+	  {
+	    m_previewCell >= cellData.size() - 1;
+            std::cout << "Preview cell number changed to: " << m_previewCell << std::endl;
+	  }
+          auto imageDataShape = data.get<vector<unsigned long long> >("image.data.shape");
+            
+          uint32_t indx = m_previewCell*m_imageSize;
+          
+          for(int i=0; i<m_imageSize; i++)
+          {
             m_previewImageData[i] = dataPtr[indx];
             indx++;
-        }
+          }
+	}
     }
     
     void DsscProcessor::previewThreadFunc()
