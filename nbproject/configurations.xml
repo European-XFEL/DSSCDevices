@@ -496,7 +496,6 @@
           </linkerAddLib>
           <linkerDynSerch>
             <pElem>${KARABO}/lib</pElem>
-            <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
           </linkerDynSerch>
@@ -511,6 +510,7 @@
             <linkerOptionItem>-lPPT</linkerOptionItem>
             <linkerOptionItem>-lPPTDataReceiver</linkerOptionItem>
           </linkerLibItems>
+          <commandLine>-lgsl -lgslcblas</commandLine>
         </linkerTool>
       </compileType>
       <item path="../DsscDependencies/DsscDependencies/CMakeLists.txt"
@@ -2431,7 +2431,6 @@
           </linkerAddLib>
           <linkerDynSerch>
             <pElem>${KARABO}/lib</pElem>
-            <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
           </linkerDynSerch>
@@ -2447,6 +2446,7 @@
             <linkerOptionItem>-lPPTDataReceiver</linkerOptionItem>
             <linkerOptionItem>-lConfigReg</linkerOptionItem>
           </linkerLibItems>
+          <commandLine>-lgsl -lgslcblas -fopenmp</commandLine>
         </linkerTool>
       </compileType>
       <item path="../DsscDependencies/DsscDependencies/CMakeLists.txt"

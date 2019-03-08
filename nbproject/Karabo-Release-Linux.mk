@@ -181,7 +181,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L${KARABO}/extern/dssc_minuit/lib -L${KARABO}/extern/lib/dssc -L${KARABO}/extern/lib -L${KARABO}/lib -Wl,-rpath,${KARABO}/lib -Wl,-rpath,${KARABO}/extern/lib/dssc -Wl,-rpath,${KARABO}/extern/dssc_minuit/lib -Wl,-rpath,${KARABO}/extern/lib -lkarabo `pkg-config --libs karaboDependencies` -lDsscDependencies -lCHIPInterface -lSequencer -lUtils -lDsscHdf5 -lPPT -lPPTDataReceiver -lConfigReg  
+LDLIBSOPTIONS=-L${KARABO}/extern/dssc_minuit/lib -L${KARABO}/extern/lib/dssc -L${KARABO}/extern/lib -L${KARABO}/lib -Wl,-rpath,${KARABO}/lib -Wl,-rpath,${KARABO}/extern/dssc_minuit/lib -Wl,-rpath,${KARABO}/extern/lib -lkarabo `pkg-config --libs karaboDependencies` -lDsscDependencies -lCHIPInterface -lSequencer -lUtils -lDsscHdf5 -lPPT -lPPTDataReceiver -lConfigReg  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
@@ -189,7 +189,7 @@ LDLIBSOPTIONS=-L${KARABO}/extern/dssc_minuit/lib -L${KARABO}/extern/lib/dssc -L$
 
 ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT}: ${OBJECTFILES}
 	${MKDIR} -p ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}
-	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT} ${OBJECTFILES} ${LDLIBSOPTIONS} -shared -fPIC
+	${LINK.cc} -o ${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT} ${OBJECTFILES} ${LDLIBSOPTIONS} -lgsl -lgslcblas -fopenmp -shared -fPIC
 
 ${OBJECTDIR}/_ext/153712117/DsscDependencies.o: ../DsscDependencies/DsscDependencies/src/DsscDependencies.cpp 
 	${MKDIR} -p ${OBJECTDIR}/_ext/153712117
