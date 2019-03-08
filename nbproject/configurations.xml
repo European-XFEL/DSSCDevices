@@ -511,7 +511,7 @@
             <linkerOptionItem>-lPPT</linkerOptionItem>
             <linkerOptionItem>-lPPTDataReceiver</linkerOptionItem>
           </linkerLibItems>
-          <commandLine>-lgsl -lgslcblas</commandLine>
+          <commandLine>-lgsl -lgslcblas -fopenmp</commandLine>
         </linkerTool>
       </compileType>
       <item path="../DsscDependencies/DsscDependencies/CMakeLists.txt"
