@@ -1,6 +1,383 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configurationDescriptor version="95">
   <logicalFolder name="root" displayName="root" projectFiles="true" kind="ROOT">
+    <logicalFolder name="DsscDependencies"
+                   displayName="DsscDependencies"
+                   projectFiles="true">
+      <logicalFolder name="src" displayName="src" projectFiles="true">
+        <logicalFolder name="libCHIPInterface"
+                       displayName="libCHIPInterface"
+                       projectFiles="true">
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPFullConfig.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPFullConfig.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPGainConfigurator.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPGainConfigurator.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPInterface.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPInterface.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPTrimmer.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPTrimmer.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CMakeLists.txt</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CalibrationDataGenerator.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/CalibrationDataGenerator.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2BCHIPInterface.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2BCHIPInterface.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2CHIPInterface.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2CHIPInterface.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DEPFET.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DEPFET.xcf</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DSSCXFEL.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DSSCXFEL.xcf</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/Makefile</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/MultiModuleInterface.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/MultiModuleInterface.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/PPTFullConfig.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libCHIPInterface/PPTFullConfig.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="libConfigReg"
+                       displayName="libConfigReg"
+                       projectFiles="true">
+          <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/CMakeLists.txt</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigReg.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigReg.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigSignals.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigSignals.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/Makefile</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/ModuleSet.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/ModuleSet.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="libPPT" displayName="libPPT" projectFiles="true">
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPT/CMakeLists.txt</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT_FTP.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT_FTP.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPT/Makefile</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPT/SC.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="libPPTDataReceiver"
+                       displayName="libPPTDataReceiver"
+                       projectFiles="true">
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/CMakeLists.txt</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverNoSort.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverNoSort.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverSimple.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverSimple.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscTrainSorter.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscTrainSorter.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/Makefile</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/RingStorage.hh</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/ThreadSafeQueue.hh</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/TrainDataRingStorage.hh</itemPath>
+        </logicalFolder>
+        <logicalFolder name="libSequencer"
+                       displayName="libSequencer"
+                       projectFiles="true">
+          <itemPath>../DsscDependencies/DsscDependencies/src/libSequencer/CMakeLists.txt</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libSequencer/Makefile</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libSequencer/Sequencer.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libSequencer/Sequencer.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libSequencer/SequencerTrack.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libSequencer/SequencerTrack.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="libUtils" displayName="libUtils" projectFiles="true">
+          <logicalFolder name="prog" displayName="prog" projectFiles="true">
+            <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/prog/CMakeLists.txt</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/prog/main.cpp</itemPath>
+          </logicalFolder>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/AsicDataIterator.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/AsicDataIterator.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/CMakeLists.txt</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DataHisto.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DataHisto.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscCalibrationDB.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscCalibrationDB.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscGainParamMap.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscGainParamMap.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscModuleInfo.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscModuleInfo.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscProgressBar.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscProgressBar.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscSramBlacklist.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscSramBlacklist.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainData.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainData.hh</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainDataProcessor.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainDataProcessor.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainDataTypes.hh</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/FitUtils.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/FitUtils.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/Makefile</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/PixelDataArray.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/PixelDataArray.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/SimUtils.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/SimUtils.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/SimpleThreadSafeQueue.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/SimpleThreadSafeQueue.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/SpectrumFitResult.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/SpectrumFitResult.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/VariableIterator.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/VariableIterator.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/utils.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libUtils/utils.h</itemPath>
+        </logicalFolder>
+        <logicalFolder name="Minuit2" displayName="Minuit2" projectFiles="true">
+          <logicalFolder name="Minuit2-5.34.14"
+                         displayName="Minuit2-5.34.14"
+                         projectFiles="true">
+            <logicalFolder name="config" displayName="config" projectFiles="true">
+              <logicalFolder name="m4" displayName="m4" projectFiles="true">
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/m4/ac_compile_warnings.m4</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/m4/ac_openmp.m4</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/m4/pfk_cxx_lib_path.m4</itemPath>
+              </logicalFolder>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/config.guess</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/config.sub</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/depcomp</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/install-sh</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/ltmain.sh</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/missing</itemPath>
+            </logicalFolder>
+            <logicalFolder name="doc" displayName="doc" projectFiles="true">
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Doxyfile</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Doxyfile.in</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Makefile</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Makefile.am</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Makefile.in</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Minuit2.html</itemPath>
+            </logicalFolder>
+            <logicalFolder name="inc" displayName="inc" projectFiles="true">
+              <logicalFolder name="Math" displayName="Math" projectFiles="true">
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Error.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/FitMethodFunction.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Functor.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/GenAlgoOptions.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/IFunction.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/IFunctionfwd.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/IOptions.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Makefile</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Makefile.am</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Makefile.in</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Minimizer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/MinimizerOptions.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/WrappedFunction.h</itemPath>
+              </logicalFolder>
+              <logicalFolder name="Minuit2" displayName="Minuit2" projectFiles="true">
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABObj.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABProd.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABSum.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABTypes.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/AnalyticalGradientCalculator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicFunctionGradient.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicFunctionMinimum.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumError.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumParameters.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumSeed.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumState.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/CombinedMinimizer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/CombinedMinimumBuilder.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ContoursError.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/DavidonErrorUpdator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNAdapter.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNBase.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNGradAdapter.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNGradientBase.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliBuilder.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliChi2FCN.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliErrorUpdator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliFCNAdapter.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliFCNBase.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliGradientCalculator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliMaximumLikelihoodFCN.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliMinimizer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliStandardChi2FCN.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliStandardMaximumLikelihoodFCN.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FunctionGradient.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FunctionMinimizer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FunctionMinimum.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/GenericFunction.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/GradientCalculator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/HessianGradientCalculator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/InitialGradientCalculator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LASymMatrix.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LAVector.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaInverse.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaOuterProduct.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaProd.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaSum.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MPIProcess.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Makefile</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Makefile.am</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Makefile.in</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MatrixInverse.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumBuilder.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumError.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumErrorUpdator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumParameters.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumSeed.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumSeedGenerator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumState.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinosError.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Minuit2Minimizer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinuitParameter.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnApplication.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnConfig.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnContours.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnCovarianceSqueeze.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnCross.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnEigen.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnFcn.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnFumiliMinimize.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnFunctionCross.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnGlobalCorrelationCoeff.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnHesse.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnLineSearch.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMachinePrecision.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMatrix.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMigrad.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMinimize.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMinos.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParabola.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParabolaFactory.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParabolaPoint.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParameterScan.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnPlot.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnPosDef.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnPrint.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnRefCountedPointer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnReferenceCounter.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnScan.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnSeedGenerator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnSimplex.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnStrategy.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnTiny.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserCovariance.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserFcn.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserParameterState.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserParameters.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserTransformation.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnVectorTransform.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ModularFunctionMinimizer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/NegativeG2LineSearch.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Numerical2PGradientCalculator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ParametricFunction.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ScanBuilder.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ScanMinimizer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexBuilder.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexMinimizer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexParameters.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexSeedGenerator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SinParameterTransformation.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SqrtLowParameterTransformation.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SqrtUpParameterTransformation.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/StackAllocator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VariableMetricBuilder.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VariableMetricEDMEstimator.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VariableMetricMinimizer.h</itemPath>
+                <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VectorOuterProduct.h</itemPath>
+              </logicalFolder>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Makefile</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Makefile.am</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Makefile.in</itemPath>
+            </logicalFolder>
+            <logicalFolder name="src" displayName="src" projectFiles="true">
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/AnalyticalGradientCalculator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/BasicMinimumError.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/CombinedMinimumBuilder.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/DavidonErrorUpdator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliBuilder.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliErrorUpdator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliGradientCalculator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliMinimizer.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliStandardChi2FCN.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliStandardMaximumLikelihoodFCN.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/GenAlgoOptions.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/HessianGradientCalculator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/InitialGradientCalculator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaEigenValues.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaInnerProduct.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaInverse.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaOuterProduct.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaSumOfElements.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaVtMVSimilarity.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MPIProcess.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Makefile</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Makefile.am</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Makefile.in</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MinimizerOptions.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Minuit2Minimizer.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnApplication.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnContours.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnCovarianceSqueeze.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnEigen.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnFcn.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnFumiliMinimize.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnFunctionCross.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnGlobalCorrelationCoeff.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnHesse.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnLineSearch.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnMachinePrecision.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnMinos.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnParabolaFactory.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnParameterScan.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnPlot.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnPosDef.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnPrint.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnScan.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnSeedGenerator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnStrategy.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnTiny.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserFcn.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserParameterState.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserParameters.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserTransformation.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/ModularFunctionMinimizer.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/NegativeG2LineSearch.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Numerical2PGradientCalculator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/ParametricFunction.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/ScanBuilder.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SimplexBuilder.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SimplexParameters.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SimplexSeedGenerator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SinParameterTransformation.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SqrtLowParameterTransformation.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SqrtUpParameterTransformation.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/VariableMetricBuilder.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/VariableMetricEDMEstimator.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnbins.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndasum.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndaxpy.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnddot.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndscal.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndspmv.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndspr.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnlsame.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnteigen.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mntplot.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnvert.cxx</itemPath>
+              <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnxerbla.cxx</itemPath>
+            </logicalFolder>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/Makefile</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/Makefile.am</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/Makefile.in</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/aclocal.m4</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.h</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.h.in</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.log</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.status</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/configure</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/configure.in</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/libtool</itemPath>
+            <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/stamp-h1</itemPath>
+          </logicalFolder>
+          <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14.tar.gz</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/Minuit2/build.sh</itemPath>
+        </logicalFolder>
+        <itemPath>../DsscDependencies/DsscDependencies/src/DsscDependencies.cpp</itemPath>
+        <itemPath>../DsscDependencies/DsscDependencies/src/DsscDependencies.h</itemPath>
+      </logicalFolder>
+      <itemPath>../DsscDependencies/DsscDependencies/CMakeLists.txt</itemPath>
+    </logicalFolder>
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
                    projectFiles="true">
@@ -46,6 +423,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>../DsscDependencies</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="2">
@@ -59,14 +439,14 @@
           <standard>8</standard>
           <incDir>
             <pElem>${KARABO}/include</pElem>
-            <pElem>${KARABO}/extern/include/dssc/utils</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libUtils/</pElem>
             <pElem>${KARABO}/extern/include/hdf5</pElem>
-            <pElem>${KARABO}/extern/include/dssc/chipinterface</pElem>
-            <pElem>${KARABO}/extern/include/dssc/configreg</pElem>
-            <pElem>${KARABO}/extern/include/dssc/dsschdf5</pElem>
-            <pElem>${KARABO}/extern/include/dssc/ppt</pElem>
-            <pElem>${KARABO}/extern/include/dssc/pptdatareceiver</pElem>
-            <pElem>${KARABO}/extern/include/dssc/sequence</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libCHIPInterface/</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libConfigReg/</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libDsscHdf5/</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libPPT/</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libPPTDataReceiver</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libSequencer/</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/include</pElem>
             <pElem>${KARABO}/extern/include/dssc</pElem>
             <pElem>${KARABO}/extern/include</pElem>
@@ -103,6 +483,1651 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../DsscDependencies/DsscDependencies/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/DsscDependencies.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/DsscDependencies.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14.tar.gz"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/aclocal.m4"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.h.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.log"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.status"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/config.guess"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/config.sub"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/depcomp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/install-sh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/ltmain.sh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/m4/ac_compile_warnings.m4"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/m4/ac_openmp.m4"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/m4/pfk_cxx_lib_path.m4"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/missing"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/configure"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/configure.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Doxyfile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Doxyfile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Minuit2.html"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Error.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/FitMethodFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Functor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/GenAlgoOptions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/IFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/IFunctionfwd.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/IOptions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Minimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/MinimizerOptions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/WrappedFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABObj.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABProd.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABSum.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABTypes.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/AnalyticalGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicFunctionGradient.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicFunctionMinimum.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumError.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumParameters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumSeed.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumState.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/CombinedMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/CombinedMinimumBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ContoursError.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/DavidonErrorUpdator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNAdapter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNBase.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNGradAdapter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNGradientBase.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliChi2FCN.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliErrorUpdator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliFCNAdapter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliFCNBase.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliMaximumLikelihoodFCN.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliStandardChi2FCN.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliStandardMaximumLikelihoodFCN.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FunctionGradient.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FunctionMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FunctionMinimum.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/GenericFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/GradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/HessianGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/InitialGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LASymMatrix.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LAVector.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaInverse.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaOuterProduct.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaProd.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaSum.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MPIProcess.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MatrixInverse.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumError.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumErrorUpdator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumParameters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumSeed.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumSeedGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumState.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinosError.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Minuit2Minimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinuitParameter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnApplication.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnConfig.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnContours.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnCovarianceSqueeze.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnCross.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnEigen.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnFcn.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnFumiliMinimize.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnFunctionCross.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnGlobalCorrelationCoeff.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnHesse.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnLineSearch.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMachinePrecision.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMatrix.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMigrad.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMinimize.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMinos.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParabola.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParabolaFactory.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParabolaPoint.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParameterScan.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnPlot.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnPosDef.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnPrint.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnRefCountedPointer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnReferenceCounter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnScan.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnSeedGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnSimplex.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnStrategy.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnTiny.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserCovariance.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserFcn.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserParameterState.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserParameters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserTransformation.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnVectorTransform.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ModularFunctionMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/NegativeG2LineSearch.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Numerical2PGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ParametricFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ScanBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ScanMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexParameters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexSeedGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SinParameterTransformation.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SqrtLowParameterTransformation.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SqrtUpParameterTransformation.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/StackAllocator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VariableMetricBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VariableMetricEDMEstimator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VariableMetricMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VectorOuterProduct.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/libtool"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/AnalyticalGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/BasicMinimumError.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/CombinedMinimumBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/DavidonErrorUpdator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliErrorUpdator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliMinimizer.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliStandardChi2FCN.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliStandardMaximumLikelihoodFCN.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/GenAlgoOptions.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/HessianGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/InitialGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaEigenValues.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaInnerProduct.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaInverse.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaOuterProduct.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaSumOfElements.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaVtMVSimilarity.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MPIProcess.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MinimizerOptions.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Minuit2Minimizer.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnApplication.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnContours.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnCovarianceSqueeze.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnEigen.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnFcn.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnFumiliMinimize.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnFunctionCross.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnGlobalCorrelationCoeff.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnHesse.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnLineSearch.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnMachinePrecision.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnMinos.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnParabolaFactory.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnParameterScan.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnPlot.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnPosDef.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnPrint.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnScan.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnSeedGenerator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnStrategy.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnTiny.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserFcn.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserParameterState.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserParameters.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserTransformation.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/ModularFunctionMinimizer.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/NegativeG2LineSearch.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Numerical2PGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/ParametricFunction.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/ScanBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SimplexBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SimplexParameters.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SimplexSeedGenerator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SinParameterTransformation.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SqrtLowParameterTransformation.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SqrtUpParameterTransformation.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/VariableMetricBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/VariableMetricEDMEstimator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnbins.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndasum.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndaxpy.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnddot.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndscal.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndspmv.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndspr.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnlsame.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnteigen.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mntplot.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnvert.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnxerbla.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/stamp-h1"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/build.sh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPFullConfig.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPFullConfig.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPGainConfigurator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPGainConfigurator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPTrimmer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPTrimmer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CalibrationDataGenerator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CalibrationDataGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2BCHIPInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2BCHIPInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2CHIPInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2CHIPInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DEPFET.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DEPFET.xcf"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DSSCXFEL.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DSSCXFEL.xcf"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/MultiModuleInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/MultiModuleInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/PPTFullConfig.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/PPTFullConfig.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigReg.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigReg.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigSignals.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigSignals.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ModuleSet.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ModuleSet.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT_FTP.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT_FTP.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/SC.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverNoSort.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverNoSort.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverSimple.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverSimple.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscTrainSorter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscTrainSorter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/RingStorage.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/ThreadSafeQueue.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/TrainDataRingStorage.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/Sequencer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/Sequencer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/SequencerTrack.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/SequencerTrack.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/AsicDataIterator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/AsicDataIterator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DataHisto.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DataHisto.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscCalibrationDB.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscCalibrationDB.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscGainParamMap.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscGainParamMap.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscModuleInfo.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscModuleInfo.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscProgressBar.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscProgressBar.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscSramBlacklist.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscSramBlacklist.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainData.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainData.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainDataProcessor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainDataProcessor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainDataTypes.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/FitUtils.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/FitUtils.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/PixelDataArray.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/PixelDataArray.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SimUtils.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SimUtils.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SimpleThreadSafeQueue.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SimpleThreadSafeQueue.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SpectrumFitResult.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SpectrumFitResult.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/VariableIterator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/VariableIterator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/prog/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/prog/main.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/utils.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/utils.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="DsscAsicProcessor/src/DsscAsicProcessor.cc"
             ex="false"
             tool="1"
@@ -203,14 +2228,14 @@
           <standard>8</standard>
           <incDir>
             <pElem>${KARABO}/include</pElem>
-            <pElem>${KARABO}/extern/include/dssc/utils</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libUtils/</pElem>
             <pElem>${KARABO}/extern/include/hdf5</pElem>
-            <pElem>${KARABO}/extern/include/dssc/chipinterface</pElem>
-            <pElem>${KARABO}/extern/include/dssc/configreg</pElem>
-            <pElem>${KARABO}/extern/include/dssc/dsschdf5</pElem>
-            <pElem>${KARABO}/extern/include/dssc/ppt</pElem>
-            <pElem>${KARABO}/extern/include/dssc/pptdatareceiver</pElem>
-            <pElem>${KARABO}/extern/include/dssc/sequence</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libCHIPInterface/</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libConfigReg/</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libDsscHdf5/</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libPPT/</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libPPTDataReceiver</pElem>
+            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libSequencer/</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/include</pElem>
             <pElem>${KARABO}/extern/include/dssc</pElem>
             <pElem>${KARABO}/extern/include</pElem>
@@ -254,6 +2279,1651 @@
           </linkerLibItems>
         </linkerTool>
       </compileType>
+      <item path="../DsscDependencies/DsscDependencies/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/DsscDependencies.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/DsscDependencies.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14.tar.gz"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/aclocal.m4"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.h.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.log"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config.status"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/config.guess"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/config.sub"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/depcomp"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/install-sh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/ltmain.sh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/m4/ac_compile_warnings.m4"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/m4/ac_openmp.m4"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/m4/pfk_cxx_lib_path.m4"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/config/missing"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/configure"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/configure.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Doxyfile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Doxyfile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/doc/Minuit2.html"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Error.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/FitMethodFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Functor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/GenAlgoOptions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/IFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/IFunctionfwd.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/IOptions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/Minimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/MinimizerOptions.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Math/WrappedFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABObj.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABProd.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABSum.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ABTypes.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/AnalyticalGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicFunctionGradient.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicFunctionMinimum.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumError.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumParameters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumSeed.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/BasicMinimumState.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/CombinedMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/CombinedMinimumBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ContoursError.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/DavidonErrorUpdator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNAdapter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNBase.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNGradAdapter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FCNGradientBase.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliChi2FCN.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliErrorUpdator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliFCNAdapter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliFCNBase.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliMaximumLikelihoodFCN.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliStandardChi2FCN.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FumiliStandardMaximumLikelihoodFCN.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FunctionGradient.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FunctionMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/FunctionMinimum.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/GenericFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/GradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/HessianGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/InitialGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LASymMatrix.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LAVector.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaInverse.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaOuterProduct.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaProd.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/LaSum.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MPIProcess.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MatrixInverse.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumError.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumErrorUpdator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumParameters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumSeed.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumSeedGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinimumState.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinosError.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Minuit2Minimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MinuitParameter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnApplication.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnConfig.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnContours.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnCovarianceSqueeze.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnCross.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnEigen.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnFcn.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnFumiliMinimize.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnFunctionCross.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnGlobalCorrelationCoeff.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnHesse.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnLineSearch.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMachinePrecision.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMatrix.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMigrad.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMinimize.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnMinos.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParabola.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParabolaFactory.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParabolaPoint.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnParameterScan.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnPlot.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnPosDef.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnPrint.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnRefCountedPointer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnReferenceCounter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnScan.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnSeedGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnSimplex.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnStrategy.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnTiny.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserCovariance.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserFcn.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserParameterState.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserParameters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnUserTransformation.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/MnVectorTransform.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ModularFunctionMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/NegativeG2LineSearch.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/Numerical2PGradientCalculator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ParametricFunction.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ScanBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/ScanMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexParameters.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SimplexSeedGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SinParameterTransformation.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SqrtLowParameterTransformation.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/SqrtUpParameterTransformation.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/StackAllocator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VariableMetricBuilder.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VariableMetricEDMEstimator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VariableMetricMinimizer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/inc/Minuit2/VectorOuterProduct.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/libtool"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/AnalyticalGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/BasicMinimumError.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/CombinedMinimumBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/DavidonErrorUpdator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliErrorUpdator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliMinimizer.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliStandardChi2FCN.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/FumiliStandardMaximumLikelihoodFCN.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/GenAlgoOptions.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/HessianGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/InitialGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaEigenValues.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaInnerProduct.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaInverse.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaOuterProduct.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaSumOfElements.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/LaVtMVSimilarity.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MPIProcess.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Makefile.am"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Makefile.in"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MinimizerOptions.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Minuit2Minimizer.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnApplication.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnContours.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnCovarianceSqueeze.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnEigen.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnFcn.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnFumiliMinimize.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnFunctionCross.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnGlobalCorrelationCoeff.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnHesse.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnLineSearch.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnMachinePrecision.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnMinos.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnParabolaFactory.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnParameterScan.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnPlot.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnPosDef.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnPrint.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnScan.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnSeedGenerator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnStrategy.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnTiny.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserFcn.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserParameterState.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserParameters.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/MnUserTransformation.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/ModularFunctionMinimizer.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/NegativeG2LineSearch.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/Numerical2PGradientCalculator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/ParametricFunction.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/ScanBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SimplexBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SimplexParameters.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SimplexSeedGenerator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SinParameterTransformation.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SqrtLowParameterTransformation.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/SqrtUpParameterTransformation.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/VariableMetricBuilder.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/VariableMetricEDMEstimator.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnbins.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndasum.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndaxpy.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnddot.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndscal.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndspmv.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mndspr.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnlsame.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnteigen.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mntplot.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnvert.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/src/mnxerbla.cxx"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/Minuit2-5.34.14/stamp-h1"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/Minuit2/build.sh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPFullConfig.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPFullConfig.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPGainConfigurator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPGainConfigurator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPTrimmer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CHIPTrimmer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CalibrationDataGenerator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/CalibrationDataGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2BCHIPInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2BCHIPInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2CHIPInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/F2CHIPInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DEPFET.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DEPFET.xcf"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DSSCXFEL.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/LOGO_DSSCXFEL.xcf"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/MultiModuleInterface.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/MultiModuleInterface.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/PPTFullConfig.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libCHIPInterface/PPTFullConfig.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigReg.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigReg.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigSignals.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ConfigSignals.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ModuleSet.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libConfigReg/ModuleSet.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT_FTP.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT_FTP.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPT/SC.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverNoSort.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverNoSort.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverSimple.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscPacketReceiverSimple.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscTrainSorter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/DsscTrainSorter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/RingStorage.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/ThreadSafeQueue.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libPPTDataReceiver/TrainDataRingStorage.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/Sequencer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/Sequencer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/SequencerTrack.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libSequencer/SequencerTrack.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/AsicDataIterator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/AsicDataIterator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DataHisto.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DataHisto.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscCalibrationDB.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscCalibrationDB.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscGainParamMap.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscGainParamMap.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscModuleInfo.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscModuleInfo.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscProgressBar.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscProgressBar.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscSramBlacklist.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscSramBlacklist.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainData.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainData.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainDataProcessor.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainDataProcessor.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/DsscTrainDataTypes.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/FitUtils.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/FitUtils.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/PixelDataArray.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/PixelDataArray.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SimUtils.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SimUtils.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SimpleThreadSafeQueue.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SimpleThreadSafeQueue.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SpectrumFitResult.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/SpectrumFitResult.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/VariableIterator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/VariableIterator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/prog/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/prog/main.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/utils.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libUtils/utils.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="DsscAsicProcessor/src/DsscAsicProcessor.cc"
             ex="false"
             tool="1"
