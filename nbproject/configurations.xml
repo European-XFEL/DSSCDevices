@@ -495,9 +495,10 @@
             <pElem>${KARABO}/lib</pElem>
           </linkerAddLib>
           <linkerDynSerch>
-            <pElem>${KARABO}/lib</pElem>
+            <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
+            <pElem>${KARABO}/lib</pElem>
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
@@ -2430,9 +2431,10 @@
             <pElem>${KARABO}/lib</pElem>
           </linkerAddLib>
           <linkerDynSerch>
-            <pElem>${KARABO}/lib</pElem>
+            <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
+            <pElem>${KARABO}/lib</pElem>
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
