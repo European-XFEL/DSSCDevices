@@ -297,6 +297,11 @@ namespace karabo {
             .assignmentOptional().defaultValue(100)
             .reconfigurable()
             .commit();
+        
+        SLOT_ELEMENT(expected).key("resetTrainsCounter")
+            .displayedName("Reset trains counter")
+            .description("Put last trains counter values into GUI, flush counter values.")
+            .commit();
 
         Schema asicOutSchema;
 
@@ -306,6 +311,18 @@ namespace karabo {
             .commit();
 
         UINT64_ELEMENT(asicOutSchema).key("trainId")
+            .readOnly()
+            .commit();
+        
+        UINT64_ELEMENT(asicOutSchema).key("startTrainId")
+            .readOnly()
+            .commit();
+        
+        UINT64_ELEMENT(asicOutSchema).key("endTrainId")
+            .readOnly()
+            .commit();
+        
+        UINT32_ELEMENT(asicOutSchema).key("receivedTrainsNumber")
             .readOnly()
             .commit();
 
@@ -377,7 +394,7 @@ namespace karabo {
       KARABO_SLOT(saveHistograms)
               
       KARABO_SLOT(startPreview)
-      KARABO_SLOT(stopPreview)              
+      KARABO_SLOT(stopPreview)  
 
       m_starttime = std::chrono::high_resolution_clock::now();
 
@@ -519,6 +536,12 @@ namespace karabo {
       m_numIterations = get<unsigned int>("numIterations");
       set<bool>("run",false);
       m_run = false;
+      
+      set<unsigned long long>("startTrainId", m_startTrainId);
+      set<unsigned long long>("endTrainId", m_endTrainId);
+      set<unsigned int>("receivedTrainsNumber", m_receivedTrains);
+      m_receivedTrains = 0;
+      m_trainMonitorStart = true;
 
       set<unsigned int>("iterationCnt",m_iterationCnt);
 
@@ -527,6 +550,7 @@ namespace karabo {
 
       clearData();
     }
+    
 
     void DsscProcessor::initialization()
     {
@@ -560,14 +584,12 @@ namespace karabo {
 
     void DsscProcessor::onData(const karabo::util::Hash& data,
                                const karabo::xms::InputChannel::MetaData& meta)  //find data for data source
-    {
-  
+    {  
     
       auto timenow = std::chrono::high_resolution_clock::now();
       std::chrono::duration<double> diff = timenow - m_starttime;
       m_starttime = timenow;
-      set<float>("dataRate", 1.0/diff.count());
-      
+      set<float>("dataRate", 1.0/diff.count());      
       
                     // verify data is sane
       if (!data.has("image.data")){
@@ -619,8 +641,7 @@ namespace karabo {
                        data.get<util::NDArray>("image.cellId"),
                        data.get<util::NDArray>("image.trainId"));
       }
-
-
+      
     }
 
 
@@ -636,6 +657,14 @@ namespace karabo {
 
       const unsigned long long* trainId_ptr = trainId.getData<unsigned long long>();
       size_t trainId_size = trainId.size();
+      
+      if(m_trainMonitorStart)
+      {
+          m_startTrainId = trainId_ptr[0];
+          m_trainMonitorStart = false;
+      }
+      m_endTrainId = trainId_ptr[0];
+      m_receivedTrains++;
 
       m_numFrames = cellId_size;
       m_alsoRMS = get<bool>("measureRMS");
@@ -690,7 +719,7 @@ namespace karabo {
           
         KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
           
-        if(m_iterationCnt == m_numIterations)
+        if(m_iterationCnt == m_numIterations )
         {
           //savePixelHistos();    
           displayPixelHistogram();  
