@@ -46,6 +46,36 @@
           <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/ModuleSet.cpp</itemPath>
           <itemPath>../DsscDependencies/DsscDependencies/src/libConfigReg/ModuleSet.h</itemPath>
         </logicalFolder>
+        <logicalFolder name="libDsscHdf5" displayName="libDsscHdf5" projectFiles="true">
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/CMakeLists.txt</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDB.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDB.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDataGenerator.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDataGenerator.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CorrectionFileReader.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CorrectionFileReader.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeanRMSReader.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeanRMSReader.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoReader.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoReader.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoWriter.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoWriter.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Reader.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Reader.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Receiver.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Receiver.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5RegisterConfig.hh</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrainDataReader.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrainDataReader.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataReader.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataReader.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataWriter.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataWriter.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Writer.cpp</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Writer.h</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/LPDHDf5Structure.txt</itemPath>
+          <itemPath>../DsscDependencies/DsscDependencies/src/libDsscHdf5/Makefile</itemPath>
+        </logicalFolder>
         <logicalFolder name="libPPT" displayName="libPPT" projectFiles="true">
           <itemPath>../DsscDependencies/DsscDependencies/src/libPPT/CMakeLists.txt</itemPath>
           <itemPath>../DsscDependencies/DsscDependencies/src/libPPT/DSSC_PPT.cpp</itemPath>
@@ -382,7 +412,6 @@
                    displayName="Header Files"
                    projectFiles="true">
       <itemPath>DsscAsicProcessor/src/DsscAsicProcessor.hh</itemPath>
-      <itemPath>DsscPpt/src/DsscConfigHashWriter.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.hh</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.hh</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.hh</itemPath>
@@ -402,7 +431,6 @@
                    displayName="Source Files"
                    projectFiles="true">
       <itemPath>DsscAsicProcessor/src/DsscAsicProcessor.cc</itemPath>
-      <itemPath>DsscPpt/src/DsscConfigHashWriter.cc</itemPath>
       <itemPath>DsscDataReceiver/src/DsscDataReceiver.cc</itemPath>
       <itemPath>DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.cc</itemPath>
       <itemPath>DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.cc</itemPath>
@@ -424,7 +452,7 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>../DsscDependencies</Elem>
+    <Elem>../DsscDependencies/DsscDependencies</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -439,14 +467,14 @@
           <standard>8</standard>
           <incDir>
             <pElem>${KARABO}/include</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libUtils/</pElem>
+            <pElem>${KARABO}/extern/include/dssc/utils</pElem>
             <pElem>${KARABO}/extern/include/hdf5</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libCHIPInterface/</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libConfigReg/</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libDsscHdf5/</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libPPT/</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libPPTDataReceiver</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libSequencer/</pElem>
+            <pElem>${KARABO}/extern/include/dssc/chipinterface</pElem>
+            <pElem>${KARABO}/extern/include/dssc/configreg</pElem>
+            <pElem>${KARABO}/extern/include/dssc/dsschdf5</pElem>
+            <pElem>${KARABO}/extern/include/dssc/ppt</pElem>
+            <pElem>${KARABO}/extern/include/dssc/pptdatareceiver</pElem>
+            <pElem>${KARABO}/extern/include/dssc/sequence</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/include</pElem>
             <pElem>${KARABO}/extern/include/dssc</pElem>
             <pElem>${KARABO}/extern/include</pElem>
@@ -1823,6 +1851,146 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDB.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDB.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDataGenerator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDataGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CorrectionFileReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CorrectionFileReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeanRMSReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeanRMSReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoWriter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoWriter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Reader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Reader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Receiver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Receiver.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5RegisterConfig.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrainDataReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrainDataReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataWriter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataWriter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Writer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Writer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/LPDHDf5Structure.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../DsscDependencies/DsscDependencies/src/libPPT/CMakeLists.txt"
             ex="false"
             tool="3"
@@ -2188,16 +2356,6 @@
             tool="3"
             flavor2="0">
       </item>
-      <item path="DsscPpt/src/DsscConfigHashWriter.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="DsscPpt/src/DsscConfigHashWriter.hh"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
       <item path="DsscPpt/src/DsscPpt.cc" ex="false" tool="1" flavor2="0">
       </item>
       <item path="DsscPpt/src/DsscPpt.hh" ex="false" tool="3" flavor2="0">
@@ -2228,14 +2386,14 @@
           <standard>8</standard>
           <incDir>
             <pElem>${KARABO}/include</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libUtils/</pElem>
+            <pElem>${KARABO}/extern/include/dssc/utils</pElem>
             <pElem>${KARABO}/extern/include/hdf5</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libCHIPInterface/</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libConfigReg/</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libDsscHdf5/</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libPPT/</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libPPTDataReceiver</pElem>
-            <pElem>${KARABO}/installed/DsscDependencies/DsscDependencies/src/libSequencer/</pElem>
+            <pElem>${KARABO}/extern/include/dssc/chipinterface</pElem>
+            <pElem>${KARABO}/extern/include/dssc/configreg</pElem>
+            <pElem>${KARABO}/extern/include/dssc/dsschdf5</pElem>
+            <pElem>${KARABO}/extern/include/dssc/ppt</pElem>
+            <pElem>${KARABO}/extern/include/dssc/pptdatareceiver</pElem>
+            <pElem>${KARABO}/extern/include/dssc/sequence</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/include</pElem>
             <pElem>${KARABO}/extern/include/dssc</pElem>
             <pElem>${KARABO}/extern/include</pElem>
@@ -3619,6 +3777,146 @@
             tool="3"
             flavor2="0">
       </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/CMakeLists.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDB.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDB.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDataGenerator.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CalibrationDataGenerator.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CorrectionFileReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5CorrectionFileReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeanRMSReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeanRMSReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoWriter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5MeasurementInfoWriter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Reader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Reader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Receiver.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Receiver.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5RegisterConfig.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrainDataReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrainDataReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataReader.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataReader.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataWriter.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5TrimmingDataWriter.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Writer.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/DsscHDF5Writer.h"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/LPDHDf5Structure.txt"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="../DsscDependencies/DsscDependencies/src/libDsscHdf5/Makefile"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
       <item path="../DsscDependencies/DsscDependencies/src/libPPT/CMakeLists.txt"
             ex="false"
             tool="3"
@@ -3980,16 +4278,6 @@
             flavor2="0">
       </item>
       <item path="DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.hh"
-            ex="false"
-            tool="3"
-            flavor2="0">
-      </item>
-      <item path="DsscPpt/src/DsscConfigHashWriter.cc"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
-      <item path="DsscPpt/src/DsscConfigHashWriter.hh"
             ex="false"
             tool="3"
             flavor2="0">

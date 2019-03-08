@@ -10,7 +10,7 @@
             <sourceEncoding>UTF-8</sourceEncoding>
             <make-dep-projects/>
             <sourceRootList>
-                <sourceRootElem>../DsscDependencies</sourceRootElem>
+                <sourceRootElem>../DsscDependencies/DsscDependencies</sourceRootElem>
             </sourceRootList>
             <confList>
                 <confElem>
