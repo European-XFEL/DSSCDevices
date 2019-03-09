@@ -298,9 +298,17 @@ namespace karabo {
             .reconfigurable()
             .commit();
         
-        SLOT_ELEMENT(expected).key("resetTrainsCounter")
-            .displayedName("Reset trains counter")
-            .description("Put last trains counter values into GUI, flush counter values.")
+        
+        UINT64_ELEMENT(expected).key("startTrainId")
+            .readOnly()
+            .commit();
+        
+        UINT64_ELEMENT(expected).key("endTrainId")
+            .readOnly()
+            .commit();
+        
+        UINT32_ELEMENT(expected).key("receivedTrainsNumber")
+            .readOnly()
             .commit();
 
         Schema asicOutSchema;
@@ -314,17 +322,6 @@ namespace karabo {
             .readOnly()
             .commit();
         
-        UINT64_ELEMENT(asicOutSchema).key("startTrainId")
-            .readOnly()
-            .commit();
-        
-        UINT64_ELEMENT(asicOutSchema).key("endTrainId")
-            .readOnly()
-            .commit();
-        
-        UINT32_ELEMENT(asicOutSchema).key("receivedTrainsNumber")
-            .readOnly()
-            .commit();
 
         UINT32_ELEMENT(asicOutSchema).key("pulseCnt")
             .readOnly()
