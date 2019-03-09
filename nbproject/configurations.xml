@@ -46,6 +46,9 @@
       <itemPath>Makefile</itemPath>
     </logicalFolder>
   </logicalFolder>
+  <sourceRootList>
+    <Elem>../DsscDependencies/DsscDependencies</Elem>
+  </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
     <conf name="Debug" type="2">
@@ -85,10 +88,10 @@
             <pElem>${KARABO}/lib</pElem>
           </linkerAddLib>
           <linkerDynSerch>
-            <pElem>${KARABO}/lib</pElem>
             <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
+            <pElem>${KARABO}/lib</pElem>
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
@@ -101,6 +104,7 @@
             <linkerOptionItem>-lPPT</linkerOptionItem>
             <linkerOptionItem>-lPPTDataReceiver</linkerOptionItem>
           </linkerLibItems>
+          <commandLine>-lgsl -lgslcblas -fopenmp</commandLine>
         </linkerTool>
       </compileType>
       <item path="DsscAsicProcessor/src/DsscAsicProcessor.cc"
@@ -235,10 +239,10 @@
             <pElem>${KARABO}/lib</pElem>
           </linkerAddLib>
           <linkerDynSerch>
-            <pElem>${KARABO}/lib</pElem>
             <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
+            <pElem>${KARABO}/lib</pElem>
           </linkerDynSerch>
           <linkerLibItems>
             <linkerLibLibItem>karabo</linkerLibLibItem>
@@ -252,6 +256,7 @@
             <linkerOptionItem>-lPPTDataReceiver</linkerOptionItem>
             <linkerOptionItem>-lConfigReg</linkerOptionItem>
           </linkerLibItems>
+          <commandLine>-lgsl -lgslcblas -fopenmp</commandLine>
         </linkerTool>
       </compileType>
       <item path="DsscAsicProcessor/src/DsscAsicProcessor.cc"

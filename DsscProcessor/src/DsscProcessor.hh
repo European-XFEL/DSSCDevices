@@ -148,7 +148,7 @@ namespace karabo {
         void stopPreview();
         void updatePreviewData(const karabo::util::Hash& data);
         void previewThreadFunc();
-
+        
 
         constexpr static uint m_imageSize = 512 * 128;
 
@@ -161,6 +161,11 @@ namespace karabo {
         bool m_previewMaximum;        
         uint32_t m_previewMaxCounter;        
         uint32_t m_previewMaxCounterValue;
+        
+        uint64_t m_startTrainId = 0;
+        uint64_t m_endTrainId = 0;
+        uint32_t m_receivedTrains = 0;
+        bool m_trainMonitorStart = true;
 
         std::thread m_previewThread;
         std::mutex m_previewMutex;
