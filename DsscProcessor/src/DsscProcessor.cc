@@ -537,7 +537,7 @@ namespace karabo {
       set<unsigned long long>("startTrainId", m_startTrainId);
       set<unsigned long long>("endTrainId", m_endTrainId);
       set<unsigned int>("receivedTrainsNumber", m_receivedTrains);
-      m_receivedTrains = 0;
+      m_receivedTrains = 0;      
       m_trainMonitorStart = true;
 
       set<unsigned int>("iterationCnt",m_iterationCnt);
@@ -604,6 +604,15 @@ namespace karabo {
         return;
       } 
 
+
+      if(m_trainMonitorStart)
+      {
+          m_startTrainId = data.get<util::NDArray>("image.trainId").getData<unsigned long long>()[0];
+          m_trainMonitorStart = false;
+      }
+      m_endTrainId = data.get<util::NDArray>("image.trainId").getData<unsigned long long>()[0];
+      m_receivedTrains++;
+
       if(m_preview) updatePreviewData(data);
 
       if(m_run == false){
@@ -655,14 +664,6 @@ namespace karabo {
       const unsigned long long* trainId_ptr = trainId.getData<unsigned long long>();
       size_t trainId_size = trainId.size();
       
-      if(m_trainMonitorStart)
-      {
-          m_startTrainId = trainId_ptr[0];
-          m_trainMonitorStart = false;
-      }
-      m_endTrainId = trainId_ptr[0];
-      m_receivedTrains++;
-
       m_numFrames = cellId_size;
       m_alsoRMS = get<bool>("measureRMS");
           
