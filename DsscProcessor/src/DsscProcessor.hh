@@ -11,6 +11,8 @@
 
 #include <string>
 #include <vector>
+#include <chrono>
+
 
 #include <karabo/karabo.hpp>
 
@@ -21,8 +23,7 @@
  */
 namespace karabo {
 
-   class DsscProcessor : public karabo::core::Device<> , public utils::DsscTrainDataProcessor {
-
+    class DsscProcessor : public karabo::core::Device<>, public utils::DsscTrainDataProcessor {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
@@ -84,6 +85,8 @@ namespace karabo {
          */
         void accumulate();
 
+        void saveHistograms();
+
         void stop();
 
         /**
@@ -117,7 +120,7 @@ namespace karabo {
          */
         void acquireBaselineValues();
         //void acquireSramCorrectionValues();
-        
+
         void runHistogramAcquisition();
 
     private:
@@ -128,7 +131,7 @@ namespace karabo {
 
 
         void onData(const karabo::util::Hash& data,
-            const karabo::xms::InputChannel::MetaData& meta);
+                const karabo::xms::InputChannel::MetaData& meta);
 
         void processTrain(const karabo::util::NDArray& data, const karabo::util::NDArray& cellId, const karabo::util::NDArray& trainId);
 
@@ -141,15 +144,39 @@ namespace karabo {
 
         void clearData();
 
+        void startPreview();
+        void stopPreview();
+        void updatePreviewData(const karabo::util::Hash& data);
+        void previewThreadFunc();
+        
+
+        constexpr static uint m_imageSize = 512 * 128;
 
         std::string m_sourceId;
         std::vector<unsigned long long> m_trainIds;
+
+        bool m_run;
+        bool m_preview;
+	uint16_t m_previewCell;
+        bool m_previewMaximum;        
+        uint32_t m_previewMaxCounter;        
+        uint32_t m_previewMaxCounterValue;
+        
+        uint64_t m_startTrainId = 0;
+        uint64_t m_endTrainId = 0;
+        uint32_t m_receivedTrains = 0;
+        bool m_trainMonitorStart = true;
+
+        std::thread m_previewThread;
+        std::mutex m_previewMutex;
 
         bool m_acquireHistograms;
         bool m_acquireBaseLine;
         bool m_acquireSramCorrection;
         utils::DataHistoVec m_pixelHistoVec;
+        std::chrono::time_point<std::chrono::high_resolution_clock> m_starttime;
 
+        std::vector<uint16_t> m_previewImageData;
     };
 }
 

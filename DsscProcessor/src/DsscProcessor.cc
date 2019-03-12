@@ -6,6 +6,8 @@
  * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
  */
 
+#include <thread>
+
 #include "DsscProcessor.hh"
 #include "DsscDependencies.h"
 #include "DsscHDF5CorrectionFileReader.h"
@@ -195,9 +197,19 @@ namespace karabo {
             .readOnly()
             .commit();
         
+        FLOAT_ELEMENT(expected).key("dataRate")
+            .displayedName("Data rate")
+            .readOnly()
+            .commit();     
+        
         SLOT_ELEMENT(expected).key("runHistogramAcquisition")
             .displayedName("Start Histogram Acquisition")
             .description("remove sram correction data, wont be applied anymore")
+            .commit();
+
+        SLOT_ELEMENT(expected).key("saveHistograms")
+            .displayedName("Save Histograms")
+            .description("save acquired histograms")
             .commit();
         
         PATH_ELEMENT(expected).key("outputDir")
@@ -248,7 +260,56 @@ namespace karabo {
         INPUT_CHANNEL(expected).key("input")
                 .displayedName("Input")
                 .commit();
+        
+        SLOT_ELEMENT(expected).key("startPreview")
+            .displayedName("Start preview")
+            .description("Start sending pixel data to output visualization channel")
+            .commit();
+        
+        SLOT_ELEMENT(expected).key("stopPreview")
+            .displayedName("Stop preview")
+            .description("Stop sending pixel data to output visualization channel")
+            .commit();
+        
+        BOOL_ELEMENT(expected).key("preview")
+            .displayedName("Preview")
+            .description("Enabled preview of pixeldata on output channel")
+            .readOnly()
+            .commit();
 
+        UINT32_ELEMENT(expected).key("previewCell")
+            .displayedName("Preview cell number")
+            .description("Cell number used in preview")
+            .assignmentOptional().defaultValue(0)
+	    .minInc(0).maxInc(799)
+            .reconfigurable()
+            .commit();
+
+       BOOL_ELEMENT(expected).key("previewMaximum")
+            .displayedName("Preview max value in Cells")
+            .description("Enabled by device where data should be received")
+            .assignmentOptional().defaultValue(false).reconfigurable()
+            .commit();
+
+        UINT32_ELEMENT(expected).key("resetPreviewImageAtCount")
+            .displayedName("Reset preview image counter value")
+            .description("Reset preview image after getting trains number")
+            .assignmentOptional().defaultValue(100)
+            .reconfigurable()
+            .commit();
+        
+        
+        UINT64_ELEMENT(expected).key("startTrainId")
+            .readOnly()
+            .commit();
+        
+        UINT64_ELEMENT(expected).key("endTrainId")
+            .readOnly()
+            .commit();
+        
+        UINT32_ELEMENT(expected).key("receivedTrainsNumber")
+            .readOnly()
+            .commit();
 
         Schema asicOutSchema;
 
@@ -260,6 +321,7 @@ namespace karabo {
         UINT64_ELEMENT(asicOutSchema).key("trainId")
             .readOnly()
             .commit();
+        
 
         UINT32_ELEMENT(asicOutSchema).key("pulseCnt")
             .readOnly()
@@ -293,6 +355,17 @@ namespace karabo {
             .displayedName("Mean and RMS Data Output")
             .dataSchema(meanOutSchema)
             .commit();
+        
+        Schema ladderSchema;
+        IMAGEDATA(ladderSchema).key("ladderImage")
+            .setDimensions("128,512")
+            .commit();
+
+        OUTPUT_CHANNEL(expected).key("ladderImageOutput")
+            .displayedName("Ladder Image Output")
+            .dataSchema(ladderSchema)
+            .commit();
+
 
 
     }
@@ -313,11 +386,20 @@ namespace karabo {
       KARABO_SLOT(clearSramBlacklist)
 
       KARABO_SLOT(acquireBaselineValues)
+      KARABO_SLOT(runHistogramAcquisition)
+
+      KARABO_SLOT(saveHistograms)
+              
+      KARABO_SLOT(startPreview)
+      KARABO_SLOT(stopPreview)  
+
+      m_starttime = std::chrono::high_resolution_clock::now();
 
     }
 
 
     DsscProcessor::~DsscProcessor() {
+        m_run = false;
       set<bool>("run",false);
     }
 
@@ -369,6 +451,22 @@ namespace karabo {
               KARABO_LOG_ERROR << "File not found. Could not load SRAM Correction from " << fileName;
             }
           }
+          else if(path.compare("run") == 0)
+          {
+            m_run = incomingReconfiguration.getAs<bool>(path);                
+          }
+          else if(path.compare("previewCell") == 0)
+          {
+            m_previewCell = incomingReconfiguration.getAs<uint32_t>(path);                
+          }
+          else if(path.compare("previewMaximum") == 0)
+          {
+            m_previewMaximum = incomingReconfiguration.getAs<bool>(path);                
+          }
+          else if(path.compare("resetPreviewImageAtCount") == 0)
+          {
+            m_previewMaxCounter = incomingReconfiguration.getAs<uint32_t>(path);                
+          }
         }
       }
     }
@@ -400,13 +498,20 @@ namespace karabo {
       resetCounters();
       changeDeviceState(State::ACQUIRING);
       set<bool>("run",true);
+      m_run = true;
     }
 
 
     void DsscProcessor::stop()
     {
       set<bool>("run",false);
+      m_run = false;
       changeDeviceState(State::STOPPED);
+    }
+
+    void DsscProcessor::saveHistograms()
+    {
+      savePixelHistos();
     }
 
     void DsscProcessor::changeDeviceState(const util::State & newState)
@@ -427,6 +532,13 @@ namespace karabo {
       m_iterationCnt = 0;
       m_numIterations = get<unsigned int>("numIterations");
       set<bool>("run",false);
+      m_run = false;
+      
+      set<unsigned long long>("startTrainId", m_startTrainId);
+      set<unsigned long long>("endTrainId", m_endTrainId);
+      set<unsigned int>("receivedTrainsNumber", m_receivedTrains);
+      m_receivedTrains = 0;      
+      m_trainMonitorStart = true;
 
       set<unsigned int>("iterationCnt",m_iterationCnt);
 
@@ -435,6 +547,7 @@ namespace karabo {
 
       clearData();
     }
+    
 
     void DsscProcessor::initialization()
     {
@@ -455,26 +568,27 @@ namespace karabo {
         set<bool>("acquireHistograms",m_acquireHistograms);
         
         changeDeviceState(State::OFF);
+        
+        m_run = get<bool>("run");
+        set<bool>("preview", false);
+        m_preview = false;
+	m_previewCell = 0;
+        m_previewMaximum = false;
+        m_previewMaxCounter = get<uint32_t>("resetPreviewImageAtCount");     
+        m_previewMaxCounterValue = 0;
+        m_previewImageData = std::vector<uint16_t>(m_imageSize, 0);
     }
 
     void DsscProcessor::onData(const karabo::util::Hash& data,
                                const karabo::xms::InputChannel::MetaData& meta)  //find data for data source
-    {
-      if(get<bool>("run") == false){
-        changeDeviceState(State::STOPPED);
-        return; // dont send anything during idle+
-      }
-      changeDeviceState(State::ACQUIRING);
-
-      // resend until stopped from remote
-      if(get<bool>("measureMean") || get<bool>("measureRMS")){
-        if(m_numIterations == m_iterationCnt){
-          sendMeanValues();
-          KARABO_LOG_INFO << "RESENT DATA ";
-          return;
-        }
-      }
-        // verify data is sane
+    {  
+    
+      auto timenow = std::chrono::high_resolution_clock::now();
+      std::chrono::duration<double> diff = timenow - m_starttime;
+      m_starttime = timenow;
+      set<float>("dataRate", 1.0/diff.count());      
+      
+                    // verify data is sane
       if (!data.has("image.data")){
         cout << "No Image Data Found in input data " << m_sourceId << endl;
         return;
@@ -488,8 +602,34 @@ namespace karabo {
       if (!data.has("image.trainId")){
         cout << "No trainId Data Found in input data " << m_sourceId << endl;
         return;
-      }
+      } 
 
+
+      if(m_trainMonitorStart)
+      {
+          m_startTrainId = data.get<util::NDArray>("image.trainId").getData<unsigned long long>()[0];
+          m_trainMonitorStart = false;
+      }
+      m_endTrainId = data.get<util::NDArray>("image.trainId").getData<unsigned long long>()[0];
+      m_receivedTrains++;
+
+      if(m_preview) updatePreviewData(data);
+
+      if(m_run == false){
+        changeDeviceState(State::STOPPED);
+        return; // don't send anything during idle+
+      }
+      changeDeviceState(State::ACQUIRING);
+
+      // resend until stopped from remote
+      if(get<bool>("measureMean") || get<bool>("measureRMS")){
+        if(m_numIterations == m_iterationCnt){
+          sendMeanValues();
+          KARABO_LOG_INFO << "RESENT DATA ";
+          return;
+        }
+      }
+      
       if (data.has("imageFormat"))
       {
         string format = data.get<string>("imageFormat");
@@ -507,7 +647,7 @@ namespace karabo {
                        data.get<util::NDArray>("image.cellId"),
                        data.get<util::NDArray>("image.trainId"));
       }
-
+      
     }
 
 
@@ -523,21 +663,10 @@ namespace karabo {
 
       const unsigned long long* trainId_ptr = trainId.getData<unsigned long long>();
       size_t trainId_size = trainId.size();
-
+      
       m_numFrames = cellId_size;
       m_alsoRMS = get<bool>("measureRMS");
           
-      std::map<unsigned long long, size_t> unique_trains;
-      size_t train_id_offset = 0;
-      for(size_t train_idx = 0; train_idx<trainId_size; train_idx++)
-      {
-          if(unique_trains.find(trainId_ptr[train_idx]) == unique_trains.end()) {
-            size_t train_offset = train_id_offset*utils::s_totalNumPxs*m_numFrames;          
-            unique_trains.insert(std::make_pair(trainId_ptr[train_idx], train_offset));
-            train_id_offset++;
-          }
-      }
-
       for(uint idx = 0; idx < 10 ; idx++){
             cout << idx << " : " << data_ptr[idx] << std::endl;
         }
@@ -564,50 +693,44 @@ namespace karabo {
 
       // business logic starts here
       
-      for(auto this_train = unique_trains.begin(); this_train != unique_trains.end(); ++this_train)
+      set<unsigned long long>("currentTrainId",trainId_ptr[0]);
+
+  
+
+      if(get<bool>("measureMean") || get<bool>("measureRMS"))
       {
-        if(this_train->first <= minValidTrainId) continue;
+        m_trainIds.push_back(trainId_ptr[0]);
 
-        set<unsigned long long>("currentTrainId",this_train->first);
+        processMeanValues(data_ptr,m_inputFormat);
 
-        
-        const unsigned short* train_data_ptr = data_ptr + this_train->second;
-
-
-        if(get<bool>("measureMean") || get<bool>("measureRMS"))
-        {
-          m_trainIds.push_back(this_train->first);
-
-          processMeanValues(train_data_ptr,m_inputFormat);
-
-          if(m_iterationCnt >= m_numIterations){
-            sendMeanValues();
-          }
-
-          set<unsigned int>("iterationCnt",m_iterationCnt);
-
+        if(m_iterationCnt >= m_numIterations){
+          sendMeanValues();
         }
-        else if(m_acquireHistograms)
-        {          
-          fillDataHistoVec(train_data_ptr,m_pixelHistoVec,false);
-          m_iterationCnt++;
+
+        set<unsigned int>("iterationCnt",m_iterationCnt);
+
+      }
+      else if(m_acquireHistograms)
+      {          
+        fillDataHistoVec(data_ptr,m_pixelHistoVec,false);
+        m_iterationCnt++;
           
-          KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
+        KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
           
-          if(m_iterationCnt == m_numIterations)
-          {
-            savePixelHistos();    
-            stop();
-          }
-        }
-        else
+        if(m_iterationCnt == m_numIterations )
         {
-          auto processedPixelData = processPixelData(train_data_ptr,m_inputFormat);
-          sendPixelData(processedPixelData,this_train->first);
+          //savePixelHistos();    
+          displayPixelHistogram();  
+          stop();
         }
+      }
+      else
+      {
+        auto processedPixelData = processPixelData(data_ptr,m_inputFormat);
+        sendPixelData(processedPixelData,trainId_ptr[0]);
+      }
 
         //KARABO_LOG_INFO << "Train Processed: " << this_train->first << "/" << minValidTrainId;
-      }
     }
 
 
@@ -772,10 +895,126 @@ namespace karabo {
       if(!bins.empty()){
         set<unsigned long long>("histoGen.pixelhistoCnt",histoValueCount);
         set<vector<unsigned short>>("histoGen.pixelHistoBins",std::move(bins));
-        if(get<bool>("istoGen.displayHistoLogscale")){
+        if(get<bool>("histoGen.displayHistoLogscale")){
           std::transform(binValues.begin(),binValues.end(),binValues.begin(),[](int x){if(x==0) return 1; return x;});
         }
         set<vector<unsigned int>>("histoGen.pixelHistoBinValues",std::move(binValues));
       }
+
     }
+    
+    void DsscProcessor::startPreview()
+    {
+      //
+      {
+        std::lock_guard< std::mutex > lock( m_previewMutex );
+        if(m_preview) return;
+        m_preview = true; 
+        m_previewThread = std::thread(&DsscProcessor::previewThreadFunc, this);
+      }
+      set<bool>("preview", true);  
+    }
+
+    void DsscProcessor::stopPreview()
+    {
+      //
+      {
+        std::lock_guard< std::mutex > lock( m_previewMutex );  
+        if(!m_preview) return;
+        m_preview = false;
+        if(m_previewThread.joinable()) m_previewThread.join();
+      }
+      set<bool>("preview", false);     
+    }
+    
+    void DsscProcessor::updatePreviewData(const karabo::util::Hash& data)
+    {
+      //
+        
+        auto imageData = data.get<util::NDArray>("image.data");
+	auto cellData = data.get<util::NDArray>("image.cellId");
+        auto dataPtr = imageData.getData<uint16_t>();
+
+	if(m_previewMaximum)
+	{
+	  //
+	  if(m_previewMaxCounterValue > m_previewMaxCounter)  
+	  {
+	    for(int j=0; j<m_imageSize; j++)
+	    {
+              m_previewImageData[j] = 0;   
+            }
+	    m_previewMaxCounterValue = 0;   
+       
+          }
+	  for(int i=0; i<cellData.size(); i++)
+	    for(int j=0; j<m_imageSize; j++)
+	      {
+                if(m_previewImageData[j] < dataPtr[i*m_imageSize + j]) m_previewImageData[j] = dataPtr[i*m_imageSize + j];   
+              }
+
+	  m_previewMaxCounterValue++;
+	  return;
+	}
+	else
+	{
+	  if(m_previewCell >= cellData.size()) 
+	  {
+	    m_previewCell >= cellData.size() - 1;
+            std::cout << "Preview cell number changed to: " << m_previewCell << std::endl;
+	  }
+          auto imageDataShape = data.get<vector<unsigned long long> >("image.data.shape");
+            
+          uint32_t indx = m_previewCell*m_imageSize;
+          
+          for(int i=0; i<m_imageSize; i++)
+          {
+            m_previewImageData[i] = dataPtr[indx];
+            indx++;
+          }
+	}
+    }
+    
+    void DsscProcessor::previewThreadFunc()
+    {
+      //
+        NDArray imageArray(m_previewImageData.data(),
+                m_imageSize,
+                NDArray::NullDeleter(),
+                Dims(128,512));
+        util::Hash dataHash;
+        dataHash.set("ladderImage",ImageData(imageArray));
+        while(m_preview)
+        {
+            //
+            writeChannel("ladderImageOutput", dataHash);
+        }
+        
+    }
+    
+    /*void DsscProcessor::fillImageData(,vector<uint16_t> & imageData, int frameNum)
+    {
+      const size_t numCols = m_ladderMode? 512 : 64;
+      const size_t numRows = m_ladderMode? 128 : 64;
+      const size_t numImagePixels = numCols * numRows;
+
+      imageData.resize(numImagePixels);
+
+      if(!m_ladderMode){
+        auto asicDataArr = m_trainDataToShow->getAsicDataArray(0,frameNum);
+        std::copy(asicDataArr.begin(),asicDataArr.end(),imageData.begin());
+        for(size_t px=0; px<numImagePixels; px++){
+          imageData[px] = m_correctionFunction(frameNum,px,asicDataArr[px]);
+        }
+      }else{
+        auto imageDataArr = m_trainDataToShow->getImageDataArray(frameNum);
+        for(size_t px=0; px<numImagePixels; px++){
+          imageData[px] = m_correctionFunction(frameNum,px,imageDataArr[px]);
+        }
+      }
+    }//*/
+
+    
 }
+
+

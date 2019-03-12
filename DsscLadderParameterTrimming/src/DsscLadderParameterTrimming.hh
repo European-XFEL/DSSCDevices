@@ -117,6 +117,7 @@ namespace karabo {
         void initDataAcquisition();
 
         std::vector<double> measureBurstData(const std::vector<uint32_t> & measurePixels, int STARTADDR, int ENDADDR, bool subtract) override;
+
         std::vector<double> measureRMSData(const std::vector<uint32_t> & measurePixels, const int STARTADDR, const int ENDADDR ) override;
 
         // configuration function with DsscPpt Device
@@ -226,6 +227,7 @@ namespace karabo {
         void setSelectedInjectionMode(const std::string & nextMode);
 
         void measureBurstOffsetSweep();
+        void measureBurstOffsetSweepDiscr();
         void measureInjectionSweepSlopes();
         void measureBinningInformation();
         void measureADCGainMap();
