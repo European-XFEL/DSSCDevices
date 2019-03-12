@@ -59,20 +59,23 @@ namespace karabo {
                     case Types::UINT32:
                         UINT32_ELEMENT(expected).key(path + it->getKey())
                                 .daqPolicy(DAQPolicy::OMIT)
-                                .readOnly()
+                                .init()
+                                .assignmentOptional().noDefaultValue()
                                 .commit();
                         break;
 
                     case Types::STRING:
                         STRING_ELEMENT(expected).key(path + it->getKey())
                                 .daqPolicy(DAQPolicy::OMIT)
-                                .readOnly()
+                                .init()
+                                .assignmentOptional().noDefaultValue()
                                 .commit();
                         break;
                     case Types::VECTOR_UINT32:
                         VECTOR_UINT32_ELEMENT(expected).key(path + it->getKey())
                                 .daqPolicy(DAQPolicy::OMIT)
-                                .readOnly()
+                                .init()
+                                .assignmentOptional().noDefaultValue()
                                 .commit();
                         break;
 
@@ -108,8 +111,8 @@ namespace karabo {
             hash.set<std::string>(baseNodeMain + "RegisterNames", configData.getRegisterNames());
             hash.set<std::string>(baseNodeMain + "timestamp", configData.timestamp);
 
-            addConfiguration(hash, configData.pixelRegisterDataVec);
-            addConfiguration(hash, configData.jtagRegisterDataVec);
+            //addConfiguration(hash, configData.pixelRegisterDataVec);
+            //addConfiguration(hash, configData.jtagRegisterDataVec);
             addConfiguration(hash, configData.iobRegisterData);
             addConfiguration(hash, configData.epcRegisterData);
 
