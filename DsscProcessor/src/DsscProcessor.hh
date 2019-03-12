@@ -165,6 +165,7 @@ namespace karabo {
         uint64_t m_startTrainId = 0;
         uint64_t m_endTrainId = 0;
         uint32_t m_receivedTrains = 0;
+        
         bool m_trainMonitorStart = true;
 
         std::thread m_previewThread;
