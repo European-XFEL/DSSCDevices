@@ -141,6 +141,7 @@ namespace karabo {
         void savePixelHistos();
         void saveMeasurementInfo();
         void displayPixelHistogram();
+	void displayPixelCells(const karabo::util::Hash& data);
 
         void clearData();
 
@@ -176,6 +177,9 @@ namespace karabo {
         bool m_acquireSramCorrection;
         utils::DataHistoVec m_pixelHistoVec;
         std::chrono::time_point<std::chrono::high_resolution_clock> m_starttime;
+
+	bool m_showPixelCells;
+        uint32_t m_pixelNumberCellsShow;
 
         std::vector<uint16_t> m_previewImageData;
     };

@@ -261,6 +261,34 @@ namespace karabo {
             .reconfigurable()
             .commit();
 
+        BOOL_ELEMENT(expected).key("showPixelCells")
+            .displayedName("Show pixel values in cells")
+            .description("Show pixel values in cells / time dependency")
+            .assignmentOptional().defaultValue(false).reconfigurable()
+            .commit();
+
+        UINT32_ELEMENT(expected).key("pixelNumberCellsShow")
+            .displayedName("Pixel number to show cells")
+            .assignmentOptional().defaultValue(0)
+	    .minInc(0).maxExc(512*128)
+            .reconfigurable()
+            .commit();
+
+        NODE_ELEMENT(expected).key("pixelCells")
+            .description("Vectors for pixel cells preview")
+            .displayedName("Online pixel cells View")
+            .commit();
+
+        VECTOR_UINT16_ELEMENT(expected).key("pixelCells.pixelCells")
+            .displayedName("Pixel Cells")
+            .readOnly().initialValue(std::vector<unsigned short>(1,0))
+            .commit();
+
+        VECTOR_UINT16_ELEMENT(expected).key("pixelCells.pixelCellsValues")
+            .displayedName("Pixel Cells Values")
+            .readOnly().initialValue(std::vector<unsigned short>(1,0))
+            .commit();
+
 
         INPUT_CHANNEL(expected).key("input")
             .displayedName("Input")
@@ -470,6 +498,16 @@ namespace karabo {
           {
             m_previewMaxCounter = incomingReconfiguration.getAs<uint32_t>(path);                
           }
+          else if(path.compare("showPixelCells") == 0)
+          {
+	    m_showPixelCells = incomingReconfiguration.getAs<bool>(path);
+              
+          }
+          else if(path.compare("pixelNumberCellsShow") == 0)
+          {
+            m_pixelNumberCellsShow = incomingReconfiguration.getAs<uint32_t>(path);              
+          }
+
         }
       }
     }
@@ -582,6 +620,9 @@ namespace karabo {
         m_previewMaxCounter = get<uint32_t>("resetPreviewImageAtCount");     
         m_previewMaxCounterValue = 0;
         m_previewImageData = std::vector<uint16_t>(m_imageSize, 0);
+
+	m_showPixelCells = get<bool>("showPixelCells");
+        m_pixelNumberCellsShow = get<uint32_t>("pixelNumberCellsShow");     
     }
 
     void DsscProcessor::onData(const karabo::util::Hash& data,
@@ -619,6 +660,8 @@ namespace karabo {
       m_receivedTrains++;
 
       if(m_preview) updatePreviewData(data);
+
+      if(m_showPixelCells) displayPixelCells(data);
 
       if(m_run == false){
         changeDeviceState(State::STOPPED);
@@ -905,6 +948,37 @@ namespace karabo {
         }
         set<vector<unsigned int>>("histoGen.pixelHistoBinValues",std::move(binValues));
       }
+
+    }
+
+    void DsscProcessor::displayPixelCells(const karabo::util::Hash& data)
+    {
+      //std::cout << "In display pix cell data" << std::endl;
+
+      static vector<unsigned short> cells;
+      static vector<unsigned short> cellValues;
+
+      auto cellsData = data.get<util::NDArray>("image.cellId");
+      bool cellsSizeUpdated = false;
+      if(cells.size() !=  cellsData.size())
+      {
+        cells.resize(cellsData.size());
+        for(int i=0; i < cells.size(); i++) cells[i] = i; 
+        cellValues.resize(cellsData.size());
+        cellsSizeUpdated = true;
+      }
+
+      auto dataPtr = data.get<util::NDArray>("image.data").getData<uint16_t>();
+        
+
+         
+      for(int i=0; i<cellsData.size(); i++)
+      {
+        cellValues[i] = dataPtr[m_pixelNumberCellsShow + i*m_imageSize];        
+      }
+      
+      if(cellsSizeUpdated) set<vector<unsigned short>>("pixelCells.pixelCells", std::move(cells));
+      set<vector<unsigned short>>("pixelCells.pixelCellsValues", std::move(cellValues));
 
     }
     
