@@ -711,7 +711,7 @@ namespace karabo {
 
       const unsigned long long* trainId_ptr = trainId.getData<unsigned long long>();
       size_t trainId_size = trainId.size();
-      
+     
       m_numFrames = cellId_size;
       m_alsoRMS = get<bool>("measureRMS");
           
@@ -738,6 +738,7 @@ namespace karabo {
       //cout << "DataSize = " << data_size << endl;
 
       const auto minValidTrainId = get<unsigned long long>("minValidTrainId");
+      if(trainId_ptr[0] <= minValidTrainId) return;
 
       // business logic starts here
       
