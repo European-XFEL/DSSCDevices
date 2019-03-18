@@ -23,8 +23,8 @@
 
 namespace karabo {
 
-    const std::string s_dsscConfBaseNode = "RunMetaData";
-
+    const std::string s_dsscConfBaseNode = "DetConfig";
+    
     class DsscH5ConfigToSchema {
     public:
 

@@ -151,10 +151,15 @@ namespace karabo {
                 .commit();
         
         SLOT_ELEMENT(expected)
-                .key("writeFullConfigHashOut").displayedName("Send Config Data Hash").description("Sending full config data hash through chennel")
+                .key("updateFullConfigHash").displayedName("Update Config Data Hash").description("Update full config data hash")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::UNKNOWN)
                 .commit();
-
+ 
+        SLOT_ELEMENT(expected)
+                .key("sendConfigHashOut").displayedName("Send Config Data Hash").description("Send full config data hash through p2p channel")
+                .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::UNKNOWN)
+                .commit();
+        
         PATH_ELEMENT(expected).key("linuxBinaryName")
                 .description("Path to linux binary")
                 .displayedName("Linux Binary Filename")
@@ -973,10 +978,25 @@ namespace karabo {
                 .displayedName("Input")
                 .commit();
         
-            // Output channel for the DAQ
+        /*    // Output channel for the DAQ
         NODE_ELEMENT(expected).key(karabo::s_dsscConfBaseNode)
                 .displayedName("Meta Data")
-                .commit();
+                .commit();//*/
+        
+        Schema detconfigSchema;
+        /*BOOL_ELEMENT(detconfigSchema).key("initialized")
+                .displayedName("Initialzed")
+                .assignmentOptional()
+                .defaultValue(false)
+                .commit();//*/
+        NODE_ELEMENT(detconfigSchema).key("DetConfig")
+            .description("Detector configuration")
+            .displayedName("DetConfig")
+            .commit();
+        OUTPUT_CHANNEL(expected).key("daqOutput")
+            .displayedName("daqOutput")
+            .dataSchema(detconfigSchema)
+            .commit();
 
     }
 
@@ -1063,7 +1083,8 @@ namespace karabo {
       KARABO_SLOT(saveConfiguration);
       KARABO_SLOT(storeFullConfigFile);
       KARABO_SLOT(storeFullConfigHDF5);
-      KARABO_SLOT(writeFullConfigHashOut);
+      KARABO_SLOT(updateFullConfigHash);
+      KARABO_SLOT(sendConfigHashOut);      
 
       KARABO_SLOT(setSendingASICs);
       KARABO_SLOT(programLMKsAuto);
@@ -1998,30 +2019,49 @@ namespace karabo {
 #endif    
     }
     
-    void DsscPpt::writeFullConfigHashOut()
+    void DsscPpt::updateFullConfigHash()    
     {
-      Hash hashout;  
       const auto fileName = get<string>("fullConfigFileName");
       {
         DsscScopedLock lock(&m_accessToPptMutex,__func__);
         if(checkPathExists(fileName)){            
-            bool schemaUpdateRequired = m_dsscConfigtoSchema.getFullConfigHash(fileName, hashout);
-            KARABO_LOG_INFO<<"Updating meta config schema: "<<schemaUpdateRequired;
+            bool schemaUpdateRequired = m_dsscConfigtoSchema.getFullConfigHash(fileName, m_hashout);
+            KARABO_LOG_INFO<<"Updating meta config schema: " << schemaUpdateRequired;
             
             if (schemaUpdateRequired) {
-                const karabo::util::Schema& update = m_dsscConfigtoSchema.getUpdatedSchema();
-                this->updateSchema(update, true);                
+                const karabo::util::Schema& detconfigSchema = m_dsscConfigtoSchema.getUpdatedSchema();
+                //this->updateSchema(update, true); 
+                
+                Schema update;
+                OUTPUT_CHANNEL(update).key("daqOutput")
+                    .displayedName("daqOutput")
+                    .dataSchema(detconfigSchema)
+                    .commit();
+       
+                this->updateSchema(update, true); //*/
             }
             
-            for (auto it = hashout.get<Hash>(karabo::s_dsscConfBaseNode).begin(); it != hashout.get<Hash>(karabo::s_dsscConfBaseNode).end(); ++it) {
+            /*for (auto it = hashout.get<Hash>(karabo::s_dsscConfBaseNode).begin(); it != hashout.get<Hash>(karabo::s_dsscConfBaseNode).end(); ++it) {
                 set(karabo::s_dsscConfBaseNode+"."+it->getKey(), it->getValueAsAny());
-            }
+            }//*/
             
         }else return;
       }                  
   
     }
-
+    
+    void DsscPpt::sendConfigHashOut()    
+    {
+      if(m_hashout != Hash())
+      {
+        /*std::cout << "Sending config data" << std::endl;
+        const karabo::util::Timestamp& actualTimestamp = this->getActualTimestamp();
+        std::cout << "Writing data to daqOutput" << std::endl;
+        this->writeChannel("daqOutput", m_hashout, actualTimestamp);//*/
+        this->writeChannel("daqOutput", m_hashout, actualTimestamp);
+      }
+    }
+    
 
     void DsscPpt::doFastInit()
     {

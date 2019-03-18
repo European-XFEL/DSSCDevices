@@ -377,7 +377,8 @@ namespace karabo {
         void SaveQSFPNetConfig();
 
         void setThrottleDivider();
-        void writeFullConfigHashOut();
+        void updateFullConfigHash();
+        void sendConfigHashOut();
 
 
 
@@ -429,6 +430,8 @@ namespace karabo {
 
         bool m_lastTrainIdPolling = false;
         DsscH5ConfigToSchema m_dsscConfigtoSchema;
+        
+        karabo::util::Hash m_hashout; 
 
     };
 }

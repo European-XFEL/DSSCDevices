@@ -111,8 +111,8 @@ namespace karabo {
             hash.set<std::string>(baseNodeMain + "RegisterNames", configData.getRegisterNames());
             hash.set<std::string>(baseNodeMain + "timestamp", configData.timestamp);
 
-            //addConfiguration(hash, configData.pixelRegisterDataVec);
-            //addConfiguration(hash, configData.jtagRegisterDataVec);
+            addConfiguration(hash, configData.pixelRegisterDataVec);
+            addConfiguration(hash, configData.jtagRegisterDataVec);
             addConfiguration(hash, configData.iobRegisterData);
             addConfiguration(hash, configData.epcRegisterData);
 

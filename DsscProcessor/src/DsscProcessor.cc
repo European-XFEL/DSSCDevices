@@ -398,7 +398,6 @@ namespace karabo {
             .displayedName("Ladder Image Output")
             .dataSchema(ladderSchema)
             .commit();
-
     }
 
 
