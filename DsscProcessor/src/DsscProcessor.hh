@@ -182,6 +182,8 @@ namespace karabo {
         uint32_t m_pixelNumberCellsShow;
 
         std::vector<uint16_t> m_previewImageData;
+        
+        unsigned int m_updateHistoStride;
     };
 }
 

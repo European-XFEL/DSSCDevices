@@ -236,7 +236,12 @@ namespace karabo {
         
         UINT32_ELEMENT(expected).key("histoGen.ladderPixelToShow")
             .displayedName("Pixel To Show")
-            .assignmentOptional().defaultValue(true).reconfigurable()
+            .assignmentOptional().defaultValue(1).reconfigurable()
+            .commit();
+        
+        UINT32_ELEMENT(expected).key("histoGen.updateHistoStride")
+            .displayedName("Histo update stride")
+            .assignmentOptional().defaultValue(200).reconfigurable()
             .commit();
       
         UINT64_ELEMENT(expected).key("histoGen.pixelhistoCnt")
@@ -505,8 +510,11 @@ namespace karabo {
           else if(path.compare("pixelNumberCellsShow") == 0)
           {
             m_pixelNumberCellsShow = incomingReconfiguration.getAs<uint32_t>(path);              
+          }          
+          else if(path.compare("histoGen.updateHistoStride") == 0)
+          {
+            m_updateHistoStride = incomingReconfiguration.getAs<uint32_t>(path);              
           }
-
         }
       }
     }
@@ -621,7 +629,8 @@ namespace karabo {
         m_previewImageData = std::vector<uint16_t>(m_imageSize, 0);
 
 	m_showPixelCells = get<bool>("showPixelCells");
-        m_pixelNumberCellsShow = get<uint32_t>("pixelNumberCellsShow");     
+        m_pixelNumberCellsShow = get<uint32_t>("pixelNumberCellsShow"); 
+        m_updateHistoStride = get<uint32_t>("histoGen.updateHistoStride"); 
     }
 
     void DsscProcessor::onData(const karabo::util::Hash& data,
@@ -764,11 +773,16 @@ namespace karabo {
         m_iterationCnt++;
           
         KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
+        
+        if(m_iterationCnt%m_updateHistoStride == 0 )
+        {
+            displayPixelHistogram();  
+        }
           
         if(m_iterationCnt == m_numIterations )
         {
-          //savePixelHistos();    
-          displayPixelHistogram();  
+          //savePixelHistos();
+          displayPixelHistogram();    
           stop();
         }
       }

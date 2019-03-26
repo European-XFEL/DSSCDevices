@@ -2058,7 +2058,6 @@ namespace karabo {
         const karabo::util::Timestamp& actualTimestamp = this->getActualTimestamp();
         std::cout << "Writing data to daqOutput" << std::endl;
         this->writeChannel("daqOutput", m_hashout, actualTimestamp);//*/
-        //this->writeChannel("daqOutput", m_hashout);
       }
     }
     
