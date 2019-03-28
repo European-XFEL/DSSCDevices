@@ -774,7 +774,7 @@ namespace karabo {
           
         KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
         
-        if(m_iterationCnt%m_updateHistoStride == 0 )
+        if( trainId_ptr[0]%m_updateHistoStride == 0 )
         {
             displayPixelHistogram();  
         }
