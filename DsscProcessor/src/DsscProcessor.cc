@@ -773,13 +773,15 @@ namespace karabo {
         m_iterationCnt++;
           
         KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
-        
-        if( trainId_ptr[0]%m_updateHistoStride == 0 )
-        {
-            displayPixelHistogram();  
-        }
+
+
+       if( m_iterationCnt % m_updateHistoStride == 0 )
+         {
+             displayPixelHistogram();  
+         }
+
           
-        if(m_iterationCnt == m_numIterations )
+        if(m_iterationCnt >= m_numIterations )
         {
           //savePixelHistos();
           displayPixelHistogram();    
@@ -1026,6 +1028,10 @@ namespace karabo {
         
         auto imageData = data.get<util::NDArray>("image.data");
 	auto cellData = data.get<util::NDArray>("image.cellId");
+
+        auto trainId = data.get<util::NDArray>("image.trainId")
+        const unsigned long long* trainId_ptr = trainId.getData<unsigned long long>();
+
         auto dataPtr = imageData.getData<uint16_t>();
         
         if(m_maxSram >= cellData.size()){
@@ -1036,17 +1042,33 @@ namespace karabo {
           KARABO_LOG_WARN << "Sram Range does not fit to number of frames, is corrected";
         }
 
+
+
++        unsigned int histoUpdateFract = trainId_ptr[0]%m_updateHistoStride;        
++        if( histoUpdateFract < m_lastUpdateHistoFract )
+         {
+             displayPixelHistogram();  
+-        }
++            m_lastUpdateHistoFract = 0;
++        }else m_lastUpdateHistoFract = histoUpdateFract;
+
+
+
+
+
+
 	if(m_previewMaximum)
 	{
 	  //
-	  if(m_previewMaxCounterValue > m_previewMaxCounter)  
+          unsigned int histoUpdateFract = trainId_ptr[0] % m_previewMaxCounter;
+	  if(histoUpdateFract < m_lastUpdateHistoFract)  
 	  {
 	    for(int j=0; j<m_imageSize; j++)
 	    {
               m_previewImageData[j] = 0;   
             }
-	    m_previewMaxCounterValue = 0;        
-          }
+            m_lastUpdateHistoFract = 0;        
+          }else m_lastUpdateHistoFract = histoUpdateFract;
           
 	  for(int i=m_minSram; i<m_maxSram; i++)
 	    for(int j=0; j<m_imageSize; j++)
