@@ -625,7 +625,6 @@ namespace karabo {
 	m_previewCell = 0;
         m_previewMaximum = false;
         m_previewMaxCounter = get<uint32_t>("resetPreviewImageAtCount");     
-        m_previewMaxCounterValue = 0;
         m_previewImageData = std::vector<uint16_t>(m_imageSize, 0);
 
 	m_showPixelCells = get<bool>("showPixelCells");
@@ -773,15 +772,13 @@ namespace karabo {
         m_iterationCnt++;
           
         KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
-
-
-       if( m_iterationCnt % m_updateHistoStride == 0 )
-         {
-             displayPixelHistogram();  
-         }
-
+        
+        if(m_iterationCnt%m_updateHistoStride == 0 )
+        {
+            displayPixelHistogram();  
+        }
           
-        if(m_iterationCnt >= m_numIterations )
+        if(m_iterationCnt == m_numIterations )
         {
           //savePixelHistos();
           displayPixelHistogram();    
@@ -1028,11 +1025,9 @@ namespace karabo {
         
         auto imageData = data.get<util::NDArray>("image.data");
 	auto cellData = data.get<util::NDArray>("image.cellId");
-
-        auto trainId = data.get<util::NDArray>("image.trainId")
-        const unsigned long long* trainId_ptr = trainId.getData<unsigned long long>();
-
+        auto trainData = data.get<util::NDArray>("image.trainId");
         auto dataPtr = imageData.getData<uint16_t>();
+        auto trainIdPtr = trainData.getData<unsigned long long>();
         
         if(m_maxSram >= cellData.size()){
           m_maxSram = cellData.size()-1;
@@ -1042,33 +1037,18 @@ namespace karabo {
           KARABO_LOG_WARN << "Sram Range does not fit to number of frames, is corrected";
         }
 
-
-
-+        unsigned int histoUpdateFract = trainId_ptr[0]%m_updateHistoStride;        
-+        if( histoUpdateFract < m_lastUpdateHistoFract )
-         {
-             displayPixelHistogram();  
--        }
-+            m_lastUpdateHistoFract = 0;
-+        }else m_lastUpdateHistoFract = histoUpdateFract;
-
-
-
-
-
-
 	if(m_previewMaximum)
 	{
 	  //
-          unsigned int histoUpdateFract = trainId_ptr[0] % m_previewMaxCounter;
-	  if(histoUpdateFract < m_lastUpdateHistoFract)  
+          unsigned long long previewMaxFract = trainIdPtr[0]%m_previewMaxCounter;
+	  if(previewMaxFract < m_previewMaxLastFract)  
 	  {
 	    for(int j=0; j<m_imageSize; j++)
 	    {
               m_previewImageData[j] = 0;   
             }
-            m_lastUpdateHistoFract = 0;        
-          }else m_lastUpdateHistoFract = histoUpdateFract;
+          }
+          m_previewMaxLastFract = previewMaxFract;
           
 	  for(int i=m_minSram; i<m_maxSram; i++)
 	    for(int j=0; j<m_imageSize; j++)
@@ -1076,7 +1056,6 @@ namespace karabo {
                 if(m_previewImageData[j] < dataPtr[i*m_imageSize + j]) m_previewImageData[j] = dataPtr[i*m_imageSize + j];   
               }
 
-	  m_previewMaxCounterValue++;
 	  return;
 	}
 	else

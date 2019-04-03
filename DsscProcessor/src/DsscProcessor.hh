@@ -160,7 +160,8 @@ namespace karabo {
         bool m_preview;
 	uint16_t m_previewCell;
         bool m_previewMaximum;        
-        uint32_t m_previewMaxCounter;        
+        uint64_t m_previewMaxCounter;   
+        uint64_t m_previewMaxLastFract = 0;
         
         uint64_t m_startTrainId = 0;
         uint64_t m_endTrainId = 0;
@@ -183,7 +184,6 @@ namespace karabo {
         std::vector<uint16_t> m_previewImageData;
         
         unsigned int m_updateHistoStride;
-        unsigned int m_lastUpdateHistoFract = 0;
     };
 }
 
