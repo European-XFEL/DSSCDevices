@@ -1041,8 +1041,10 @@ namespace karabo {
 	{
 	  //
           unsigned long long previewMaxFract = trainIdPtr[0]%m_previewMaxCounter;
-	  if(previewMaxFract < m_previewMaxLastFract)  
+          //std::cout << "previewMaxFract: " << previewMaxFract <<  "  " << "trainId: " << trainIdPtr[0]  << std::endl;
+	  if(previewMaxFract == 0) //< m_previewMaxCounter*0.33 && m_previewMaxLastFract > m_previewMaxCounter*0.66)  
 	  {
+            std::cout << "Resetting Max Preview" << std::endl;
 	    for(int j=0; j<m_imageSize; j++)
 	    {
               m_previewImageData[j] = 0;   
