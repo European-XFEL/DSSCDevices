@@ -27,7 +27,7 @@ namespace karabo {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
-        KARABO_CLASSINFO(DsscProcessor, "DsscProcessor", "3.0")
+        KARABO_CLASSINFO(DsscProcessor, "DsscProcessor", "2.4")
 
         /**
          * Necessary method as part of the factory/configuration system
@@ -128,7 +128,6 @@ namespace karabo {
 
         void initialization();
         void updateSelPixelSramBlacklist();
-
 
         void onData(const karabo::util::Hash& data,
                 const karabo::xms::InputChannel::MetaData& meta);
