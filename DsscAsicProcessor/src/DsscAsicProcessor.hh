@@ -22,7 +22,7 @@ namespace karabo {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
-        KARABO_CLASSINFO(DsscAsicProcessor, "DsscAsicProcessor", "2.0")
+        KARABO_CLASSINFO(DsscAsicProcessor, "DsscAsicProcessor", "2.4")
         using DataHistos = std::vector<utils::DataHisto>;
         static const size_t s_NUMPX = 4096;
 
@@ -69,7 +69,7 @@ namespace karabo {
          * @endcode
          */
         virtual void postReconfigure();
-    
+
     private:// slots
         void stop();
         void accumulate();
@@ -78,23 +78,23 @@ namespace karabo {
     private:
         void initialization();
         void resetCounters();
-        
+
         void onData(const karabo::util::Hash& data,
-            const karabo::xms::InputChannel::MetaData& meta);
-        
-        util::Hash fillOutputSchema(int asic_idx);
+                    const karabo::xms::InputChannel::MetaData& meta);
+
+        util::Hash fillOutputSchema(int asicIdx);
 
         void fillPixelHistos(const karabo::util::NDArray& data);
-        
+
         void clearHistos();
-        
+
         DataHistos m_pixelHistos;
         std::vector<unsigned long long> m_trainIds;
         int m_iterationCnt;
         int m_numIterations;
         bool m_run;
-        
-        unsigned short m_minSram,m_maxSram;
+
+        unsigned short m_minSram, m_maxSram;
         util::Hash m_lastSendHash;
     };
 }
