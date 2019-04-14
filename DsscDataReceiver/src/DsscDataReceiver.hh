@@ -10,22 +10,22 @@
 
 #ifndef KARABO_DSSCDATARECEIVER_HH
 #define KARABO_DSSCDATARECEIVER_HH
+
 #include <memory>
 #include <vector>
 #include <string>
 #include <utility>
 #include <functional>
 
-#define HDF5
-
 #include <karabo/karabo.hpp>
-#ifdef HDF5
+
 #include "DsscHDF5Writer.h"
-#endif
 #include "DsscTrainData.hh"
 #include "DsscTrainDataProcessor.h"
 #include "DsscTrainSorter.h"
 #include "DataHisto.h"
+
+#define HUTCH_ENVIRONMENT
 
 /**
  * The main Karabo namespace
@@ -40,7 +40,7 @@ namespace karabo {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
-        KARABO_CLASSINFO(DsscDataReceiver, "DsscDataReceiver", "3.1")
+        KARABO_CLASSINFO(DsscDataReceiver, "DsscDataReceiver", "2.4")
 
         /**
          * Necessary method as part of the factory/configuration system
@@ -72,8 +72,9 @@ namespace karabo {
 
         bool waitDataReceived();
 
+#ifndef HUTCH_ENVIRONMENT
         void startDataTransfer();
-
+#endif
         void start();
         void updateStatus(const std::string & text);
 
@@ -81,6 +82,7 @@ namespace karabo {
         void updateTempADCValues(utils::DsscTrainData * trainData);
         void saveToHDF(utils::DsscTrainData * trainDataToStore);
         void saveToHDFviaThread();
+        
         /**
          * This function acts as a hook and is called after an reconfiguration request was received,
          * but BEFORE this reconfiguration request is actually merged into this device's state.
@@ -97,7 +99,6 @@ namespace karabo {
         virtual void preReconfigurePreview(karabo::util::Hash& incomingReconfiguration);
         virtual void preReconfigureReceiver(karabo::util::Hash& incomingReconfiguration);
         virtual void preReconfigureCorrection(karabo::util::Hash& incomingReconfiguration);
-
 
         void open();
         void close();
@@ -126,11 +127,9 @@ namespace karabo {
         void acquireBackgroundAndCorrection();
         void loadBackgroundAndCorrection();
 
-
         void startPolling();
         void stopPolling();
         void getFillStands();
-
 
         bool allASICTestPatternsValid(utils::DsscTrainData * trainDataToCheck);
         bool allASICTempValuesValid(utils::DsscTrainData * trainDataToCheck);
@@ -144,12 +143,8 @@ namespace karabo {
 
         void fillImageData(std::vector<unsigned int> & imageData, int frameNum);
         std::vector<uint32_t> accumulateImageData();
-        static std::string getDir(const std::string & name);
+        std::string getDir(const std::string & name);
 
-        void fillMetaData();
-        void fillTrailer();
-        void fillHeader();
-        void fillSpecificData();
         void initialize();
         void initSortMap();
 
@@ -163,8 +158,13 @@ namespace karabo {
         bool checkOutputDirExists();
         bool checkDirExists(const std::string & path);
 
-        void resetHistograms(){m_nextHistoReset = true;}
-        void resetThresholdMap(){m_nextThresholdReset = true;}
+        void resetHistograms() {
+            m_nextHistoReset = true;
+        }
+
+        void resetThresholdMap() {
+            m_nextThresholdReset = true;
+        }
         void clearHistograms();
         void clearThresholdMap();
         void saveCurrentPixelHisto();
@@ -181,29 +181,29 @@ namespace karabo {
 
     private:
 
-        inline float rawData(int frame, int pixel, const  uint16_t & value) const;
-        inline float rawDataSramBL(int frame, int pixel, const  uint16_t & value) const;
-        inline float gccWrapCorrect(int frame, int pixel, const  uint16_t & value) const;
+        inline float rawData(int frame, int pixel, const uint16_t & value) const;
+        inline float rawDataSramBL(int frame, int pixel, const uint16_t & value) const;
+        inline float gccWrapCorrect(int frame, int pixel, const uint16_t & value) const;
         inline float sramCorrectData(int frame, int pixel, const uint16_t & value) const;
         inline float sramCorrectSramBLData(int frame, int pixel, const uint16_t & value) const;
-        inline float offsetCorrectData(int frame, int pixel, const uint16_t & value) const ;
-        inline float offsetCorrectSramBLData(int frame, int pixel, const uint16_t & value) const ;
-        inline float offsetCorrectTHData(int frame, int pixel, const uint16_t & value) const ;
-        inline float offsetCorrectTHSramBLData(int frame, int pixel, const uint16_t & value) const ;
-        inline float fullCorrectData(int frame, int pixel, const uint16_t & value) const ;
-        inline float fullCorrectSramBLData(int frame, int pixel, const uint16_t & value) const ;
-        inline float fullCorrectTHData(int frame, int pixel, const uint16_t & value) const ;
-        inline float fullCorrectTHSramBLData(int frame, int pixel, const uint16_t & value) const ;
+        inline float offsetCorrectData(int frame, int pixel, const uint16_t & value) const;
+        inline float offsetCorrectSramBLData(int frame, int pixel, const uint16_t & value) const;
+        inline float offsetCorrectTHData(int frame, int pixel, const uint16_t & value) const;
+        inline float offsetCorrectTHSramBLData(int frame, int pixel, const uint16_t & value) const;
+        inline float fullCorrectData(int frame, int pixel, const uint16_t & value) const;
+        inline float fullCorrectSramBLData(int frame, int pixel, const uint16_t & value) const;
+        inline float fullCorrectTHData(int frame, int pixel, const uint16_t & value) const;
+        inline float fullCorrectTHSramBLData(int frame, int pixel, const uint16_t & value) const;
 
-        std::function<float(int,int,const uint16_t & )> getGccCorrectionFunction();
-        std::function<float(int,int,const uint16_t & )> getSimpleCorrectionFunction();
-        std::function<float(int,int,const uint16_t & )> getThresholdFunction();
-        std::function<float(int,int,const uint16_t & )> getThresholdSramBLFunction();
-        std::function<float(int,int,const uint16_t & )> getSimpleSramBLCorrectionFunction();
-        std::function<float(int,int,const uint16_t & )> getSramBlacklistCorrectionFunction();
-        std::function<float(int,int,const uint16_t & )> getNoBlacklistCorrectionFunction();
+        std::function<float(int, int, const uint16_t &) > getGccCorrectionFunction();
+        std::function<float(int, int, const uint16_t &) > getSimpleCorrectionFunction();
+        std::function<float(int, int, const uint16_t &) > getThresholdFunction();
+        std::function<float(int, int, const uint16_t &) > getThresholdSramBLFunction();
+        std::function<float(int, int, const uint16_t &) > getSimpleSramBLCorrectionFunction();
+        std::function<float(int, int, const uint16_t &) > getSramBlacklistCorrectionFunction();
+        std::function<float(int, int, const uint16_t &) > getNoBlacklistCorrectionFunction();
 
-        std::function<float(int,int,const uint16_t & )> getCorrectionFunction();
+        std::function<float(int, int, const uint16_t &) > getCorrectionFunction();
 
         void updateProcessorParams();
         void initStatsAcc();
@@ -242,11 +242,10 @@ namespace karabo {
         bool m_showRawData;
         uint16_t m_gccwrap;
 
+        util::Hash m_sendData;
 
-        util::Hash sendData;
 
-
-        static const std::unordered_map<std::string,std::string> directoryStructure;
+        static const std::unordered_map<std::string, std::string> m_directoryStructure;
         utils::DataHistoVec m_pixelHistoVec;
 
         std::vector<float> m_pixelData;
@@ -256,10 +255,10 @@ namespace karabo {
         utils::StatsAccVec m_sramCorrectionAcc;
         std::vector<std::vector<float>> m_pixelCorrectionData;
 
-        utils::DataHisto pixelHisto;
-        utils::DataHisto asicHisto;
+        utils::DataHisto m_pixelHisto;
+        utils::DataHisto m_asicHisto;
 
-        utils::DsscTrainData * currentTrainData;
+        utils::DsscTrainData * m_currentTrainData;
         utils::DsscTrainData * m_trainDataToShow;
 
         bool m_ladderMode;
@@ -269,13 +268,13 @@ namespace karabo {
         int m_selFrame;
         unsigned long long m_currentTrainID;
 
-        util::State lastState;
+        karabo::util::State m_lastState;
 
         bool m_nextHistoReset;
         bool m_nextThresholdReset;
 
-        std::function<float(int,int,const uint16_t & )> m_correctionFunction;
-        std::function<float(int,uint16_t *,uint16_t num)> m_correctionFunctionPixelWise;
+        std::function<float(int, int, const uint16_t &) > m_correctionFunction;
+        std::function<float(int, uint16_t *, uint16_t num) > m_correctionFunctionPixelWise;
 
         uint64_t m_numCheckedData;
         uint64_t m_errorCnt;
