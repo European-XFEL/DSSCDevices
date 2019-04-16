@@ -12,8 +12,6 @@
  *
  */
 
-
-
 #ifndef DSSCCONFIGHASHWRITER_HH
 #define DSSCCONFIGHASHWRITER_HH
 
@@ -23,17 +21,15 @@
 
 namespace karabo {
 
-    const std::string s_dsscConfBaseNode = "RunMetaData";
+    const std::string s_dsscConfBaseNode = "DetConfig";
 
     class DsscH5ConfigToSchema {
+
     public:
 
-        DsscH5ConfigToSchema() {
-            std::cout << "constructor2" << std::endl;
-        }
+        DsscH5ConfigToSchema();
 
-        virtual ~DsscH5ConfigToSchema() {
-        }
+        virtual ~DsscH5ConfigToSchema();
 
         bool getFullConfigHash(const std::string& filename, karabo::util::Hash& hash);
         karabo::util::Schema getUpdatedSchema();
@@ -47,6 +43,11 @@ namespace karabo {
         void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfigVec& registerConfigVec);
         void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfig & registerConfig);
         void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscHDF5SequenceData& sequenceData);
+
+        inline std::string & removeSpaces(std::string& p) const {
+            std::replace(p.begin(), p.end(), ' ', '_');
+            return p;
+        }
 
         karabo::util::Hash m_lastHash;
 
