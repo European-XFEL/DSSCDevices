@@ -10,6 +10,7 @@
 #define KARABO_DSSCLADDERPARAMETERTRIMMING_HH
 
 #include <karabo/karabo.hpp>
+
 #include "MultiModuleInterface.h"
 #include "CHIPTrimmer.h"
 #include "FitUtils.h"
@@ -23,7 +24,7 @@ class DataPacker;
 
 namespace karabo {
 
-    class DsscLadderParameterTrimming : public karabo::core::Device<> , public SuS::MultiModuleInterface {
+    class DsscLadderParameterTrimming : public karabo::core::Device<>, public SuS::MultiModuleInterface {
 
     public:
 
@@ -79,7 +80,7 @@ namespace karabo {
 
 
         void loadCoarseGainParamsIntoGui();
-        void displayInjectionSweep(const std::vector<std::vector<double>> & binValues, const std::vector<unsigned int> & xValues, const std::vector<uint32_t> & measurePixels) override;
+        void displayInjectionSweep(const std::vector<std::vector<double>> &binValues, const std::vector<unsigned int> & xValues, const std::vector<uint32_t> & measurePixels) override;
         void displayDataHistos(const utils::DataHistoVec & dataHistoVec, const std::vector<uint32_t> & measurePixels) override;
 
     private:
@@ -99,25 +100,29 @@ namespace karabo {
         // Readout Function with Data Receiver Environment
 
         const uint16_t *getPixelSramData(int pixel) override; // gets imagePixel
-        const uint16_t  *getTrailerData() override { return nullptr;}
 
-        inline double getPixelMeanValue(int imagePixel){  // gets imagePixel
-          //return m_asicMeanValues[m_meanSortMap[imagePixel]];
-          return m_asicMeanValues[imagePixel];
+        const uint16_t *getTrailerData() override {
+            return nullptr;
+        }
+
+        inline double getPixelMeanValue(int imagePixel) { // gets imagePixel
+            //return m_asicMeanValues[m_meanSortMap[imagePixel]];
+            return m_asicMeanValues[imagePixel];
         }
 
         int initSystem() override;
         bool updateAllCounters() override;
         void updateStartWaitOffset(int value) override;
 
-        bool doSingleCycle(DataPacker* packer=NULL, bool testPattern = false) override;
-        bool doSingleCycle(int numTries, DataPacker* packer=NULL, bool testPattern = false) override;
+        bool doSingleCycle(DataPacker* packer = NULL, bool testPattern = false) override;
+        bool doSingleCycle(int numTries, DataPacker* packer = NULL, bool testPattern = false) override;
 
         bool waitDataReceived();
         void initDataAcquisition();
 
         std::vector<double> measureBurstData(const std::vector<uint32_t> & measurePixels, int STARTADDR, int ENDADDR, bool subtract) override;
-        std::vector<double> measureRMSData(const std::vector<uint32_t> & measurePixels, const int STARTADDR, const int ENDADDR ) override;
+
+        std::vector<double> measureRMSData(const std::vector<uint32_t> & measurePixels, const int STARTADDR, const int ENDADDR) override;
 
         // configuration function with DsscPpt Device
         bool isHardwareReady() override;
@@ -133,16 +138,21 @@ namespace karabo {
 
         bool getContentFromDevice(uint32_t bitStreamLength, std::vector<bool> &data_vec) override;
 
-        bool programJtag(bool readBack=false, bool setJtagEngineBusy=true, bool recalcXors = true) override;
+        bool programJtag(bool readBack = false, bool setJtagEngineBusy = true, bool recalcXors = true) override;
         bool programJtagSingle(const std::string & moduleSetName, bool readBack = false, bool setJtagEngineBusy = true, bool recalcXors = true, bool overwrite = false) override;
-        bool programPixelRegs(bool readBack=false, bool setJtagEngineBusy=true) override;
-        void programPixelRegDirectly(int px, bool setJtagEngineBusy=true) override;
-        bool programSequencer(bool readBack=false, bool setJtagEngineBusy=true, bool program=true) override;
-        void programEPCRegister(const std::string & moduleSet) override {}
+        bool programPixelRegs(bool readBack = false, bool setJtagEngineBusy = true) override;
+        void programPixelRegDirectly(int px, bool setJtagEngineBusy = true) override;
+        bool programSequencer(bool readBack = false, bool setJtagEngineBusy = true, bool program = true) override;
 
-        virtual void resetChip() override {}
+        void programEPCRegister(const std::string & moduleSet) override {
+        }
 
-        bool calibrateCurrCompDACForReticleTest(bool log=true, int singlePx=-1, int startSetting=0, int defaultValue = 3){ return true;}
+        virtual void resetChip() override {
+        }
+
+        bool calibrateCurrCompDACForReticleTest(bool log = true, int singlePx = -1, int startSetting = 0, int defaultValue = 3) {
+            return true;
+        }
 
         void acquireDisplayData();
         void acquireImage();
@@ -157,7 +167,7 @@ namespace karabo {
         void setGainConfigurationFromFitResultsFile();
 
         void setBurstVetoOffset(int val) override;
-        int  getBurstVetoOffset() override;
+        int getBurstVetoOffset() override;
 
         void measureMeanSramContent();
         void measureMeanSramContentAllPix();
@@ -166,7 +176,10 @@ namespace karabo {
         void setNumWordsToReceive(int val, bool saveOldVal = true) override;
 
         void runContinuousMode(bool run) override;
-        bool inContinuousMode(){ return dsscPptState() == util::State::ACQUIRING;}
+
+        bool inContinuousMode() {
+            return dsscPptState() == util::State::ACQUIRING;
+        }
 
         void setRoSerIn(bool bit) override;
 
@@ -174,10 +187,16 @@ namespace karabo {
 
         void waitJTAGEngineDone() override;
 
-        int runTestPatternAcquisition(uint16_t _testPattern) override { return 0;}
+        int runTestPatternAcquisition(uint16_t _testPattern) override {
+            return 0;
+        }
 
-        bool isLadderReadout() override { return true;}
-        void setLadderReadout(bool enable) override {}
+        bool isLadderReadout() override {
+            return true;
+        }
+
+        void setLadderReadout(bool enable) override {
+        }
 
         void loadPxInjCalibData(SuS::CHIPTrimmer * trimmer);
 
@@ -186,33 +205,75 @@ namespace karabo {
         int getActiveASICToReadout() const override;
 
         //functions without functionality
-        void testJtagInChain(bool inChain) override {}
+
+        void testJtagInChain(bool inChain) override {
+        }
         void resetDataReceiver() override;
-        bool writeFpgaRegisters() override { return true;}
-        void setDebugOutputSelect(int SMA_1_val, int SMA_2_val, bool enableSMA_1 = true, bool enableSMA_2 = true) override {}
 
-        int getStaticVDDA() override { return 0;}
-        int getStaticVDDDADC() override {return 0;}
-        int getStaticVDDD() override {return 0;}
-        void updateDataPackerPixelOffsetsMap() override {}
-        void flushFtdi() override {}
+        bool writeFpgaRegisters() override {
+            return true;
+        }
 
-        void setCHIPReadout(ChipReadout mode) override {}
-        int getCHIPReadout() override { return 0;}
+        void setDebugOutputSelect(int SMA_1_val, int SMA_2_val, bool enableSMA_1 = true, bool enableSMA_2 = true) override {
+        }
 
-        void setMultiCyclesNum(int num, bool program = false) override {}
-        void generateInitialChipData(DataPacker *packer) override {}
+        int getStaticVDDA() override {
+            return 0;
+        }
 
-        void setFullFReadoutMode(bool en, bool program = false) override {}
-        void setWindowReadoutMode(bool en, bool program = false) override {}
-        bool getSinglePixelReadoutMode() override {return false;}
-        void setSinglePixelReadoutMode(bool en, bool program = true) override {}
-        void setSinglePixelToReadout(int px, bool program = false) override {}
+        int getStaticVDDDADC() override {
+            return 0;
+        }
+
+        int getStaticVDDD() override {
+            return 0;
+        }
+
+        void updateDataPackerPixelOffsetsMap() override {
+        }
+
+        void flushFtdi() override {
+        }
+
+        void setCHIPReadout(ChipReadout mode) override {
+        }
+
+        int getCHIPReadout() override {
+            return 0;
+        }
+
+        void setMultiCyclesNum(int num, bool program = false) override {
+        }
+
+        void generateInitialChipData(DataPacker *packer) override {
+        }
+
+        void setFullFReadoutMode(bool en, bool program = false) override {
+        }
+
+        void setWindowReadoutMode(bool en, bool program = false) override {
+        }
+
+        bool getSinglePixelReadoutMode() override {
+            return false;
+        }
+
+        void setSinglePixelReadoutMode(bool en, bool program = true) override {
+        }
+
+        void setSinglePixelToReadout(int px, bool program = false) override {
+        }
 
         //only used in MeasurementWidget
-        void enBusInj(bool enable, std::string pixel = "all") override {}
-        void enBusInjRes(bool enable, std::string pixel = "all") override {}
-        void enPxInjDC(bool enable, std::string pixel = "all") override {}
+
+        void enBusInj(bool enable, std::string pixel = "all") override {
+        }
+
+        void enBusInjRes(bool enable, std::string pixel = "all") override {
+        }
+
+        void enPxInjDC(bool enable, std::string pixel = "all") override {
+        }
 
         void setSendingAsics(uint16_t asics) override;
         void setActiveModule(int modNumber) override;
@@ -226,6 +287,7 @@ namespace karabo {
         void setSelectedInjectionMode(const std::string & nextMode);
 
         void measureBurstOffsetSweep();
+        void measureBurstOffsetSweepDiscr();
         void measureInjectionSweepSlopes();
         void measureBinningInformation();
         void measureADCGainMap();
@@ -233,7 +295,7 @@ namespace karabo {
 
         void displayBinValuesOfPixel();
 
-    // device slots
+        // device slots
     public:
 
         void test();
@@ -242,20 +304,23 @@ namespace karabo {
         void measureBurstData();
         void setBaseline();
         void clearBaseline();
-        void doSingleCycle2(){doSingleCycle();}
+
+        void doSingleCycle2() {
+            doSingleCycle();
+        }
 
         void enableInjectionInSelPixels();
         void powerUpSelPixels();
         void addValueToPxRegSignal();
         void enableMonBusInCols();
 
-    // device own functions
+        // device own functions
     private:
 
         void onMeanData(const util::Hash& data,
-            const xms::InputChannel::MetaData& meta);
+                        const xms::InputChannel::MetaData& meta);
         void onPixelData(const util::Hash& data,
-            const xms::InputChannel::MetaData& meta);
+                         const xms::InputChannel::MetaData& meta);
 
         void saveDataVector(const std::string & outputName, const std::vector<double> & dataVector);
         void saveDataHisto(const std::string & outputName, const utils::DataHisto & dataHisto, double scaleFactor = 1.0);
@@ -279,7 +344,7 @@ namespace karabo {
         bool startMainProcessorInstance();
         bool startDsscPptInstance();
         void startPptDevice();
-        void triggerPptInitFunction(util::State originState, const std::string & function, int timeout=3, int TRY_CNT = 3);
+        void triggerPptInitFunction(util::State originState, const std::string & function, int timeout = 3, int TRY_CNT = 3);
         void fillSramAndReadoutPattern();
 
         void computeTargetGainADCConfiguration();
@@ -295,7 +360,8 @@ namespace karabo {
         unsigned int getLastValidTrainId();
         util::State dsscPptState();
         util::State deviceState(const std::string & deviceId);
-        bool isDeviceExisting(const std::string & deviceId){
+
+        bool isDeviceExisting(const std::string & deviceId) {
             return (m_deviceInitialized ? remote().exists(deviceId).first : false);
         }
 
@@ -304,8 +370,16 @@ namespace karabo {
         bool isXFELData();
 
     private: // members
-        enum RecvStatus{OK=0,TESTPATTERN=1,TIMEOUT=2,DROP=3};
-        enum RecvMode{RAW=0,PIXEL=1,MEAN=2, RMS=3, NO=4};
+
+        enum RecvStatus {
+
+            OK = 0, TESTPATTERN = 1, TIMEOUT = 2, DROP = 3
+        };
+
+        enum RecvMode {
+
+            RAW = 0, PIXEL = 1, MEAN = 2, RMS = 3, NO = 4
+        };
 
         unsigned long long m_lastTrainId;
 
@@ -357,7 +431,7 @@ namespace karabo {
         DsscHDF5CalibrationDataGenerator m_calibGenerator;
 
         bool m_deviceInitialized;
-        
+
         void changeDeviceState(const util::State & newState);
 
         bool matrixSRAMTest(int patternID, int &errCnt);
@@ -368,63 +442,67 @@ namespace karabo {
 
         void setNumIterations(uint iterations);
 
-        class StateChangeKeeper{
-          public:
-            StateChangeKeeper(core::Device<>  *device) : dev(device),lastState(dev->getState()){
-              try{
-                dev->updateState(util::State::CHANGING);
-                dev->set<std::string>("status","Measuring");
-              }
-              catch(...)
-              {
-                std::cout << "DsscLadderParameterTrimming.h : Could not change device state!!!" << std::endl ;// sometimes state is not existing
-              }
+        class StateChangeKeeper {
+
+        public:
+
+            StateChangeKeeper(core::Device<> *device) : m_dev(device), m_lastState(m_dev->getState()) {
+                try {
+                    m_dev->updateState(util::State::CHANGING);
+                    m_dev->set<std::string>("status", "Measuring");
+                } catch (...) {
+                    std::cout << "DsscLadderParameterTrimming.h : Could not change device state!!!" << std::endl; // sometimes state is not existing
+                }
             }
 
-            StateChangeKeeper(core::Device<>  *device, const util::State & afterState) : dev(device),lastState(afterState){
-              try{
-                dev->updateState(util::State::CHANGING);
-                dev->set<std::string>("status","Measuring");
-              }
-              catch(...)
-              {
-                std::cout << "DsscLadderParameterTrimming.h : Could not change device state!!!" << std::endl ;// sometimes state is not existing
-              }
+            StateChangeKeeper(core::Device<> *device, const util::State & afterState) : m_dev(device), m_lastState(afterState) {
+                try {
+                    m_dev->updateState(util::State::CHANGING);
+                    m_dev->set<std::string>("status", "Measuring");
+                } catch (...) {
+                    std::cout << "DsscLadderParameterTrimming.h : Could not change device state!!!" << std::endl; // sometimes state is not existing
+                }
             }
 
-            ~StateChangeKeeper(){
-              try{
-                dev->updateState(lastState);
-              }catch(...)
-              {
-                 std::cout << "DsscLadderParameterTrimming.h : Could not change device state!!!" << std::endl ;// sometimes state is not existing
-              }
+            ~StateChangeKeeper() {
+                try {
+                    m_dev->updateState(m_lastState);
+                } catch (...) {
+                    std::cout << "DsscLadderParameterTrimming.h : Could not change device state!!!" << std::endl; // sometimes state is not existing
+                }
             }
 
-            void change(const util::State & newState){lastState = newState;}
+            void change(const util::State & newState) {
+                m_lastState = newState;
+            }
 
-          private:
-            core::Device<> *dev;
-            util::State lastState;
+        private:
+            core::Device<> *m_dev;
+            util::State m_lastState;
         };
 
-        enum ConfigState{VALID=0,CHANGED=1,CHANGING=2};
+        enum ConfigState {
+
+            VALID = 0, CHANGED = 1, CHANGING = 2
+        };
 
         ConfigState m_deviceConfigState;
 
-        class ConfigStateKeeper{
-          public:
-            ConfigStateKeeper(ConfigState & configState) : m_activeState(configState), m_lastState(configState){
-              m_activeState = ConfigState::CHANGING;
+        class ConfigStateKeeper {
+
+        public:
+
+            ConfigStateKeeper(ConfigState & configState) : m_activeState(configState), m_lastState(configState) {
+                m_activeState = ConfigState::CHANGING;
             }
 
-            ~ConfigStateKeeper(){
-              if(m_lastState !=ConfigState::CHANGING){
-                m_activeState = ConfigState::CHANGED;
-              }
+            ~ConfigStateKeeper() {
+                if (m_lastState != ConfigState::CHANGING) {
+                    m_activeState = ConfigState::CHANGED;
+                }
             }
 
-          private:
+        private:
             ConfigState & m_activeState;
             ConfigState m_lastState;
         };
