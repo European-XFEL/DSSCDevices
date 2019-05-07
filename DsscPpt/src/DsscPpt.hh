@@ -40,7 +40,7 @@ namespace karabo {
 
         void unlock() {
             m_origin = "";
-            boost::mutex::unlock();
+            boost::mutex::unlock();         
         }
 
         void trylock(const std::string & info) {
@@ -295,6 +295,9 @@ namespace karabo {
         void preReconfigureFullConfig(karabo::util::Hash & incomingReconfiguration);
         void preReconfigureFastInit(karabo::util::Hash & incomingReconfiguration);
         void preReconfigureRegAccess(karabo::util::Hash & incomingReconfiguration);
+
+
+        void preDestruction();
 
         void getEPCParamsIntoGui();
         void getEPCParamsIntoGui(const std::string & moduleSetName);

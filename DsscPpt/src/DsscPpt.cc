@@ -1089,15 +1089,27 @@ namespace karabo {
 
     }
 
+    void DsscPpt::preDestruction() {
 
-    DsscPpt::~DsscPpt() {
+        this->signalEndOfStream("daqOutput");
         const string defaultConfigPath = DEFAULTCONF;
         m_ppt->storeFullConfigFile(defaultConfigPath);
-        m_keepPolling = false;
-        if (m_pollThread->joinable()) {
+
+        
+        if (m_pollThread && m_pollThread->joinable()) {
+
+            std::cout << "Joining the thread" << std::cout;
+            m_keepPolling = false;        
             m_pollThread->join();
         }
-        this->signalEndOfStream("daqOutput");
+
+        if (m_acquisitionThread && m_acquisitionThread->joinable()) {
+            m_acquisitionThread->join();
+        }
+       
+    }
+    
+    DsscPpt::~DsscPpt() {
     }
 
 
@@ -1110,23 +1122,27 @@ namespace karabo {
             return;
         }
 
-        setQSFPEthernetConfig();
+        {        
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
-        m_iobCurrIOBNumber = "1";
-        m_jtagCurrIOBNumber = "1";
+            setQSFPEthernetConfig();
 
-        m_ppt->setInitDist(120);
-        m_ppt->setFastInitConfigSpeed(30);
-        m_ppt->setEPCParam("JTAG_Control_Register", "all", "ASIC_JTAG_Clock_Divider", 30);
+            m_iobCurrIOBNumber = "1";
+            m_jtagCurrIOBNumber = "1";
 
-        const auto quadrantId = this->get<string>("quadrantId");
-        m_ppt->setQuadrantId(quadrantId);
+            m_ppt->setInitDist(120);
+            m_ppt->setFastInitConfigSpeed(30);
+            m_ppt->setEPCParam("JTAG_Control_Register", "all", "ASIC_JTAG_Clock_Divider", 30);
 
-        set<string>("epcRegisterFilePath", m_ppt->getEPCRegisters()->getFileName());
-        set<string>("iobRegisterFilePath", m_ppt->getIOBRegisters()->getFileName());
-        set<string>("pixelRegisterFilePath", m_ppt->getPixelRegisters()->getFileName());
-        set<string>("jtagRegisterFilePath", m_ppt->getJTAGRegisters()->getFileName());
-        set<string>("sequencerFilePath", m_ppt->getSequencer()->getFilename());
+            const auto quadrantId = this->get<string>("quadrantId");
+            m_ppt->setQuadrantId(quadrantId);
+
+            set<string>("epcRegisterFilePath", m_ppt->getEPCRegisters()->getFileName());
+            set<string>("iobRegisterFilePath", m_ppt->getIOBRegisters()->getFileName());
+            set<string>("pixelRegisterFilePath", m_ppt->getPixelRegisters()->getFileName());
+            set<string>("jtagRegisterFilePath", m_ppt->getJTAGRegisters()->getFileName());
+            set<string>("sequencerFilePath", m_ppt->getSequencer()->getFilename());
+        }
 
         KARABO_LOG_WARN << "updateGuiMeasurementParameters";
         updateGuiMeasurementParameters();
@@ -1140,7 +1156,6 @@ namespace karabo {
         KARABO_LOG_WARN << "getCoarseGainParametersIntoGui";
         getCoarseGainParamsIntoGui();
 
-        m_accessToPptMutex.unlock();
         KARABO_LOG_INFO << "init done";
 
     }
