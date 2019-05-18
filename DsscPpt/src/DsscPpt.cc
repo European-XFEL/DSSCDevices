@@ -1097,9 +1097,7 @@ namespace karabo {
 
         
         if (m_pollThread && m_pollThread->joinable()) {
-
-            std::cout << "Joining the thread" << std::cout;
-            m_keepPolling = false;        
+            m_keepPolling = false;
             m_pollThread->join();
         }
 
