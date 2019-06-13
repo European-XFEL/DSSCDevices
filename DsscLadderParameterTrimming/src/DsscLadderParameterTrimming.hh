@@ -9,13 +9,10 @@
 #ifndef KARABO_DSSCLADDERPARAMETERTRIMMING_HH
 #define KARABO_DSSCLADDERPARAMETERTRIMMING_HH
 
+#include "DsscTrimPptAPI.hh"
+
 #include <karabo/karabo.hpp>
 
-#include "MultiModuleInterface.h"
-#include "CHIPTrimmer.h"
-#include "FitUtils.h"
-#include "DsscHDF5MeasurementInfoWriter.h"
-#include "DsscHDF5CalibrationDataGenerator.h"
 /**
  * The main Karabo namespace
  */
@@ -24,9 +21,11 @@ class DataPacker;
 
 namespace karabo {
 
-    class DsscLadderParameterTrimming : public karabo::core::Device<>, public SuS::MultiModuleInterface {
+    class DsscLadderParameterTrimming : public karabo::core::Device<>{
 
     public:
+        
+        typedef boost::shared_ptr<SuS::DsscTrimPptAPI> TrimPPT_API_Pointer;
 
         // Add reflection information and Karabo framework compatibility to this class
         KARABO_CLASSINFO(DsscLadderParameterTrimming, "DsscLadderParameterTrimming", "3.1")
@@ -80,8 +79,8 @@ namespace karabo {
 
 
         void loadCoarseGainParamsIntoGui();
-        void displayInjectionSweep(const std::vector<std::vector<double>> &binValues, const std::vector<unsigned int> & xValues, const std::vector<uint32_t> & measurePixels) override;
-        void displayDataHistos(const utils::DataHistoVec & dataHistoVec, const std::vector<uint32_t> & measurePixels) override;
+        void displayInjectionSweep(const std::vector<std::vector<double>> &binValues, const std::vector<unsigned int> & xValues, const std::vector<uint32_t> & measurePixels); // override;
+        void displayDataHistos(const utils::DataHistoVec & dataHistoVec, const std::vector<uint32_t> & measurePixels);// override;
 
     private:
 
@@ -99,60 +98,52 @@ namespace karabo {
     private:
         // Readout Function with Data Receiver Environment
 
-        const uint16_t *getPixelSramData(int pixel) override; // gets imagePixel
-
-        const uint16_t *getTrailerData() override {
-            return nullptr;
-        }
+        const uint16_t *getPixelSramData(int pixel);// override; // gets imagePixel
 
         inline double getPixelMeanValue(int imagePixel) { // gets imagePixel
             //return m_asicMeanValues[m_meanSortMap[imagePixel]];
             return m_asicMeanValues[imagePixel];
         }
 
-        int initSystem() override;
-        bool updateAllCounters() override;
-        void updateStartWaitOffset(int value) override;
+        int initSystem();// override;
+        bool updateAllCounters();// override;
+        void updateStartWaitOffset(int value);// override;
 
-        bool doSingleCycle(DataPacker* packer = NULL, bool testPattern = false) override;
-        bool doSingleCycle(int numTries, DataPacker* packer = NULL, bool testPattern = false) override;
+        bool doSingleCycle(DataPacker* packer = NULL, bool testPattern = false); //override;
+        bool doSingleCycle(int numTries, DataPacker* packer = NULL, bool testPattern = false); //override;
 
         bool waitDataReceived();
         void initDataAcquisition();
 
-        std::vector<double> measureBurstData(const std::vector<uint32_t> & measurePixels, int STARTADDR, int ENDADDR, bool subtract) override;
+        std::vector<double> measureBurstData(const std::vector<uint32_t> & measurePixels, int STARTADDR, int ENDADDR, bool subtract); // override;
 
-        std::vector<double> measureRMSData(const std::vector<uint32_t> & measurePixels, const int STARTADDR, const int ENDADDR) override;
+        std::vector<double> measureRMSData(const std::vector<uint32_t> & measurePixels, const int STARTADDR, const int ENDADDR);// override;
 
         // configuration function with DsscPpt Device
-        bool isHardwareReady() override;
+        bool isHardwareReady(); //override;
 
         bool checkPPTInputConnected();
 
-        bool fillSramAndReadout(uint16_t pattern, bool init, bool jtagMode = false) override;
+        bool fillSramAndReadout(uint16_t pattern, bool init, bool jtagMode = false); //override;
 
         bool checkIOBDataFailed();
 
-        bool fastInitChip() override;
-        void initChip() override;
+        bool fastInitChip(); //override;
+        void initChip(); //override;
 
-        bool getContentFromDevice(uint32_t bitStreamLength, std::vector<bool> &data_vec) override;
+        bool getContentFromDevice(uint32_t bitStreamLength, std::vector<bool> &data_vec); //override;
 
-        bool programJtag(bool readBack = false, bool setJtagEngineBusy = true, bool recalcXors = true) override;
-        bool programJtagSingle(const std::string & moduleSetName, bool readBack = false, bool setJtagEngineBusy = true, bool recalcXors = true, bool overwrite = false) override;
-        bool programPixelRegs(bool readBack = false, bool setJtagEngineBusy = true) override;
-        void programPixelRegDirectly(int px, bool setJtagEngineBusy = true) override;
-        bool programSequencer(bool readBack = false, bool setJtagEngineBusy = true, bool program = true) override;
+        bool programJtag(bool readBack = false, bool setJtagEngineBusy = true, bool recalcXors = true); //override;
+        bool programJtagSingle(const std::string & moduleSetName, bool readBack = false, bool setJtagEngineBusy = true, bool recalcXors = true, bool overwrite = false); //override;
+        bool programPixelRegs(bool readBack = false, bool setJtagEngineBusy = true); //override;
+        void programPixelRegDirectly(int px, bool setJtagEngineBusy = true); //override;
+        bool programSequencer(bool readBack = false, bool setJtagEngineBusy = true, bool program = true); //override;
 
-        void programEPCRegister(const std::string & moduleSet) override {
+        /*void programEPCRegister(const std::string & moduleSet) override {
         }
 
         virtual void resetChip() override {
-        }
-
-        bool calibrateCurrCompDACForReticleTest(bool log = true, int singlePx = -1, int startSetting = 0, int defaultValue = 3) {
-            return true;
-        }
+        }//*/
 
         void acquireDisplayData();
         void acquireImage();
@@ -166,28 +157,28 @@ namespace karabo {
         void computeCalibratedADCSettings();
         void setGainConfigurationFromFitResultsFile();
 
-        void setBurstVetoOffset(int val) override;
-        int getBurstVetoOffset() override;
+        void setBurstVetoOffset(int val); //override;
+        int getBurstVetoOffset(); //override;
 
         void measureMeanSramContent();
         void measureMeanSramContentAllPix();
 
-        void setNumFramesToSend(int val, bool saveOldVal = true) override;
-        void setNumWordsToReceive(int val, bool saveOldVal = true) override;
+        void setNumFramesToSend(int val, bool saveOldVal = true); //override;
+        void setNumWordsToReceive(int val, bool saveOldVal = true); //override;
 
-        void runContinuousMode(bool run) override;
-
+        void runContinuousMode(bool run); //override;
+        
         bool inContinuousMode() {
             return dsscPptState() == util::State::ACQUIRING;
         }
 
-        void setRoSerIn(bool bit) override;
+        void setRoSerIn(bool bit); //override;
 
-        void setSendRawData(bool enable, bool reordered = false, bool converted = false) override;
+        void setSendRawData(bool enable, bool reordered = false, bool converted = false); //override;
 
-        void waitJTAGEngineDone() override;
+        void waitJTAGEngineDone(); //override;
 
-        int runTestPatternAcquisition(uint16_t _testPattern) override {
+        /*int runTestPatternAcquisition(uint16_t _testPattern) override {
             return 0;
         }
 
@@ -196,19 +187,20 @@ namespace karabo {
         }
 
         void setLadderReadout(bool enable) override {
-        }
+        }//*/
 
         void loadPxInjCalibData(SuS::CHIPTrimmer * trimmer);
 
-        int getNumberOfActiveAsics() const override;
-        int getNumberOfSendingAsics() const override;
-        int getActiveASICToReadout() const override;
+        int getNumberOfActiveAsics() const; // override;
+        int getNumberOfSendingAsics() const; // override;
+        int getActiveASICToReadout() const; // override;
 
         //functions without functionality
 
-        void testJtagInChain(bool inChain) override {
+        void resetDataReceiver();// override;        
+        
+        /*void testJtagInChain(bool inChain) override {
         }
-        void resetDataReceiver() override;
 
         bool writeFpgaRegisters() override {
             return true;
@@ -273,10 +265,10 @@ namespace karabo {
         }
 
         void enPxInjDC(bool enable, std::string pixel = "all") override {
-        }
+        }//*/
 
-        void setSendingAsics(uint16_t asics) override;
-        void setActiveModule(int modNumber) override;
+        void setSendingAsics(uint16_t asics); //override;
+        void setActiveModule(int modNumber); //override;
 
         void sendBurstParams();
 
@@ -437,9 +429,11 @@ namespace karabo {
         bool matrixSRAMTest();
 
         // is this function required?
-        void sramTest(int iterations, bool init = false) override;
+        void sramTest(int iterations, bool init = false); // override;
 
         void setNumIterations(uint iterations);
+        
+        TrimPPT_API_Pointer m_trimppt_api;
 
         class StateChangeKeeper {
 

@@ -16,6 +16,7 @@
       <itemPath>DsscProcessor/src/DsscProcessor.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscRecvFsm.hh</itemPath>
       <itemPath>DsscDataReceiver/src/DsscTrainDataSchema.hh</itemPath>
+      <itemPath>DsscLadderParameterTrimming/src/DsscTrimPptAPI.hh</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
                    displayName="Resource Files"
@@ -33,6 +34,7 @@
       <itemPath>DsscPpt/src/DsscPpt.cc</itemPath>
       <itemPath>DsscPpt/src/DsscPptAPI.cc</itemPath>
       <itemPath>DsscProcessor/src/DsscProcessor.cc</itemPath>
+      <itemPath>DsscLadderParameterTrimming/src/DsscTrimPptAPI.cc</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -47,7 +49,7 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>../DsscDependencies/DsscDependencies</Elem>
+    <Elem>../DsscDependencies</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -163,6 +165,16 @@
             flavor2="0">
       </item>
       <item path="DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscLadderParameterTrimming/src/DsscTrimPptAPI.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="DsscLadderParameterTrimming/src/DsscTrimPptAPI.hh"
             ex="false"
             tool="3"
             flavor2="0">
@@ -315,6 +327,16 @@
             flavor2="0">
       </item>
       <item path="DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.hh"
+            ex="false"
+            tool="3"
+            flavor2="0">
+      </item>
+      <item path="DsscLadderParameterTrimming/src/DsscTrimPptAPI.cc"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="DsscLadderParameterTrimming/src/DsscTrimPptAPI.hh"
             ex="false"
             tool="3"
             flavor2="0">
