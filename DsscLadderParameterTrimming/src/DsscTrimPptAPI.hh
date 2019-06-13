@@ -8,6 +8,7 @@
 #ifndef DSSCTRIMPPTAPI_H
 #define	DSSCTRIMPPTAPI_H
 
+
 #include "MultiModuleInterface.h"
 #include "CHIPTrimmer.h"
 #include "FitUtils.h"
@@ -18,15 +19,21 @@
 #include "DsscHDF5TrimmingDataWriter.h"
 #include "DsscHDF5TrimmingDataReader.h"
 #include "DsscModuleInfo.h"
+#include "DsscLadderParameterTrimming.hh"
 
+namespace karabo{
 class DsscLadderParameterTrimming;
+}
+
 
 namespace SuS{
 
 class DsscTrimPptAPI: public SuS::MultiModuleInterface {
 public:
     
-    DsscTrimPptAPI(DsscLadderParameterTrimming* _karaboDevice, const char* configFile);
+    friend class karabo::DsscLadderParameterTrimming;
+    
+    DsscTrimPptAPI(karabo::DsscLadderParameterTrimming* _karaboDevice, const std::string& configFile);
     DsscTrimPptAPI(const DsscTrimPptAPI& orig) = delete;
     virtual ~DsscTrimPptAPI();
     
@@ -113,73 +120,6 @@ private:
     }
 
     virtual void resetChip() override {
-        m_iterations;
-        m_trimStartAddr;
-        //saveSramTestResult;
-        //getFinalSlopes;
-        //getPixelRegisters;
-        pptFullConfig;
-        //m_calibGenerator;
-        pixelRegisters;
-        //programPixelRegs;
-        sequencer;
-        totalNumPxs;
-        //getLastValidTrainId;
-        runTrimming;
-        errorCodePixels;
-        //getSramDriftValues;
-        //getCurvatureValues;
-        //getSendingColumnPixels;
-        totalNumPxs;
-        baselineValuesValid;
-        //isPixelSending;
-        //getSendingPixels;
-        sramSize;
-        meanSramContent;
-        baselineValuesValid;
-        //updateAllCounters;
-        //initChip
-        //programJtag;
-        //enableInjection;
-        //getPixelRegisters;
-        //programPixelRegs;
-        //m_calibGenerator;
-        injectionMode;
-        injectionMode;
-        //getInjectionMode;
-        //enableInjection;
-        activeAsics;
-        sendingAsics;
-        //getBurstParam;
-        //getBurstParamNames;
-        //getSequencerHash;
-        //getSequencer;
-        currentModule;
-        jtagRegisters;
-        baselineValues;
-        //getPixelMeanValue;
-        currentModule;
-        //sweepBurstWaitOffset;
-        //getASICPixels;
-        m_numRuns;
-        pptFullConfig;
-        //setInjectionMode;
-        //setNumIterations;
-        //calibratePixelDelay;
-        //initTrimming;
-        meanSramAccs;
-        //getSendingAsicsVec;
-        m_numRuns;
-        //setD0Mode;
-        //setActiveAsics;
-        //setLadderReadout;
-        injectionMode;
-        //measureSramDriftMap;
-        //m_asicMeanValues;
-        baselineValues;
-        runTrimming;
-        //NORM;
-
     }
     
     int runTestPatternAcquisition(uint16_t _testPattern) override {
@@ -265,7 +205,7 @@ private:
         return true;
     }
   
-    DsscLadderParameterTrimming* m_karaboDevice;
+    karabo::DsscLadderParameterTrimming* m_karaboDevice;    
 
 };
 

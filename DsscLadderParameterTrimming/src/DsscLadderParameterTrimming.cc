@@ -803,7 +803,7 @@ namespace karabo{
 
     DsscLadderParameterTrimming::DsscLadderParameterTrimming(const karabo::util::Hash& config)
         : Device<>(config),
-        m_trimppt_api(new SuS::DsscTrimPptAPI(this, INITIALCONF)),
+        m_trimppt_api(new SuS::DsscTrimPptAPI(this, std::string(INITIALCONF))),
         m_asicMeanValues(utils::s_totalNumPxs),
         m_pixelData(utils::s_totalNumPxs*utils::s_numSram),
         m_currentTrimmer(nullptr),
@@ -961,7 +961,7 @@ namespace karabo{
 
         initDataWriter();
 
-        SuS::CHIPTrimmer trimmer(m_trimppt_api);
+        SuS::CHIPTrimmer trimmer(m_trimppt_api.get());
         trimmer.setAsicWise(false);
 
         auto chipParts = get<string>("selChipParts");
@@ -1527,7 +1527,7 @@ namespace karabo{
 
         m_runFastAcquisition = true;
 
-        SuS::CHIPInterface::measureMeanSramContent(utils::getUpCountingVector(utils::s_totalNumPxs), m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr, false);
+        m_trimppt_api->SuS::CHIPInterface::measureMeanSramContent(utils::getUpCountingVector(utils::s_totalNumPxs), m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr, false);
 
         m_runFastAcquisition = false;
 
@@ -2595,7 +2595,7 @@ namespace karabo{
 
         string gainConfigStr = get<string>("gainSelection");
 
-        SuS::CHIPGainConfigurator configurator(m_trimppt_api);
+        SuS::CHIPGainConfigurator configurator(m_trimppt_api.get());
         configurator.setGainMode(gainConfigStr);
         configurator.activateGainMode(gainConfigStr);
 
@@ -3155,7 +3155,7 @@ namespace karabo{
             return;
         }
 
-        SuS::CHIPGainConfigurator configurator(m_trimppt_api);
+        SuS::CHIPGainConfigurator configurator(m_trimppt_api.get());
         configurator.loadGainConfiguration("RmpFineTrm", fileName, false);
 
         updateModuleInfo();
@@ -3287,4 +3287,5 @@ namespace karabo{
         return ok;
     }
 
-} // namespace karabo
+
+}// namespace karabo
