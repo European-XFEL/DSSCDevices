@@ -12,7 +12,7 @@
 
 namespace SuS{
 
-DsscTrimPptAPI::DsscTrimPptAPI(karabo::DsscLadderParameterTrimming* _karaboDevice, const char* configFile) : SuS::MultiModuleInterface(new SuS::PPTFullConfig(configFile)),  m_karaboDevice(_karaboDevice){
+DsscTrimPptAPI::DsscTrimPptAPI(karabo::DsscLadderParameterTrimming* _karaboDevice, const std::string& configFile) : m_karaboDevice(_karaboDevice), SuS::MultiModuleInterface(new SuS::PPTFullConfig(configFile)) {
 }
 
 
@@ -167,5 +167,5 @@ bool DsscTrimPptAPI::inContinuousMode() override {
     return m_karaboDevice->inContinuousMode();
 }
 
-}
+}//SuS
 
