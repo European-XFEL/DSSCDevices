@@ -6,6 +6,20 @@
  * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
  */
 
+#include "CHIPTrimmer.h"
+//#include "FitUtils.h"
+#include "DsscHDF5MeasurementInfoWriter.h"
+#include "DsscHDF5CalibrationDataGenerator.h"
+
+//#include "CHIPGainConfigurator.h"
+//#include "DsscHDF5TrimmingDataWriter.h"
+//#include "DsscHDF5TrimmingDataReader.h"
+#include "DsscModuleInfo.h"
+
+
+
+#include "DsscTrimPptAPI.hh"
+
 #include "DsscLadderParameterTrimming.hh"
 
 #define DSSCSTATUS(statStr) \
@@ -18,7 +32,8 @@
 #define INITIALCONF "ConfigFiles/F2Init.conf"
 //#endif
 
-using namespace std;
+//using namespace std;
+
 
 USING_KARABO_NAMESPACES
 

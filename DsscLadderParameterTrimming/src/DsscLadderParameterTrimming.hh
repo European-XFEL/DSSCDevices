@@ -9,13 +9,15 @@
 #ifndef KARABO_DSSCLADDERPARAMETERTRIMMING_HH
 #define KARABO_DSSCLADDERPARAMETERTRIMMING_HH
 
-#include "DsscTrimPptAPI.hh"
-
 #include <karabo/karabo.hpp>
 
 /**
  * The main Karabo namespace
  */
+
+namespace SuS{
+    class DsscTrimPptAPI;
+}
 
 class DataPacker;
 
