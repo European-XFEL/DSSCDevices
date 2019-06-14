@@ -6,10 +6,10 @@
  * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
  */
 
+#include "DsscLadderParameterTrimming.hh"
+
 #include "CHIPTrimmer.h"
 //#include "FitUtils.h"
-#include "DsscHDF5MeasurementInfoWriter.h"
-#include "DsscHDF5CalibrationDataGenerator.h"
 
 //#include "CHIPGainConfigurator.h"
 //#include "DsscHDF5TrimmingDataWriter.h"
@@ -20,7 +20,10 @@
 
 #include "DsscTrimPptAPI.hh"
 
-#include "DsscLadderParameterTrimming.hh"
+
+
+//set<string> setst;
+
 
 #define DSSCSTATUS(statStr) \
       KARABO_LOG_INFO << statStr;\
