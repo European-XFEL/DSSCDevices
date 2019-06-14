@@ -9,8 +9,12 @@
 #ifndef KARABO_DSSCLADDERPARAMETERTRIMMING_HH
 #define KARABO_DSSCLADDERPARAMETERTRIMMING_HH
 
+ 
 #include <karabo/karabo.hpp>
 
+#include "CHIPTrimmer.h"
+#include "DsscHDF5MeasurementInfoWriter.h"
+#include "DsscHDF5CalibrationDataGenerator.h"
 /**
  * The main Karabo namespace
  */
@@ -100,22 +104,47 @@ namespace karabo {
     private:
         // Readout Function with Data Receiver Environment
 
-        const uint16_t *getPixelSramData(int pixel);// override; // gets imagePixel
-
         inline double getPixelMeanValue(int imagePixel) { // gets imagePixel
             //return m_asicMeanValues[m_meanSortMap[imagePixel]];
             return m_asicMeanValues[imagePixel];
         }
 
+        bool waitDataReceived();
+        void initDataAcquisition();
+        
+        bool checkPPTInputConnected();
+
+        bool checkIOBDataFailed();
+        
+        void acquireDisplayData();
+        void acquireImage();
+        void acquireHistogram();
+
+        std::vector<uint32_t> getPixelsToChange();
+
+        void importBinningInformationFile();
+        void importADCGainMapFile();
+        void importSpektrumFitResultsFile();
+        void computeCalibratedADCSettings();
+        void setGainConfigurationFromFitResultsFile();
+        
+        void measureMeanSramContent();
+        void measureMeanSramContentAllPix();
+       
+    public:
+        
+        bool inContinuousMode() {
+            return dsscPptState() == util::State::ACQUIRING;
+        }
+        
         int initSystem();// override;
         bool updateAllCounters();// override;
         void updateStartWaitOffset(int value);// override;
 
         bool doSingleCycle(DataPacker* packer = NULL, bool testPattern = false); //override;
         bool doSingleCycle(int numTries, DataPacker* packer = NULL, bool testPattern = false); //override;
-
-        bool waitDataReceived();
-        void initDataAcquisition();
+       
+        const uint16_t *getPixelSramData(int pixel);// override; // gets imagePixel
 
         std::vector<double> measureBurstData(const std::vector<uint32_t> & measurePixels, int STARTADDR, int ENDADDR, bool subtract); // override;
 
@@ -124,12 +153,8 @@ namespace karabo {
         // configuration function with DsscPpt Device
         bool isHardwareReady(); //override;
 
-        bool checkPPTInputConnected();
-
         bool fillSramAndReadout(uint16_t pattern, bool init, bool jtagMode = false); //override;
-
-        bool checkIOBDataFailed();
-
+        
         bool fastInitChip(); //override;
         void initChip(); //override;
 
@@ -147,33 +172,14 @@ namespace karabo {
         virtual void resetChip() override {
         }//*/
 
-        void acquireDisplayData();
-        void acquireImage();
-        void acquireHistogram();
-
-        std::vector<uint32_t> getPixelsToChange();
-
-        void importBinningInformationFile();
-        void importADCGainMapFile();
-        void importSpektrumFitResultsFile();
-        void computeCalibratedADCSettings();
-        void setGainConfigurationFromFitResultsFile();
-
         void setBurstVetoOffset(int val); //override;
         int getBurstVetoOffset(); //override;
-
-        void measureMeanSramContent();
-        void measureMeanSramContentAllPix();
 
         void setNumFramesToSend(int val, bool saveOldVal = true); //override;
         void setNumWordsToReceive(int val, bool saveOldVal = true); //override;
 
         void runContinuousMode(bool run); //override;
         
-        bool inContinuousMode() {
-            return dsscPptState() == util::State::ACQUIRING;
-        }
-
         void setRoSerIn(bool bit); //override;
 
         void setSendRawData(bool enable, bool reordered = false, bool converted = false); //override;
@@ -271,6 +277,11 @@ namespace karabo {
 
         void setSendingAsics(uint16_t asics); //override;
         void setActiveModule(int modNumber); //override;
+        
+        // is this function required?
+        void sramTest(int iterations, bool init = false); // override;
+        
+    private:
 
         void sendBurstParams();
 
@@ -429,9 +440,6 @@ namespace karabo {
 
         bool matrixSRAMTest(int patternID, int &errCnt);
         bool matrixSRAMTest();
-
-        // is this function required?
-        void sramTest(int iterations, bool init = false); // override;
 
         void setNumIterations(uint iterations);
         

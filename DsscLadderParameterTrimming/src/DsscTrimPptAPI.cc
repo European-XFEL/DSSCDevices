@@ -163,7 +163,7 @@ void DsscTrimPptAPI::resetDataReceiver(){
     m_karaboDevice->resetDataReceiver();
 }
 
-bool DsscTrimPptAPI::inContinuousMode() override {
+bool DsscTrimPptAPI::inContinuousMode(){
     return m_karaboDevice->inContinuousMode();
 }
 
