@@ -10,16 +10,6 @@
 
 
 #include "MultiModuleInterface.h"
-#include "CHIPTrimmer.h"
-#include "FitUtils.h"
-#include "DsscHDF5MeasurementInfoWriter.h"
-#include "DsscHDF5CalibrationDataGenerator.h"
-
-#include "CHIPGainConfigurator.h"
-#include "DsscHDF5TrimmingDataWriter.h"
-#include "DsscHDF5TrimmingDataReader.h"
-#include "DsscModuleInfo.h"
-#include "DsscLadderParameterTrimming.hh"
 
 namespace karabo{
 class DsscLadderParameterTrimming;
