@@ -634,6 +634,30 @@ namespace karabo {
             return;
         }
 
+        // reformat data array
+
+       const auto imageData = data.get<util::NDArray>("image.data");
+       const auto imageDataShape = data.get<vector<unsigned long long> >("image.data.shape");
+
+       auto reshapedImageData = util::NDArray(util::Dims(imageDataShape[2], imageDataShape[0], imageDataShape[1]), Types::UINT16);
+       const auto dataPtr = imageData.getData<uint16_t>();
+       auto dataPtrR = reshapedImageData.getData<uint16_t>();
+       const unsigned int singleImShape = imageDataShape[0] * imageDataShape[1];
+
+       #pragma omp parallel for       
+       for (int cell = 0; cell != imageDataShape[2]; cell++) {
+           int k = 0;
+           for(int i = 0; i != imageDataShape[0]; ++i) {
+               for(int j = 0; j != imageDataShape[1]; ++j) {
+                     dataPtrR[singleImShape*cell + imageDataShape[0]*j + i] = dataPtr[(k*imageDataShape[2])+cell];
+                     k++;
+                }
+           }
+        }
+        
+        const_cast<util::Hash*>(&data)->set("image.data", reshapedImageData);
+        
+
 
         if (m_trainMonitorStart) {
             m_startTrainId = data.get<util::NDArray>("image.trainId").getData<unsigned long long>()[0];
@@ -1024,7 +1048,6 @@ namespace karabo {
             auto imageDataShape = data.get<vector<unsigned long long> >("image.data.shape");
 
             uint32_t indx = m_previewCell*m_imageSize;
-
             for (int i = 0; i < m_imageSize; i++) {
                 m_previewImageData[i] = dataPtr[indx];
                 indx++;
