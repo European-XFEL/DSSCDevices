@@ -107,8 +107,6 @@ private:
     }
     
     void programEPCRegister(const std::string & moduleSet) override {
-        //m_calibGenerator;
-        //inContinuousMode
     }
 
     virtual void resetChip() override {
