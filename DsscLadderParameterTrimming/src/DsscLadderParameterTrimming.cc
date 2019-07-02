@@ -951,6 +951,8 @@ namespace karabo{
         // pixel sort map is always in ladder mode filled
         initPixelSortMap();
         
+        m_deviceInitialized = true;
+        
         //Check the devices are available
         if (allDevicesAvailable()) {
             KARABO_LOG_INFO << "All Devices started, ready for trimming routines";
@@ -973,7 +975,6 @@ namespace karabo{
         
         updateBaselineValid();
         
-        m_deviceInitialized = true;
     }
 
 
