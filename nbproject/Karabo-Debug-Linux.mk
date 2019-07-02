@@ -40,6 +40,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/DsscDummyTrainGenerator/src/DsscDummyTrainGenerator.o \
 	${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscKaraboRegisterConfig.o \
 	${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.o \
+	${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscTrimPptAPI.o \
 	${OBJECTDIR}/DsscPpt/src/DsscConfigHashWriter.o \
 	${OBJECTDIR}/DsscPpt/src/DsscPpt.o \
 	${OBJECTDIR}/DsscPpt/src/DsscPptAPI.o \
@@ -94,6 +95,11 @@ ${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.o: Dssc
 	${MKDIR} -p ${OBJECTDIR}/DsscLadderParameterTrimming/src
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.o DsscLadderParameterTrimming/src/DsscLadderParameterTrimming.cc
+
+${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscTrimPptAPI.o: DsscLadderParameterTrimming/src/DsscTrimPptAPI.cc 
+	${MKDIR} -p ${OBJECTDIR}/DsscLadderParameterTrimming/src
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DF2IO -DHAVE_HDF5 -I${KARABO}/include -I${KARABO}/extern/include/dssc/utils -I${KARABO}/extern/include/hdf5 -I${KARABO}/extern/include/dssc/chipinterface -I${KARABO}/extern/include/dssc/configreg -I${KARABO}/extern/include/dssc/dsschdf5 -I${KARABO}/extern/include/dssc/ppt -I${KARABO}/extern/include/dssc/pptdatareceiver -I${KARABO}/extern/include/dssc/sequence -I${KARABO}/extern/dssc_minuit/include -I${KARABO}/extern/include/dssc -I${KARABO}/extern/include `pkg-config --cflags karaboDependencies` -std=c++11  -fPIC  -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/DsscLadderParameterTrimming/src/DsscTrimPptAPI.o DsscLadderParameterTrimming/src/DsscTrimPptAPI.cc
 
 ${OBJECTDIR}/DsscPpt/src/DsscConfigHashWriter.o: DsscPpt/src/DsscConfigHashWriter.cc 
 	${MKDIR} -p ${OBJECTDIR}/DsscPpt/src
