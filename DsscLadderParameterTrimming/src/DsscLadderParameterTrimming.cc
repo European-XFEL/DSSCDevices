@@ -932,23 +932,9 @@ namespace karabo{
 
         m_deviceConfigState = ConfigState::CHANGED;
         m_asicChannelDataValid = false;
-        
-        m_calibGenerator.setCurrentPixels(utils::positionListToVector<int>("0-65535"));
-        m_calibGenerator.setOutputDir(get<string>("outputDir"));
-        
-        // pixel sort map is always in ladder mode filled
-        initPixelSortMap();
-        
+      
         initMultiModuleInterface(get<string>("fullConfigFileName"));
         
-        //Check the devices are available
-        if (allDevicesAvailable()) {
-            KARABO_LOG_INFO << "All Devices started, ready for trimming routines";
-        } else {
-            changeDeviceState(State::ERROR);
-            set<string>("status", "Not all devices are available");
-            
-        }
         changeDeviceState(State::OFF);
   
     }
@@ -962,7 +948,6 @@ namespace karabo{
             set<string>("status", e.what());
             return;
         }
-        m_trimppt_api->injectionMode = SuS::CHIPInterface::InjectionMode::NORM;
 
         m_trimppt_api->m_iterations = get<unsigned int>("numIterations");
         m_trimppt_api->m_trimStartAddr = get<unsigned short>("minSram");
@@ -974,10 +959,27 @@ namespace karabo{
         m_trimppt_api->setActiveAsics(0xFFFF);
 
         m_trimppt_api->setLadderReadout(true);
+        
+        // pixel sort map is always in ladder mode filled
+        initPixelSortMap();
+        
+        //Check the devices are available
+        if (allDevicesAvailable()) {
+            KARABO_LOG_INFO << "All Devices started, ready for trimming routines";
+        } else {
+            changeDeviceState(State::ERROR);
+            set<string>("status", "Not all devices are available");
+            
+        }
+        
+        m_trimppt_api->injectionMode = SuS::CHIPInterface::InjectionMode::NORM;
 
         loadCoarseGainParamsIntoGui();
 
         setSendingAsics(utils::bitEnableStringToValue(get<string>("sendingASICs")));
+        
+        m_calibGenerator.setCurrentPixels(utils::positionListToVector<int>("0-65535"));
+        m_calibGenerator.setOutputDir(get<string>("outputDir"));
 
         updateActiveModule(get<int>("activeModule"));
         
