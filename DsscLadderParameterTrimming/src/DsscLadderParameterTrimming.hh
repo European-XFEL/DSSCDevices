@@ -320,6 +320,8 @@ namespace karabo {
 
         // device own functions
     private:
+        
+        void initMultiModuleInterface(const std::string);
 
         void onMeanData(const util::Hash& data,
                         const xms::InputChannel::MetaData& meta);

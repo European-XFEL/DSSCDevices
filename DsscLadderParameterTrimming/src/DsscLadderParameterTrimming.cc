@@ -810,7 +810,6 @@ namespace karabo{
 
     DsscLadderParameterTrimming::DsscLadderParameterTrimming(const karabo::util::Hash& config)
         : Device<>(config),
-        m_trimppt_api(new SuS::DsscTrimPptAPI(this, std::string(INITIALCONF))),
         m_asicMeanValues(utils::s_totalNumPxs),
         m_pixelData(utils::s_totalNumPxs*utils::s_numSram),
         m_currentTrimmer(nullptr),
@@ -889,7 +888,7 @@ namespace karabo{
         cout << "Initialized data channels " << endl;
 
         changeDeviceState(State::STARTING);
-
+        
         m_quadrantId = get<string>("quadrantId");
 
         m_quadrantServerId = get<string>("pptDeviceServerId"); //"pptDeviceServer1"; // "Dssc" + m_quadrantId + "DeviceServer";
@@ -915,45 +914,64 @@ namespace karabo{
         m_startTrimming = true;
         m_runFastAcquisition = false;
         m_saveRawData = false;
+        
+        m_recvMode = RecvMode::MEAN;
+        m_recvStatus = RecvStatus::OK;
+
+        m_deviceConfigState = ConfigState::CHANGED;
+        m_asicChannelDataValid = false;
+        
+        m_calibGenerator.setCurrentPixels(utils::positionListToVector<int>("0-65535"));
+        m_calibGenerator.setOutputDir(get<string>("outputDir"));
+        
+        // pixel sort map is always in ladder mode filled
+        initPixelSortMap();
+        
+        initMultiModuleInterface(get<string>("fullConfigFileName"));
+        
+        //Check the devices are available
+        if (allDevicesAvailable()) {
+            KARABO_LOG_INFO << "All Devices started, ready for trimming routines";
+        } else {
+            changeDeviceState(State::ERROR);
+            set<string>("status", "Not all devices are available");
+            
+        }
+        changeDeviceState(State::OFF);
+  
+    }
+    
+    void DsscLadderParameterTrimming::initMultiModuleInterface(const std::string _configFile){
+        
+        try{      
+            m_trimppt_api.reset(new SuS::DsscTrimPptAPI(this, _configFile));
+        } catch( const std::invalid_argument& e){
+            changeDeviceState(State::ERROR);
+            set<string>("status", e.what());
+            return;
+        }
+        m_trimppt_api->injectionMode = SuS::CHIPInterface::InjectionMode::NORM;
 
         m_trimppt_api->m_iterations = get<unsigned int>("numIterations");
         m_trimppt_api->m_trimStartAddr = get<unsigned short>("minSram");
         m_trimppt_api->m_trimEndAddr = get<unsigned short>("maxSram");
         m_trimppt_api->m_numRuns = get<unsigned int>("numRuns");
 
-        m_recvMode = RecvMode::MEAN;
-        m_recvStatus = RecvStatus::OK;
-
-        m_deviceConfigState = ConfigState::CHANGED;
-        m_asicChannelDataValid = false;
         m_trimppt_api->setD0Mode(true);
 
         m_trimppt_api->setActiveAsics(0xFFFF);
 
         m_trimppt_api->setLadderReadout(true);
 
-        // pixel sort map is always in ladder mode filled
-        initPixelSortMap();
-
-        m_deviceInitialized = true;
-        if (allDevicesAvailable()) {
-            KARABO_LOG_INFO << "All Devices started, ready for trimming routines";
-        } else {
-            changeDeviceState(State::ERROR);
-        }
-        changeDeviceState(State::OFF);
-
-        m_trimppt_api->injectionMode = SuS::CHIPInterface::InjectionMode::NORM;
-
         loadCoarseGainParamsIntoGui();
 
         setSendingAsics(utils::bitEnableStringToValue(get<string>("sendingASICs")));
 
-        m_calibGenerator.setCurrentPixels(utils::positionListToVector<int>("0-65535"));
-        m_calibGenerator.setOutputDir(get<string>("outputDir"));
-
         updateActiveModule(get<int>("activeModule"));
+        
         updateBaselineValid();
+        
+        m_deviceInitialized = true;
     }
 
 
@@ -1735,7 +1753,11 @@ namespace karabo{
 
 
             BOOST_FOREACH(string path, paths) {
-                if (path.compare("sendingASICs") == 0) {
+                
+                
+                if (path.compare("fullConfigFileName") == 0) {
+                    initMultiModuleInterface(filtered.getAs<string>(path));
+                } else if (path.compare("sendingASICs") == 0) {
                     auto selAsicsStr = filtered.getAs<string>(path);
                     if (selAsicsStr.length() != 17) {
                         KARABO_LOG_ERROR << "Can not convert sendingASICs string, wrong number of entries";
