@@ -352,12 +352,17 @@ namespace karabo {
                 .commit();
         
         SLOT_ELEMENT(expected)
+                .key("startBurstAcquisition").displayedName("Start Burst Acquisition").description("Send burst of trains")
+                .allowedStates(State::ON)
+                .commit();
+        
+        SLOT_ELEMENT(expected)
                 .key("burstData")
                 .displayedName("burstData")
                 .description("Burst measurement data")
                 .allowedStates(State::OFF)
                 .commit();
-        
+
         UINT64_ELEMENT(expected).key("burstData.startTrain")
                 .displayedName("startTrain")
                 .description("start train of burst measurement")
@@ -368,11 +373,6 @@ namespace karabo {
                 .displayedName("endTrain")
                 .description("end train of burst measurement")
                 .assignmentOptional().defaultValue(0).reconfigurable()
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("startBurstAcquisition").displayedName("Start Burst Acquisition").description("Send burst of trains")
-                .allowedStates(State::ON)
                 .commit();
 
         UINT32_ELEMENT(expected).key("numBurstTrains")
