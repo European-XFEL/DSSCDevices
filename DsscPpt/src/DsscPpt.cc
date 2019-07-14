@@ -360,7 +360,6 @@ namespace karabo {
                 .key("burstData")
                 .displayedName("burstData")
                 .description("Burst measurement data")
-                .allowedStates(State::OFF)
                 .commit();
 
         UINT64_ELEMENT(expected).key("burstData.startTrain")
