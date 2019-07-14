@@ -350,6 +350,25 @@ namespace karabo {
                 .key("startAcquisition").displayedName("Start Acquisition").description("Enable continuous data sending")
                 .allowedStates(State::STARTED)
                 .commit();
+        
+        SLOT_ELEMENT(expected)
+                .key("burstData")
+                .displayedName("burstData")
+                .description("Burst measurement data")
+                .allowedStates(State::OFF)
+                .commit();
+        
+        UINT64_ELEMENT(expected).key("burstData.startTrain")
+                .displayedName("startTrain")
+                .description("start train of burst measurement")
+                .assignmentOptional().defaultValue(0).reconfigurable()
+                .commit();
+                
+        UINT64_ELEMENT(expected).key("burstData.endTrain")
+                .displayedName("endTrain")
+                .description("end train of burst measurement")
+                .assignmentOptional().defaultValue(0).reconfigurable()
+                .commit();
 
         SLOT_ELEMENT(expected)
                 .key("startBurstAcquisition").displayedName("Start Burst Acquisition").description("Send burst of trains")
@@ -1709,23 +1728,30 @@ namespace karabo {
 
         start();
 
-        unsigned int last_trainId = m_ppt->getCurrentTrainID();
+        uint64 last_trainId = m_ppt->getCurrentTrainID();
         unsigned int sent_trains = 1;
+        
+        set<uint64>("burstData.startTrain", 0);
+        set<uint64>("burstData.endTrain", 0);
+        
+        uint64 first_burstTrainId = last_trainId;
+        
 
         while (m_lastTrainIdPolling) {
-            unsigned int current_trainId = m_ppt->getCurrentTrainID();
+            uint64 current_trainId = m_ppt->getCurrentTrainID();
             if (last_trainId != current_trainId) {
                 //
                 last_trainId = current_trainId;
                 sent_trains++;
-                if (sent_trains > num_trains) {
+                if (sent_trains > num_trains) {                    
                     stop();
-                    break;
+                    m_lastTrainIdPolling = false;
                 }
             }
-            usleep(20000);
+            usleep(30000);
         }
-        m_lastTrainIdPolling = false;
+        set<uint64>("burstData.startTrain", first_burstTrainId);
+        set<uint64>("burstData.endTrain", last_trainId);
         updateState(currentState);
 
 
