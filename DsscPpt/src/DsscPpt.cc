@@ -378,7 +378,7 @@ namespace karabo {
                 .displayedName("Number of Trains")
                 .description("Number of trains in the burst")
                 .assignmentOptional().defaultValue(10).reconfigurable()
-                .minExc(1)
+                .minInc(1)
                 .commit();
 
         STRING_ELEMENT(expected).key("selRegName")
@@ -1753,8 +1753,8 @@ namespace karabo {
                     m_lastTrainIdPolling = false;
                 }else{
                     last_trainId = current_trainId;
-                    if(train_diff > 20){
-                        wait_time = 1000000;
+                    if(train_diff > 10){
+                        wait_time = 100000;// to prevent often hw polling
                     }else{
                         wait_time = 30000;
                     }
