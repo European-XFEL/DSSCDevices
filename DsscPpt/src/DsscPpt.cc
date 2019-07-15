@@ -363,13 +363,13 @@ namespace karabo {
                 .commit();
 
         UINT64_ELEMENT(expected).key("burstData.startTrainId")
-                .displayedName("startTrain")
+                .displayedName("startTrainId")
                 .description("start train of burst measurement")
                 .assignmentOptional().defaultValue(0).reconfigurable()
                 .commit();
                 
         UINT64_ELEMENT(expected).key("burstData.endTrainId")
-                .displayedName("endTrain")
+                .displayedName("endTrainId")
                 .description("end train of burst measurement")
                 .assignmentOptional().defaultValue(0).reconfigurable()
                 .commit();
