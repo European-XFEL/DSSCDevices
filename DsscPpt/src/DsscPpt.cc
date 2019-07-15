@@ -1736,6 +1736,8 @@ namespace karabo {
         uint64 first_burstTrainId = last_trainId;
         bool first_train = true;
         
+        static unsigned int wait_time = 30000;
+        
         while (m_lastTrainIdPolling) {
             uint64 current_trainId = m_ppt->getCurrentTrainID();
             if(current_trainId != last_trainId){
@@ -1743,16 +1745,22 @@ namespace karabo {
                     first_burstTrainId = current_trainId;
                     first_train = false;
                 }
-                if((current_trainId - first_burstTrainId + 1) >= num_trains){
+                uint64 train_diff = current_trainId - first_burstTrainId;
+                if((train_diff + 1) >= num_trains){
                     stop();
                     set<uint64>("burstData.startTrain", first_burstTrainId);
                     set<uint64>("burstData.endTrain", current_trainId);
                     m_lastTrainIdPolling = false;
                 }else{
                     last_trainId = current_trainId;
+                    if(train_diff > 20){
+                        wait_time = 1000000;
+                    }else{
+                        wait_time = 30000;
+                    }
                 }
             }
-            usleep(30000);
+            usleep(wait_time);
         }
         updateState(currentState);
 
