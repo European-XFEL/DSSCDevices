@@ -378,6 +378,7 @@ namespace karabo {
                 .displayedName("Number of Trains")
                 .description("Number of trains in the burst")
                 .assignmentOptional().defaultValue(10).reconfigurable()
+                .minExc(1)
                 .commit();
 
         STRING_ELEMENT(expected).key("selRegName")
@@ -1718,7 +1719,7 @@ namespace karabo {
 
     void DsscPpt::startBurstAcquisition() {
         unsigned int num_trains = get<unsigned int>("numBurstTrains");
-        if (num_trains == 0) return;
+        assert(num_trains);
 
         const auto currentState = getState();
         updateState(State::ACQUIRING);
@@ -1733,15 +1734,23 @@ namespace karabo {
         set<uint64>("burstData.endTrain", 0);
         
         uint64 first_burstTrainId = last_trainId;
+        bool first_train = true;
         
-
         while (m_lastTrainIdPolling) {
-            last_trainId = m_ppt->getCurrentTrainID();
-            if((last_trainId-first_burstTrainId) >= num_trains){
-                stop();
-                set<uint64>("burstData.startTrain", first_burstTrainId);
-                set<uint64>("burstData.endTrain", last_trainId);
-                m_lastTrainIdPolling = false;
+            uint64 current_trainId = m_ppt->getCurrentTrainID();
+            if(current_trainId != last_trainId){
+                if(first_train){
+                    first_burstTrainId = current_trainId;
+                    first_train = false;
+                }
+                if((current_trainId - first_burstTrainId + 1) >= num_trains){
+                    stop();
+                    set<uint64>("burstData.startTrain", first_burstTrainId);
+                    set<uint64>("burstData.endTrain", current_trainId);
+                    m_lastTrainIdPolling = false;
+                }else{
+                    last_trainId = current_trainId;
+                }
             }
             usleep(30000);
         }
