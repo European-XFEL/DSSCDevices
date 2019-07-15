@@ -356,7 +356,7 @@ namespace karabo {
                 .allowedStates(State::ON)
                 .commit();
         
-        SLOT_ELEMENT(expected)
+        NODE_ELEMENT(expected)
                 .key("burstData")
                 .displayedName("burstData")
                 .description("Burst measurement data")
