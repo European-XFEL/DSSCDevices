@@ -362,13 +362,13 @@ namespace karabo {
                 .description("Burst measurement data")
                 .commit();
 
-        UINT64_ELEMENT(expected).key("burstData.startTrain")
+        UINT64_ELEMENT(expected).key("burstData.startTrainId")
                 .displayedName("startTrain")
                 .description("start train of burst measurement")
                 .assignmentOptional().defaultValue(0).reconfigurable()
                 .commit();
                 
-        UINT64_ELEMENT(expected).key("burstData.endTrain")
+        UINT64_ELEMENT(expected).key("burstData.endTrainId")
                 .displayedName("endTrain")
                 .description("end train of burst measurement")
                 .assignmentOptional().defaultValue(0).reconfigurable()
@@ -1730,8 +1730,8 @@ namespace karabo {
 
         uint64 last_trainId = m_ppt->getCurrentTrainID();
         
-        set<uint64>("burstData.startTrain", 0);
-        set<uint64>("burstData.endTrain", 0);
+        set<uint64>("burstData.startTrainId", 0);
+        set<uint64>("burstData.endTrainId", 0);
         
         uint64 first_burstTrainId = last_trainId;
         bool first_train = true;
@@ -1748,8 +1748,8 @@ namespace karabo {
                 uint64 train_diff = current_trainId - first_burstTrainId;
                 if((train_diff + 1) >= num_trains){
                     stop();
-                    set<uint64>("burstData.startTrain", first_burstTrainId);
-                    set<uint64>("burstData.endTrain", current_trainId);
+                    set<uint64>("burstData.startTrainId", first_burstTrainId);
+                    set<uint64>("burstData.endTrainId", current_trainId);
                     m_lastTrainIdPolling = false;
                 }else{
                     last_trainId = current_trainId;
