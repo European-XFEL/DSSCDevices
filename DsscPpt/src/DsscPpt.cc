@@ -80,13 +80,6 @@ namespace karabo {
                 .assignmentOptional().defaultValue(2384).reconfigurable()
                 .allowedStates(State::UNKNOWN)
                 .commit();
-        
-        UINT32_ELEMENT(expected).key("karaboDevicePort")
-                .displayedName("Karabo device local Port")
-                .description("Local port used by karabo device")
-                .assignmentOptional().defaultValue(10).reconfigurable()
-                .allowedStates(State::UNKNOWN)
-                .commit();
 
         SLOT_ELEMENT(expected)
                 .key("open").displayedName("Connect PPT").description("Open connection to PPT")
@@ -1640,7 +1633,7 @@ namespace karabo {
 
             // Open client connection to the PPT
             string host = "Blubb";
-            unsigned int port = get<unsigned int>("karaboDevicePort");
+            unsigned int port = 10;
             host = get<string>("pptHost");
             port = get<unsigned int>("pptPort");
             KARABO_LOG_INFO << "About to open PPT using host: " + host + " and port: " + toString(port);
@@ -2068,6 +2061,8 @@ namespace karabo {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
             m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
+            
+            
 
             int rc = m_ppt->initSystem();
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
