@@ -2062,7 +2062,6 @@ namespace karabo {
 
             m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
             
-            //
             std::vector<uint32_t> initial_TempADCvals{4};
             for(uint i=0; i<m_ppt->numAvailableIOBs(); i++){
                 m_ppt->setActiveModule(m_ppt->activeIOBs.at(i));
@@ -2073,7 +2072,6 @@ namespace karabo {
 
             int rc = m_ppt->initSystem();
             
-            //
             for(uint i=0; i<m_ppt->numAvailableIOBs(); i++){
                 m_ppt->setActiveModule(m_ppt->activeIOBs.at(i));
                 m_ppt->jtagRegisters->setSignalValue("Temperature ADC Controller","all","DSTAT",initial_TempADCvals[i]);
