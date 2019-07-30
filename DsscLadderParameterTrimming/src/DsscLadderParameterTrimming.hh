@@ -292,7 +292,6 @@ namespace karabo {
         void setSelectedInjectionMode(const std::string & nextMode);
 
         void measureBurstOffsetSweep();
-        void measureBurstOffsetSweepDiscr();
         void measureInjectionSweepSlopes();
         void measureBinningInformation();
         void measureADCGainMap();

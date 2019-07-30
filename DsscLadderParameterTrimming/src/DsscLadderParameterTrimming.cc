@@ -521,12 +521,6 @@ namespace karabo{
                 .assignmentOptional().defaultValue(12345).reconfigurable()
                 .commit();
 
-        UINT32_ELEMENT(expected).key("discrValPixelProc")
-                .displayedName("Discr. param for pixel processing")
-                .description("Specify the amplitude discrimination parameter for pixel processing routines.")
-                .assignmentOptional().defaultValue(50).reconfigurable()
-                .commit();
-
         UINT32_ELEMENT(expected).key("numFramesToReceive")
                 .displayedName("Num Frames to Receive")
                 .description("Number of frame to process for all asics")
@@ -547,12 +541,6 @@ namespace karabo{
                 .key("measureBurstOffsetSweep").displayedName("Measure Burst Offset Sweep")
                 .description("Starts a parameter sweep of the burst_wait_offset parameter in 10 ns steps")
                 .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("measureBurstOffsetSweepDiscr").displayedName("Measure Burst Offset Sweep using discr values")
-                .description("Starts a parameter sweep of the burst_wait_offset parameter in 10 ns steps using integral discriminated pixel number/amplitudes")
-                .commit();
-
 
         SLOT_ELEMENT(expected)
                 .key("measureADCGainMap").displayedName("Measure ADC Gain Map")
@@ -843,7 +831,6 @@ namespace karabo{
         KARABO_SLOT(addValueToPxRegSignal);
         KARABO_SLOT(enableMonBusInCols);
         KARABO_SLOT(measureBurstOffsetSweep);
-        KARABO_SLOT(measureBurstOffsetSweepDiscr);
         KARABO_SLOT(measureInjectionSweepSlopes);
         KARABO_SLOT(measureADCGainMap);
         KARABO_SLOT(measureBinningInformation);
@@ -2837,56 +2824,6 @@ namespace karabo{
         int maxIdx = maxElement - binValues.begin();
         KARABO_LOG_INFO << "Max Value = " << *maxElement << " at setting " << paramValues[maxIdx];
     }
-
-
-    void DsscLadderParameterTrimming::measureBurstOffsetSweepDiscr() {
-        StateChangeKeeper keeper(this);
-
-        const unsigned int discrVal = get<unsigned int>("discrValPixelProc");
-
-        //std::pair<uint32_t, uint64_t> res_pair = SuS::CHIPInterface::measureDiscrSramCounterValues(utils::getUpCountingVector(utils::s_totalNumPxs), 10, 99, discrVal);
-        //std::cout << "Number of pixels: " << res_pair.first << std::endl;
-        //std::cout << "Integral amplitude: " << res_pair.second << std::endl;
-        //return;
-
-
-        std::vector<int> paramValues;
-        bool ok = utils::getSimpleSweepVector<int>(get<string>("burstWaitOffsetRange"), paramValues);
-        if (!ok) {
-            KARABO_LOG_ERROR << "burstWaitOffsetRange has a bad range";
-            return;
-        }
-
-        auto resValues = m_trimppt_api->sweepBurstWaitOffsetDiscr(paramValues, m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr, discrVal);
-        // save data
-        //const string fileName = get<string>("outputDir") + "/" + utils::getLocalTimeStr() + "_BurstWaitOffset.h5";
-        //DsscHDF5TrimmingDataWriter dataWriter(fileName);
-        //dataWriter.setMeasurementName("BurstWaitOffsetSweep");
-        //dataWriter.addVectorData("BurstWaitOffsetData",binValues);
-
-        // display data in PixelData vector output
-        //std::vector<double> pixelBurstOffsetData(paramValues.back()+1,0);
-
-        //std::vector<unsigned int> sweepvec(50,0);
-        const uint numParams = resValues.size();
-        int idx = 0;
-        for (const auto it : resValues) {
-            std::cout << "Number of pixels in " << idx << " sweep: " << it.first << std::endl;
-            //sweepvec[idx] = it.first;
-            ++idx;
-        }
-
-
-        //set<vector<unsigned int> >("pixelBurstSweepPts", sweepvec);
-
-
-        //show max value
-        //auto maxElement = std::max_element(binValues.begin(), binValues.end());
-        //int maxIdx = maxElement - binValues.begin();
-        //KARABO_LOG_INFO << "Max Value = " << *maxElement << " at setting " << paramValues[maxIdx];
-        //*/
-    }
-
 
     void DsscLadderParameterTrimming::measureADCGainMap() {
         KARABO_LOG_INFO << "Measure Pixel Slopes for all adc gain settings";
