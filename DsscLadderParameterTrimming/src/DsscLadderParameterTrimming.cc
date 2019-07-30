@@ -521,7 +521,6 @@ namespace karabo{
                 .assignmentOptional().defaultValue(12345).reconfigurable()
                 .commit();
 
-
         UINT32_ELEMENT(expected).key("numFramesToReceive")
                 .displayedName("Num Frames to Receive")
                 .description("Number of frame to process for all asics")
