@@ -46,7 +46,7 @@ using namespace karabo::core;
 
 #define DEVICE_ERROR(messsage)           \
         KARABO_LOG_ERROR << messsage;    \
-        set<string>("status",messsage);  \
+        set<string>("status", messsage);  \
         this->updateState(State::ERROR);
 
 namespace karabo {
@@ -134,6 +134,13 @@ namespace karabo {
                 .tags("FullConfig")
                 .assignmentOptional().defaultValue(INITIALCONF).reconfigurable()
                 // do not limit states
+                .commit();
+        
+        VECTOR_CHAR_ELEMENT(expected).key("fullConfigByteArray")
+                .description("Byte Array of Full Config File")
+                .displayedName("Full Config File encoded")                
+                .tags("FullConfig")
+                .assignmentOptional().defaultValue(std::vector<char>{})
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -1138,6 +1145,8 @@ namespace karabo {
             DEVICE_ERROR("FullConfigFile invalid");
             return;
         }
+        
+        updateFullConfigByteVector(get<string>("fullConfigFileName"));
 
         {        
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -1903,6 +1912,7 @@ namespace karabo {
         KARABO_LOG_INFO << "Load Full Config File : " << fileName;
 
         {
+            
             ContModeKeeper keeper(this);
             m_ppt->loadFullConfig(fileName, false);
             string defaultConfigPath = DEFAULTCONF;
@@ -1930,6 +1940,11 @@ namespace karabo {
 
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
+    }
+    
+    void DsscPpt::updateFullConfigByteVector(const std::string & fileName){
+        std::vector<char> value(fileName.begin(), fileName.end());     
+        set<std::vector<char>>("fullConfigByteArray", value);
     }
 
 
@@ -4038,6 +4053,7 @@ namespace karabo {
                     boost::filesystem::path myfile(fullConfigFileName);
                     if (boost::filesystem::exists(myfile)) {
                         readFullConfigFile(fullConfigFileName);
+                        updateFullConfigByteVector(fullConfigFileName);
                         setQSFPEthernetConfig();
                     }
                 }
