@@ -46,7 +46,7 @@ using namespace karabo::core;
 
 #define DEVICE_ERROR(messsage)           \
         KARABO_LOG_ERROR << messsage;    \
-        set<string>("status",messsage);  \
+        set<string>("status", messsage);  \
         this->updateState(State::ERROR);
 
 namespace karabo {
@@ -134,6 +134,13 @@ namespace karabo {
                 .tags("FullConfig")
                 .assignmentOptional().defaultValue(INITIALCONF).reconfigurable()
                 // do not limit states
+                .commit();
+        
+        VECTOR_CHAR_ELEMENT(expected).key("fullConfigByteArray")
+                .description("Byte Array of Full Config File")
+                .displayedName("Full Config File encoded")                
+                .tags("FullConfig")
+                .assignmentOptional().defaultValue(std::vector<char>{})
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -1138,6 +1145,8 @@ namespace karabo {
             DEVICE_ERROR("FullConfigFile invalid");
             return;
         }
+        
+        updateFullConfigByteVector(get<string>("fullConfigFileName"));
 
         {        
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -1740,13 +1749,14 @@ namespace karabo {
         
         while (m_lastTrainIdPolling) {
             uint64 current_trainId = m_ppt->getCurrentTrainID();
-            if(current_trainId != last_trainId){
+            if(current_trainId > last_trainId){
                 if(first_train){
                     first_burstTrainId = current_trainId;
                     first_train = false;
                 }
                 uint64 train_diff = current_trainId - first_burstTrainId;
                 if((train_diff + 1) >= num_trains){
+                    std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
                     stop();
                     set<uint64>("burstData.startTrainId", first_burstTrainId);
                     set<uint64>("burstData.endTrainId", current_trainId);
@@ -1759,6 +1769,10 @@ namespace karabo {
                         wait_time = 30000;
                     }
                 }
+            }else{
+               if(current_trainId < first_burstTrainId){
+                 std::cout << "current_trainId is less than first_burstTrainId: " << current_trainId << "  " << first_burstTrainId << std::endl; 
+               }
             }
             usleep(wait_time);
         }
@@ -1903,6 +1917,7 @@ namespace karabo {
         KARABO_LOG_INFO << "Load Full Config File : " << fileName;
 
         {
+            
             ContModeKeeper keeper(this);
             m_ppt->loadFullConfig(fileName, false);
             string defaultConfigPath = DEFAULTCONF;
@@ -1930,6 +1945,11 @@ namespace karabo {
 
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
+    }
+    
+    void DsscPpt::updateFullConfigByteVector(const std::string & fileName){
+        std::vector<char> value(fileName.begin(), fileName.end());     
+        set<std::vector<char>>("fullConfigByteArray", value);
     }
 
 
@@ -4038,6 +4058,7 @@ namespace karabo {
                     boost::filesystem::path myfile(fullConfigFileName);
                     if (boost::filesystem::exists(myfile)) {
                         readFullConfigFile(fullConfigFileName);
+                        updateFullConfigByteVector(fullConfigFileName);
                         setQSFPEthernetConfig();
                     }
                 }
