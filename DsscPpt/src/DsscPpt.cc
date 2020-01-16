@@ -1749,13 +1749,14 @@ namespace karabo {
         
         while (m_lastTrainIdPolling) {
             uint64 current_trainId = m_ppt->getCurrentTrainID();
-            if(current_trainId != last_trainId){
+            if(current_trainId > last_trainId){
                 if(first_train){
                     first_burstTrainId = current_trainId;
                     first_train = false;
                 }
                 uint64 train_diff = current_trainId - first_burstTrainId;
                 if((train_diff + 1) >= num_trains){
+                    std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
                     stop();
                     set<uint64>("burstData.startTrainId", first_burstTrainId);
                     set<uint64>("burstData.endTrainId", current_trainId);
@@ -1768,6 +1769,10 @@ namespace karabo {
                         wait_time = 30000;
                     }
                 }
+            }else{
+               if(current_trainId < first_burstTrainId){
+                 std::cout << "current_trainId is less than first_burstTrainId: " << current_trainId << "  " << first_burstTrainId << std::endl; 
+               }
             }
             usleep(wait_time);
         }
