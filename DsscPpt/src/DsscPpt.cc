@@ -1251,13 +1251,15 @@ namespace karabo {
             utils::split(data.get<string>(moduleSet + ".signalNames"), ';', signalNames, 0);
 
             for (auto && signalName : signalNames) {
-                const auto signalsData = data.get<util::NDArray>(moduleSet + "." + signalName);
+                //const auto signalsData = data.get<util::NDArray>(moduleSet + "." + signalName);
+                const vector<uint32_t> signalsData = data.get<vector<uint32_t> >(moduleSet + "." + signalName);
                 size_t data_size = signalsData.size();
 
-                auto signalValues = signalsData.getData<unsigned int>();
+                //auto signalValues = signalsData.getData<unsigned int>();
 
                 if (data_size == 1) {
-                    currentReg->setSignalValue(moduleSet, "all", signalName, signalValues[0]);
+                    //currentReg->setSignalValue(moduleSet, "all", signalName, signalValues[0]);
+                    currentReg->setSignalValue(moduleSet, "all", signalName, signalsData[0]);
                 } else {
                     if (data_size != modules.size()) {
                         KARABO_LOG_ERROR << "ERROR: Number of signal values does not fit to number of modules: " << data_size << "/" << modules.size();
@@ -1267,7 +1269,8 @@ namespace karabo {
                     programDefault = false;
 
                     for (size_t idx = 0; idx < data_size; idx++) {
-                        currentReg->setSignalValue(moduleSet, modules[idx], signalName, signalValues[idx]);
+                        //currentReg->setSignalValue(moduleSet, modules[idx], signalName, signalValues[idx]);
+                        currentReg->setSignalValue(moduleSet, modules[idx], signalName, signalsData[idx]);
                     }
                 }
             }
