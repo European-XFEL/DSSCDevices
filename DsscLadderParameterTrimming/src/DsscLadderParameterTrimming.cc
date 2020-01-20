@@ -2233,15 +2233,17 @@ namespace karabo{
 
             if (reg->signalIsVarious(moduleSetName, signalName, "all")) {
 
-                const auto signalValues = (std::vector<unsigned int>)reg->getSignalValues(moduleSetName, "all", signalName);
+                const std::vector<uint32_t> signalValues = reg->getSignalValues(moduleSetName, "all", signalName);
 
-                util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
-                moduleSetHash.set<util::NDArray>(signalName, arr);
+                //util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
+                //moduleSetHash.set<util::NDArray>(signalValues, arr);
+                moduleSetHash.set(signalName, signalValues);
             } else {
                 unsigned int value = reg->getSignalValue(moduleSetName, "all", signalName);
                 std::vector<unsigned int> signalValues(1, value);
-                util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
-                moduleSetHash.set<util::NDArray>(signalName, arr);
+                //util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
+                //moduleSetHash.set<util::NDArray>(signalName, arr);
+                moduleSetHash.set(signalName, signalValues);
             }
 
             sentSignals += signalName + ";";
