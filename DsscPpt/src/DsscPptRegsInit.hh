@@ -486,7 +486,7 @@
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
-                .key("programJtag")                                                             \
+                .key("programJTAG")                                                             \
                 .displayedName("Program Active JTAG")                                           \
                 .description("Program Sequencer via selected Module")                           \
                 .allowedStates(State::ON, State::STOPPED)                                                        \
