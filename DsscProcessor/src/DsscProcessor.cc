@@ -7,6 +7,7 @@
  */
 
 #include <thread>
+#include <chrono>
 
 #include "DsscProcessor.hh"
 #include "DsscDependencies.h"
@@ -14,6 +15,7 @@
 #include "DsscHDF5TrimmingDataWriter.h"
 #include "DsscHDF5MeasurementInfoWriter.h"
 using namespace std;
+
 
 USING_KARABO_NAMESPACES;
 
@@ -1067,6 +1069,7 @@ namespace karabo {
         while (m_preview) {
             //
             writeChannel("ladderImageOutput", dataHash);
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
         }
 
     }
