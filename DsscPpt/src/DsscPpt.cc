@@ -1012,7 +1012,7 @@ namespace karabo {
 
     DsscPpt::DsscPpt(const karabo::util::Hash& config)
         : Device<>(config),
-        m_keepAcquisition(false), m_keepPolling(false),
+        m_keepAcquisition(false), m_keepPolling(false), m_burstAcquisition(false),
         m_pollThread(), m_acquisitionThread(),
         m_epcTag("epcParam"), m_dsscConfigtoSchema() {
 
@@ -1120,6 +1120,8 @@ namespace karabo {
         this->signalEndOfStream("daqOutput");
         const string defaultConfigPath = DEFAULTCONF;
         m_ppt->storeFullConfigFile(defaultConfigPath);
+        
+        stop();
 
         
         if (m_pollThread && m_pollThread->joinable()) {
@@ -1727,16 +1729,14 @@ namespace karabo {
     void DsscPpt::startAcquisition() {
         runAcquisition(true);
     }
-
-
-    void DsscPpt::startBurstAcquisition() {
+    
+    void DsscPpt::burstAcquisitionPolling() {
+        
         unsigned int num_trains = get<unsigned int>("numBurstTrains");
         assert(num_trains);
-
+        
         const auto currentState = getState();
         updateState(State::ACQUIRING);
-
-        m_lastTrainIdPolling = true;
 
         start();
 
@@ -1750,7 +1750,7 @@ namespace karabo {
         
         static unsigned int wait_time = 30000;
         
-        while (m_lastTrainIdPolling) {
+        while (m_burstAcquisition.load()) {
             uint64 current_trainId = m_ppt->getCurrentTrainID();
             if(current_trainId > last_trainId){
                 if(first_train){
@@ -1760,14 +1760,14 @@ namespace karabo {
                 uint64 train_diff = current_trainId - first_burstTrainId;
                 if((train_diff + 1) >= num_trains){
                     std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
+                    m_burstAcquisition.store(false); //must be done in stop())
                     stop();
                     set<uint64>("burstData.startTrainId", first_burstTrainId);
                     set<uint64>("burstData.endTrainId", current_trainId);
-                    m_lastTrainIdPolling = false;
                 }else{
                     last_trainId = current_trainId;
                     if(train_diff > 10){
-                        wait_time = 100000;// to prevent often hw polling
+                        wait_time = 250000;// to prevent often hw polling
                     }else{
                         wait_time = 30000;
                     }
@@ -1779,16 +1779,25 @@ namespace karabo {
             }
             usleep(wait_time);
         }
-        updateState(currentState);
-
-
+        updateState(currentState);        
     }
 
 
+    void DsscPpt::startBurstAcquisition() {
+
+        m_burstAcquisition.store(true);
+        
+        m_acquisitionThread.reset(new boost::thread(boost::bind(&DsscPpt::burstAcquisitionPolling, this)));
+        KARABO_LOG_INFO << "burstPolling thread started..."; 
+   }
+    
     void DsscPpt::stopAcquisition() {
-        if (m_lastTrainIdPolling) {
-            m_lastTrainIdPolling = false;
-            return;
+        if (m_burstAcquisition.load()) {
+            m_burstAcquisition.store(false);
+            if (m_acquisitionThread) {
+              m_acquisitionThread->join();
+              m_acquisitionThread.reset();
+            }            
         }
         runAcquisition(false);
         if (m_ppt->isXFELMode()) {
