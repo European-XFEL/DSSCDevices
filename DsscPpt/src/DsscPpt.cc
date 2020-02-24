@@ -1123,10 +1123,6 @@ namespace karabo {
         
         stop();
         
-        if (m_acquisitionThread && m_acquisitionThread->joinable()) {
-            m_acquisitionThread->join();
-        }
-        
         if (m_pollThread && m_pollThread->joinable()) {
             m_keepPolling = false;
             m_pollThread->join();
