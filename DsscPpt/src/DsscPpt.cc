@@ -1122,7 +1122,10 @@ namespace karabo {
         m_ppt->storeFullConfigFile(defaultConfigPath);
         
         stop();
-
+        
+        if (m_acquisitionThread && m_acquisitionThread->joinable()) {
+            m_acquisitionThread->join();
+        }
         
         if (m_pollThread && m_pollThread->joinable()) {
             m_keepPolling = false;
@@ -1787,6 +1790,8 @@ namespace karabo {
 
         m_burstAcquisition.store(true);
         
+        if(m_acquisitionThread->joinable()) m_acquisitionThread->join(); 
+        
         m_acquisitionThread.reset(new boost::thread(boost::bind(&DsscPpt::burstAcquisitionPolling, this)));
         KARABO_LOG_INFO << "burstPolling thread started..."; 
    }
@@ -1795,7 +1800,8 @@ namespace karabo {
         if (m_burstAcquisition.load()) {
             m_burstAcquisition.store(false);
             if (m_acquisitionThread) {
-              m_acquisitionThread->join();
+              if(m_acquisitionThread->joinable())
+                  m_acquisitionThread->join();
               m_acquisitionThread.reset();
             }            
         }
