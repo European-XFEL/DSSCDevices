@@ -9,6 +9,7 @@
  */
 #include <boost/filesystem.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
+#include <chrono>
 
 #include "DsscPpt.hh"
 #include "DsscPptRegsInit.hh"
@@ -27,7 +28,6 @@ using namespace karabo::io;
 using namespace karabo::net;
 using namespace karabo::xms;
 using namespace karabo::core;
-
 
 // cwd is karabo/var/data/
 #define DEFAULTCONF "ConfigFiles/session.conf"
@@ -1750,7 +1750,12 @@ namespace karabo {
         static unsigned int wait_time = 30000;
         
         while (m_burstAcquisition.load()) {
-            uint64 current_trainId = m_ppt->getCurrentTrainID();
+            uint64 current_trainId;
+            {
+                boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                current_trainId = m_ppt->getCurrentTrainID();
+            }
+
             if(current_trainId > last_trainId){
                 if(first_train){
                     first_burstTrainId = current_trainId;
@@ -4380,7 +4385,8 @@ namespace karabo {
 
                     int value = m_ppt->readFPGATemperature();
                     set<int>("pptTemp", value);
-
+                    
+                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
                 }
 
                 uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")*128 / 1E6;
