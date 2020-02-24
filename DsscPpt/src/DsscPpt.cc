@@ -1794,7 +1794,7 @@ namespace karabo {
 
         m_burstAcquisition.store(true);
         
-        if(m_acquisitionThread->joinable()) m_acquisitionThread->join(); 
+        if(m_acquisitionThread && m_acquisitionThread->joinable()) m_acquisitionThread->join(); 
         
         m_acquisitionThread.reset(new boost::thread(boost::bind(&DsscPpt::burstAcquisitionPolling, this)));
         KARABO_LOG_INFO << "burstPolling thread started..."; 
