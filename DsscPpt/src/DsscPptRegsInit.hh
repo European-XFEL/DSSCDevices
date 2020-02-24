@@ -488,36 +488,36 @@
             SLOT_ELEMENT(expected)                                                              \
                 .key("programJTAG")                                                             \
                 .displayedName("Program Active JTAG")                                           \
-                .description("Program JTAG via selected Module")                           \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .description("Program JTAG via selected Module")                                \
+                .allowedStates(State::ON, State::STOPPED)                                       \
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
                 .key("programPixelRegisterDefault")                                             \
                 .displayedName("Program PixelRegister Default")                                 \
                 .description("Program Pixelregister to default Content via selected Module")    \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                       \
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
                 .key("programPixelRegister")                                                    \
                 .displayedName("Program PixelRegister")                                         \
                 .description("Program Pixelregister via selected Module")                       \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                       \
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
                 .key("programSequencer")                                                        \
                 .displayedName("Program Sequencer")                                             \
                 .description("Program Sequencer via selected Module")                           \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                       \
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
                 .key("updateSequencer")                                                         \
                 .displayedName("Update Sequencer")                                              \
                 .description("Update sequencer counters from fields and program")               \
-                .allowedStates(State::ON, State::STOPPED)                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                       \
                 .commit();                                                                      \
 
 
@@ -545,15 +545,15 @@
                 .description("Activates clocks form XFEL, standalone mode deactivated = clock from xfel")  	\
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(false).reconfigurable()					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         BOOL_ELEMENT(expected)                                                                                  \
                 .key("pptPLL.internalPLL")                                                                      \
                 .displayedName("Internal PLL Chip")								\
-                .description("Activates clocks form internal PLL, deactivated = clock from external pll")  		\
+                .description("Activates clocks form internal PLL, deactivated = clock from external pll")	\
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(false).reconfigurable()					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         NODE_ELEMENT(expected).key("pptPLL.fineTuning")                                                         \
                 .displayedName("FineTuning")                                                                    \
@@ -565,7 +565,7 @@
                 .description("Enables Fine Tuning of clock in standalone mode - not recommended")  		\
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(false).reconfigurable()					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         STRING_ELEMENT(expected)                                                                                \
                 .key("pptPLL.fineTuning.resultingClockSpeed")                                                   \
@@ -579,28 +579,28 @@
                 .description("Int Value")                                                                       \
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(280).reconfigurable()     					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         UINT32_ELEMENT(expected).key("pptPLL.fineTuning.fracValue")                                             \
                 .displayedName("Frac Value")                                                                    \
                 .description("Frac Value")                                                                      \
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(0).reconfigurable()     					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         UINT32_ELEMENT(expected).key("pptPLL.fineTuning.modValue")						\
                 .displayedName("Mod Value")                                                                     \
                 .description("Mod Value")                                                                       \
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(25).reconfigurable()     					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         UINT32_ELEMENT(expected).key("pptPLL.fineTuning.PLLMultiplier")                                         \
                 .displayedName("Multiplier Value")								\
                 .description("Multiplier Value")								\
                 .tags("PLL")                                                                                    \
                 .assignmentOptional().defaultValue(28).reconfigurable()     					\
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
 
 
@@ -610,25 +610,25 @@
                 .key("resetAurora"#iobNum)                                                                      \
                 .displayedName("IOB "#iobNum" Reset Aurora")                                                    \
                 .description("Reset Aurora and gives the channel a new chance to lock")                         \
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         SLOT_ELEMENT(expected)                                                                                  \
                 .key("programLMK"#iobNum)                                                                       \
                 .displayedName("IOB "#iobNum" Program LMK")                                                     \
                 .description("Initializes clock buffers")                                                       \
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         SLOT_ELEMENT(expected)                                                                                  \
                 .key("programIOBConfig"#iobNum)                                                                 \
                 .displayedName("IOB "#iobNum" Program Config")                                                  \
                 .description("Program IOB sysconfig register")                                                  \
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         SLOT_ELEMENT(expected)                                                                                  \
                 .key("readbackIOBConfig"#iobNum)                                                                \
                 .displayedName("IOB "#iobNum" Readback Config")                                                 \
                 .description("Readback IOB sysconfig register")                                                 \
-                .allowedStates(State::ON, State::STOPPED)                                                                        \
+                .allowedStates(State::ON, State::STOPPED)                                                       \
                 .commit();                                                                                      \
         NODE_ELEMENT(expected).key("iob"#iobNum"Status")                                                        \
                 .displayedName("IOB "#iobNum)                                                                   \
@@ -718,7 +718,7 @@
                 .description("Enables datapath "#dp" to receive data from IOBoard "#dp)      \
                 .tags("enableDatapath")                                                      \
                 .assignmentOptional().defaultValue(false).reconfigurable()                   \
-                .allowedStates(State::ON, State::STOPPED)                                                     \
+                .allowedStates(State::ON, State::STOPPED)                                    \
                 .commit();                                                                   \
 
 #define INIT_ENABLE_DATAPATH_ELEMENTS                                                        \
@@ -753,7 +753,7 @@
                 .displayedName("IP")                                                         \
                 .description("PPT hostname or IP address")                                   \
                 .tags("ethParam")                                                            \
-                .assignmentOptional().defaultValue("192.168.142.165").reconfigurable()           \
+                .assignmentOptional().defaultValue("192.168.142.165").reconfigurable()       \
                 .commit();                                                                   \
         UINT32_ELEMENT(expected).key("qsfp.chan"#CH".recv.port")                             \
                 .displayedName("UDP Port")                                                   \
@@ -775,7 +775,7 @@
                 .displayedName("IP")                                                         \
                 .description("PPT hostname or IP address")                                   \
                 .tags("ethParam")                                                            \
-                .assignmentOptional().defaultValue("192.168.142.5"#ADDR).reconfigurable()     \
+                .assignmentOptional().defaultValue("192.168.142.5"#ADDR).reconfigurable()    \
                 .commit();                                                                   \
         UINT32_ELEMENT(expected).key("qsfp.chan"#CH".send.port")                             \
                 .displayedName("UDP Port")                                                   \

@@ -16,6 +16,8 @@
 #include "DsscPptAPI.hh"
 #include "DsscConfigHashWriter.hh"
 
+#include <atomic>
+
 /**
  * The main Karabo namespace
  */
@@ -426,10 +428,14 @@ namespace karabo {
         std::string m_jtagCurrIOBNumber;
         std::string m_pixelCurrIOBNumber;
 
-        bool m_lastTrainIdPolling = false;
         DsscH5ConfigToSchema m_dsscConfigtoSchema;
 
         karabo::util::Hash m_hashout;
+        
+        std::atomic<bool> m_burstAcquisition;
+        
+        void burstAcquisitionPolling();
+        
 
     };
 }
