@@ -1731,66 +1731,74 @@ namespace karabo {
     
     void DsscPpt::burstAcquisitionPolling() {
         
-        unsigned int num_trains = get<unsigned int>("numBurstTrains");
-        assert(num_trains);
+        try {
+            KARABO_LOG_INFO << "Hardware polling started";
+       
+          unsigned int num_trains = get<unsigned int>("numBurstTrains");
+          assert(num_trains);
         
-        const auto currentState = getState();
-        updateState(State::ACQUIRING);
+          start();
 
-        start();
-
-        uint64 last_trainId = m_ppt->getCurrentTrainID();
+          uint64 last_trainId = m_ppt->getCurrentTrainID();
         
-        set<uint64>("burstData.startTrainId", 0);
-        set<uint64>("burstData.endTrainId", 0);
+          set<uint64>("burstData.startTrainId", 0);
+          set<uint64>("burstData.endTrainId", 0);
         
-        uint64 first_burstTrainId = last_trainId;
-        bool first_train = true;
+          uint64 first_burstTrainId = last_trainId;
+          bool first_train = true;
         
-        static unsigned int wait_time = 30000;
+          static unsigned int wait_time = 30000;
 
-        uint64 current_trainId;        
-        while (m_burstAcquisition.load()) {
-            {
-                boost::mutex::scoped_lock lock(m_accessToPptMutex);
-                current_trainId = m_ppt->getCurrentTrainID();
-            }
+          uint64 current_trainId;        
+          while (m_burstAcquisition.load()) {
+              {
+                  boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                  current_trainId = m_ppt->getCurrentTrainID();
+              }
 
-            if(current_trainId > last_trainId){
-                if(first_train){
-                    first_burstTrainId = current_trainId;
-                    first_train = false;
-                }
-                uint64 train_diff = current_trainId - first_burstTrainId;
-                if((train_diff + 1) >= num_trains){
-                    std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
-                    m_burstAcquisition.store(false); //must be done in stop())
-                    stop();
-                    //set<uint64>("burstData.startTrainId", first_burstTrainId);
-                    //set<uint64>("burstData.endTrainId", current_trainId);
-                }else{
-                    last_trainId = current_trainId;
-                    if(train_diff > 10){
-                        wait_time = 250000;// to prevent often hw polling
-                    }else{
-                        wait_time = 30000;
-                    }
-                }
-            }else{
-               if(current_trainId < first_burstTrainId){
-                 std::cout << "current_trainId is less than first_burstTrainId: " << current_trainId << "  " << first_burstTrainId << std::endl; 
-               }
-            }
-            usleep(wait_time);
+              if(current_trainId > last_trainId){
+                  if(first_train){
+                      first_burstTrainId = current_trainId;
+                      first_train = false;
+                  }
+                  uint64 train_diff = current_trainId - first_burstTrainId;
+                  if((train_diff + 1) >= num_trains){
+                      std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
+                      m_burstAcquisition.store(false); //must be done in stop())
+                      stop();
+                      //set<uint64>("burstData.startTrainId", first_burstTrainId);
+                      //set<uint64>("burstData.endTrainId", current_trainId);
+                  }else{
+                      last_trainId = current_trainId;
+                      if(train_diff > 10){
+                          wait_time = 250000;// to prevent often hw polling
+                      }else{
+                          wait_time = 30000;
+                      }
+                  }
+              }else{
+                 if(current_trainId < first_burstTrainId){
+                   std::cout << "current_trainId is less than first_burstTrainId: " << current_trainId << "  " << first_burstTrainId << std::endl; 
+                 }
+              }
+              usleep(wait_time);
+          }
+        
+          set<uint64>("burstData.startTrainId", first_burstTrainId);
+          set<uint64>("burstData.endTrainId", current_trainId);
+          updateState(State::ON);
+         
+        } catch (const Exception& e) {
+            KARABO_LOG_ERROR << e;
+        } catch (...) {
+            KARABO_LOG_ERROR << "Unknown exception was raised in poll thread";
         }
-        
-        set<uint64>("burstData.startTrainId", first_burstTrainId);
-        set<uint64>("burstData.endTrainId", current_trainId);
-        updateState(currentState);        
     }
 
 
     void DsscPpt::startBurstAcquisition() {
+        
+        updateState(State::ACQUIRING);
        
         m_burstAcquisition.store(false);
         if(m_acquisitionThread && m_acquisitionThread->joinable()){
