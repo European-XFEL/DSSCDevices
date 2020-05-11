@@ -1791,26 +1791,27 @@ namespace karabo {
 
 
     void DsscPpt::startBurstAcquisition() {
-
-        m_burstAcquisition.store(true);
+       
+        m_burstAcquisition.store(false);
+        if(m_acquisitionThread && m_acquisitionThread->joinable()){
+          m_acquisitionThread->join();
+          m_acquisitionThread.reset();
+        } 
         
-        if(m_acquisitionThread && m_acquisitionThread->joinable()) m_acquisitionThread->join(); 
+        m_burstAcquisition.store(true);
         
         m_acquisitionThread.reset(new boost::thread(boost::bind(&DsscPpt::burstAcquisitionPolling, this)));
         KARABO_LOG_INFO << "burstPolling thread started..."; 
    }
     
     void DsscPpt::stopAcquisition() {
-        if (m_burstAcquisition.load()) {
-            m_burstAcquisition.store(false);
-            if (m_acquisitionThread) {
-              if(m_acquisitionThread->joinable())
-                  m_acquisitionThread->join();
-              m_acquisitionThread.reset();
-            }            
-        }
+        m_burstAcquisition.store(false);
+        if (m_acquisitionThread && m_acquisitionThread->joinable()){
+          m_acquisitionThread->join();
+          m_acquisitionThread.reset();
+        }            
         runAcquisition(false);
-        if (m_ppt->isXFELMode()) {
+        if (m_ppt->isXFELMode()){
             runContMode(false);
         }
     }
