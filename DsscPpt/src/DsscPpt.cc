@@ -1737,6 +1737,9 @@ namespace karabo {
           unsigned int num_trains = get<unsigned int>("numBurstTrains");
           assert(num_trains);
         
+          const auto currentState = getState();
+          updateState(State::ACQUIRING);
+
           start();
 
           uint64 last_trainId = m_ppt->getCurrentTrainID();
@@ -1786,7 +1789,7 @@ namespace karabo {
         
           set<uint64>("burstData.startTrainId", first_burstTrainId);
           set<uint64>("burstData.endTrainId", current_trainId);
-          updateState(State::ON);
+          updateState(currentState); 
          
         } catch (const Exception& e) {
             KARABO_LOG_ERROR << e;
@@ -1797,8 +1800,6 @@ namespace karabo {
 
 
     void DsscPpt::startBurstAcquisition() {
-        
-        updateState(State::ACQUIRING);
        
         m_burstAcquisition.store(false);
         if(m_acquisitionThread && m_acquisitionThread->joinable()){
