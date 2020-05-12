@@ -1790,10 +1790,17 @@ namespace karabo {
               }
               usleep(wait_time);
           }
+          
+          std::cout << "exited from loop" << std::endl;
         
           set<uint64>("burstData.startTrainId", first_burstTrainId);
           set<uint64>("burstData.endTrainId", current_trainId);
+          
+          std::cout << "updated trainId data in gui" << std::endl;
+          
           updateState(currentState); 
+          
+          std::cout << "updated state of device" << std::endl;
          
         } catch (const Exception& e) {
             KARABO_LOG_ERROR << e;
