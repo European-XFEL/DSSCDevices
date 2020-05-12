@@ -1771,7 +1771,7 @@ namespace karabo {
                   uint64 train_diff = current_trainId - first_burstTrainId;
                   if((train_diff + 1) >= num_trains){
                       std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
-                      m_burstAcquisition.store(false); //must be done in stop())
+                      m_burstAcquisition.store(false); 
                       stop();
                       //set<uint64>("burstData.startTrainId", first_burstTrainId);
                       //set<uint64>("burstData.endTrainId", current_trainId);
@@ -1825,11 +1825,14 @@ namespace karabo {
    }
     
     void DsscPpt::stopAcquisition() {
-        m_burstAcquisition.store(false);
-        if (m_acquisitionThread && m_acquisitionThread->joinable()){
-          m_acquisitionThread->join();
-          m_acquisitionThread.reset();
-        }            
+        
+        if m_burstAcquisition.load(){ //making sure we do it from main thread
+            m_burstAcquisition.store(false);
+            if (m_acquisitionThread && m_acquisitionThread->joinable()){
+            m_acquisitionThread->join();
+            m_acquisitionThread.reset();
+            }            
+        }
         runAcquisition(false);
         if (m_ppt->isXFELMode()){
             runContMode(false);
