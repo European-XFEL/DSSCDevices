@@ -1730,7 +1730,7 @@ namespace karabo {
     
     void DsscPpt::burstAcquisitionPolling() {
         
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        //std::this_thread::sleep_for(std::chrono::milliseconds(300));
         try {
             KARABO_LOG_INFO << "Hardware polling started";
        
