@@ -416,7 +416,6 @@ namespace karabo {
         bool m_keepAcquisition;
         bool m_keepPolling;
         boost::shared_ptr<boost::thread> m_pollThread;
-        boost::shared_ptr<boost::thread> m_acquisitionThread;
         SmartMutex m_accessToPptMutex;
         boost::mutex m_outMutex;
         PPT_Pointer m_ppt; // Use your main PPT class here
