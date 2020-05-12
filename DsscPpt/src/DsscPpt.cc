@@ -1013,7 +1013,7 @@ namespace karabo {
     DsscPpt::DsscPpt(const karabo::util::Hash& config)
         : Device<>(config),
         m_keepAcquisition(false), m_keepPolling(false), m_burstAcquisition(false),
-        m_pollThread(), m_acquisitionThread(),
+        m_pollThread(), 
         m_epcTag("epcParam"), m_dsscConfigtoSchema() {
         
         EventLoop::addThread(16);
@@ -1129,11 +1129,7 @@ namespace karabo {
             m_keepPolling = false;
             m_pollThread->join();
         }
-
-        if (m_acquisitionThread && m_acquisitionThread->joinable()) {
-            m_acquisitionThread->join();
-        }
-       
+      
     }
     
     DsscPpt::~DsscPpt() {
@@ -1804,7 +1800,7 @@ namespace karabo {
           
           //updateState(currentState);
           
-          std::this_thread::sleep_for(std::chrono::milliseconds(100));
+          //std::this_thread::sleep_for(std::chrono::milliseconds(100));
           updateState(State::ON);
           
           std::cout << "updated state of device" << std::endl;
@@ -1819,27 +1815,14 @@ namespace karabo {
 
     void DsscPpt::startBurstAcquisition() {
        
-        m_burstAcquisition.store(false);
-        if(m_acquisitionThread && m_acquisitionThread->joinable()){
-          m_acquisitionThread->join();
-          m_acquisitionThread.reset();
-        } 
-        
         m_burstAcquisition.store(true);
-        
-        m_acquisitionThread.reset(new boost::thread(boost::bind(&DsscPpt::burstAcquisitionPolling, this)));
-        KARABO_LOG_INFO << "burstPolling thread started..."; 
+        EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::burstAcquisitionPolling, this));       
    }
     
     void DsscPpt::stopAcquisition() {
         
-        if(m_burstAcquisition.load()){ //making sure we do it from main thread
-            m_burstAcquisition.store(false);
-            if (m_acquisitionThread && m_acquisitionThread->joinable()){
-            m_acquisitionThread->join();
-            m_acquisitionThread.reset();
-            }            
-        }
+        m_burstAcquisition.store(false);
+
         runAcquisition(false);
         if (m_ppt->isXFELMode()){
             runContMode(false);
