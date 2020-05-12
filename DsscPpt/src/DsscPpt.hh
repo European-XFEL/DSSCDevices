@@ -276,7 +276,7 @@ namespace karabo {
         void setPetraIIISetup();
         void setQuadrantSetup();
 
-        void idleStateOnEntry();
+        //void idleStateOnEntry();
         void acquisitionStateOnEntry();
         void manualAcquisitionStateOnEntry();
         void acquisitionStateOnExit();
