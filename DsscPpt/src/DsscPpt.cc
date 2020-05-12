@@ -1015,6 +1015,8 @@ namespace karabo {
         m_keepAcquisition(false), m_keepPolling(false), m_burstAcquisition(false),
         m_pollThread(), m_acquisitionThread(),
         m_epcTag("epcParam"), m_dsscConfigtoSchema() {
+        
+        EventLoop::addThread(16);
 
         KARABO_INITIAL_FUNCTION(initialize);
 
@@ -1135,6 +1137,7 @@ namespace karabo {
     }
     
     DsscPpt::~DsscPpt() {
+        EventLoop::removeThread(16);
     }
 
 
