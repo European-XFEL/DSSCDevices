@@ -1736,11 +1736,12 @@ namespace karabo {
        
           unsigned int num_trains = get<unsigned int>("numBurstTrains");
           assert(num_trains);
-        
-          const auto currentState = getState();
-          updateState(State::ACQUIRING);
 
+          //const auto currentState = getState();
+          updateState(State::ACQUIRING);
+          
           start();
+
           uint64 last_trainId;          
           {
             boost::mutex::scoped_lock lock(m_accessToPptMutex);
@@ -1798,7 +1799,8 @@ namespace karabo {
           
           std::cout << "updated trainId data in gui" << std::endl;
           
-          updateState(currentState); 
+          //updateState(currentState); 
+          updateState(State::ON);
           
           std::cout << "updated state of device" << std::endl;
          
