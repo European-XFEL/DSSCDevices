@@ -1826,7 +1826,7 @@ namespace karabo {
     
     void DsscPpt::stopAcquisition() {
         
-        if m_burstAcquisition.load(){ //making sure we do it from main thread
+        if(m_burstAcquisition.load()){ //making sure we do it from main thread
             m_burstAcquisition.store(false);
             if (m_acquisitionThread && m_acquisitionThread->joinable()){
             m_acquisitionThread->join();
