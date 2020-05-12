@@ -1799,7 +1799,9 @@ namespace karabo {
           
           std::cout << "updated trainId data in gui" << std::endl;
           
-          //updateState(currentState); 
+          //updateState(currentState);
+          
+          std::this_thread::sleep_for(std::chrono::milliseconds(100));
           updateState(State::ON);
           
           std::cout << "updated state of device" << std::endl;
