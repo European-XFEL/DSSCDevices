@@ -1604,11 +1604,11 @@ namespace karabo {
     }
 
 
-    void DsscPpt::idleStateOnEntry() {
+    /*void DsscPpt::idleStateOnEntry() {
         if (m_ppt->isOpen()) {
             startPolling();
         }
-    }
+    }//*/
 
 
     void DsscPpt::acquisitionStateOnEntry() {
@@ -1741,8 +1741,11 @@ namespace karabo {
           updateState(State::ACQUIRING);
 
           start();
-
-          uint64 last_trainId = m_ppt->getCurrentTrainID();
+          uint64 last_trainId;          
+          {
+            boost::mutex::scoped_lock lock(m_accessToPptMutex);
+            last_trainId = m_ppt->getCurrentTrainID();
+          }
         
           set<uint64>("burstData.startTrainId", 0);
           set<uint64>("burstData.endTrainId", 0);
@@ -1754,6 +1757,7 @@ namespace karabo {
 
           uint64 current_trainId;        
           while (m_burstAcquisition.load()) {
+              
               {
                   boost::mutex::scoped_lock lock(m_accessToPptMutex);
                   current_trainId = m_ppt->getCurrentTrainID();
@@ -4392,18 +4396,17 @@ namespace karabo {
         try {
             KARABO_LOG_INFO << "Hardware polling started";
             while (m_keepPolling) {
+                
+                int value;
                 {
                     boost::mutex::scoped_lock lock(m_accessToPptMutex);
                     m_ppt->readBackEPCRegister("Eth_Output_Data_Rate");
-
-                    int value = m_ppt->readFPGATemperature();
-                    set<int>("pptTemp", value);
-                    
-                    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                }
+                    value = m_ppt->readFPGATemperature();                  
+                 }
 
                 uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")*128 / 1E6;
                 set<string>("ethOutputRate", to_string(outputRate) + " MBit/s");
+                set<int>("pptTemp", value);
 
                 boost::this_thread::sleep(boost::posix_time::seconds(5));
             }
