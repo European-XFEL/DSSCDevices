@@ -50,9 +50,14 @@ namespace karabo {
                 std::cout << "---- SmarMutex could not lock mutex at " << info << ". Has been reserved by " << m_origin << std::endl;
             } else {
                 // this->lock();
+                boost::this_thread::sleep_for(boost::chrono::milliseconds(500));
+                if (!try_lock()) {
+                  std::cout << "Second attempt 500 ms later: SmarMutex could not lock mutex at " << info << ". Has been reserved by " << m_origin << std::endl;
+                }
             }
             m_origin = info;
         }
+        
         std::string m_origin;
     };
 
