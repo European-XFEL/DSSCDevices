@@ -1740,7 +1740,7 @@ namespace karabo {
           
           start();
           
-          updateState(State::ACQUIRING);
+          //updateState(State::ACQUIRING);
 
           uint64 last_trainId;          
           {
@@ -1791,18 +1791,12 @@ namespace karabo {
               }
               usleep(wait_time);
           }
-          
-          std::cout << "exited from loop" << std::endl;
         
           set<uint64>("burstData.startTrainId", first_burstTrainId);
           set<uint64>("burstData.endTrainId", current_trainId);
           
-          std::cout << "updated trainId data in gui" << std::endl;
-          
           //updateState(currentState);
-          updateState(State::ON);
-          
-          std::cout << "updated state of device" << std::endl;
+          //updateState(State::ON);
          
         } catch (const Exception& e) {
             KARABO_LOG_ERROR << e;
