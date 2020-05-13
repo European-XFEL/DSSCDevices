@@ -1770,7 +1770,7 @@ namespace karabo {
                       first_train = false;
                   }
                   uint64 train_diff = current_trainId - first_burstTrainId;
-                  if((train_diff + 1) >= num_trains){
+                  if(train_diff >= num_trains){
                       std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
                       m_burstAcquisition.store(false); 
                       stop();
