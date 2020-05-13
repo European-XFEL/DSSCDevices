@@ -4338,6 +4338,7 @@ namespace karabo {
 
 
     void DsscPpt::setCurrentColSkipOn() {
+        std::cout << "in setCurrentColSkipOn" << std::endl;
         DSSC::StateChangeKeeper keeper(this);
 
         string colString = getCurrentColSelectString();
@@ -4346,10 +4347,12 @@ namespace karabo {
         const auto quarterPixelsStr = utils::positionVectorToList(quarterPixels);
         KARABO_LOG_INFO << "Enable " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " in columns " << colString;
         KARABO_LOG_INFO << "Enable in pixels " << quarterPixelsStr.substr(0, 30) << "  ...";
-
+        
+        std::cout << "in setCurrentColSkipOn: locking" << std::endl;
         DsscScopedLock lock(&m_accessToPptMutex, __func__);
         m_ppt->enableMonBusCols(colString);
         m_ppt->enableInjection(true, quarterPixelsStr, true);
+        std::cout << "in setCurrentColSkipOn: exit" << std::endl;
     }
 
 
