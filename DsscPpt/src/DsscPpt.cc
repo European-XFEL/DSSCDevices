@@ -1736,7 +1736,7 @@ namespace karabo {
           unsigned int num_trains = get<unsigned int>("numBurstTrains");
           assert(num_trains);
 
-          const auto currentState = getState();
+          //const auto currentState = getState();
           
           start();
           
@@ -1799,8 +1799,8 @@ namespace karabo {
           
           std::cout << "updated trainId data in gui" << std::endl;
           
-          updateState(currentState);
-          //updateState(State::ON);
+          //updateState(currentState);
+          updateState(State::ON);
           
           std::cout << "updated state of device" << std::endl;
          
