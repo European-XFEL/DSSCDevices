@@ -1737,9 +1737,10 @@ namespace karabo {
           assert(num_trains);
 
           const auto currentState = getState();
-          updateState(State::ACQUIRING);
           
           start();
+          
+          updateState(State::ACQUIRING);
 
           uint64 last_trainId;          
           {
