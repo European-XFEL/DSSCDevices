@@ -1744,8 +1744,7 @@ namespace karabo {
 
           uint64 last_trainId;          
           {
-            //boost::mutex::scoped_lock lock(m_accessToPptMutex);
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            boost::mutex::scoped_lock lock(m_accessToPptMutex);
             last_trainId = m_ppt->getCurrentTrainID();
           }
         
@@ -1761,8 +1760,7 @@ namespace karabo {
           while (m_burstAcquisition.load()) {
               
               {
-                  //boost::mutex::scoped_lock lock(m_accessToPptMutex);
-                  DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                  boost::mutex::scoped_lock lock(m_accessToPptMutex);
                   current_trainId = m_ppt->getCurrentTrainID();
               }
 
@@ -4338,7 +4336,6 @@ namespace karabo {
 
 
     void DsscPpt::setCurrentColSkipOn() {
-        std::cout << "in setCurrentColSkipOn" << std::endl;
         DSSC::StateChangeKeeper keeper(this);
 
         string colString = getCurrentColSelectString();
@@ -4347,12 +4344,10 @@ namespace karabo {
         const auto quarterPixelsStr = utils::positionVectorToList(quarterPixels);
         KARABO_LOG_INFO << "Enable " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " in columns " << colString;
         KARABO_LOG_INFO << "Enable in pixels " << quarterPixelsStr.substr(0, 30) << "  ...";
-        
-        std::cout << "in setCurrentColSkipOn: locking" << std::endl;
+
         DsscScopedLock lock(&m_accessToPptMutex, __func__);
         m_ppt->enableMonBusCols(colString);
         m_ppt->enableInjection(true, quarterPixelsStr, true);
-        std::cout << "in setCurrentColSkipOn: exit" << std::endl;
     }
 
 
@@ -4397,8 +4392,7 @@ namespace karabo {
                 
                 int value;
                 {
-                    //boost::mutex::scoped_lock lock(m_accessToPptMutex);
-                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                    boost::mutex::scoped_lock lock(m_accessToPptMutex);
                     m_ppt->readBackEPCRegister("Eth_Output_Data_Rate");
                     value = m_ppt->readFPGATemperature();                  
                  }
@@ -4506,8 +4500,7 @@ namespace karabo {
 
 
     void DsscPpt::checkQSFPConnected() {
-        //boost::mutex::scoped_lock lock(m_accessToPptMutex);
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        boost::mutex::scoped_lock lock(m_accessToPptMutex);
         set<string>("connectedETHChannels", m_ppt->getConnectedETHChannels());
     }
 
