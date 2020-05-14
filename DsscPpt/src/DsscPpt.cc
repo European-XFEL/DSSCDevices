@@ -1775,9 +1775,9 @@ namespace karabo {
                   if(train_diff >= num_trains){
                       std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
                       m_burstAcquisition.store(false); 
+                      set<uint64>("burstData.startTrainId", first_burstTrainId);
+                      set<uint64>("burstData.endTrainId", current_trainId);
                       stop();
-                      //set<uint64>("burstData.startTrainId", first_burstTrainId);
-                      //set<uint64>("burstData.endTrainId", current_trainId);
                   }else{
                       last_trainId = current_trainId;
                       if(train_diff > 10){
@@ -1794,8 +1794,8 @@ namespace karabo {
               usleep(wait_time);
           }
         
-          set<uint64>("burstData.startTrainId", first_burstTrainId);
-          set<uint64>("burstData.endTrainId", current_trainId);
+          //set<uint64>("burstData.startTrainId", first_burstTrainId);
+          //set<uint64>("burstData.endTrainId", current_trainId);
           
           //updateState(currentState);
           //updateState(State::ON);
