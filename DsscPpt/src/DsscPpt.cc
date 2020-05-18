@@ -1587,9 +1587,9 @@ namespace karabo {
     void DsscPpt::startPolling() {
         if (m_keepPolling) return;
 
-        m_keepPolling = true;
-        m_pollThread.reset(new boost::thread(boost::bind(&DsscPpt::pollHardware, this)));
-        KARABO_LOG_INFO << "PollThread started...";
+        //m_keepPolling = true;
+        //m_pollThread.reset(new boost::thread(boost::bind(&DsscPpt::pollHardware, this)));
+        //KARABO_LOG_INFO << "PollThread started...";
     }
 
 
@@ -1792,8 +1792,8 @@ namespace karabo {
               usleep(wait_time);
           }
         
-          //set<uint64>("burstData.startTrainId", first_burstTrainId);
-          //set<uint64>("burstData.endTrainId", current_trainId);
+          set<uint64>("burstData.startTrainId", first_burstTrainId);
+          set<uint64>("burstData.endTrainId", current_trainId);
           
           //updateState(currentState);
           //updateState(State::ON);
