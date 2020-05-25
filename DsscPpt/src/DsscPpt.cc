@@ -1742,16 +1742,15 @@ namespace karabo {
           
           //updateState(State::ACQUIRING);
 
-          uint64 last_trainId;          
+          uint64 last_trainId;       
+          uint64 first_burstTrainId;
           {
             boost::mutex::scoped_lock lock(m_accessToPptMutex);
-            last_trainId = m_ppt->getCurrentTrainID();
+            first_burstTrainId = m_ppt->getCurrentTrainID();
           }
         
           set<uint64>("burstData.startTrainId", 0);
           set<uint64>("burstData.endTrainId", 0);
-        
-          uint64 first_burstTrainId = last_trainId;
           bool first_train = true;
         
           static unsigned int wait_time = 30000;
@@ -1764,11 +1763,17 @@ namespace karabo {
                   current_trainId = m_ppt->getCurrentTrainID();
               }
 
-              if(current_trainId > last_trainId){
-                  if(first_train){
+              if(first_train){
+                  if(current_trainId != first_burstTrainId){
                       first_burstTrainId = current_trainId;
+                      last_trainId = current_trainId;
                       first_train = false;
                   }
+                  continue;
+              }
+
+
+              if(current_trainId > last_trainId){
                   uint64 train_diff = current_trainId - first_burstTrainId;
                   if(train_diff >= num_trains){
                       std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
