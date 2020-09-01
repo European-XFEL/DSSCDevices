@@ -46,14 +46,16 @@ namespace karabo {
         }
 
         void trylock(const std::string & info) {
+            std::chrono::milliseconds interval(100);
             if (!try_lock()) {
                 std::cout << "---- SmarMutex could not lock mutex at " << info << ". Has been reserved by " << m_origin << std::endl;
-            } else {
-                // this->lock();
+                while(!try_lock()){
+                    std::this_thread::sleep_for(interval);
+                }
             }
             m_origin = info;
         }
-        std::string m_origin;
+        static std::string m_origin;
     };
 
     class DsscScopedLock {
