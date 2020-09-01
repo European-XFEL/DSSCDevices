@@ -52,11 +52,11 @@ namespace karabo {
                 std::cout << "---- SmarMutex could not lock mutex at " << info << ". Has been reserved by " << m_origin << std::endl;
                 while(!try_lock()){
                     std::this_thread::sleep_for(interval);
-                }
+                }//*/
             }
             m_origin = info;
         }
-        static std::string m_origin;
+        std::string m_origin;
     };
 
     class DsscScopedLock {
