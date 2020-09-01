@@ -1767,10 +1767,16 @@ namespace karabo {
 
               if(first_train){
                   if(current_trainId != first_burstTrainId){
-                      first_burstTrainId = current_trainId;
-                      last_trainId = current_trainId;
-                      first_train = false;
+                    if(current_trainId - first_burstTrainId != 1){
+                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        first_burstTrainId = m_ppt->getCurrentTrainID();      
+                    }else{
+                        first_burstTrainId = current_trainId;
+                        last_trainId = current_trainId;
+                        first_train = false;
+                    }
                   }
+                  usleep(wait_time);
                   continue;
               }
 
