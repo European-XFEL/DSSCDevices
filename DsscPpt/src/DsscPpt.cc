@@ -1767,14 +1767,11 @@ namespace karabo {
 
               if(first_train){
                   if(current_trainId != first_burstTrainId){
-                    if(current_trainId - first_burstTrainId != 1){
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                        first_burstTrainId = m_ppt->getCurrentTrainID();      
-                    }else{
-                        first_burstTrainId = current_trainId;
+                    if( (current_trainId - first_burstTrainId) == uint64(1) ){
                         last_trainId = current_trainId;
                         first_train = false;
                     }
+                    first_burstTrainId = current_trainId;
                   }
                   usleep(wait_time);
                   continue;
@@ -1782,7 +1779,7 @@ namespace karabo {
 
 
               if(current_trainId > last_trainId){
-                  uint64 train_diff = current_trainId - first_burstTrainId;
+                  uint64 train_diff = current_trainId - first_burstTrainId + 1;
                   if(train_diff >= num_trains){
                       std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
                       m_burstAcquisition.store(false); 
