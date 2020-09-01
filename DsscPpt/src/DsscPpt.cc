@@ -4408,7 +4408,7 @@ namespace karabo {
                     value = m_ppt->readFPGATemperature();                  
                  }
 
-                uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")*128 / 1E6;
+                uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")/(1E6/128.0);
                 set<string>("ethOutputRate", to_string(outputRate) + " MBit/s");
                 set<int>("pptTemp", value);
 
