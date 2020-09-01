@@ -1745,7 +1745,8 @@ namespace karabo {
           uint64 last_trainId;       
           uint64 first_burstTrainId;
           {
-            boost::mutex::scoped_lock lock(m_accessToPptMutex);
+            //boost::mutex::scoped_lock lock(m_accessToPptMutex);
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
             first_burstTrainId = m_ppt->getCurrentTrainID();
           }
         
@@ -1759,7 +1760,8 @@ namespace karabo {
           while (m_burstAcquisition.load()) {
               
               {
-                  boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                  //boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                  DsscScopedLock lock(&m_accessToPptMutex, __func__);
                   current_trainId = m_ppt->getCurrentTrainID();
               }
 
@@ -4292,7 +4294,8 @@ namespace karabo {
         }
         while (m_keepAcquisition) {
             {
-                boost::mutex::scoped_lock lock(m_outMutex);
+                //boost::mutex::scoped_lock lock(m_outMutex);
+                DsscScopedLock lock(&m_accessToPptMutex, __func__);
                 cout << '-';
                 cout.flush();
             }
@@ -4397,7 +4400,8 @@ namespace karabo {
                 
                 int value;
                 {
-                    boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                    //boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
                     m_ppt->readBackEPCRegister("Eth_Output_Data_Rate");
                     value = m_ppt->readFPGATemperature();                  
                  }
@@ -4505,7 +4509,8 @@ namespace karabo {
 
 
     void DsscPpt::checkQSFPConnected() {
-        boost::mutex::scoped_lock lock(m_accessToPptMutex);
+        //boost::mutex::scoped_lock lock(m_accessToPptMutex);
+        DsscScopedLock lock(&m_accessToPptMutex, __func__);
         set<string>("connectedETHChannels", m_ppt->getConnectedETHChannels());
     }
 
