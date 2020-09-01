@@ -3499,11 +3499,6 @@ namespace karabo {
             m_ppt->enableXFELControl(true);
         }
 
-        if (!m_accessToPptMutex.try_lock()){
-            KARABO_LOG_INFO << "#### mutrex still locked";
-        } else{
-            m_accessToPptMutex.unlock();
-        }
         getEPCParamsIntoGui("Multi_purpose_Register");
         updateGuiPLLParameters();
     }
