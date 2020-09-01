@@ -18,6 +18,7 @@
 
 #include <atomic>
 
+
 /**
  * The main Karabo namespace
  */
@@ -46,10 +47,15 @@ namespace karabo {
         }
 
         void trylock(const std::string & info) {
-            if (!try_lock()) {
-                std::cout << "---- SmarMutex could not lock mutex at " << info << ". Has been reserved by " << m_origin << std::endl;
-            } else {
-                // this->lock();
+            std::chrono::milliseconds interval(100);
+            int ncounts = 0;
+            while(!try_lock()){
+                std::this_thread::sleep_for(interval);
+                ++ncounts;
+                if(ncounts>50){
+                    std::cout << "---- SmarMutex could not lock mutex during 5 sec at " << info << ". Has been reserved by " << m_origin << std::endl;
+                    ncounts = 0;
+                }
             }
             m_origin = info;
         }
