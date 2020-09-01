@@ -18,8 +18,6 @@
 
 #include <atomic>
 
-#include <chrono>
-#include <thread>
 
 /**
  * The main Karabo namespace
