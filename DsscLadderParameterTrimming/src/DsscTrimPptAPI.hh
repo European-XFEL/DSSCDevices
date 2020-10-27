@@ -69,6 +69,10 @@ private:
     
     bool programSequencer(bool readBack = false, bool setJtagEngineBusy = true, bool program = true) override;
    
+    int programIOBRegister(const std::string & moduleSetStr, bool overwrite = false) override {
+        return 0;
+    };
+    
     void setBurstVetoOffset(int val) override;
     
     int getBurstVetoOffset() override;

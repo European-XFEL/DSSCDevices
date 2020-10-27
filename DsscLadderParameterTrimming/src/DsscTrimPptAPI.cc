@@ -102,7 +102,7 @@ void DsscTrimPptAPI::programPixelRegDirectly(int px, bool setJtagEngineBusy){
 bool DsscTrimPptAPI::programSequencer(bool readBack, bool setJtagEngineBusy, bool program){
     m_karaboDevice->programSequencer(readBack, setJtagEngineBusy, program);
 }
-   
+
 void DsscTrimPptAPI::setBurstVetoOffset(int val){
     m_karaboDevice->setBurstVetoOffset(val);
 }
