@@ -2241,9 +2241,11 @@ namespace karabo {
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
-            m_ppt->setASICReset(true); // ALSO CHECKS IF TEST SYSTEM IN mANNHEIM
+            //m_ppt->setASICReset(true); this is wrong // ALSO CHECKS IF TEST SYSTEM IN mANNHEIM
+            m_ppt->iobReset(true);
             boost::this_thread::sleep(boost::posix_time::seconds(1));
-            m_ppt->setASICReset(false);
+            m_ppt->iobReset(false);
+            //m_ppt->setASICReset(false); this is wrong
         }
     }
 
@@ -2254,9 +2256,11 @@ namespace karabo {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
             m_ppt->setASICReset_TestSystem(true); // required in test system important to minimize current consumption
-            m_ppt->iobReset(true);
+            //m_ppt->iobReset(true); // ???????????????????????? Nonsense. wrong
+            m_ppt->setASICReset(true);
             boost::this_thread::sleep(boost::posix_time::seconds(1));
-            m_ppt->iobReset(false);
+            m_ppt->setASICReset(false);
+            //m_ppt->iobReset(false); wrong.
         }
     }
 
@@ -4427,7 +4431,11 @@ namespace karabo {
         KARABO_LOG_INFO << "Program PLL";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            m_ppt->clockPLLSelect(false);
+            if (get<bool>("pptPLL.internalPLL")) {
+                m_ppt->clockPLLSelect(true);
+            } else {
+                m_ppt->clockPLLSelect(false);
+            }
         }
         if (get<bool>("xfelMode")) {
             stopManualMode();
