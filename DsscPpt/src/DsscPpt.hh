@@ -16,6 +16,9 @@
 #include "DsscPptAPI.hh"
 #include "DsscConfigHashWriter.hh"
 
+#include <atomic>
+
+
 /**
  * The main Karabo namespace
  */
@@ -44,10 +47,15 @@ namespace karabo {
         }
 
         void trylock(const std::string & info) {
-            if (!try_lock()) {
-                std::cout << "---- SmarMutex could not lock mutex at " << info << ". Has been reserved by " << m_origin << std::endl;
-            } else {
-                // this->lock();
+            std::chrono::milliseconds interval(100);
+            int ncounts = 0;
+            while(!try_lock()){
+                std::this_thread::sleep_for(interval);
+                ++ncounts;
+                if(ncounts>50){
+                    std::cout << "---- SmarMutex could not lock mutex during 5 sec at " << info << ". Has been reserved by " << m_origin << std::endl;
+                    ncounts = 0;
+                }
             }
             m_origin = info;
         }
@@ -274,7 +282,7 @@ namespace karabo {
         void setPetraIIISetup();
         void setQuadrantSetup();
 
-        void idleStateOnEntry();
+        //void idleStateOnEntry();
         void acquisitionStateOnEntry();
         void manualAcquisitionStateOnEntry();
         void acquisitionStateOnExit();
@@ -341,6 +349,7 @@ namespace karabo {
         void readFullConfigFile(const std::string & fileName);
         void storeFullConfigFile();
         void storeFullConfigHDF5();
+        void updateFullConfigByteVector(const std::string & fileName);
 
         void saveConfiguration();
         void saveEPCRegisters();
@@ -413,7 +422,6 @@ namespace karabo {
         bool m_keepAcquisition;
         bool m_keepPolling;
         boost::shared_ptr<boost::thread> m_pollThread;
-        boost::shared_ptr<boost::thread> m_acquisitionThread;
         SmartMutex m_accessToPptMutex;
         boost::mutex m_outMutex;
         PPT_Pointer m_ppt; // Use your main PPT class here
@@ -425,10 +433,14 @@ namespace karabo {
         std::string m_jtagCurrIOBNumber;
         std::string m_pixelCurrIOBNumber;
 
-        bool m_lastTrainIdPolling = false;
         DsscH5ConfigToSchema m_dsscConfigtoSchema;
 
         karabo::util::Hash m_hashout;
+        
+        std::atomic<bool> m_burstAcquisition;
+        
+        void burstAcquisitionPolling();
+        
 
     };
 }

@@ -7,11 +7,23 @@
  */
 
 #include "DsscLadderParameterTrimming.hh"
-#include "CHIPGainConfigurator.h"
-#include "DsscHDF5TrimmingDataWriter.h"
-#include "DsscHDF5TrimmingDataReader.h"
-#include "FitUtils.h"
+
+#include "CHIPTrimmer.h"
+//#include "FitUtils.h"
+
+//#include "CHIPGainConfigurator.h"
+//#include "DsscHDF5TrimmingDataWriter.h"
+//#include "DsscHDF5TrimmingDataReader.h"
 #include "DsscModuleInfo.h"
+
+
+
+#include "DsscTrimPptAPI.hh"
+
+
+
+//set<string> setst;
+
 
 #define DSSCSTATUS(statStr) \
       KARABO_LOG_INFO << statStr;\
@@ -23,12 +35,12 @@
 #define INITIALCONF "ConfigFiles/F2Init.conf"
 //#endif
 
-using namespace std;
+//using namespace std;
+
 
 USING_KARABO_NAMESPACES
 
-        namespace karabo {
-
+namespace karabo{
 
     KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, DsscLadderParameterTrimming)
 
@@ -509,7 +521,6 @@ USING_KARABO_NAMESPACES
                 .assignmentOptional().defaultValue(12345).reconfigurable()
                 .commit();
 
-
         UINT32_ELEMENT(expected).key("numFramesToReceive")
                 .displayedName("Num Frames to Receive")
                 .description("Number of frame to process for all asics")
@@ -798,7 +809,6 @@ USING_KARABO_NAMESPACES
 
     DsscLadderParameterTrimming::DsscLadderParameterTrimming(const karabo::util::Hash& config)
         : Device<>(config),
-        SuS::MultiModuleInterface(new SuS::PPTFullConfig(INITIALCONF)),
         m_asicMeanValues(utils::s_totalNumPxs),
         m_pixelData(utils::s_totalNumPxs*utils::s_numSram),
         m_currentTrimmer(nullptr),
@@ -848,7 +858,7 @@ USING_KARABO_NAMESPACES
     void DsscLadderParameterTrimming::stopTrimming() {
         KARABO_LOG_WARN << "Abort Trimming by user abort";
 
-        runTrimming = false;
+        m_trimppt_api->runTrimming = false;
 
         if (m_currentTrimmer) {
             m_currentTrimmer->abortTrimming();
@@ -877,7 +887,7 @@ USING_KARABO_NAMESPACES
         cout << "Initialized data channels " << endl;
 
         changeDeviceState(State::STARTING);
-
+        
         m_quadrantId = get<string>("quadrantId");
 
         m_quadrantServerId = get<string>("pptDeviceServerId"); //"pptDeviceServer1"; // "Dssc" + m_quadrantId + "DeviceServer";
@@ -903,50 +913,72 @@ USING_KARABO_NAMESPACES
         m_startTrimming = true;
         m_runFastAcquisition = false;
         m_saveRawData = false;
-
-        m_iterations = get<unsigned int>("numIterations");
-        m_trimStartAddr = get<unsigned short>("minSram");
-        m_trimEndAddr = get<unsigned short>("maxSram");
-        m_numRuns = get<unsigned int>("numRuns");
-
+        
         m_recvMode = RecvMode::MEAN;
         m_recvStatus = RecvStatus::OK;
 
         m_deviceConfigState = ConfigState::CHANGED;
         m_asicChannelDataValid = false;
-        setD0Mode(true);
+      
+        initMultiModuleInterface(get<string>("fullConfigFileName"));
+        
+        changeDeviceState(State::OFF);
+  
+    }
+    
+    void DsscLadderParameterTrimming::initMultiModuleInterface(const std::string _configFile){
+        
+        try{      
+            m_trimppt_api.reset(new SuS::DsscTrimPptAPI(this, _configFile));
+        } catch( const std::invalid_argument& e){
+            changeDeviceState(State::ERROR);
+            set<string>("status", e.what());
+            return;
+        }
 
-        setActiveAsics(0xFFFF);
+        m_trimppt_api->m_iterations = get<unsigned int>("numIterations");
+        m_trimppt_api->m_trimStartAddr = get<unsigned short>("minSram");
+        m_trimppt_api->m_trimEndAddr = get<unsigned short>("maxSram");
+        m_trimppt_api->m_numRuns = get<unsigned int>("numRuns");
 
-        setLadderReadout(true);
+        m_trimppt_api->setD0Mode(true);
 
+        m_trimppt_api->setActiveAsics(0xFFFF);
+
+        m_trimppt_api->setLadderReadout(true);
+        
         // pixel sort map is always in ladder mode filled
         initPixelSortMap();
-
+        
         m_deviceInitialized = true;
+        
+        //Check the devices are available
         if (allDevicesAvailable()) {
             KARABO_LOG_INFO << "All Devices started, ready for trimming routines";
         } else {
             changeDeviceState(State::ERROR);
+            set<string>("status", "Not all devices are available");
+            
         }
-        changeDeviceState(State::OFF);
-
-        injectionMode = NORM;
+        
+        m_trimppt_api->injectionMode = SuS::CHIPInterface::InjectionMode::NORM;
 
         loadCoarseGainParamsIntoGui();
 
         setSendingAsics(utils::bitEnableStringToValue(get<string>("sendingASICs")));
-
+        
         m_calibGenerator.setCurrentPixels(utils::positionListToVector<int>("0-65535"));
         m_calibGenerator.setOutputDir(get<string>("outputDir"));
 
         updateActiveModule(get<int>("activeModule"));
+        
         updateBaselineValid();
+        
     }
 
 
     SuS::CHIPTrimmer DsscLadderParameterTrimming::getNewChipTrimmer(bool &ok) {
-        runTrimming = true;
+        m_trimppt_api->runTrimming = true;
 
         //enable data sending to dsscProcessor if disabled from somewhere else
         if (isDsscData()) {
@@ -955,7 +987,7 @@ USING_KARABO_NAMESPACES
 
         initDataWriter();
 
-        SuS::CHIPTrimmer trimmer(this);
+        SuS::CHIPTrimmer trimmer(m_trimppt_api.get());
         trimmer.setAsicWise(false);
 
         auto chipParts = get<string>("selChipParts");
@@ -974,7 +1006,7 @@ USING_KARABO_NAMESPACES
         trimmer.setChipParts(chipParts);
         trimmer.setDacRange(paramValues.front(), paramValues.back());
         trimmer.setNumDacVals(paramValues.size());
-        trimmer.setSramRange(m_trimStartAddr, m_trimEndAddr);
+        trimmer.setSramRange(m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr);
         trimmer.setOutputDir(get<string>("outputDir"));
 
         loadPxInjCalibData(&trimmer);
@@ -999,7 +1031,7 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::setBufferMode() {
-        sequencer->setOpMode(SuS::Sequencer::BUFFER);
+        m_trimppt_api->sequencer->setOpMode(SuS::Sequencer::BUFFER);
         programSequencer();
 
         KARABO_LOG_INFO << "Sequencer Mode activated";
@@ -1037,7 +1069,7 @@ USING_KARABO_NAMESPACES
 
         m_recvStatus = RecvStatus::OK;
 
-        errorCodePixels.clear();
+        m_trimppt_api->errorCodePixels.clear();
     }
 
 
@@ -1048,7 +1080,7 @@ USING_KARABO_NAMESPACES
         remote().execute(m_mainProcessorId, "accumulate");
 
         int cnt = 0;
-        int timeout = m_iterations * 3000;
+        int timeout = m_trimppt_api->m_iterations * 3000;
 
         utils::Timer timer;
         while (!m_asicChannelDataValid && cnt++ < timeout) {
@@ -1091,7 +1123,7 @@ USING_KARABO_NAMESPACES
         if (displayMode == "AsicImages") {
             enableMeanValueAcquisition(showRms);
 
-            errorCodePixels.clear();
+            m_trimppt_api->errorCodePixels.clear();
 
             waitDataReceived();
 
@@ -1099,15 +1131,15 @@ USING_KARABO_NAMESPACES
                 const size_t numPixels = m_asicMeanValues.size();
 #pragma omp parallel for
                 for (size_t idx = 0; idx < numPixels; idx++) {
-                    m_asicMeanValues[idx] = m_asicMeanValues[idx] - baselineValues[idx] + 10;
+                    m_asicMeanValues[idx] = m_asicMeanValues[idx] - m_trimppt_api->baselineValues[idx] + 10;
                 }
             }
         } else if (displayMode == "FinalSlopes") {
             KARABO_LOG_WARN << " Final Slopes values are not implemented yet";
         } else if (displayMode == "SramDrift") {
-            measureSramDriftMap(m_trimStartAddr, m_trimEndAddr);
+            m_trimppt_api->measureSramDriftMap(m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr);
         } else if (displayMode == "SramSlopes") {
-            measureSramSlopesMap(m_trimStartAddr, m_trimEndAddr);
+            m_trimppt_api->measureSramSlopesMap(m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr);
         } else if (displayMode == "Curvature") {
             KARABO_LOG_WARN << "Curvature values are not implemented yet";
         }
@@ -1130,11 +1162,11 @@ USING_KARABO_NAMESPACES
         if (displayMode == "AsicImages") {
             showLadderImage(m_asicMeanValues);
         } else if (displayMode == "FinalSlopes") {
-            showLadderImage(getFinalSlopes());
+            showLadderImage(m_trimppt_api->getFinalSlopes());
         } else if (displayMode == "SramDrift" || displayMode == "SramSlopes") {
-            showLadderImage(getSramDriftValues());
+            showLadderImage(m_trimppt_api->getSramDriftValues());
         } else if (displayMode == "Curvature") {
-            showLadderImage(getCurvatureValues());
+            showLadderImage(m_trimppt_api->getCurvatureValues());
         }
     }
 
@@ -1150,11 +1182,11 @@ USING_KARABO_NAMESPACES
         if (displayMode == "AsicImages") {
             showLadderHisto(m_asicMeanValues);
         } else if (displayMode == "FinalSlopes") {
-            showLadderHisto(getFinalSlopes());
+            showLadderHisto(m_trimppt_api->getFinalSlopes());
         } else if (displayMode == "SramDrift" || displayMode == "SramSlopes") {
-            showLadderHisto(getSramDriftValues());
+            showLadderHisto(m_trimppt_api->getSramDriftValues());
         } else if (displayMode == "Curvature") {
-            showLadderHisto(getCurvatureValues());
+            showLadderHisto(m_trimppt_api->getCurvatureValues());
         }
     }
 
@@ -1175,7 +1207,7 @@ USING_KARABO_NAMESPACES
             }
             const auto chipParts = utils::getChipParts(chipPartsStr);
             if (chipParts.size() > elem) {
-                pixels = getSendingColumnPixels<uint32_t>(chipParts.at(elem));
+                pixels = m_trimppt_api->getSendingColumnPixels<uint32_t>(chipParts.at(elem));
                 if (m_setColumns) {
                     set<string>("monBusColsSelect", chipParts.at(elem).substr(3));
                     enableMonBusInCols();
@@ -1184,7 +1216,7 @@ USING_KARABO_NAMESPACES
             }
         } else {
             if (pxStr[0] == 'a') {
-                pxStr = "0-" + std::to_string(totalNumPxs - 1);
+                pxStr = "0-" + std::to_string(m_trimppt_api->totalNumPxs - 1);
                 set<string>("pixelsToChange", pxStr);
             }
             pixels = utils::positionListToVector(pxStr);
@@ -1297,10 +1329,10 @@ USING_KARABO_NAMESPACES
             m_runSettingsVec.clear();
 
             remote().set<string>(m_dsscDataReceiverId, "outputDir", m_runBaseDirectory);
-            remote().set<unsigned int>(m_dsscDataReceiverId, "numTrainsToStore", m_iterations);
+            remote().set<unsigned int>(m_dsscDataReceiverId, "numTrainsToStore", m_trimppt_api->m_iterations);
 
 
-            m_currentMeasurementConfig.numIterations = m_iterations;
+            m_currentMeasurementConfig.numIterations = m_trimppt_api->m_iterations;
             m_currentMeasurementConfig.numPreBurstVetos = remote().get<unsigned int>(m_pptDeviceId, "numPreBurstVetos");
             m_currentMeasurementConfig.ladderMode = (remote().get<bool>(m_dsscDataReceiverId, "ladderMode") ? 1 : 0);
 
@@ -1339,7 +1371,7 @@ USING_KARABO_NAMESPACES
 
         enableMeanValueAcquisition(false);
 
-        errorCodePixels.clear();
+        m_trimppt_api->errorCodePixels.clear();
 
         if (!waitDataReceived()) { // disables also raw data recording
             return binValues;
@@ -1353,7 +1385,7 @@ USING_KARABO_NAMESPACES
         if (subtract) {
 #pragma omp parallel for
             for (int idx = 0; idx < numPixels; idx++) {
-                binValues[idx] -= baselineValues[measurePixels[idx]];
+                binValues[idx] -= m_trimppt_api->baselineValues[measurePixels[idx]];
             }
         }
         return binValues;
@@ -1368,7 +1400,7 @@ USING_KARABO_NAMESPACES
 
         m_recvMode = RMS;
 
-        errorCodePixels.clear();
+        m_trimppt_api->errorCodePixels.clear();
 
         if (!waitDataReceived()) {
             return pixelRMSValues;
@@ -1463,13 +1495,13 @@ USING_KARABO_NAMESPACES
 
         static const auto measurePixels = utils::positionListToVector("0-32767");
 
-        const auto binValues = measureBurstData(measurePixels, m_trimStartAddr, m_trimEndAddr, baselineValuesValid);
+        const auto binValues = measureBurstData(measurePixels, m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr, m_trimppt_api->baselineValuesValid);
 
         for (int idx = 0; idx < 10; idx++) {
             cout << idx << " : " << binValues[idx] << endl;
         }
 
-        DSSCSTATUS("Measure Burst Data done: " + to_string(m_iterations) + " acquired!");
+        DSSCSTATUS("Measure Burst Data done: " + to_string(m_trimppt_api->m_iterations) + " acquired!");
     }
 
 
@@ -1481,26 +1513,26 @@ USING_KARABO_NAMESPACES
 
         uint32_t pixelToMeasure = get<unsigned int>("displayPixel");
 
-        if (!isPixelSending(pixelToMeasure)) {
+        if (!m_trimppt_api->isPixelSending(pixelToMeasure)) {
             KARABO_LOG_WARN << "Can not measure not sending pixel";
-            auto sendingPixels = getSendingPixels();
+            auto sendingPixels = m_trimppt_api->getSendingPixels();
             if (!sendingPixels.empty()) {
                 set<unsigned int>("displayPixel", sendingPixels.front());
             }
             return;
         }
 
-        KARABO_LOG_INFO << "Measure Mean SRAM Content in pixel " << pixelToMeasure << " from " << m_trimStartAddr << " to " << m_trimEndAddr;
+        KARABO_LOG_INFO << "Measure Mean SRAM Content in pixel " << pixelToMeasure << " from " << m_trimppt_api->m_trimStartAddr << " to " << m_trimppt_api->m_trimEndAddr;
 
         m_runFastAcquisition = true;
 
-        SuS::CHIPInterface::measureMeanSramContent(pixelToMeasure, m_trimStartAddr, m_trimEndAddr, false);
+        m_trimppt_api->SuS::CHIPInterface::measureMeanSramContent(pixelToMeasure, m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr, false);
 
         m_runFastAcquisition = false;
 
         std::vector<double> pixelSramData;
-        size_t pxOffs = sramSize*pixelToMeasure;
-        pixelSramData.assign(meanSramContent.begin() + pxOffs + m_trimStartAddr, meanSramContent.begin() + pxOffs + m_trimEndAddr + 1);
+        size_t pxOffs = m_trimppt_api->sramSize*pixelToMeasure;
+        pixelSramData.assign(m_trimppt_api->meanSramContent.begin() + pxOffs + m_trimppt_api->m_trimStartAddr, m_trimppt_api->meanSramContent.begin() + pxOffs + m_trimppt_api->m_trimEndAddr + 1);
 
         util::Hash dataHash;
         dataHash.set("pixelData", pixelSramData);
@@ -1517,17 +1549,17 @@ USING_KARABO_NAMESPACES
     void DsscLadderParameterTrimming::measureMeanSramContentAllPix() {
         StateChangeKeeper keeper(this);
 
-        KARABO_LOG_INFO << "Measure Mean SRAM Content for whole Ladder " << " from " << m_trimStartAddr << " to " << m_trimEndAddr;
+        KARABO_LOG_INFO << "Measure Mean SRAM Content for whole Ladder " << " from " << m_trimppt_api->m_trimStartAddr << " to " << m_trimppt_api->m_trimEndAddr;
 
         m_runFastAcquisition = true;
 
-        SuS::CHIPInterface::measureMeanSramContent(utils::getUpCountingVector(utils::s_totalNumPxs), m_trimStartAddr, m_trimEndAddr, false);
+        m_trimppt_api->SuS::CHIPInterface::measureMeanSramContent(utils::getUpCountingVector(utils::s_totalNumPxs), m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr, false);
 
         m_runFastAcquisition = false;
 
         const string outputDir = get<string>("outputDir");
         const string fileName = outputDir + "/" + utils::getLocalTimeStr() + "_LadderSramCorrectionMap.h5";
-        DsscHDF5Writer::saveBaselineAndSramCorrection(fileName, meanSramAccs, getSendingAsicsVec(), m_iterations);
+        DsscHDF5Writer::saveBaselineAndSramCorrection(fileName, m_trimppt_api->meanSramAccs, m_trimppt_api->getSendingAsicsVec(), m_trimppt_api->m_iterations);
 
         DSSCSTATUS("Mean SRAM Measurement Done");
     }
@@ -1536,7 +1568,7 @@ USING_KARABO_NAMESPACES
     void DsscLadderParameterTrimming::generateSramBlacklist() {
         measureMeanSramContentAllPix();
 
-        utils::DsscSramBlacklist sramBlacklist(meanSramContent);
+        utils::DsscSramBlacklist sramBlacklist(m_trimppt_api->meanSramContent);
 
         const string outputDir = get<string>("outputDir");
         const string fileName = outputDir + "/" + utils::getLocalTimeStr() + "_PxSramOutliers.txt";
@@ -1560,16 +1592,16 @@ USING_KARABO_NAMESPACES
     void DsscLadderParameterTrimming::setBaseline() {
         static const auto measurePixels = utils::positionListToVector("0-65535");
 
-        SuS::CHIPInterface::setBaseline(measurePixels, m_trimStartAddr, m_trimEndAddr);
+        m_trimppt_api->SuS::CHIPInterface::setBaseline(measurePixels, m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr);
 
         updateBaselineValid();
 
-        DSSCSTATUS("Baseline with " + to_string(m_iterations) + " acquired!");
+        DSSCSTATUS("Baseline with " + to_string(m_trimppt_api->m_iterations) + " acquired!");
     }
 
 
     void DsscLadderParameterTrimming::clearBaseline() {
-        SuS::CHIPInterface::clearBaseLine();
+        m_trimppt_api->SuS::CHIPInterface::clearBaseLine();
 
         updateBaselineValid();
 
@@ -1578,8 +1610,8 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::updateBaselineValid() {
-        set<bool>("baselineAvailable", baselineValuesValid);
-        set<bool>("subtractBaseline", baselineValuesValid);
+        set<bool>("baselineAvailable", m_trimppt_api->baselineValuesValid);
+        set<bool>("subtractBaseline", m_trimppt_api->baselineValuesValid);
     }
 
 
@@ -1592,9 +1624,9 @@ USING_KARABO_NAMESPACES
 
         KARABO_LOG_INFO << "Send Configuration to PPT";
 
-        updateAllCounters();
+        m_trimppt_api->updateAllCounters();
 
-        initChip();
+        m_trimppt_api->initChip();
 
         return 0;
     }
@@ -1638,10 +1670,10 @@ USING_KARABO_NAMESPACES
         }
         initTrimming();
 
-        calibratePixelDelay();
+        m_trimppt_api->calibratePixelDelay();
 
         const std::string fileName = get<string>("outputDir") + "/" + utils::getLocalTimeStr() + "_DelayTrimmedConfig.conf";
-        storeFullConfigFile(fileName, true);
+        m_trimppt_api->storeFullConfigFile(fileName, true);
 
         DSSCSTATUS("Pixel Delays Trimming done");
     }
@@ -1723,11 +1755,15 @@ USING_KARABO_NAMESPACES
 
 
             BOOST_FOREACH(string path, paths) {
-                if (path.compare("sendingASICs") == 0) {
+                
+                
+                if (path.compare("fullConfigFileName") == 0) {
+                    initMultiModuleInterface(filtered.getAs<string>(path));
+                } else if (path.compare("sendingASICs") == 0) {
                     auto selAsicsStr = filtered.getAs<string>(path);
                     if (selAsicsStr.length() != 17) {
                         KARABO_LOG_ERROR << "Can not convert sendingASICs string, wrong number of entries";
-                        selAsicsStr = utils::bitEnableValueToString(getSendingAsics());
+                        selAsicsStr = utils::bitEnableValueToString(m_trimppt_api->getSendingAsics());
                         set<string>("sendingASICs", selAsicsStr);
                     }
                     setSendingAsics(utils::bitEnableStringToValue(selAsicsStr));
@@ -1739,15 +1775,15 @@ USING_KARABO_NAMESPACES
                     if (utils::checkFileExists(fullConfigFileName)) {
                         bool isCalibData = get<bool>("isCalibrationDataConfig");
                         bool program = isDeviceExisting(m_pptDeviceId) && !isCalibData;
-                        loadFullConfig(fullConfigFileName, program);
+                        m_trimppt_api->loadFullConfig(fullConfigFileName, program);
                         loadCoarseGainParamsIntoGui();
                         if (isCalibData) {
-                            m_calibGenerator.setPixelRegisters(pixelRegisters);
+                            m_calibGenerator.setPixelRegisters(m_trimppt_api->pixelRegisters);
                             set<bool>("pixelCalibrationDataSettingsValid", m_calibGenerator.isCalibrationDataConfigLoaded());
                         }
                     } else {
                         KARABO_LOG_ERROR << "Can not open full config File: " << fullConfigFileName;
-                        set<string>("fullConfigFileName", pptFullConfig->getFullConfigFileName());
+                        set<string>("fullConfigFileName", m_trimppt_api->pptFullConfig->getFullConfigFileName());
                     }
                 }
             }
@@ -1758,7 +1794,7 @@ USING_KARABO_NAMESPACES
     void DsscLadderParameterTrimming::updateActiveModule(int newActiveModule) {
         if (newActiveModule < 1 || newActiveModule > 4) {
             //revert changes
-            set<int>("activeModule", currentModule);
+            set<int>("activeModule", m_trimppt_api->currentModule);
         } else {
             setActiveModule(newActiveModule);
             loadCoarseGainParamsIntoGui();
@@ -1767,25 +1803,25 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::loadCoarseGainParamsIntoGui() {
-        set<unsigned int>("gain.fcfEnCap", getPixelRegisterValue("0", "FCF_EnCap"));
-        set<unsigned int>("gain.csaFbCap", getPixelRegisterValue("0", "CSA_FbCap"));
-        set<unsigned int>("gain.csaResistor", getPixelRegisterValue("0", "CSA_Resistor"));
-        set<unsigned int>("gain.csaInjCap", getPixelRegisterValue("0", "QInjEn10fF"));
-        set<bool>("gain.csaInjCap200", getPixelRegisterValue("0", "CSA_Cin_200fF") != 0);
-        set<unsigned int>("gain.integrationTime", sequencer->getIntegrationTime(true));
+        set<unsigned int>("gain.fcfEnCap", m_trimppt_api->getPixelRegisterValue("0", "FCF_EnCap"));
+        set<unsigned int>("gain.csaFbCap", m_trimppt_api->getPixelRegisterValue("0", "CSA_FbCap"));
+        set<unsigned int>("gain.csaResistor", m_trimppt_api->getPixelRegisterValue("0", "CSA_Resistor"));
+        set<unsigned int>("gain.csaInjCap", m_trimppt_api->getPixelRegisterValue("0", "QInjEn10fF"));
+        set<bool>("gain.csaInjCap200", m_trimppt_api->getPixelRegisterValue("0", "CSA_Cin_200fF") != 0);
+        set<unsigned int>("gain.integrationTime", m_trimppt_api->sequencer->getIntegrationTime(true));
 
         string value;
-        if (getPixelRegisters()->signalIsVarious("Control register", "RmpFineTrm", "all")) {
+        if (m_trimppt_api->getPixelRegisters()->signalIsVarious("Control register", "RmpFineTrm", "all")) {
             value = "Various";
         } else {
-            value = to_string(getPixelRegisterValue("0", "RmpFineTrm"));
+            value = to_string(m_trimppt_api->getPixelRegisterValue("0", "RmpFineTrm"));
         }
         set<string>("gain.irampFineTrm", value);
 
-        if (getPixelRegisters()->signalIsVarious("Control register", "RmpDelayCntrl", "all")) {
+        if (m_trimppt_api->getPixelRegisters()->signalIsVarious("Control register", "RmpDelayCntrl", "all")) {
             value = "Various";
         } else {
-            value = to_string(getPixelRegisterValue("0", "RmpDelayCntrl"));
+            value = to_string(m_trimppt_api->getPixelRegisterValue("0", "RmpDelayCntrl"));
         }
         set<string>("gain.pixelDelay", value);
     }
@@ -1801,14 +1837,14 @@ USING_KARABO_NAMESPACES
 
             BOOST_FOREACH(string path, paths) {
                 if (path.compare("minSram") == 0) {
-                    m_trimStartAddr = filtered.getAs<unsigned short>(path);
+                    m_trimppt_api->m_trimStartAddr = filtered.getAs<unsigned short>(path);
                     if (isDeviceExisting(m_mainProcessorId)) {
-                        remote().set<unsigned short>(m_mainProcessorId, "minSram", m_trimStartAddr);
+                        remote().set<unsigned short>(m_mainProcessorId, "minSram", m_trimppt_api->m_trimStartAddr);
                     }
                 } else if (path.compare("maxSram") == 0) {
-                    m_trimEndAddr = filtered.getAs<unsigned short>(path);
+                    m_trimppt_api->m_trimEndAddr = filtered.getAs<unsigned short>(path);
                     if (isDeviceExisting(m_mainProcessorId)) {
-                        remote().set<unsigned short>(m_mainProcessorId, "maxSram", m_trimEndAddr);
+                        remote().set<unsigned short>(m_mainProcessorId, "maxSram", m_trimppt_api->m_trimEndAddr);
                     }
                 } else if (path.compare("numIterations") == 0) {
                     const uint iterations = filtered.getAs<unsigned int>(path);
@@ -1833,16 +1869,16 @@ USING_KARABO_NAMESPACES
                 } else if (path.compare("asicsToChange") == 0) {
                     auto asics = filtered.getAs<string>(path);
                     auto asicPixels = get<string>("asicsPixelsToChange");
-                    set<string>("pixelsToChange", utils::positionVectorToList(getASICPixels(asics, asicPixels)));
+                    set<string>("pixelsToChange", utils::positionVectorToList(m_trimppt_api->getASICPixels(asics, asicPixels)));
                 } else if (path.compare("asicsPixelsToChange") == 0) {
                     auto asics = get<string>("asicsToChange");
                     auto asicPixels = filtered.getAs<string>(path);
-                    set<string>("pixelsToChange", utils::positionVectorToList(getASICPixels(asics, asicPixels)));
+                    set<string>("pixelsToChange", utils::positionVectorToList(m_trimppt_api->getASICPixels(asics, asicPixels)));
                 } else if (path.compare("numFramesToReceive") == 0) {
                     auto numFrames = filtered.getAs<unsigned int>(path);
                     setNumFramesToSend(numFrames);
                 } else if (path.compare("numRuns") == 0) {
-                    m_numRuns = filtered.getAs<unsigned int>(path);
+                    m_trimppt_api->m_numRuns = filtered.getAs<unsigned int>(path);
                 }
             }
         }
@@ -1887,9 +1923,9 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::setNumIterations(uint iterations) {
-        m_iterations = iterations;
+        m_trimppt_api->m_iterations = iterations;
         if (isDeviceExisting(m_mainProcessorId)) {
-            remote().set<unsigned short>(m_mainProcessorId, "numIterations", m_iterations);
+            remote().set<unsigned short>(m_mainProcessorId, "numIterations", m_trimppt_api->m_iterations);
         }
     }
 
@@ -2097,7 +2133,7 @@ USING_KARABO_NAMESPACES
         util::Hash initialConfig;
         initialConfig.set<string>("asicsToRecord", get<string>("sendingASICs"));
         initialConfig.set<string>("deviceId", m_dsscDataReceiverId);
-        initialConfig.set<unsigned int>("testPattern", getExpectedTestPattern());
+        initialConfig.set<unsigned int>("testPattern", m_trimppt_api->getExpectedTestPattern());
         initialConfig.set<string>("quadrantId", get<string>("quadrantId"));
         initialConfig.set<bool>("enableDAQOutput", false);
         initialConfig.set<unsigned int>("udpPort", get<unsigned int>("recvDeviceUDPPort"));
@@ -2197,15 +2233,17 @@ USING_KARABO_NAMESPACES
 
             if (reg->signalIsVarious(moduleSetName, signalName, "all")) {
 
-                const auto signalValues = (std::vector<unsigned int>)reg->getSignalValues(moduleSetName, "all", signalName);
+                const std::vector<uint32_t> signalValues = reg->getSignalValues(moduleSetName, "all", signalName);
 
-                util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
-                moduleSetHash.set<util::NDArray>(signalName, arr);
+                //util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
+                //moduleSetHash.set<util::NDArray>(signalValues, arr);
+                moduleSetHash.set(signalName, signalValues);
             } else {
                 unsigned int value = reg->getSignalValue(moduleSetName, "all", signalName);
                 std::vector<unsigned int> signalValues(1, value);
-                util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
-                moduleSetHash.set<util::NDArray>(signalName, arr);
+                //util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
+                //moduleSetHash.set<util::NDArray>(signalName, arr);
+                moduleSetHash.set(signalName, signalValues);
             }
 
             sentSignals += signalName + ";";
@@ -2243,15 +2281,15 @@ USING_KARABO_NAMESPACES
 
         outData.set<string>("regType", "jtag");
         outData.set<string>("progType", "new");
-        outData.set<int>("currentModule", currentModule);
+        outData.set<int>("currentModule", m_trimppt_api->currentModule);
 
-        const auto moduleSetNames = jtagRegisters->getModuleSetNames();
+        const auto moduleSetNames = m_trimppt_api->jtagRegisters->getModuleSetNames();
 
         string sentModuleSets;
         for (auto && moduleSet : moduleSetNames) {
-            if (jtagRegisters->isModuleSetReadOnly(moduleSet)) continue;
+            if (m_trimppt_api->jtagRegisters->isModuleSetReadOnly(moduleSet)) continue;
 
-            auto moduleSetHash = getModuleSetHash(jtagRegisters, moduleSet);
+            auto moduleSetHash = getModuleSetHash(m_trimppt_api->jtagRegisters, moduleSet);
             outData.set(moduleSet, moduleSetHash);
             sentModuleSets += moduleSet + ";";
         }
@@ -2274,10 +2312,10 @@ USING_KARABO_NAMESPACES
         util::Hash outData;
         outData.set<string>("regType", "jtag");
         outData.set<string>("progType", "new");
-        outData.set<int>("currentModule", currentModule);
+        outData.set<int>("currentModule", m_trimppt_api->currentModule);
         outData.set<string>("moduleSets", moduleSetName);
 
-        auto moduleSetHash = getModuleSetHash(jtagRegisters, moduleSetName);
+        auto moduleSetHash = getModuleSetHash(m_trimppt_api->jtagRegisters, moduleSetName);
         outData.set(moduleSetName, moduleSetHash);
 
 
@@ -2299,10 +2337,10 @@ USING_KARABO_NAMESPACES
 
         outData.set<string>("regType", "pixel");
         outData.set<string>("progType", (m_startTrimming ? "new" : "update")); // startTrimming has no function yet
-        outData.set<int>("currentModule", currentModule);
+        outData.set<int>("currentModule", m_trimppt_api->currentModule);
         outData.set<string>("moduleSets", "Control register");
 
-        auto moduleSetHash = getModuleSetHash(pixelRegisters, moduleSetName);
+        auto moduleSetHash = getModuleSetHash(m_trimppt_api->pixelRegisters, moduleSetName);
         outData.set(moduleSetName, moduleSetHash);
 
 
@@ -2329,7 +2367,7 @@ USING_KARABO_NAMESPACES
         outData.set<string>("regType", "sequencer");
         outData.set<string>("progType", "new");
 
-        auto sequencerHash = getSequencerHash(getSequencer());
+        auto sequencerHash = getSequencerHash(m_trimppt_api->getSequencer());
         outData.set("sequencerParams", sequencerHash);
 
 
@@ -2345,7 +2383,7 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::setSendingAsics(uint16_t asics) {
-        SuS::MultiModuleInterface::setSendingAsics(asics);
+        m_trimppt_api->SuS::MultiModuleInterface::setSendingAsics(asics);
 
         if (isDeviceExisting(m_pptDeviceId)) {
             remote().set<string>(m_pptDeviceId, "sendingASICs", utils::bitEnableValueToString(asics));
@@ -2355,7 +2393,7 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::setActiveModule(int modNumber) {
-        SuS::MultiModuleInterface::setActiveModule(modNumber);
+        m_trimppt_api->SuS::MultiModuleInterface::setActiveModule(modNumber);
 
         updateSendingAsics(modNumber);
 
@@ -2382,9 +2420,9 @@ USING_KARABO_NAMESPACES
         util::Hash outData;
         outData.set<string>("regType", "burstParams");
         util::Hash burstParamData;
-        auto paramNames = getBurstParamNames();
+        auto paramNames = m_trimppt_api->getBurstParamNames();
         for (auto && name : paramNames) {
-            burstParamData.set<int>(name, getBurstParam(name));
+            burstParamData.set<int>(name, m_trimppt_api->getBurstParam(name));
         }
         outData.set("paramValues", burstParamData);
 
@@ -2418,17 +2456,17 @@ USING_KARABO_NAMESPACES
 
 
     int DsscLadderParameterTrimming::getNumberOfActiveAsics() const {
-        return utils::countOnesInInt(activeAsics);
+        return utils::countOnesInInt(m_trimppt_api->activeAsics);
     }
 
 
     int DsscLadderParameterTrimming::getNumberOfSendingAsics() const {
-        return utils::countOnesInInt(sendingAsics);
+        return utils::countOnesInInt(m_trimppt_api->sendingAsics);
     }
 
 
     int DsscLadderParameterTrimming::getActiveASICToReadout() const {
-        return utils::getFirstOneInValue(activeAsics);
+        return utils::getFirstOneInValue(m_trimppt_api->activeAsics);
     }
 
 
@@ -2439,9 +2477,9 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::initChip() {
-        programJtag();
-        programSequencer();
-        programPixelRegs();
+        m_trimppt_api->programJtag();
+        m_trimppt_api->programSequencer();
+        m_trimppt_api->programPixelRegs();
     }
 
 
@@ -2486,14 +2524,14 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::setMaxSram(unsigned int value) {
-        m_trimEndAddr = value;
-        set<unsigned short>("maxSram", m_trimEndAddr);
+        m_trimppt_api->m_trimEndAddr = value;
+        set<unsigned short>("maxSram", m_trimppt_api->m_trimEndAddr);
     }
 
 
     void DsscLadderParameterTrimming::setMinSram(unsigned int value) {
-        m_trimStartAddr = value;
-        set<unsigned short>("minSram", m_trimStartAddr);
+        m_trimppt_api->m_trimStartAddr = value;
+        set<unsigned short>("minSram", m_trimppt_api->m_trimStartAddr);
     }
 
 
@@ -2559,17 +2597,17 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::powerUpSelPixels() {
-        powerDownPixels("all");
+        m_trimppt_api->powerDownPixels("all");
         const auto pixels = getPixelsToChange();
         if (pixels.empty()) {
             return;
         }
-        powerUpPixels(utils::positionVectorToList(pixels), true/*program*/);
+        m_trimppt_api->powerUpPixels(utils::positionVectorToList(pixels), true/*program*/);
     }
 
 
     void DsscLadderParameterTrimming::enableInjectionInSelPixels() {
-        enableInjection(false, "all");
+        m_trimppt_api->enableInjection(false, "all");
 
         const auto selStr = get<string>("pixelsToChange");
         if (selStr.substr(0, 3) == "col") {
@@ -2580,7 +2618,7 @@ USING_KARABO_NAMESPACES
         if (pixels.empty()) {
             return;
         }
-        enableInjection(true, utils::positionVectorToList(pixels));
+        m_trimppt_api->enableInjection(true, utils::positionVectorToList(pixels));
     }
 
 
@@ -2589,7 +2627,7 @@ USING_KARABO_NAMESPACES
 
         string gainConfigStr = get<string>("gainSelection");
 
-        SuS::CHIPGainConfigurator configurator(this);
+        SuS::CHIPGainConfigurator configurator(m_trimppt_api.get());
         configurator.setGainMode(gainConfigStr);
         configurator.activateGainMode(gainConfigStr);
 
@@ -2598,30 +2636,30 @@ USING_KARABO_NAMESPACES
 
 
     void DsscLadderParameterTrimming::setCoarseGainSettings() {
-        setPixelRegisterValue("all", "FCF_EnCap", get<unsigned int>("gain.fcfEnCap"));
-        setPixelRegisterValue("all", "CSA_FbCap", get<unsigned int>("gain.csaFbCap"));
-        setPixelRegisterValue("all", "CSA_Resistor", get<unsigned int>("gain.csaResistor"));
-        setPixelRegisterValue("all", "QInjEn10fF", get<unsigned int>("gain.csaInjCap"));
-        setPixelRegisterValue("all", "CSA_Cin_200fF", get<bool>("gain.csaInjCap200") ? 1 : 0);
+        m_trimppt_api->setPixelRegisterValue("all", "FCF_EnCap", get<unsigned int>("gain.fcfEnCap"));
+        m_trimppt_api->setPixelRegisterValue("all", "CSA_FbCap", get<unsigned int>("gain.csaFbCap"));
+        m_trimppt_api->setPixelRegisterValue("all", "CSA_Resistor", get<unsigned int>("gain.csaResistor"));
+        m_trimppt_api->setPixelRegisterValue("all", "QInjEn10fF", get<unsigned int>("gain.csaInjCap"));
+        m_trimppt_api->setPixelRegisterValue("all", "CSA_Cin_200fF", get<bool>("gain.csaInjCap200") ? 1 : 0);
 
-        set<unsigned int>("gain.integrationTime", sequencer->getIntegrationTime());
+        set<unsigned int>("gain.integrationTime", m_trimppt_api->sequencer->getIntegrationTime());
 
         string value;
-        if (getPixelRegisters()->signalIsVarious("Control register", "RmpFineTrm", "all")) {
+        if (m_trimppt_api->getPixelRegisters()->signalIsVarious("Control register", "RmpFineTrm", "all")) {
             value = "Various";
         } else {
-            value = to_string(getPixelRegisterValue("0", "RmpFineTrm"));
+            value = to_string(m_trimppt_api->getPixelRegisterValue("0", "RmpFineTrm"));
         }
         set<string>("gain.irampFineTrm", value);
 
-        if (getPixelRegisters()->signalIsVarious("Control register", "RmpDelayCntrl", "all")) {
+        if (m_trimppt_api->getPixelRegisters()->signalIsVarious("Control register", "RmpDelayCntrl", "all")) {
             value = "Various";
         } else {
-            value = to_string(getPixelRegisterValue("0", "RmpDelayCntrl"));
+            value = to_string(m_trimppt_api->getPixelRegisterValue("0", "RmpDelayCntrl"));
         }
         set<string>("gain.pixelDelay", value);
 
-        programPixelRegs();
+        m_trimppt_api->programPixelRegs();
 
         m_calibGenerator.setPixelRegistersChanged();
         set<bool>("pixelCalibrationDataSettingsValid", false);
@@ -2634,8 +2672,8 @@ USING_KARABO_NAMESPACES
         setActiveModule(get<int>("activeModule"));
 
         string injectionModeName = get<string>("injectionMode");
-        auto newMode = getInjectionMode(injectionModeName);
-        if (injectionMode == newMode) {
+        auto newMode = m_trimppt_api->getInjectionMode(injectionModeName);
+        if (m_trimppt_api->injectionMode == newMode) {
             KARABO_LOG_WARN << "InjectionMode already set, nothing to do";
             return;
         }
@@ -2645,7 +2683,7 @@ USING_KARABO_NAMESPACES
             remote().execute(m_pptDeviceId, "setInjectionMode");
         }
 
-        setInjectionMode(newMode);
+        m_trimppt_api->setInjectionMode(newMode);
     }
 
 
@@ -2655,17 +2693,17 @@ USING_KARABO_NAMESPACES
 
         const auto pixels = getPixelsToChange();
         for (auto p : pixels) {
-            uint32_t val = getPixelRegisterValue(std::to_string(p), sigStr);
+            uint32_t val = m_trimppt_api->getPixelRegisterValue(std::to_string(p), sigStr);
             val += value;
-            setPixelRegisterValue(std::to_string(p), sigStr, val);
+            m_trimppt_api->setPixelRegisterValue(std::to_string(p), sigStr, val);
         }
-        programPixelRegs();
+        m_trimppt_api->programPixelRegs();
     }
 
 
     void DsscLadderParameterTrimming::enableMonBusInCols() {
         auto selCols = get<string>("monBusColsSelect");
-        enableMonBusCols(selCols);
+        m_trimppt_api->enableMonBusCols(selCols);
     }
 
 
@@ -2712,9 +2750,9 @@ USING_KARABO_NAMESPACES
         }
 
         if (m_recvMode == RecvMode::MEAN || m_recvMode == RecvMode::RMS) {
-            remote().set<unsigned int>(m_mainProcessorId, "numIterations", m_iterations);
-            remote().set<unsigned short>(m_mainProcessorId, "minSram", m_trimStartAddr);
-            remote().set<unsigned short>(m_mainProcessorId, "maxSram", m_trimEndAddr);
+            remote().set<unsigned int>(m_mainProcessorId, "numIterations", m_trimppt_api->m_iterations);
+            remote().set<unsigned short>(m_mainProcessorId, "minSram", m_trimppt_api->m_trimStartAddr);
+            remote().set<unsigned short>(m_mainProcessorId, "maxSram", m_trimppt_api->m_trimEndAddr);
             remote().execute(m_mainProcessorId, "accumulate");
         }
     }
@@ -2764,7 +2802,7 @@ USING_KARABO_NAMESPACES
             return;
         }
 
-        auto binValues = sweepBurstWaitOffset(measurePixel, paramValues, m_trimStartAddr, m_trimEndAddr);
+        auto binValues = m_trimppt_api->sweepBurstWaitOffset(measurePixel, paramValues, m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr);
         // save data
         const string fileName = get<string>("outputDir") + "/" + utils::getLocalTimeStr() + "_BurstWaitOffset.h5";
         DsscHDF5TrimmingDataWriter dataWriter(fileName);
@@ -2815,10 +2853,10 @@ USING_KARABO_NAMESPACES
         const size_t numSettings = irampSettings.size();
 
         // transpose gain map and fill to single Vector numPixels x numSettings
-        std::vector<double> adcGainMap(numSettings * totalNumPxs, 0.0);
+        std::vector<double> adcGainMap(numSettings * m_trimppt_api->totalNumPxs, 0.0);
         int set = 0;
         for (auto && gainSlopes : pixelADCGainSlopes) {
-            for (int px = 0; px < totalNumPxs; px++) {
+            for (int px = 0; px < m_trimppt_api->totalNumPxs; px++) {
                 const size_t offs = px * numSettings + set;
                 adcGainMap[offs] = gainSlopes[px];
             }
@@ -2855,9 +2893,9 @@ USING_KARABO_NAMESPACES
 
         m_binValues = trimmer.generateSlopeInformationForChipParts();
 
-        showLadderImage(getFinalSlopes());
+        showLadderImage(m_trimppt_api->getFinalSlopes());
 
-        saveDataVector("InjectionSweepSlopes", getFinalSlopes());
+        saveDataVector("InjectionSweepSlopes", m_trimppt_api->getFinalSlopes());
 
         m_currentTrimmer = nullptr;
 
@@ -2929,7 +2967,7 @@ USING_KARABO_NAMESPACES
 
         trimmer.generateBinningInformationForChipParts();
 
-        disableMonBusCols();
+        m_trimppt_api->disableMonBusCols();
         programPixelRegs();
 
         m_currentTrimmer = nullptr;
@@ -2991,7 +3029,7 @@ USING_KARABO_NAMESPACES
 
         if (ok) {
             const std::string fileName = outputDir + "/CalibratedConfig_" + utils::stringReplace(get<string>("gainSelection"), '/', '_') + ".conf";
-            storeFullConfigFile(fileName, true);
+            m_trimppt_api->storeFullConfigFile(fileName, true);
 
             KARABO_LOG_INFO << "Calibrated configuration saved to:\n-->" << fileName;
 
@@ -3018,7 +3056,7 @@ USING_KARABO_NAMESPACES
 
         initTrimming();
 
-        KARABO_LOG_INFO << "Start GainTrimming in Injection Mode " << getInjectionModeName(injectionMode);
+        KARABO_LOG_INFO << "Start GainTrimming in Injection Mode " << m_trimppt_api->getInjectionModeName(m_trimppt_api->injectionMode);
 
         bool ok;
         auto trimmer = getNewChipTrimmer(ok);
@@ -3042,7 +3080,7 @@ USING_KARABO_NAMESPACES
         m_currentTrimmer = nullptr;
 
         const std::string fileName = get<string>("outputDir") + "/" + utils::getLocalTimeStr() + "_GainTrimmedConfig.conf";
-        storeFullConfigFile(fileName, true);
+        m_trimppt_api->storeFullConfigFile(fileName, true);
 
         KARABO_LOG_INFO << "Gain trimming done";
     }
@@ -3051,8 +3089,8 @@ USING_KARABO_NAMESPACES
     void DsscLadderParameterTrimming::saveGainTrimmingOutputs() {
         string fileName = get<string>("outputDir") + "/GainTrimmingResults.h5";
 
-        const auto finalSlopes = getFinalSlopes();
-        const auto irampSettings = utils::convertVectorType<uint32_t, double>(getPixelRegisters()->getSignalValues("Control register", "all", "RmpFineTrm"));
+        const auto finalSlopes = m_trimppt_api->getFinalSlopes();
+        const auto irampSettings = utils::convertVectorType<uint32_t, double>(m_trimppt_api->getPixelRegisters()->getSignalValues("Control register", "all", "RmpFineTrm"));
         // display one dimensional vector as 2 dimensional image
         DsscHDF5TrimmingDataWriter dataWriter(fileName);
         dataWriter.setMeasurementName("LadderTrimming");
@@ -3099,7 +3137,7 @@ USING_KARABO_NAMESPACES
             return;
         }
 
-        SuS::CHIPGainConfigurator configurator(this);
+        SuS::CHIPGainConfigurator configurator(m_trimppt_api.get());
         configurator.loadGainConfiguration("RmpFineTrm", fileName, false);
 
         updateModuleInfo();
@@ -3151,7 +3189,7 @@ USING_KARABO_NAMESPACES
 
 
     bool DsscLadderParameterTrimming::matrixSRAMTest() {
-        // disable contiunous operation
+        // disable continuous operation
         runContinuousMode(false);
 
         int errCnt = 0;
@@ -3220,7 +3258,7 @@ USING_KARABO_NAMESPACES
                                                                         get<unsigned int>("moduleInfo.moduleNr"),
                                                                         std::stoul(get<string>("moduleInfo.iobSerial"), 0, 16));
 
-        int errCnt_thisPattern = saveSramTestResult(testPath, moduleInfo, testpattern);
+        int errCnt_thisPattern = m_trimppt_api->saveSramTestResult(testPath, moduleInfo, testpattern);
         errCnt += errCnt_thisPattern;
 
         bool ok = (errCnt_thisPattern == 0);
@@ -3231,4 +3269,5 @@ USING_KARABO_NAMESPACES
         return ok;
     }
 
-} // namespace karabo
+
+}// namespace karabo

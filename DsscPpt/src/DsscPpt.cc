@@ -9,6 +9,7 @@
  */
 #include <boost/filesystem.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
+#include <chrono>
 
 #include "DsscPpt.hh"
 #include "DsscPptRegsInit.hh"
@@ -28,7 +29,6 @@ using namespace karabo::net;
 using namespace karabo::xms;
 using namespace karabo::core;
 
-
 // cwd is karabo/var/data/
 #define DEFAULTCONF "ConfigFiles/session.conf"
 
@@ -46,7 +46,7 @@ using namespace karabo::core;
 
 #define DEVICE_ERROR(messsage)           \
         KARABO_LOG_ERROR << messsage;    \
-        set<string>("status",messsage);  \
+        set<string>("status", messsage);  \
         this->updateState(State::ERROR);
 
 namespace karabo {
@@ -134,6 +134,13 @@ namespace karabo {
                 .tags("FullConfig")
                 .assignmentOptional().defaultValue(INITIALCONF).reconfigurable()
                 // do not limit states
+                .commit();
+        
+        VECTOR_CHAR_ELEMENT(expected).key("fullConfigByteArray")
+                .description("Byte Array of Full Config File")
+                .displayedName("Full Config File encoded")                
+                .tags("FullConfig")
+                .assignmentOptional().defaultValue(std::vector<char>{})
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -350,16 +357,35 @@ namespace karabo {
                 .key("startAcquisition").displayedName("Start Acquisition").description("Enable continuous data sending")
                 .allowedStates(State::STARTED)
                 .commit();
-
+        
         SLOT_ELEMENT(expected)
                 .key("startBurstAcquisition").displayedName("Start Burst Acquisition").description("Send burst of trains")
                 .allowedStates(State::ON)
+                .commit();
+        
+        NODE_ELEMENT(expected)
+                .key("burstData")
+                .displayedName("burstData")
+                .description("Burst measurement data")
+                .commit();
+
+        UINT64_ELEMENT(expected).key("burstData.startTrainId")
+                .displayedName("startTrainId")
+                .description("start train of burst measurement")
+                .assignmentOptional().defaultValue(0).reconfigurable()
+                .commit();
+                
+        UINT64_ELEMENT(expected).key("burstData.endTrainId")
+                .displayedName("endTrainId")
+                .description("end train of burst measurement")
+                .assignmentOptional().defaultValue(0).reconfigurable()
                 .commit();
 
         UINT32_ELEMENT(expected).key("numBurstTrains")
                 .displayedName("Number of Trains")
                 .description("Number of trains in the burst")
                 .assignmentOptional().defaultValue(10).reconfigurable()
+                .minInc(1)
                 .commit();
 
         STRING_ELEMENT(expected).key("selRegName")
@@ -986,9 +1012,11 @@ namespace karabo {
 
     DsscPpt::DsscPpt(const karabo::util::Hash& config)
         : Device<>(config),
-        m_keepAcquisition(false), m_keepPolling(false),
-        m_pollThread(), m_acquisitionThread(),
+        m_keepAcquisition(false), m_keepPolling(false), m_burstAcquisition(false),
+        m_pollThread(), 
         m_epcTag("epcParam"), m_dsscConfigtoSchema() {
+        
+        EventLoop::addThread(16);
 
         KARABO_INITIAL_FUNCTION(initialize);
 
@@ -1094,20 +1122,18 @@ namespace karabo {
         this->signalEndOfStream("daqOutput");
         const string defaultConfigPath = DEFAULTCONF;
         m_ppt->storeFullConfigFile(defaultConfigPath);
-
+        
+        stop();
         
         if (m_pollThread && m_pollThread->joinable()) {
             m_keepPolling = false;
             m_pollThread->join();
         }
-
-        if (m_acquisitionThread && m_acquisitionThread->joinable()) {
-            m_acquisitionThread->join();
-        }
-       
+      
     }
     
     DsscPpt::~DsscPpt() {
+        EventLoop::removeThread(16);
     }
 
 
@@ -1119,6 +1145,8 @@ namespace karabo {
             DEVICE_ERROR("FullConfigFile invalid");
             return;
         }
+        
+        updateFullConfigByteVector(get<string>("fullConfigFileName"));
 
         {        
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -1223,13 +1251,15 @@ namespace karabo {
             utils::split(data.get<string>(moduleSet + ".signalNames"), ';', signalNames, 0);
 
             for (auto && signalName : signalNames) {
-                const auto signalsData = data.get<util::NDArray>(moduleSet + "." + signalName);
+                //const auto signalsData = data.get<util::NDArray>(moduleSet + "." + signalName);
+                const vector<uint32_t> signalsData = data.get<vector<uint32_t> >(moduleSet + "." + signalName);
                 size_t data_size = signalsData.size();
 
-                auto signalValues = signalsData.getData<unsigned int>();
+                //auto signalValues = signalsData.getData<unsigned int>();
 
                 if (data_size == 1) {
-                    currentReg->setSignalValue(moduleSet, "all", signalName, signalValues[0]);
+                    //currentReg->setSignalValue(moduleSet, "all", signalName, signalValues[0]);
+                    currentReg->setSignalValue(moduleSet, "all", signalName, signalsData[0]);
                 } else {
                     if (data_size != modules.size()) {
                         KARABO_LOG_ERROR << "ERROR: Number of signal values does not fit to number of modules: " << data_size << "/" << modules.size();
@@ -1239,7 +1269,8 @@ namespace karabo {
                     programDefault = false;
 
                     for (size_t idx = 0; idx < data_size; idx++) {
-                        currentReg->setSignalValue(moduleSet, modules[idx], signalName, signalValues[idx]);
+                        //currentReg->setSignalValue(moduleSet, modules[idx], signalName, signalValues[idx]);
+                        currentReg->setSignalValue(moduleSet, modules[idx], signalName, signalsData[idx]);
                     }
                 }
             }
@@ -1572,11 +1603,11 @@ namespace karabo {
     }
 
 
-    void DsscPpt::idleStateOnEntry() {
+    /*void DsscPpt::idleStateOnEntry() {
         if (m_ppt->isOpen()) {
             startPolling();
         }
-    }
+    }//*/
 
 
     void DsscPpt::acquisitionStateOnEntry() {
@@ -1696,49 +1727,108 @@ namespace karabo {
     void DsscPpt::startAcquisition() {
         runAcquisition(true);
     }
+    
+    void DsscPpt::burstAcquisitionPolling() {
+        
+        try {
+            KARABO_LOG_INFO << "Hardware polling started";
+       
+          unsigned int num_trains = get<unsigned int>("numBurstTrains");
+          assert(num_trains);
+
+          //const auto currentState = getState();
+          
+          start();
+          
+          //updateState(State::ACQUIRING);
+
+          uint64 last_trainId;       
+          uint64 first_burstTrainId;
+          {
+            //boost::mutex::scoped_lock lock(m_accessToPptMutex);
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            first_burstTrainId = m_ppt->getCurrentTrainID();
+          }
+        
+          set<uint64>("burstData.startTrainId", 0);
+          set<uint64>("burstData.endTrainId", 0);
+          bool first_train = true;
+        
+          static unsigned int wait_time = 30000;
+
+          uint64 current_trainId;        
+          while (m_burstAcquisition.load()) {
+              
+              {
+                  //boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                  DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                  current_trainId = m_ppt->getCurrentTrainID();
+              }
+
+              if(first_train){
+                  if(current_trainId != first_burstTrainId){
+                    uint64 elapsedTrains = current_trainId - first_burstTrainId;
+                    if( (elapsedTrains > 0) && elapsedTrains < uint64(3) ){
+                        last_trainId = current_trainId;
+                        first_train = false;
+                    }
+                    first_burstTrainId = current_trainId;
+                  }
+                  usleep(wait_time);
+                  continue;
+              }
 
 
-    void DsscPpt::startBurstAcquisition() {
-        unsigned int num_trains = get<unsigned int>("numBurstTrains");
-        if (num_trains == 0) return;
-
-        const auto currentState = getState();
-        updateState(State::ACQUIRING);
-
-        m_lastTrainIdPolling = true;
-
-        start();
-
-        unsigned int last_trainId = m_ppt->getCurrentTrainID();
-        unsigned int sent_trains = 1;
-
-        while (m_lastTrainIdPolling) {
-            unsigned int current_trainId = m_ppt->getCurrentTrainID();
-            if (last_trainId != current_trainId) {
-                //
-                last_trainId = current_trainId;
-                sent_trains++;
-                if (sent_trains > num_trains) {
-                    stop();
-                    break;
-                }
-            }
-            usleep(20000);
+              if(current_trainId > last_trainId){
+                  uint64 train_diff = current_trainId - first_burstTrainId;
+                  if(train_diff >= num_trains){
+                      std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
+                      m_burstAcquisition.store(false); 
+                      set<uint64>("burstData.startTrainId", first_burstTrainId);
+                      set<uint64>("burstData.endTrainId", current_trainId);
+                      stop();
+                  }else{
+                      last_trainId = current_trainId;
+                      if(train_diff > 10){
+                          wait_time = 250000;// to prevent often hw polling
+                      }else{
+                          wait_time = 30000;
+                      }
+                  }
+              }else{
+                 if(current_trainId < first_burstTrainId){
+                   std::cout << "current_trainId is less than first_burstTrainId: " << current_trainId << "  " << first_burstTrainId << std::endl; 
+                 }
+              }
+              usleep(wait_time);
+          }
+        
+          set<uint64>("burstData.startTrainId", first_burstTrainId);
+          set<uint64>("burstData.endTrainId", current_trainId);
+          
+          //updateState(currentState);
+          //updateState(State::ON);
+         
+        } catch (const Exception& e) {
+            KARABO_LOG_ERROR << e;
+        } catch (...) {
+            KARABO_LOG_ERROR << "Unknown exception was raised in poll thread";
         }
-        m_lastTrainIdPolling = false;
-        updateState(currentState);
-
-
     }
 
 
+    void DsscPpt::startBurstAcquisition() {
+       
+        m_burstAcquisition.store(true);
+        EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::burstAcquisitionPolling, this));       
+   }
+    
     void DsscPpt::stopAcquisition() {
-        if (m_lastTrainIdPolling) {
-            m_lastTrainIdPolling = false;
-            return;
-        }
+        
+        m_burstAcquisition.store(false);
+
         runAcquisition(false);
-        if (m_ppt->isXFELMode()) {
+        if (m_ppt->isXFELMode()){
             runContMode(false);
         }
     }
@@ -1867,6 +1957,7 @@ namespace karabo {
         KARABO_LOG_INFO << "Load Full Config File : " << fileName;
 
         {
+            
             ContModeKeeper keeper(this);
             m_ppt->loadFullConfig(fileName, false);
             string defaultConfigPath = DEFAULTCONF;
@@ -1894,6 +1985,11 @@ namespace karabo {
 
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
+    }
+    
+    void DsscPpt::updateFullConfigByteVector(const std::string & fileName){
+        std::vector<char> value(fileName.begin(), fileName.end());     
+        set<std::vector<char>>("fullConfigByteArray", value);
     }
 
 
@@ -2025,8 +2121,23 @@ namespace karabo {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
             m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
+            
+            std::vector<uint32_t> initial_TempADCvals{4};
+            for(uint i=0; i<m_ppt->numAvailableIOBs(); i++){
+                m_ppt->setActiveModule(m_ppt->activeIOBs.at(i));
+                initial_TempADCvals[i] = m_ppt->jtagRegisters->getSignalValue("Temperature ADC Controller","all","DSTAT");
+                m_ppt->jtagRegisters->setSignalValue("Temperature ADC Controller","all","DSTAT",2048);
+                m_ppt->programJtagSingle("Temperature ADC Controller");
+            }
 
             int rc = m_ppt->initSystem();
+            
+            for(uint i=0; i<m_ppt->numAvailableIOBs(); i++){
+                m_ppt->setActiveModule(m_ppt->activeIOBs.at(i));
+                m_ppt->jtagRegisters->setSignalValue("Temperature ADC Controller","all","DSTAT",initial_TempADCvals[i]);
+                m_ppt->programJtagSingle("Temperature ADC Controller");
+            }
+            
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
                 printPPTErrorMessages();
             }
@@ -2130,9 +2241,11 @@ namespace karabo {
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
-            m_ppt->setASICReset(true); // ALSO CHECKS IF TEST SYSTEM IN mANNHEIM
+            //m_ppt->setASICReset(true); this is wrong // ALSO CHECKS IF TEST SYSTEM IN mANNHEIM
+            m_ppt->iobReset(true);
             boost::this_thread::sleep(boost::posix_time::seconds(1));
-            m_ppt->setASICReset(false);
+            m_ppt->iobReset(false);
+            //m_ppt->setASICReset(false); this is wrong
         }
     }
 
@@ -2143,9 +2256,11 @@ namespace karabo {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
             m_ppt->setASICReset_TestSystem(true); // required in test system important to minimize current consumption
-            m_ppt->iobReset(true);
+            //m_ppt->iobReset(true); // ???????????????????????? Nonsense. wrong
+            m_ppt->setASICReset(true);
             boost::this_thread::sleep(boost::posix_time::seconds(1));
-            m_ppt->iobReset(false);
+            m_ppt->setASICReset(false);
+            //m_ppt->iobReset(false); wrong.
         }
     }
 
@@ -3392,7 +3507,6 @@ namespace karabo {
             m_ppt->enableXFELControl(true);
         }
 
-        if (!m_accessToPptMutex.try_lock()) KARABO_LOG_INFO << "#### mutrex still locked";
         getEPCParamsIntoGui("Multi_purpose_Register");
         updateGuiPLLParameters();
     }
@@ -3987,6 +4101,7 @@ namespace karabo {
                     boost::filesystem::path myfile(fullConfigFileName);
                     if (boost::filesystem::exists(myfile)) {
                         readFullConfigFile(fullConfigFileName);
+                        updateFullConfigByteVector(fullConfigFileName);
                         setQSFPEthernetConfig();
                     }
                 }
@@ -4186,7 +4301,8 @@ namespace karabo {
         }
         while (m_keepAcquisition) {
             {
-                boost::mutex::scoped_lock lock(m_outMutex);
+                //boost::mutex::scoped_lock lock(m_outMutex);
+                DsscScopedLock lock(&m_accessToPptMutex, __func__);
                 cout << '-';
                 cout.flush();
             }
@@ -4288,17 +4404,18 @@ namespace karabo {
         try {
             KARABO_LOG_INFO << "Hardware polling started";
             while (m_keepPolling) {
+                
+                int value;
                 {
-                    boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                    //boost::mutex::scoped_lock lock(m_accessToPptMutex);
+                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
                     m_ppt->readBackEPCRegister("Eth_Output_Data_Rate");
+                    value = m_ppt->readFPGATemperature();                  
+                 }
 
-                    int value = m_ppt->readFPGATemperature();
-                    set<int>("pptTemp", value);
-
-                }
-
-                uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")*128 / 1E6;
+                uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")/(1E6/128.0);
                 set<string>("ethOutputRate", to_string(outputRate) + " MBit/s");
+                set<int>("pptTemp", value);
 
                 boost::this_thread::sleep(boost::posix_time::seconds(5));
             }
@@ -4314,7 +4431,11 @@ namespace karabo {
         KARABO_LOG_INFO << "Program PLL";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            m_ppt->clockPLLSelect(false);
+            if (get<bool>("pptPLL.internalPLL")) {
+                m_ppt->clockPLLSelect(true);
+            } else {
+                m_ppt->clockPLLSelect(false);
+            }
         }
         if (get<bool>("xfelMode")) {
             stopManualMode();
@@ -4399,7 +4520,8 @@ namespace karabo {
 
 
     void DsscPpt::checkQSFPConnected() {
-        boost::mutex::scoped_lock lock(m_accessToPptMutex);
+        //boost::mutex::scoped_lock lock(m_accessToPptMutex);
+        DsscScopedLock lock(&m_accessToPptMutex, __func__);
         set<string>("connectedETHChannels", m_ppt->getConnectedETHChannels());
     }
 
