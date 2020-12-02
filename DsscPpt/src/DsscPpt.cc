@@ -953,24 +953,6 @@ namespace karabo {
         //Defined in DsscPptRegsInit.hh
         INIT_ETH_ELEMENTS
 
-        PATH_ELEMENT(expected).key("QSFPnetworkConfigFilePath")
-                .description("Name of the QSFP network configuration file")
-                .displayedName("QSFP network ConfigFile Name")
-                .isInputFile()
-                .tags("QSFPConfigPath")
-                .assignmentOptional().defaultValue("~/QSFPnetworkConfig.xml").reconfigurable()
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("LoadQSFPNetConfig").displayedName("Load QSFP Network Configuration")
-                .description("Loading QSFP network configuration to config file")
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("SaveQSFPNetConfig").displayedName("Save QSFP Network Configuration")
-                .description("Saving QSFP network configuration to config file")
-                .commit();
-
         UINT32_ELEMENT(expected)
                 .key("ethThrottleDivider").displayedName("Eth. throttle divider")
                 .description("Ethernet engine throttle divider parameter")
@@ -1109,8 +1091,6 @@ namespace karabo {
         KARABO_SLOT(loadLastFileETHConfig);
         KARABO_SLOT(checkQSFPConnected);
 
-        KARABO_SLOT(LoadQSFPNetConfig);
-        KARABO_SLOT(SaveQSFPNetConfig);
         KARABO_SLOT(setThrottleDivider);
 
         KARABO_SLOT(startSingleCycle);
@@ -1896,18 +1876,6 @@ namespace karabo {
 
             cout << "Test Environment is set to Hamburg" << endl;
             cout << "QSFP and transceiver have to be defined according to setup" << endl;
-            /*
-                    if(get<string>("qsfp.chan1.recv.macaddr") == "00:1b:21:55:1f:c8" ||
-                       get<string>("qsfp.chan1.recv.macaddr") == "0:1b:21:55:1f:c8"     )
-                    {
-                      cout << "Test Environment is set to Hamburg 2" << endl;
-                      set<string>("qsfp.chan1.recv.macaddr","00:1b:21:55:1f:c9");
-                      set<string>("qsfp.chan2.recv.macaddr","00:1b:21:55:1f:c9");
-                      set<string>("qsfp.chan3.recv.macaddr","00:1b:21:55:1f:c9");
-                      set<string>("qsfp.chan4.recv.macaddr","00:1b:21:55:1f:c9");
-                      KARABO_LOG_WARN << "Set QSFP Receiver MAC to 00:1b:21:55:1f:c9";
-                    }
-             */
         }
 
         updateNumFramesToSend();
@@ -4301,7 +4269,6 @@ namespace karabo {
         }
         while (m_keepAcquisition) {
             {
-                //boost::mutex::scoped_lock lock(m_outMutex);
                 DsscScopedLock lock(&m_accessToPptMutex, __func__);
                 cout << '-';
                 cout.flush();
@@ -4556,29 +4523,6 @@ namespace karabo {
 
 
     void DsscPpt::test1() {
-    }
-
-
-    void DsscPpt::LoadQSFPNetConfig() {
-        //
-        Hash hsh;
-        karabo::io::loadFromFile(hsh, get<string>("QSFPnetworkConfigFilePath"));
-        set<Hash>("qsfp", hsh);
-
-        setQSFPEthernetConfig();
-        checkQSFPConnected();
-    }
-
-
-    void DsscPpt::SaveQSFPNetConfig() {
-        //
-        Hash thishash = get<Hash>("qsfp");
-        try {
-            karabo::io::saveToFile(thishash, get<string>("QSFPnetworkConfigFilePath"));
-        } catch (exception& e) {
-            KARABO_LOG_ERROR << "Error QSFP network config file";
-            cout << "Exception: " << e.what() << '\n';
-        }
     }
 
 
