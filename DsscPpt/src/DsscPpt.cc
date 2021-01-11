@@ -83,7 +83,7 @@ namespace karabo {
 
         SLOT_ELEMENT(expected)
                 .key("open").displayedName("Connect PPT").description("Open connection to PPT")
-                .allowedStates(State::UNKNOWN, util::State::ERROR)
+                .allowedStates(State::UNKNOWN)
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -1120,7 +1120,16 @@ namespace karabo {
     void DsscPpt::initialize() {
         KARABO_ON_DATA("registerConfigInput", receiveRegisterConfiguration);
 
-        m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(new SuS::PPTFullConfig(get<string>("fullConfigFileName"))));
+        std::cout << "//////////////////// Initializing ////////////////////" << std::endl;
+        SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(get<string>("fullConfigFileName");
+        std::cout << "//////////////////// After creating full config ////////////////////" << std::endl;
+        try{
+            
+            m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(new SuS::PPTFullConfig(get<string>("fullConfigFileName"))));
+        }catch(...){
+            KARABO_LOG_ERROR << "Failed to init PPT";
+            //return;
+        }
         if (!m_ppt->fullChipConfig->isGood()) {
             DEVICE_ERROR("FullConfigFile invalid");
             return;
@@ -1634,7 +1643,8 @@ namespace karabo {
             KARABO_LOG_INFO << "Just opened PPT: " << rc;
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
                 close();
-                DEVICE_ERROR("Failed to connect to PPT: " + m_ppt->errorString);
+                this->updateState(State::UNKNOWN);
+                KARABO_LOG_ERROR << "Failed to connect to PPT: " + m_ppt->errorString;
                 //throw KARABO_NETWORK_EXCEPTION("Failed to connect to PPT: " + m_ppt->errorString);
             }
         }
