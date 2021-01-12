@@ -1121,10 +1121,9 @@ namespace karabo {
         KARABO_ON_DATA("registerConfigInput", receiveRegisterConfiguration);
 
         std::cout << "//////////////////// Initializing ////////////////////" << std::endl;
-        SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(get<string>("fullConfigFileName");
+        SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(get<string>("fullConfigFileName"));
         std::cout << "//////////////////// After creating full config ////////////////////" << std::endl;
-        try{
-            
+        try{            
             m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(new SuS::PPTFullConfig(get<string>("fullConfigFileName"))));
         }catch(...){
             KARABO_LOG_ERROR << "Failed to init PPT";
