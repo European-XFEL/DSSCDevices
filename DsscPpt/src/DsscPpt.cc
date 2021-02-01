@@ -995,7 +995,8 @@ namespace karabo {
     DsscPpt::DsscPpt(const karabo::util::Hash& config)
         : Device<>(config),
         m_keepAcquisition(false), m_keepPolling(false), m_burstAcquisition(false),
-        m_pollThread(), 
+        m_pollThread(),
+        m_ppt(),
         m_epcTag("epcParam"), m_dsscConfigtoSchema() {
         
         EventLoop::addThread(16);
@@ -1116,22 +1117,17 @@ namespace karabo {
         EventLoop::removeThread(16);
     }
 
-
     void DsscPpt::initialize() {
         KARABO_ON_DATA("registerConfigInput", receiveRegisterConfiguration);
+        SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(get<string>("fullConfigFileName"));     
 
-        std::cout << "//////////////////// Initializing ////////////////////" << std::endl;
-        SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(get<string>("fullConfigFileName"));
-        std::cout << "//////////////////// After creating full config ////////////////////" << std::endl;
-        try{            
-            m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(new SuS::PPTFullConfig(get<string>("fullConfigFileName"))));
-        }catch(...){
-            KARABO_LOG_ERROR << "Failed to init PPT";
-            //return;
-        }
-        if (!m_ppt->fullChipConfig->isGood()) {
-            DEVICE_ERROR("FullConfigFile invalid");
-            return;
+        if(fullconfig->isGood()){
+                  m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(fullconfig));
+        }else{
+                delete fullconfig;
+                fullconfig = nullptr;
+                DEVICE_ERROR("FullConfigFile invalid");
+                return;
         }
         
         updateFullConfigByteVector(get<string>("fullConfigFileName"));
@@ -1468,7 +1464,8 @@ namespace karabo {
     }
 
 
-    void DsscPpt::generateConfigRegElements(Schema &schema, SuS::ConfigReg * reg, string regName, string tagName, string moduleStr) {// Build schema using the Config Reg Structure
+    void DsscPpt::generateConfigRegElements(Schema &schema, SuS::ConfigReg * reg, string regName, string tagName, string moduleStr) {
+        // Build schema using the Config Reg Structure
 
         vector<string> tokens;
         boost::split(tokens, regName, boost::is_any_of("."));
@@ -1678,6 +1675,7 @@ namespace karabo {
         set<bool>("continuous_mode", run);
         {
             KARABO_LOG_INFO << "runContMode mutex";
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->runContinuousMode(run);
         }
     }
@@ -1689,6 +1687,7 @@ namespace karabo {
         set<bool>("disable_sending", false);
         {
             KARABO_LOG_INFO << "runAcquisition mutex";
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->disableSending(false);
         }
 
@@ -2730,7 +2729,7 @@ namespace karabo {
     bool DsscPpt::readbackConfigIOB(int iobNumber) {
         CHECK_IOB_B(iobNumber)
 
-                int rc;
+        int rc;
 
         KARABO_LOG_INFO << "Readback IOB " + toString(iobNumber) + " Config Registers";
         m_ppt->setActiveModule(iobNumber);
@@ -4100,7 +4099,7 @@ namespace karabo {
                     KARABO_LOG_INFO << "Set Init distance";
                     m_ppt->setInitDist(filtered.getAs<unsigned int>(path));
                 } else if (path.compare("fastInitJTAGSpeed") == 0) {
-                    KARABO_LOG_INFO << "Set Init distance";
+                    KARABO_LOG_INFO << "Fast Init ConfigSpeed";
                     m_ppt->setFastInitConfigSpeed(filtered.getAs<unsigned int>(path));
                 }
             }
