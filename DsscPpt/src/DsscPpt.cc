@@ -1125,7 +1125,6 @@ namespace karabo {
                   m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(fullconfig));
         }else{
                 delete fullconfig;
-                fullconfig = nullptr;
                 DEVICE_ERROR("FullConfigFile invalid");
                 return;
         }
@@ -1640,7 +1639,9 @@ namespace karabo {
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
                 close();
                 this->updateState(State::UNKNOWN);
-                KARABO_LOG_ERROR << "Failed to connect to PPT: " + m_ppt->errorString;
+                std::string message = "Failed to connect to PPT: " + m_ppt->errorString;
+                set<string>("status", message);
+                KARABO_LOG_ERROR << message;
                 //throw KARABO_NETWORK_EXCEPTION("Failed to connect to PPT: " + m_ppt->errorString);
             }
         }
@@ -1659,12 +1660,15 @@ namespace karabo {
             updateTestEnvironment();
 
             checkQSFPConnected();
+            
+            set<string>("status", "PPT is connected");
 
-        } else {
+        } 
+        /*else {
             this->updateState(State::ERROR);
             KARABO_LOG_ERROR << "Open failure -- attempt to open a connection to PPT failed";
             //throw KARABO_NETWORK_EXCEPTION("Open failure -- attempt to open a connection to PPT failed");
-        }
+        }*/
     }
 
 
