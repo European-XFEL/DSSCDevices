@@ -1,2 +1,2 @@
 cmake, 3.14.3
-DsscDependencies, feat/desydev
+DsscDependencies, 1.4-2.10.0
