@@ -49,7 +49,8 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>../DsscDependencies</Elem>
+    <Elem>../../include</Elem>
+    <Elem>../DsscDependencies/DsscDependencies</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -84,7 +85,6 @@
         <linkerTool>
           <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT}</output>
           <linkerAddLib>
-            <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
             <pElem>${KARABO}/lib</pElem>
@@ -245,7 +245,6 @@
         <linkerTool>
           <output>${CND_DISTDIR}/${CND_CONF}/${CND_PLATFORM}/libdsscDevices.${CND_DLIB_EXT}</output>
           <linkerAddLib>
-            <pElem>${KARABO}/extern/dssc_minuit/lib</pElem>
             <pElem>${KARABO}/extern/lib/dssc</pElem>
             <pElem>${KARABO}/extern/lib</pElem>
             <pElem>${KARABO}/lib</pElem>
@@ -266,7 +265,6 @@
             <linkerOptionItem>-lDsscHdf5</linkerOptionItem>
             <linkerOptionItem>-lPPT</linkerOptionItem>
             <linkerOptionItem>-lPPTDataReceiver</linkerOptionItem>
-            <linkerOptionItem>-lConfigReg</linkerOptionItem>
           </linkerLibItems>
           <commandLine>-lgsl -lgslcblas -fopenmp</commandLine>
         </linkerTool>
