@@ -199,6 +199,9 @@ private:
     bool calibrateCurrCompDACForReticleTest(bool log = true, int singlePx = -1, int startSetting = 0, int defaultValue = 3) override {
         return true;
     }
+    bool calibrateCurrCompDAC(bool log=true, int singlePx=-1, int startSetting=0, int defaultValue = 15) override {
+        calibrateCurrCompDAC(log, singlePx, startSetting, defaultValue);
+    }
   
     karabo::DsscLadderParameterTrimming* m_karaboDevice;    
 
