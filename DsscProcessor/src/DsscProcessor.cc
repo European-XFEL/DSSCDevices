@@ -406,6 +406,12 @@ namespace karabo {
                 .displayedName("Ladder Image Output")
                 .dataSchema(ladderSchema)
                 .commit();
+        
+        BOOL_ELEMENT(expected).key("imagedataReshape")
+                .displayedName("Reshape image data")
+                .description("Reshape image data for Calibration pipeline")
+                .assignmentOptional().defaultValue(true).reconfigurable()
+                .commit();
     }
 
 
@@ -501,6 +507,9 @@ namespace karabo {
                 }
                 else if (path.compare("histoGen.updateHistoStride") == 0) {
                     m_updateHistoStride = incomingReconfiguration.getAs<uint32_t>(path);
+                }
+                else if (path.compare("imagedataReshape") == 0){
+                    m_imagedataReshape = incomingReconfiguration.getAs<bool>(path);
                 }
             }
         }
@@ -646,63 +655,67 @@ namespace karabo {
        auto dataPtrR = reshapedImageData.getData<uint16_t>();
        const unsigned int singleImShape = imageDataShape[0] * imageDataShape[1];
 
-       #pragma omp parallel for       
-       for (int cell = 0; cell != imageDataShape[2]; cell++) {
-           int k = 0;
-           for(int i = 0; i != imageDataShape[0]; ++i) {
-               for(int j = 0; j != imageDataShape[1]; ++j) {
-                     dataPtrR[singleImShape*cell + imageDataShape[0]*j + i] = dataPtr[(k*imageDataShape[2])+cell];
-                     k++;
-                }
-           }
-        }
-        
-        const_cast<util::Hash*>(&data)->set("image.data", reshapedImageData);
-        
-
-
-        if (m_trainMonitorStart) {
-            m_startTrainId = data.get<util::NDArray>("image.trainId").getData<unsigned long long>()[0];
-            m_trainMonitorStart = false;
-        }
-        m_endTrainId = data.get<util::NDArray>("image.trainId").getData<unsigned long long>()[0];
-        m_receivedTrains++;
-
-        if (m_preview) updatePreviewData(data);
-
-        if (m_showPixelCells) displayPixelCells(data);
-
-        if (m_run == false) {
-            changeDeviceState(State::STOPPED);
-            return; // don't send anything during idle+
-        }
-        changeDeviceState(State::ACQUIRING);
-
-        // resend until stopped from remote
-        if (get<bool>("measureMean") || get<bool>("measureRMS")) {
-            if (m_numIterations == m_iterationCnt) {
-                sendMeanValues();
-                KARABO_LOG_INFO << "RESENT DATA ";
-                return;
+       if(m_imagedataReshape)
+       {
+        #pragma omp parallel for       
+        for (int cell = 0; cell != imageDataShape[2]; cell++) {
+            int k = 0;
+            for(int i = 0; i != imageDataShape[0]; ++i) {
+                for(int j = 0; j != imageDataShape[1]; ++j) {
+                      dataPtrR[singleImShape*cell + imageDataShape[0]*j + i] = dataPtr[(k*imageDataShape[2])+cell];
+                      k++;
+                 }
             }
         }
+       }
+        
+       const_cast<util::Hash*>(&data)->set("image.data", reshapedImageData);
+        
 
-        if (data.has("imageFormat")) {
-            string format = data.get<string>("imageFormat");
-            m_inputFormat = utils::DsscTrainData::getFormat(format);
-            set<string>("inputDataFormat", format);
 
-            processTrain(data.get<util::NDArray>("image.data"),
-                         data.get<util::NDArray>("image.cellId"),
-                         data.get<util::NDArray>("image.trainId"));
-        } else {
-            m_inputFormat = utils::DsscTrainData::DATAFORMAT::IMAGE;
-            set<string>("inputDataFormat", "imagewise");
+       if (m_trainMonitorStart) {
+           m_startTrainId = data.get<util::NDArray>("image.trainId").getData<unsigned long long>()[0];
+           m_trainMonitorStart = false;
+       }
+       
+       m_endTrainId = data.get<util::NDArray>("image.trainId").getData<unsigned long long>()[0];
+       m_receivedTrains++;
 
-            processTrain(data.get<util::NDArray>("image.data"),
-                         data.get<util::NDArray>("image.cellId"),
-                         data.get<util::NDArray>("image.trainId"));
-        }
+       if (m_preview) updatePreviewData(data);
+
+       if (m_showPixelCells) displayPixelCells(data);
+
+       if (m_run == false) {
+            changeDeviceState(State::STOPPED);
+            return; // don't send anything during idle+
+       }
+       changeDeviceState(State::ACQUIRING);
+
+        // resend until stopped from remote
+       if (get<bool>("measureMean") || get<bool>("measureRMS")) {
+           if (m_numIterations == m_iterationCnt) {
+               sendMeanValues();
+               KARABO_LOG_INFO << "RESENT DATA ";
+               return;
+           }
+       }
+
+       if (data.has("imageFormat")) {
+           string format = data.get<string>("imageFormat");
+           m_inputFormat = utils::DsscTrainData::getFormat(format);
+           set<string>("inputDataFormat", format);
+
+           processTrain(data.get<util::NDArray>("image.data"),
+                        data.get<util::NDArray>("image.cellId"),
+                        data.get<util::NDArray>("image.trainId"));
+       } else {
+           m_inputFormat = utils::DsscTrainData::DATAFORMAT::IMAGE;
+           set<string>("inputDataFormat", "imagewise");
+
+           processTrain(data.get<util::NDArray>("image.data"),
+                        data.get<util::NDArray>("image.cellId"),
+                        data.get<util::NDArray>("image.trainId"));
+       }
 
     }
 

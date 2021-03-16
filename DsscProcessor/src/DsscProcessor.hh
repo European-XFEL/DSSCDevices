@@ -183,6 +183,8 @@ namespace karabo {
         std::vector<uint16_t> m_previewImageData;
         
         unsigned int m_updateHistoStride;
+        
+        bool m_imagedataReshape = false;
     };
 }
 
