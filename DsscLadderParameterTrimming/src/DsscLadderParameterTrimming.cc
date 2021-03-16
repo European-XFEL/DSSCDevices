@@ -505,7 +505,12 @@ namespace karabo{
         SLOT_ELEMENT(expected)
                 .key("runGainTrimming").displayedName("Run Gain Trimming")
                 .description("Starts a trimming run of the iramp current setting: valid parameters: Min Sram,Max Sram,Iterations, targetSlope, maxDiff")
-                .commit();
+                .commit();        
+        
+        SLOT_ELEMENT(expected)
+                .key("calibrateCurrCompDAC").displayedName("Run curr. compensation DAC trimming")
+                .description("Run Current Compensation DAC trimming")
+                .commit();        
 
         UINT32_ELEMENT(expected).key("displayPixel")
                 .displayedName("Display Image Pixel")
@@ -546,6 +551,7 @@ namespace karabo{
                 .key("measureADCGainMap").displayedName("Measure ADC Gain Map")
                 .description("Measure ADC Gain Map for all selected Iramp Settings")
                 .commit();
+         
 
         SLOT_ELEMENT(expected)
                 .key("displayBinValuesOfPixel").displayedName("Display BinValues OfPixel")
@@ -847,6 +853,7 @@ namespace karabo{
         KARABO_SLOT(computeTargetGainADCConfiguration);
         KARABO_SLOT(displayBinValuesOfPixel);
         KARABO_SLOT(generateSramBlacklist);
+        KARABO_SLOT(calibrateCurrCompDAC);
     }
 
 
@@ -2432,7 +2439,7 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::waitJTAGEngineDone() {
+void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         signalEndOfStream("registerConfigOutput");
 
         try {
@@ -2814,7 +2821,7 @@ namespace karabo{
 
         const uint numParams = std::min(paramValues.size(), binValues.size());
         for (uint idx = 0; idx < numParams; idx++) {
-            pixelBurstOffsetData[paramValues[idx]] = binValues[idx];
+            pixelBurstOffsetData[paramValues[idx]] = binValues[idx]; 
         }
 
         util::Hash dataHash;
@@ -3083,6 +3090,10 @@ namespace karabo{
         m_trimppt_api->storeFullConfigFile(fileName, true);
 
         KARABO_LOG_INFO << "Gain trimming done";
+    }
+    
+    void DsscLadderParameterTrimming::calibrateCurrCompDAC() {
+        m_trimppt_api->calibrateCurrCompDAC();
     }
 
 

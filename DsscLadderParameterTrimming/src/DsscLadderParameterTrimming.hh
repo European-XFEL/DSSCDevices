@@ -305,6 +305,7 @@ namespace karabo {
         void test();
         void runPixelDelayTrimming();
         void runGainTrimming();
+        void calibrateCurrCompDAC();
         void measureBurstData();
         void setBaseline();
         void clearBaseline();
