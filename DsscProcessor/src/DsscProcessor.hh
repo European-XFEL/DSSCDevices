@@ -17,6 +17,7 @@
 #include <karabo/karabo.hpp>
 
 #include "DsscTrainDataProcessor.h"
+#include "version.hh"  // provides PACKAGE_VERSION
 
 /**
  * The main Karabo namespace
@@ -27,7 +28,7 @@ namespace karabo {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
-        KARABO_CLASSINFO(DsscProcessor, "DsscProcessor", "2.4")
+        KARABO_CLASSINFO(DsscProcessor, "DsscProcessor", PACKAGE_VERSION)
 
         /**
          * Necessary method as part of the factory/configuration system

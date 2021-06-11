@@ -11,13 +11,14 @@
 #include <karabo/xms/SlotElement.hh>
 #include <karabo/core/Device.hh>
 #include <karabo/core/BaseFsm.hh>
+#include "version.hh"  // provides PACKAGE_VERSION
 namespace karabo {
     namespace dsscrecv {
 
         class DsscRecvFsm : public core::BaseFsm {
         public:
 
-            KARABO_CLASSINFO(DsscRecvFsm, "DsscRecvFsm", "1.0")
+            KARABO_CLASSINFO(DsscRecvFsm, "DsscRecvFsm", PACKAGE_VERSION)
 
             static void expectedParameters(karabo::util::Schema& expected) {
                 using namespace karabo::xms;

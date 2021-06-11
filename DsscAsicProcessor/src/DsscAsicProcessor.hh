@@ -11,6 +11,7 @@
 
 #include <karabo/karabo.hpp>
 #include "DataHisto.h"
+#include "version.hh"  // provides PACKAGE_VERSION
 
 /**
  * The main Karabo namespace
@@ -22,7 +23,7 @@ namespace karabo {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
-        KARABO_CLASSINFO(DsscAsicProcessor, "DsscAsicProcessor", "2.4")
+        KARABO_CLASSINFO(DsscAsicProcessor, "DsscAsicProcessor", PACKAGE_VERSION)
         using DataHistos = std::vector<utils::DataHisto>;
         static const size_t s_NUMPX = 4096;
 
