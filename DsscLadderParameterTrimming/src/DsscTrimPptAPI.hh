@@ -105,6 +105,10 @@ private:
     void resetDataReceiver() override;
     
     bool inContinuousMode() override;
+    
+    void updateStartTrain() override {};
+    
+    void disableSending(bool) override {};
    
     //functions without functionality
     const uint16_t *getTrailerData() override {
