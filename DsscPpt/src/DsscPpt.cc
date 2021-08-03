@@ -136,12 +136,15 @@ namespace karabo {
                 // do not limit states
                 .commit();
         
-        VECTOR_CHAR_ELEMENT(expected).key("fullConfigByteArray")
-                .description("Byte Array of Full Config File")
-                .displayedName("Full Config File encoded")                
+        PATH_ELEMENT(expected).key("saveConfigFileToName")
+                .description("Full Config save under")
+                .displayedName("Full Config save under")
+                .isInputFile()
                 .tags("FullConfig")
-                .assignmentOptional().defaultValue(std::vector<char>{})
+                .assignmentOptional().defaultValue(INITIALCONF).reconfigurable()
+                // do not limit states
                 .commit();
+                       
 
         SLOT_ELEMENT(expected)
                 .key("updateGuiRegisters").displayedName("Update GUI Registers").description("Releoad all Reigsters")
@@ -151,9 +154,14 @@ namespace karabo {
 
         SLOT_ELEMENT(expected)
                 .key("storeFullConfigFile").displayedName("Save Full Config").description("Store full config file")
-                .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
                 .commit();
 
+        SLOT_ELEMENT(expected)
+                .key("storeFullConfigUnder").displayedName("Full Config save to").description("Save full config to path")
+                .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
+                .commit();
+        
         SLOT_ELEMENT(expected)
                 .key("storeFullConfigHDF5").displayedName("Save HDF5 Config").description("Store Configuration as HDF5")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
@@ -1092,6 +1100,7 @@ namespace karabo {
         KARABO_SLOT(saveConfigIOB);
         KARABO_SLOT(saveConfiguration);
         KARABO_SLOT(storeFullConfigFile);
+        KARABO_SLOT(storeFullConfigUnder);
         KARABO_SLOT(storeFullConfigHDF5);
         KARABO_SLOT(updateFullConfigHash);
         KARABO_SLOT(sendConfigHashOut);
@@ -1146,7 +1155,6 @@ namespace karabo {
             return;
         }
         
-        updateFullConfigByteVector(get<string>("fullConfigFileName"));
 
         {        
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -1987,10 +1995,6 @@ namespace karabo {
         getCoarseGainParamsIntoGui();
     }
     
-    void DsscPpt::updateFullConfigByteVector(const std::string & fileName){
-        std::vector<char> value(fileName.begin(), fileName.end());     
-        set<std::vector<char>>("fullConfigByteArray", value);
-    }
 
 
     void DsscPpt::storeFullConfigFile() {
@@ -2001,6 +2005,17 @@ namespace karabo {
             m_ppt->storeFullConfigFile(fileName);
         }
     }
+    
+        void DsscPpt::storeFullConfigUnder() {
+        auto fileName = get<string>("saveConfigFileToName");
+        {
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            checkPathExists(fileName);
+            m_ppt->storeFullConfigFile(fileName);
+        }
+    }
+    
+
 
 
     bool DsscPpt::checkPathExists(const std::string & fileName) {
@@ -3507,14 +3522,6 @@ namespace karabo {
     }
 
 
-    void DsscPpt::startManualBurst() {
-        KARABO_LOG_INFO << "Start manual burst";
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            m_ppt->startBurst();
-        }
-    }
-
 
     void DsscPpt::startManualBurstBtn() {
         KARABO_LOG_INFO << "Start manual burst";
@@ -4087,7 +4094,6 @@ namespace karabo {
                     boost::filesystem::path myfile(fullConfigFileName);
                     if (boost::filesystem::exists(myfile)) {
                         readFullConfigFile(fullConfigFileName);
-                        updateFullConfigByteVector(fullConfigFileName);
                         setQSFPEthernetConfig();
                     }
                 }
