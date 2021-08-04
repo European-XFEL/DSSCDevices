@@ -96,7 +96,7 @@ namespace karabo {
 
         SLOT_ELEMENT(expected)
                 .key("startAllChannelsDummyData").displayedName("Start all channels dummy data").description("After connection start dummy data from all channels")
-                .allowedStates(State::UNKNOWN, State::ON, State::STOPPED, State::OFF)
+                .allowedStates(State::ON, State::STOPPED, State::OFF)
                 .commit();
 
         SLOT_ELEMENT(expected)
