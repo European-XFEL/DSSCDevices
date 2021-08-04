@@ -348,8 +348,8 @@ namespace karabo {
 
         void readFullConfigFile(const std::string & fileName);
         void storeFullConfigFile();
+        void storeFullConfigUnder();
         void storeFullConfigHDF5();
-        void updateFullConfigByteVector(const std::string & fileName);
 
         void saveConfiguration();
         void saveEPCRegisters();
