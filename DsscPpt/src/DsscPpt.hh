@@ -388,6 +388,7 @@ namespace karabo {
         void setThrottleDivider();
         void updateFullConfigHash();
         void sendConfigHashOut();
+        void updateGainHashValue();
 
         class ContModeKeeper {
 

@@ -520,6 +520,12 @@ namespace karabo {
                 .description("Selected Pixel Delay Setting")
                 .readOnly()
                 .commit();
+        
+        UINT64_ELEMENT(expected).key("gain.gainHash")
+                .displayedName("Gain settings hash")
+                .description("Hash value estimated from gain settings")
+                .readOnly()
+                .commit();
 
 
         SLOT_ELEMENT(expected)
@@ -2065,6 +2071,7 @@ namespace karabo {
                             .commit();
 
                     this->updateSchema(update, true); //*/
+                    this->updateGainHashValue();
                 }
 
             } else return;
@@ -2079,6 +2086,13 @@ namespace karabo {
             const karabo::util::Timestamp& actualTimestamp = this->getActualTimestamp();
             std::cout << "Writing data to daqOutput" << std::endl;
             this->writeChannel("daqOutput", m_hashout, actualTimestamp); //*/
+        }
+    }
+    
+    void DsscPpt::updateGainHashValue() {
+        if (m_hashout != Hash()) {
+            std::cout << "IN UPDATE GAIN HASH VALUE" << std::endl;
+               //calculate hash value
         }
     }
 
