@@ -2053,6 +2053,7 @@ namespace karabo {
 
 
     void DsscPpt::updateFullConfigHash() {
+        /*
         const auto fileName = get<string>("fullConfigFileName");
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2070,12 +2071,12 @@ namespace karabo {
                             .dataSchema(detconfigSchema)
                             .commit();
 
-                    this->updateSchema(update, true); //*/
+                    this->updateSchema(update, true); 
                     this->updateGainHashValue();
                 }
 
             } else return;
-        }
+        }*/
 
     }
 
@@ -2088,6 +2089,8 @@ namespace karabo {
             this->writeChannel("daqOutput", m_hashout, actualTimestamp); //*/
         }
     }
+    
+    
     
     void DsscPpt::updateGainHashValue() {
         if (m_hashout != Hash()) {
