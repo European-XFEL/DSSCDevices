@@ -1910,18 +1910,6 @@ namespace karabo {
 
             cout << "Test Environment is set to Hamburg" << endl;
             cout << "QSFP and transceiver have to be defined according to setup" << endl;
-            /*
-                    if(get<string>("qsfp.chan1.recv.macaddr") == "00:1b:21:55:1f:c8" ||
-                       get<string>("qsfp.chan1.recv.macaddr") == "0:1b:21:55:1f:c8"     )
-                    {
-                      cout << "Test Environment is set to Hamburg 2" << endl;
-                      set<string>("qsfp.chan1.recv.macaddr","00:1b:21:55:1f:c9");
-                      set<string>("qsfp.chan2.recv.macaddr","00:1b:21:55:1f:c9");
-                      set<string>("qsfp.chan3.recv.macaddr","00:1b:21:55:1f:c9");
-                      set<string>("qsfp.chan4.recv.macaddr","00:1b:21:55:1f:c9");
-                      KARABO_LOG_WARN << "Set QSFP Receiver MAC to 00:1b:21:55:1f:c9";
-                    }
-             */
         }
 
         updateNumFramesToSend();
@@ -2053,7 +2041,7 @@ namespace karabo {
 
 
     void DsscPpt::updateFullConfigHash() {
-        /*
+        
         const auto fileName = get<string>("fullConfigFileName");
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2076,7 +2064,7 @@ namespace karabo {
                 }
 
             } else return;
-        }*/
+        }
 
     }
 
