@@ -1993,6 +1993,7 @@ namespace karabo {
 
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
+        updateNumFramesToSend();
     }
     
 
