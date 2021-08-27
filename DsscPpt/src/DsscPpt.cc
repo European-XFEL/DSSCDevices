@@ -1994,6 +1994,7 @@ namespace karabo {
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
         updateNumFramesToSend();
+        updateSequenceCounters();
     }
     
 
@@ -2158,9 +2159,11 @@ namespace karabo {
             m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
             
             std::cout << "initSystem->initSystem()" <<std::endl;
+
+            int rc;
             
             try{
-                int rc = m_ppt->initSystem();
+                rc = m_ppt->initSystem();
             }catch (const std::exception& e) { // caught by reference to base
                 std::cout << "exception was caught in initSystem->initSystem, with message:"
                      << e.what() << std::endl;
