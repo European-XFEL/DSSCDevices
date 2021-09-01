@@ -1971,7 +1971,7 @@ namespace karabo {
             string defaultConfigPath = DEFAULTCONF;
             m_ppt->storeFullConfigFile(defaultConfigPath);
 
-            updateSequenceCounters();
+            //updateSequenceCounters();
         }
 
         const auto * fullConfigInfo = m_ppt->getFullConfig();
@@ -2177,6 +2177,8 @@ namespace karabo {
         updateGuiRegisters();
 
         checkQSFPConnected();
+
+        updateSequenceCounters();
         
         std::cout << "initSystem finished" <<std::endl;
     }
