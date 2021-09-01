@@ -24,6 +24,7 @@ public:
     friend class karabo::DsscLadderParameterTrimming;
     
     DsscTrimPptAPI(karabo::DsscLadderParameterTrimming* _karaboDevice, const std::string& configFile);
+    DsscTrimPptAPI(karabo::DsscLadderParameterTrimming* _karaboDevice, SuS::PPTFullConfig* fullconfig);
     DsscTrimPptAPI(const DsscTrimPptAPI& orig) = delete;
     virtual ~DsscTrimPptAPI();
     

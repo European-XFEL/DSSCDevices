@@ -12,8 +12,14 @@
 
 namespace SuS{
 
-DsscTrimPptAPI::DsscTrimPptAPI(karabo::DsscLadderParameterTrimming* _karaboDevice, const std::string& configFile) : m_karaboDevice(_karaboDevice), SuS::MultiModuleInterface(new SuS::PPTFullConfig(configFile)) {
+DsscTrimPptAPI::DsscTrimPptAPI(karabo::DsscLadderParameterTrimming* _karaboDevice, const std::string& configFile) :\
+  m_karaboDevice(_karaboDevice), SuS::MultiModuleInterface(new SuS::PPTFullConfig(configFile)) {
 }
+
+DsscTrimPptAPI::DsscTrimPptAPI(karabo::DsscLadderParameterTrimming* _karaboDevice, SuS::PPTFullConfig* fullconfig) : \
+  m_karaboDevice(_karaboDevice), SuS::MultiModuleInterface(fullconfig) {
+}
+
 
 
 DsscTrimPptAPI::~DsscTrimPptAPI() {
