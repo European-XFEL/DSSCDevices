@@ -1195,6 +1195,9 @@ namespace karabo {
 
         KARABO_LOG_WARN << "getCoarseGainParametersIntoGui";
         getCoarseGainParamsIntoGui();
+        
+        KARABO_LOG_WARN << "updateGainHashValue";
+        updateGainHashValue();
 
         KARABO_LOG_INFO << "init done";
 
@@ -1958,8 +1961,7 @@ namespace karabo {
     void DsscPpt::readFullConfigFile(const std::string & fileName) {
         KARABO_LOG_INFO << "Load Full Config File : " << fileName;
 
-        {
-            
+        {            
             ContModeKeeper keeper(this);
             m_ppt->loadFullConfig(fileName, false);
             string defaultConfigPath = DEFAULTCONF;
@@ -1987,6 +1989,7 @@ namespace karabo {
 
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
+        updateGainHashValue();
     }
     
 
@@ -2081,10 +2084,32 @@ namespace karabo {
     
     
     void DsscPpt::updateGainHashValue() {
-        if (m_hashout != Hash()) {
-            std::cout << "IN UPDATE GAIN HASH VALUE" << std::endl;
-               //calculate hash value
+        std::cout << "IN UPDATE_GAIN_HASH_VALUE" << std::endl;
+        
+        //std::map<std::string,ModuleSet>::iterator it 
+        auto moduleSetNames = m_ppt->pixelRegisters->getModuleSetNames();
+        std::vector<std::string>::iterator it = moduleSetNames.begin();
+        
+        while(it != moduleSetNames.end()){
+            std::cout << *it <<std::endl;
+            it++;
         }
+        
+        std::cout << std::endl;
+        //m_ppt->pixelRegisters->printContent("Control register");
+        auto modules = m_ppt->pixelRegisters->getModules("Control register");
+        std::vector<std::string>::iterator itm = modules.begin();
+        
+        while(itm != modules.end()){
+            
+            std::cout << *itm << '\t';
+            
+            std::cout << m_ppt->pixelRegisters->getModuleSetValue("Control register", *itm) << std::endl;
+            
+            itm++;
+        }
+        
+        std::cout << "EXIT FROM UPDATE_GAIN_HASH_VALUE" << std::endl;
     }
 
 
