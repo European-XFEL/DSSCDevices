@@ -1971,7 +1971,7 @@ namespace karabo {
             string defaultConfigPath = DEFAULTCONF;
             m_ppt->storeFullConfigFile(defaultConfigPath);
 
-            updateSequenceCounters();
+            //updateSequenceCounters();
         }
 
         const auto * fullConfigInfo = m_ppt->getFullConfig();
@@ -1994,6 +1994,7 @@ namespace karabo {
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
         updateNumFramesToSend();
+        updateSequenceCounters();
     }
     
 
@@ -2122,15 +2123,34 @@ namespace karabo {
 
 
     void DsscPpt::initSystem() {
-        DSSC::StateChangeKeeper keeper(this, State::ON);
+        DSSC::StateChangeKeeper keeper(this, State::ON);        
+        std::cout << "initSystem->resetAll()" << std::endl;
+        try{
+            resetAll();
+        }catch (const std::exception& e) { // caught by reference to base
+            std::cout << "exception was caught in initSystem->resetAll, with message:"
+                  << e.what() << std::endl;
+        }
 
-        resetAll();
+        std::cout << "initSystem->programPLL()" << std::endl;
+        try{
+          programPLL();
+        }catch (const std::exception& e) { // caught by reference to base
+            std::cout << "exception was caught in initSystem->programPLL, with message:"
+                  << e.what() << std::endl;
+        }
 
-        programPLL();
-
+        
         if (checkAllIOBStatus() == 0) {
             KARABO_LOG_INFO << "No IOBs detected. Will try to program IOB FPGAs";
-            programAllIOBFPGAs();
+          
+            std::cout << "initSystem->programAllIOBFPGAs()" <<std::endl;
+            try{
+                programAllIOBFPGAs();
+            }catch (const std::exception& e) { // caught by reference to base
+                std::cout << "exception was caught in initSystem->programAllIOBFPGAs, with message:"
+                    << e.what() << std::endl;
+          }
         }
 
         {
@@ -2138,7 +2158,16 @@ namespace karabo {
 
             m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
             
-            int rc = m_ppt->initSystem();
+            std::cout << "initSystem->initSystem()" <<std::endl;
+
+            int rc;
+            
+            try{
+                rc = m_ppt->initSystem();
+            }catch (const std::exception& e) { // caught by reference to base
+                std::cout << "exception was caught in initSystem->initSystem, with message:"
+                     << e.what() << std::endl;
+            }
            
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
                 printPPTErrorMessages();
@@ -2148,6 +2177,10 @@ namespace karabo {
         updateGuiRegisters();
 
         checkQSFPConnected();
+
+        updateSequenceCounters();
+        
+        std::cout << "initSystem finished" <<std::endl;
     }
 
 
