@@ -2088,9 +2088,10 @@ namespace karabo {
         
         //std::map<std::string,ModuleSet>::iterator it 
         auto moduleSetNames = m_ppt->pixelRegisters->getModuleSetNames();
-        std::vector<std::string>::iterator it = moduleSetNames.begin();
         
-        while(it != moduleSetNames.end()){
+        
+        for(std::vector<std::string>::iterator it = moduleSetNames.begin();
+                it != moduleSetNames.end(); it++){
             std::cout << *it <<std::endl;
             it++;
         }
@@ -2098,15 +2099,16 @@ namespace karabo {
         std::cout << std::endl;
         //m_ppt->pixelRegisters->printContent("Control register");
         auto modules = m_ppt->pixelRegisters->getModules("Control register");
-        std::vector<std::string>::iterator itm = modules.begin();
         
-        while(itm != modules.end()){
+        auto configData = m_ppt->getHDF5ConfigData(get<string&>("fullConfigFileName"));
+        
+        for(std::vector<std::string>::iterator itm = modules.begin();
+                itm != modules.end(); itm++){
             
-            std::cout << *itm << '\t';
+            //std::cout << *itm << '\t';
             
-            std::cout << m_ppt->pixelRegisters->getModuleSetValue("Control register", *itm) << std::endl;
+           // std::cout << m_ppt->pixelRegisters->getModuleSetValue("Control register", *itm) << std::endl;
             
-            itm++;
         }
         
         std::cout << "EXIT FROM UPDATE_GAIN_HASH_VALUE" << std::endl;
