@@ -24,6 +24,7 @@
 #include "DsscTrainDataProcessor.h"
 #include "DsscTrainSorter.h"
 #include "DataHisto.h"
+#include "version.hh"  // provides PACKAGE_VERSION
 
 #define HUTCH_ENVIRONMENT
 
@@ -40,7 +41,7 @@ namespace karabo {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
-        KARABO_CLASSINFO(DsscDataReceiver, "DsscDataReceiver", "2.4")
+        KARABO_CLASSINFO(DsscDataReceiver, "DsscDataReceiver", PACKAGE_VERSION)
 
         /**
          * Necessary method as part of the factory/configuration system

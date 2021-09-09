@@ -28,6 +28,7 @@
 //#define STATE_OFF karabo::util::State::UNKNOWN
 
 #include "DsscHDF5Writer.h"
+#include "version.hh"  // provides PACKAGE_VERSION
 
 /**
  * States: UNKNOWN -> connect -> OFF -> progIOB/initSystem ->
@@ -86,7 +87,7 @@ namespace karabo {
     public:
 
         // Add reflection and version information to this class
-        KARABO_CLASSINFO(DsscPpt, "DsscPpt", "2.4")
+        KARABO_CLASSINFO(DsscPpt, "DsscPpt", PACKAGE_VERSION)
         typedef boost::shared_ptr<SuS::DSSC_PPT_API> PPT_Pointer;
         /**
          * Necessary method as part of the factory/configuration system

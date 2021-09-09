@@ -15,6 +15,7 @@
 #include "CHIPTrimmer.h"
 #include "DsscHDF5MeasurementInfoWriter.h"
 #include "DsscHDF5CalibrationDataGenerator.h"
+#include "version.hh"  // provides PACKAGE_VERSION
 /**
  * The main Karabo namespace
  */
@@ -34,7 +35,7 @@ namespace karabo {
         typedef boost::shared_ptr<SuS::DsscTrimPptAPI> TrimPPT_API_Pointer;
 
         // Add reflection information and Karabo framework compatibility to this class
-        KARABO_CLASSINFO(DsscLadderParameterTrimming, "DsscLadderParameterTrimming", "3.1")
+        KARABO_CLASSINFO(DsscLadderParameterTrimming, "DsscLadderParameterTrimming", PACKAGE_VERSION)
 
         /**
          * Necessary method as part of the factory/configuration system
@@ -321,7 +322,7 @@ namespace karabo {
         // device own functions
     private:
         
-        void initMultiModuleInterface(const std::string);
+        bool initMultiModuleInterface(const std::string);
 
         void onMeanData(const util::Hash& data,
                         const xms::InputChannel::MetaData& meta);

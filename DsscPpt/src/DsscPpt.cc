@@ -84,7 +84,7 @@ namespace karabo {
 
         SLOT_ELEMENT(expected)
                 .key("open").displayedName("Connect PPT").description("Open connection to PPT")
-                .allowedStates(State::UNKNOWN, util::State::ERROR)
+                .allowedStates(State::UNKNOWN)
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -968,24 +968,6 @@ namespace karabo {
         //Defined in DsscPptRegsInit.hh
         INIT_ETH_ELEMENTS
 
-        PATH_ELEMENT(expected).key("QSFPnetworkConfigFilePath")
-                .description("Name of the QSFP network configuration file")
-                .displayedName("QSFP network ConfigFile Name")
-                .isInputFile()
-                .tags("QSFPConfigPath")
-                .assignmentOptional().defaultValue("~/QSFPnetworkConfig.xml").reconfigurable()
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("LoadQSFPNetConfig").displayedName("Load QSFP Network Configuration")
-                .description("Loading QSFP network configuration to config file")
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("SaveQSFPNetConfig").displayedName("Save QSFP Network Configuration")
-                .description("Saving QSFP network configuration to config file")
-                .commit();
-
         UINT32_ELEMENT(expected)
                 .key("ethThrottleDivider").displayedName("Eth. throttle divider")
                 .description("Ethernet engine throttle divider parameter")
@@ -1028,7 +1010,8 @@ namespace karabo {
     DsscPpt::DsscPpt(const karabo::util::Hash& config)
         : Device<>(config),
         m_keepAcquisition(false), m_keepPolling(false), m_burstAcquisition(false),
-        m_pollThread(), 
+        m_pollThread(),
+        m_ppt(),
         m_epcTag("epcParam"), m_dsscConfigtoSchema() {
         
         EventLoop::addThread(16);
@@ -1125,8 +1108,6 @@ namespace karabo {
         KARABO_SLOT(loadLastFileETHConfig);
         KARABO_SLOT(checkQSFPConnected);
 
-        KARABO_SLOT(LoadQSFPNetConfig);
-        KARABO_SLOT(SaveQSFPNetConfig);
         KARABO_SLOT(setThrottleDivider);
 
         KARABO_SLOT(startSingleCycle);
@@ -1152,14 +1133,16 @@ namespace karabo {
         EventLoop::removeThread(16);
     }
 
-
     void DsscPpt::initialize() {
         KARABO_ON_DATA("registerConfigInput", receiveRegisterConfiguration);
+        SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(get<string>("fullConfigFileName"));     
 
-        m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(new SuS::PPTFullConfig(get<string>("fullConfigFileName"))));
-        if (!m_ppt->fullChipConfig->isGood()) {
-            DEVICE_ERROR("FullConfigFile invalid");
-            return;
+        if(fullconfig->isGood()){
+                  m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(fullconfig));
+        }else{
+                delete fullconfig;
+                DEVICE_ERROR("FullConfigFile invalid");
+                return;
         }
         
 
@@ -1493,7 +1476,8 @@ namespace karabo {
     }
 
 
-    void DsscPpt::generateConfigRegElements(Schema &schema, SuS::ConfigReg * reg, string regName, string tagName, string moduleStr) {// Build schema using the Config Reg Structure
+    void DsscPpt::generateConfigRegElements(Schema &schema, SuS::ConfigReg * reg, string regName, string tagName, string moduleStr) {
+        // Build schema using the Config Reg Structure
 
         vector<string> tokens;
         boost::split(tokens, regName, boost::is_any_of("."));
@@ -1667,7 +1651,10 @@ namespace karabo {
             KARABO_LOG_INFO << "Just opened PPT: " << rc;
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
                 close();
-                DEVICE_ERROR("Failed to connect to PPT: " + m_ppt->errorString);
+                this->updateState(State::UNKNOWN);
+                std::string message = "Failed to connect to PPT: " + m_ppt->errorString;
+                set<string>("status", message);
+                KARABO_LOG_ERROR << message;
                 //throw KARABO_NETWORK_EXCEPTION("Failed to connect to PPT: " + m_ppt->errorString);
             }
         }
@@ -1686,12 +1673,15 @@ namespace karabo {
             updateTestEnvironment();
 
             checkQSFPConnected();
+            
+            set<string>("status", "PPT is connected");
 
-        } else {
+        } 
+        /*else {
             this->updateState(State::ERROR);
             KARABO_LOG_ERROR << "Open failure -- attempt to open a connection to PPT failed";
             //throw KARABO_NETWORK_EXCEPTION("Open failure -- attempt to open a connection to PPT failed");
-        }
+        }*/
     }
 
 
@@ -1702,6 +1692,7 @@ namespace karabo {
         set<bool>("continuous_mode", run);
         {
             KARABO_LOG_INFO << "runContMode mutex";
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->runContinuousMode(run);
         }
     }
@@ -1713,6 +1704,7 @@ namespace karabo {
         set<bool>("disable_sending", false);
         {
             KARABO_LOG_INFO << "runAcquisition mutex";
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->disableSending(false);
         }
 
@@ -1963,7 +1955,7 @@ namespace karabo {
             string defaultConfigPath = DEFAULTCONF;
             m_ppt->storeFullConfigFile(defaultConfigPath);
 
-            updateSequenceCounters();
+            //updateSequenceCounters();
         }
 
         const auto * fullConfigInfo = m_ppt->getFullConfig();
@@ -1985,7 +1977,8 @@ namespace karabo {
 
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
-        updateGainHashValue();
+        updateNumFramesToSend();
+        updateSequenceCounters();
     }
     
 
@@ -2145,15 +2138,34 @@ namespace karabo {
 
 
     void DsscPpt::initSystem() {
-        DSSC::StateChangeKeeper keeper(this, State::ON);
+        DSSC::StateChangeKeeper keeper(this, State::ON);        
+        std::cout << "initSystem->resetAll()" << std::endl;
+        try{
+            resetAll();
+        }catch (const std::exception& e) { // caught by reference to base
+            std::cout << "exception was caught in initSystem->resetAll, with message:"
+                  << e.what() << std::endl;
+        }
 
-        resetAll();
+        std::cout << "initSystem->programPLL()" << std::endl;
+        try{
+          programPLL();
+        }catch (const std::exception& e) { // caught by reference to base
+            std::cout << "exception was caught in initSystem->programPLL, with message:"
+                  << e.what() << std::endl;
+        }
 
-        programPLL();
-
+        
         if (checkAllIOBStatus() == 0) {
             KARABO_LOG_INFO << "No IOBs detected. Will try to program IOB FPGAs";
-            programAllIOBFPGAs();
+          
+            std::cout << "initSystem->programAllIOBFPGAs()" <<std::endl;
+            try{
+                programAllIOBFPGAs();
+            }catch (const std::exception& e) { // caught by reference to base
+                std::cout << "exception was caught in initSystem->programAllIOBFPGAs, with message:"
+                    << e.what() << std::endl;
+          }
         }
 
         {
@@ -2161,7 +2173,16 @@ namespace karabo {
 
             m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
             
-            int rc = m_ppt->initSystem();
+            std::cout << "initSystem->initSystem()" <<std::endl;
+
+            int rc;
+            
+            try{
+                rc = m_ppt->initSystem();
+            }catch (const std::exception& e) { // caught by reference to base
+                std::cout << "exception was caught in initSystem->initSystem, with message:"
+                     << e.what() << std::endl;
+            }
            
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
                 printPPTErrorMessages();
@@ -2171,6 +2192,10 @@ namespace karabo {
         updateGuiRegisters();
 
         checkQSFPConnected();
+
+        updateSequenceCounters();
+        
+        std::cout << "initSystem finished" <<std::endl;
     }
 
 
@@ -2778,7 +2803,7 @@ namespace karabo {
     bool DsscPpt::readbackConfigIOB(int iobNumber) {
         CHECK_IOB_B(iobNumber)
 
-                int rc;
+        int rc;
 
         KARABO_LOG_INFO << "Readback IOB " + toString(iobNumber) + " Config Registers";
         m_ppt->setActiveModule(iobNumber);
@@ -4139,7 +4164,7 @@ namespace karabo {
                     KARABO_LOG_INFO << "Set Init distance";
                     m_ppt->setInitDist(filtered.getAs<unsigned int>(path));
                 } else if (path.compare("fastInitJTAGSpeed") == 0) {
-                    KARABO_LOG_INFO << "Set Init distance";
+                    KARABO_LOG_INFO << "Fast Init ConfigSpeed";
                     m_ppt->setFastInitConfigSpeed(filtered.getAs<unsigned int>(path));
                 }
             }
@@ -4317,7 +4342,6 @@ namespace karabo {
         }
         while (m_keepAcquisition) {
             {
-                //boost::mutex::scoped_lock lock(m_outMutex);
                 DsscScopedLock lock(&m_accessToPptMutex, __func__);
                 cout << '-';
                 cout.flush();
@@ -4572,29 +4596,6 @@ namespace karabo {
 
 
     void DsscPpt::test1() {
-    }
-
-
-    void DsscPpt::LoadQSFPNetConfig() {
-        //
-        Hash hsh;
-        karabo::io::loadFromFile(hsh, get<string>("QSFPnetworkConfigFilePath"));
-        set<Hash>("qsfp", hsh);
-
-        setQSFPEthernetConfig();
-        checkQSFPConnected();
-    }
-
-
-    void DsscPpt::SaveQSFPNetConfig() {
-        //
-        Hash thishash = get<Hash>("qsfp");
-        try {
-            karabo::io::saveToFile(thishash, get<string>("QSFPnetworkConfigFilePath"));
-        } catch (exception& e) {
-            KARABO_LOG_ERROR << "Error QSFP network config file";
-            cout << "Exception: " << e.what() << '\n';
-        }
     }
 
 

@@ -920,20 +920,23 @@ namespace karabo{
         m_deviceConfigState = ConfigState::CHANGED;
         m_asicChannelDataValid = false;
       
-        initMultiModuleInterface(get<string>("fullConfigFileName"));
+        if(!initMultiModuleInterface(get<string>("fullConfigFileName")))
+            return;
         
         changeDeviceState(State::OFF);
   
     }
     
-    void DsscLadderParameterTrimming::initMultiModuleInterface(const std::string _configFile){
+    bool DsscLadderParameterTrimming::initMultiModuleInterface(const std::string _configFile){
         
-        try{      
-            m_trimppt_api.reset(new SuS::DsscTrimPptAPI(this, _configFile));
-        } catch( const std::invalid_argument& e){
+        SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(_configFile);     
+
+        if(fullconfig->isGood()){     
+            m_trimppt_api.reset(new SuS::DsscTrimPptAPI(this, fullconfig));
+        } else{
+            delete fullconfig;
             changeDeviceState(State::ERROR);
-            set<string>("status", e.what());
-            return;
+            return false;
         }
 
         m_trimppt_api->m_iterations = get<unsigned int>("numIterations");
@@ -974,6 +977,7 @@ namespace karabo{
         
         updateBaselineValid();
         
+        return true;        
     }
 
 
