@@ -389,6 +389,7 @@ namespace karabo {
         void updateFullConfigHash();
         void sendConfigHashOut();
         void updateGainHashValue();
+        void updateGainHashValue_impl();        
 
         class ContModeKeeper {
 

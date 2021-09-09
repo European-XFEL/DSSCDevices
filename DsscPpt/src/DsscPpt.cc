@@ -9,6 +9,7 @@
  */
 #include <boost/filesystem.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
+#include <boost/functional/hash.hpp>
 #include <chrono>
 
 #include "DsscPpt.hh"
@@ -1184,19 +1185,14 @@ namespace karabo {
             set<string>("sequencerFilePath", m_ppt->getSequencer()->getFilename());
         }
 
-        KARABO_LOG_WARN << "updateGuiMeasurementParameters";
         updateGuiMeasurementParameters();
 
-        KARABO_LOG_WARN << "getSequencerParamsIntoGui";
         getSequencerParamsIntoGui();
 
-        KARABO_LOG_WARN << "getSequenceCountersIntoGui";
         getSequenceCountersIntoGui();
 
-        KARABO_LOG_WARN << "getCoarseGainParametersIntoGui";
         getCoarseGainParamsIntoGui();
         
-        KARABO_LOG_WARN << "updateGainHashValue";
         updateGainHashValue();
 
         KARABO_LOG_INFO << "init done";
@@ -2063,7 +2059,6 @@ namespace karabo {
                             .commit();
 
                     this->updateSchema(update, true); 
-                    this->updateGainHashValue();
                 }
 
             } else return;
@@ -2081,37 +2076,34 @@ namespace karabo {
         }
     }
     
-    
-    
+
     void DsscPpt::updateGainHashValue() {
-        std::cout << "IN UPDATE_GAIN_HASH_VALUE" << std::endl;
+        EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::updateGainHashValue_impl, this)); 
+    }
+    
+    void DsscPpt::updateGainHashValue_impl() {
+
+        auto configData = m_ppt->getHDF5ConfigData();
         
-        //std::map<std::string,ModuleSet>::iterator it 
-        auto moduleSetNames = m_ppt->pixelRegisters->getModuleSetNames();
+        std::size_t seed = 0;
+        boost::hash<int> hasher;
         
+        for(DsscHDF5RegisterConfigVec::iterator register_data = configData.pixelRegisterDataVec.begin();
+                register_data != configData.pixelRegisterDataVec.end(); register_data++)
+            for(std::vector<std::vector<std::vector<uint32_t>>>::iterator module_set = (*register_data).registerData.begin();
+                    module_set != (*register_data).registerData.end(); module_set++) 
+                for(std::vector<std::vector<uint32_t>>::iterator signal = (*module_set).begin();
+                        signal != (*module_set).end(); signal++)
+                    for(std::vector<uint32_t>::iterator module_signal_value = (*signal).begin();
+                            module_signal_value != (*signal).end(); module_signal_value++){
+                        seed ^= hasher(*module_signal_value) + 0x9e3779b9 + (seed<<6) + (seed>>2); 
+                    }
         
-        for(std::vector<std::string>::iterator it = moduleSetNames.begin();
-                it != moduleSetNames.end(); it++){
-            std::cout << *it <<std::endl;
-            it++;
-        }
-        
-        std::cout << std::endl;
-        //m_ppt->pixelRegisters->printContent("Control register");
-        auto modules = m_ppt->pixelRegisters->getModules("Control register");
-        
-        auto configData = m_ppt->getHDF5ConfigData(get<string&>("fullConfigFileName"));
-        
-        for(std::vector<std::string>::iterator itm = modules.begin();
-                itm != modules.end(); itm++){
-            
-            //std::cout << *itm << '\t';
-            
-           // std::cout << m_ppt->pixelRegisters->getModuleSetValue("Control register", *itm) << std::endl;
-            
-        }
-        
-        std::cout << "EXIT FROM UPDATE_GAIN_HASH_VALUE" << std::endl;
+        for(DsscHDF5SequenceData::iterator sequencer_data = configData.sequencerData.begin();
+                sequencer_data != configData.sequencerData.end(); sequencer_data++){
+            seed ^= hasher(sequencer_data->second) + 0x9e3779b9 + (seed<<6) + (seed>>2); 
+        }  
+        set<uint64>("gain.gainHash", seed);
     }
 
 
