@@ -105,6 +105,10 @@ private:
     void resetDataReceiver() override;
     
     bool inContinuousMode() override;
+    
+    void updateStartTrain() override {};
+    
+    void disableSending(bool) override {};
    
     //functions without functionality
     const uint16_t *getTrailerData() override {
@@ -198,6 +202,9 @@ private:
     
     bool calibrateCurrCompDACForReticleTest(bool log = true, int singlePx = -1, int startSetting = 0, int defaultValue = 3) override {
         return true;
+    }
+    bool calibrateCurrCompDAC(bool log=true, int singlePx=-1, int startSetting=0, int defaultValue = 15) override {
+        CHIPInterface::calibrateCurrCompDAC(log, singlePx, startSetting, defaultValue);
     }
   
     karabo::DsscLadderParameterTrimming* m_karaboDevice;    

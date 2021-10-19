@@ -1747,21 +1747,21 @@ namespace karabo {
           
           //updateState(State::ACQUIRING);
 
-          uint64 last_trainId;       
-          uint64 first_burstTrainId;
+          uint64_t last_trainId;       
+          uint64_t first_burstTrainId;
           {
             //boost::mutex::scoped_lock lock(m_accessToPptMutex);
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             first_burstTrainId = m_ppt->getCurrentTrainID();
           }
         
-          set<uint64>("burstData.startTrainId", 0);
-          set<uint64>("burstData.endTrainId", 0);
+          set<uint64_t>("burstData.startTrainId", 0);
+          set<uint64_t>("burstData.endTrainId", 0);
           bool first_train = true;
         
           static unsigned int wait_time = 30000;
 
-          uint64 current_trainId;        
+          uint64_t current_trainId;        
           while (m_burstAcquisition.load()) {
               
               {
@@ -1772,8 +1772,8 @@ namespace karabo {
 
               if(first_train){
                   if(current_trainId != first_burstTrainId){
-                    uint64 elapsedTrains = current_trainId - first_burstTrainId;
-                    if( (elapsedTrains > 0) && elapsedTrains < uint64(3) ){
+                    uint64_t elapsedTrains = current_trainId - first_burstTrainId;
+                    if( (elapsedTrains > 0) && elapsedTrains < uint64_t(3) ){
                         last_trainId = current_trainId;
                         first_train = false;
                     }
@@ -1785,12 +1785,12 @@ namespace karabo {
 
 
               if(current_trainId > last_trainId){
-                  uint64 train_diff = current_trainId - first_burstTrainId;
+                  uint64_t train_diff = current_trainId - first_burstTrainId;
                   if(train_diff >= num_trains){
                       std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
                       m_burstAcquisition.store(false); 
-                      set<uint64>("burstData.startTrainId", first_burstTrainId);
-                      set<uint64>("burstData.endTrainId", current_trainId);
+                      set<uint64_t>("burstData.startTrainId", first_burstTrainId);
+                      set<uint64_t>("burstData.endTrainId", current_trainId);
                       stop();
                   }else{
                       last_trainId = current_trainId;
@@ -1808,8 +1808,8 @@ namespace karabo {
               usleep(wait_time);
           }
         
-          set<uint64>("burstData.startTrainId", first_burstTrainId);
-          set<uint64>("burstData.endTrainId", current_trainId);
+          set<uint64_t>("burstData.startTrainId", first_burstTrainId);
+          set<uint64_t>("burstData.endTrainId", current_trainId);
           
           //updateState(currentState);
           //updateState(State::ON);
@@ -2096,7 +2096,7 @@ namespace karabo {
                 sequencer_data != configData.sequencerData.end(); sequencer_data++){
             seed ^= hasher(sequencer_data->second) + 0x9e3779b9 + (seed<<6) + (seed>>2); 
         }  
-        set<uint64>("gain.gainHash", seed);
+        set<uint64_t>("gain.gainHash", seed);
     }
 
 
