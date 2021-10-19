@@ -1747,8 +1747,8 @@ namespace karabo {
           
           //updateState(State::ACQUIRING);
 
-          uint64 last_trainId;       
-          uint64 first_burstTrainId;
+          uint64_t last_trainId;       
+          uint64_t first_burstTrainId;
           {
             //boost::mutex::scoped_lock lock(m_accessToPptMutex);
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -1773,7 +1773,7 @@ namespace karabo {
               if(first_train){
                   if(current_trainId != first_burstTrainId){
                     uint64_t elapsedTrains = current_trainId - first_burstTrainId;
-                    if( (elapsedTrains > 0) && elapsedTrains < uint64(3) ){
+                    if( (elapsedTrains > 0) && elapsedTrains < uint64_t(3) ){
                         last_trainId = current_trainId;
                         first_train = false;
                     }
