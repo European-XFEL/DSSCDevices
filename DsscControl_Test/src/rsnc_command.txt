@@ -1,3 +1,0 @@
- rsync -avz --remove-source-files -e "ssh -i /home/dssc/.ssh/gweiden-fecdsscdata01-rsa-nokey" /dataFast/PetraIII_May/M070_TemperatureMeasurement gweiden@max-exfl.desy.de:/gpfs/exfel/data/scratch/gweiden/Measurements/M070_TemperatureMeasurement 
-
-
