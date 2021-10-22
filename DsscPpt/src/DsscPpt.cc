@@ -1747,21 +1747,21 @@ namespace karabo {
           
           //updateState(State::ACQUIRING);
 
-          uint64_t last_trainId;       
-          uint64_t first_burstTrainId;
+          unsigned long long last_trainId;       
+          unsigned long long first_burstTrainId;
           {
             //boost::mutex::scoped_lock lock(m_accessToPptMutex);
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             first_burstTrainId = m_ppt->getCurrentTrainID();
           }
         
-          set<uint64_t>("burstData.startTrainId", 0);
-          set<uint64_t>("burstData.endTrainId", 0);
+          set<unsigned long long>("burstData.startTrainId", 0);
+          set<unsigned long long>("burstData.endTrainId", 0);
           bool first_train = true;
         
           static unsigned int wait_time = 30000;
 
-          uint64_t current_trainId;        
+          unsigned long long current_trainId;        
           while (m_burstAcquisition.load()) {
               
               {
@@ -1772,8 +1772,8 @@ namespace karabo {
 
               if(first_train){
                   if(current_trainId != first_burstTrainId){
-                    uint64_t elapsedTrains = current_trainId - first_burstTrainId;
-                    if( (elapsedTrains > 0) && elapsedTrains < uint64_t(3) ){
+                    unsigned long long elapsedTrains = current_trainId - first_burstTrainId;
+                    if( (elapsedTrains > 0) && elapsedTrains < (unsigned long long)(3) ){
                         last_trainId = current_trainId;
                         first_train = false;
                     }
@@ -1785,12 +1785,12 @@ namespace karabo {
 
 
               if(current_trainId > last_trainId){
-                  uint64_t train_diff = current_trainId - first_burstTrainId;
+                  unsigned long long train_diff = current_trainId - first_burstTrainId;
                   if(train_diff >= num_trains){
                       std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
                       m_burstAcquisition.store(false); 
-                      set<uint64_t>("burstData.startTrainId", first_burstTrainId);
-                      set<uint64_t>("burstData.endTrainId", current_trainId);
+                      set<unsigned long long>("burstData.startTrainId", first_burstTrainId);
+                      set<unsigned long long>("burstData.endTrainId", current_trainId);
                       stop();
                   }else{
                       last_trainId = current_trainId;
@@ -1808,8 +1808,8 @@ namespace karabo {
               usleep(wait_time);
           }
         
-          set<uint64_t>("burstData.startTrainId", first_burstTrainId);
-          set<uint64_t>("burstData.endTrainId", current_trainId);
+          set<unsigned long long>("burstData.startTrainId", first_burstTrainId);
+          set<unsigned long long>("burstData.endTrainId", current_trainId);
           
           //updateState(currentState);
           //updateState(State::ON);
@@ -1917,7 +1917,7 @@ namespace karabo {
 
 
     void DsscPpt::readSerialNumber() {
-        uint64_t sern;
+        unsigned long long sern;
 
         string firmware;
         string linux;
@@ -2096,7 +2096,7 @@ namespace karabo {
                 sequencer_data != configData.sequencerData.end(); sequencer_data++){
             seed ^= hasher(sequencer_data->second) + 0x9e3779b9 + (seed<<6) + (seed>>2); 
         }  
-        set<uint64_t>("gain.gainHash", seed);
+        set<unsigned long long>("gain.gainHash", static_cast<unsigned long long>(seed));
     }
 
 
