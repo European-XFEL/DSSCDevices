@@ -159,7 +159,7 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("storeFullConfigUnder").displayedName("Full Config save to").description("Save full config to path")
+                .key("storeFullConfigUnder").displayedName("Full Config save under").description("Save full config to path")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
                 .commit();
         
