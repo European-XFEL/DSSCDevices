@@ -387,10 +387,13 @@ namespace karabo {
         void SaveQSFPNetConfig();
 
         void setThrottleDivider();
-        void updateFullConfigHash();
+        //void updateFullConfigHash();
         void sendConfigHashOut();
         void updateGainHashValue();
-        void updateGainHashValue_impl();        
+        void updateGainHashValue_impl(); 
+        void updateConfigSchema();
+        void updateConfigHash();
+        void updateConfigFromHash();
 
         class ContModeKeeper {
 
@@ -438,7 +441,8 @@ namespace karabo {
 
         DsscH5ConfigToSchema m_dsscConfigtoSchema;
 
-        karabo::util::Hash m_hashout;
+        karabo::util::Hash m_last_config_hash;
+        karabo::util::Hash m_prev_config_hash;
         
         std::atomic<bool> m_burstAcquisition;
         

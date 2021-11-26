@@ -34,21 +34,6 @@ namespace karabo {
     DsscH5ConfigToSchema::~DsscH5ConfigToSchema() {
     };
 
-
-    bool DsscH5ConfigToSchema::getFullConfigHash(const std::string& filename, Hash& hash) {
-
-        auto h5config = SuS::DSSC_PPT_API::getHDF5ConfigData(filename);
-        addConfiguration(hash, h5config);
-
-        if (!karabo::util::similar(hash, m_lastHash)) { // check on similarity of structure, not content
-            m_lastHash = hash;
-            return true;
-        }
-
-        return false;
-    }
-
-
     void DsscH5ConfigToSchema::HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path) {
         for (Hash::const_iterator it = hash.begin(); it != hash.end(); ++it) {
             switch (it->getType()) {
@@ -90,11 +75,11 @@ namespace karabo {
     }
 
 
-    karabo::util::Schema DsscH5ConfigToSchema::getUpdatedSchema() {
-        Schema expected;
-        HashToSchema(m_lastHash, expected, "");
-        return expected;
-    }
+//    karabo::util::Schema DsscH5ConfigToSchema::getUpdatedSchema() {
+//        Schema expected;
+//        HashToSchema(m_lastHash, expected, "");
+//        return expected;
+//    }
 
 
     void DsscH5ConfigToSchema::addMapData(Hash& hash, const std::string & node, const std::map<std::string, uint32_t> & mapData) {

@@ -168,10 +168,10 @@ namespace karabo {
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
                 .commit();
 
-        SLOT_ELEMENT(expected)
+        /*SLOT_ELEMENT(expected)
                 .key("updateFullConfigHash").displayedName("Update Config Data Hash").description("Update full config data hash")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::UNKNOWN)
-                .commit();
+                .commit();//*/
 
         SLOT_ELEMENT(expected)
                 .key("sendConfigHashOut").displayedName("Send Config Data Hash").description("Send full config data hash through p2p channel")
@@ -1004,6 +1004,27 @@ namespace karabo {
                 .dataSchema(detconfigSchema)
                 .commit();
 
+        NODE_ELEMENT(expected)
+                .key("DetConfRegisters")
+                .displayedName("Detector Configuration")
+                .description("Detector, EPC, JTAG, IOB config. registers")                
+                .commit();     
+        
+        /*SLOT_ELEMENT(expected)
+                .key("updateConfigSchema")
+                .displayedName("Read Config Registers")
+                .description("Trigger one single Burst")
+                .commit();//*/
+       
+        SLOT_ELEMENT(expected)
+                .key("updateConfigHash").displayedName("Read Config Data")
+                .description("Read Configuration Data")
+                .commit();//*/
+        
+        SLOT_ELEMENT(expected)
+                .key("updateConfigFromHash").displayedName("Write Config Data")
+                .description("Write Configuration Data")
+                .commit();//*/
     }
 
 
@@ -1092,7 +1113,6 @@ namespace karabo {
         KARABO_SLOT(storeFullConfigFile);
         KARABO_SLOT(storeFullConfigUnder);
         KARABO_SLOT(storeFullConfigHDF5);
-        KARABO_SLOT(updateFullConfigHash);
         KARABO_SLOT(sendConfigHashOut);
 
         KARABO_SLOT(setSendingASICs);
@@ -1111,7 +1131,11 @@ namespace karabo {
         KARABO_SLOT(setThrottleDivider);
 
         KARABO_SLOT(startSingleCycle);
-
+        
+       // KARABO_SLOT(updateConfigSchema);
+        
+        KARABO_SLOT(updateConfigHash);
+        KARABO_SLOT(updateConfigFromHash);
     }
 
     void DsscPpt::preDestruction() {
@@ -2032,40 +2056,39 @@ namespace karabo {
     }
 
 
-    void DsscPpt::updateFullConfigHash() {
+    /*void DsscPpt::updateFullConfigHash() {
         
-        const auto fileName = get<string>("fullConfigFileName");
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            if (checkPathExists(fileName)) {
-                bool schemaUpdateRequired = m_dsscConfigtoSchema.getFullConfigHash(fileName, m_hashout);
-                KARABO_LOG_INFO << "Updating meta config schema: " << schemaUpdateRequired;
+        auto h5config = m_ppt->getHDF5ConfigData();
+        karabo::util::Hash read_config_hash;
+        
+        DsscH5ConfigToSchema::addConfiguration(read_config_hash, h5config);
+        
+        if (!karabo::util::similar(m_last_config_hash, read_config_hash)) { // check on similarity of structure, not content
+            
+            
+            KARABO_LOG_INFO << "Updating meta config schema: ";
+            Schema expected;
+            DsscH5ConfigToSchema::HashToSchema(read_config_hash, expected, "");
+            
+            Schema update;
+            OUTPUT_CHANNEL(update).key("daqOutput")
+                    .displayedName("daqOutput")
+                    .dataSchema(expected)
+                    .commit();
 
-                if (schemaUpdateRequired) {
-                    const karabo::util::Schema& detconfigSchema = m_dsscConfigtoSchema.getUpdatedSchema();
-                    //this->updateSchema(update, true); 
-
-                    Schema update;
-                    OUTPUT_CHANNEL(update).key("daqOutput")
-                            .displayedName("daqOutput")
-                            .dataSchema(detconfigSchema)
-                            .commit();
-
-                    this->updateSchema(update, true); 
-                }
-
-            } else return;
+            this->updateSchema(update, true);           
+            
+            m_last_config_hash = read_config_hash;            
         }
-
-    }
+    }//*/
 
 
     void DsscPpt::sendConfigHashOut() {
-        if (m_hashout != Hash()) {
+        if (m_last_config_hash != Hash()) {
             std::cout << "Sending config data" << std::endl;
             const karabo::util::Timestamp& actualTimestamp = this->getActualTimestamp();
             std::cout << "Writing data to daqOutput" << std::endl;
-            this->writeChannel("daqOutput", m_hashout, actualTimestamp); //*/
+            this->writeChannel("daqOutput", m_last_config_hash, actualTimestamp); //*/
         }
     }
     
@@ -2098,7 +2121,85 @@ namespace karabo {
         }  
         set<unsigned long long>("gain.gainHash", static_cast<unsigned long long>(seed));
     }
+    
+    
+    void DsscPpt::updateConfigHash(){
+        
+        auto h5config = m_ppt->getHDF5ConfigData();        
+        karabo::util::Hash read_config_hash;        
+        DsscH5ConfigToSchema::addConfiguration(read_config_hash, h5config);
+        
+        if (!karabo::util::similar(read_config_hash, m_last_config_hash)){
+                        
+            KARABO_LOG_INFO << "Updating meta config schema: ";
+            Schema expected;
+            DsscH5ConfigToSchema::HashToSchema(read_config_hash, expected, "");
+            //this->updateSchema(expected, true);
+            this->appendSchema(expected, true);
+            m_last_config_hash = read_config_hash;
+        }else{
+            std::cout << "hashes are similar" << std::endl;
+        }
+         
+        /*
+            //m_ppt->
 
+            configData.timestamp = utils::getLocalTimeStr();
+
+            //for(int idx=0; idx<pptFullConfig->numPixelRegs(); idx++){
+            //  configData.pixelRegisterDataVec.push_back(m_ppt->getRegisterConfig("PixelRegister Module " + to_string(idx+1), m_ppt->pptFullConfig->getPixelReg(idx)));
+            //}
+            
+            
+            for(int idx=0; idx<pptFullConfig->numJtagRegs(); idx++){
+              configData.jtagRegisterDataVec.push_back(m_ppt->getRegisterConfig("JtagRegister Module " + to_string(idx+1), m_ppt->pptFullConfig->getJtagReg(idx)));
+            }
+            if(!pptFullConfig->getIOBRegsFileName().empty()){
+              configData.iobRegisterData = m_ppt->getRegisterConfig("IOBRegister", m_ppt->pptFullConfig->getIOBReg());
+            }
+            if(!pptFullConfig->getEPCRegsFileName().empty()){
+              configData.epcRegisterData = m_ppt->getRegisterConfig("EPCRegister", m_ppt->pptFullConfig->getEPCReg());
+            }
+
+            if(!m_ppt->pptFullConfig->getSequencerFileName().empty()){
+              Sequencer * sequencer = m_ppt->pptFullConfig->getSequencer();
+              if(sequencer->configGood){
+                configData.sequencerData = sequencer->getSequencerParameterMap();
+              }
+            }
+          
+          
+        }
+        //addConfiguration(m_last_config_hash, h5config);
+        
+        uint32_t numRegisters = h5config.getNumRegisters();
+
+        const std::string baseNodeMain(s_dsscConfBaseNode + ".");
+
+        hash.set<uint32_t>(baseNodeMain + "NumRegisters", numRegisters);
+        hash.set<std::string>(baseNodeMain + "RegisterNames", configData.getRegisterNames());
+        hash.set<std::string>(baseNodeMain + "timestamp", configData.timestamp);
+
+        addConfiguration(hash, configData.pixelRegisterDataVec);
+        addConfiguration(hash, configData.jtagRegisterDataVec);
+        addConfiguration(hash, configData.iobRegisterData);
+        addConfiguration(hash, configData.epcRegisterData);
+
+        addConfiguration(hash, "Sequencer", configData.sequencerData);
+        addConfiguration(hash, "ControlSequence", configData.controlSequenceData);
+        
+        //m_config_hash
+        if (!karabo::util::similar(hash, m_lastHash)) { // check on similarity of structure, not content
+            
+            
+            //m_lastHash = hash;
+        }//*/       
+        
+    }
+    
+    void DsscPpt::updateConfigFromHash(){
+        //
+    }
 
     void DsscPpt::doFastInit() {
         DSSC::StateChangeKeeper keeper(this, State::ON);
