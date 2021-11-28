@@ -2125,80 +2125,41 @@ namespace karabo {
     
     void DsscPpt::updateConfigHash(){
         
-        auto h5config = m_ppt->getHDF5ConfigData();        
-        karabo::util::Hash read_config_hash;        
+        auto h5config = m_ppt->getHDF5ConfigData();
+        Hash read_config_hash;        
         DsscH5ConfigToSchema::addConfiguration(read_config_hash, h5config);
+        
+        read_config_hash.set(std::string("PixelRegister_Module_1"), Hash(), '.');
+        read_config_hash.set(std::string("PixelRegister_Module_2"), Hash(), '.');        
+        read_config_hash.set(std::string("PixelRegister_Module_3"), Hash(), '.');        
+        read_config_hash.set(std::string("PixelRegister_Module_4"), Hash(), '.');        
+        read_config_hash.set(std::string("JtagRegister_Module_1"), Hash(), '.');        
+        read_config_hash.set(std::string("JtagRegister_Module_2"), Hash(), '.');        
+        read_config_hash.set(std::string("JtagRegister_Module_3"), Hash(), '.');        
+        read_config_hash.set(std::string("JtagRegister_Module_4"), Hash(), '.');        
+        //*/
         
         if (!karabo::util::similar(read_config_hash, m_last_config_hash)){
                         
             KARABO_LOG_INFO << "Updating meta config schema: ";
             Schema expected;
-            DsscH5ConfigToSchema::HashToSchema(read_config_hash, expected, "");
-            //this->updateSchema(expected, true);
-            this->appendSchema(expected, true);
-            m_last_config_hash = read_config_hash;
-        }else{
-            std::cout << "hashes are similar" << std::endl;
+            DsscH5ConfigToSchema::HashToSchemaDetConf(Hash(s_dsscConfBaseNode, read_config_hash), expected, "", true);
+            this->appendSchema(expected, true);            
         }
-         
-        /*
-            //m_ppt->
-
-            configData.timestamp = utils::getLocalTimeStr();
-
-            //for(int idx=0; idx<pptFullConfig->numPixelRegs(); idx++){
-            //  configData.pixelRegisterDataVec.push_back(m_ppt->getRegisterConfig("PixelRegister Module " + to_string(idx+1), m_ppt->pptFullConfig->getPixelReg(idx)));
-            //}
-            
-            
-            for(int idx=0; idx<pptFullConfig->numJtagRegs(); idx++){
-              configData.jtagRegisterDataVec.push_back(m_ppt->getRegisterConfig("JtagRegister Module " + to_string(idx+1), m_ppt->pptFullConfig->getJtagReg(idx)));
-            }
-            if(!pptFullConfig->getIOBRegsFileName().empty()){
-              configData.iobRegisterData = m_ppt->getRegisterConfig("IOBRegister", m_ppt->pptFullConfig->getIOBReg());
-            }
-            if(!pptFullConfig->getEPCRegsFileName().empty()){
-              configData.epcRegisterData = m_ppt->getRegisterConfig("EPCRegister", m_ppt->pptFullConfig->getEPCReg());
-            }
-
-            if(!m_ppt->pptFullConfig->getSequencerFileName().empty()){
-              Sequencer * sequencer = m_ppt->pptFullConfig->getSequencer();
-              if(sequencer->configGood){
-                configData.sequencerData = sequencer->getSequencerParameterMap();
-              }
-            }
-          
-          
-        }
-        //addConfiguration(m_last_config_hash, h5config);
-        
-        uint32_t numRegisters = h5config.getNumRegisters();
-
-        const std::string baseNodeMain(s_dsscConfBaseNode + ".");
-
-        hash.set<uint32_t>(baseNodeMain + "NumRegisters", numRegisters);
-        hash.set<std::string>(baseNodeMain + "RegisterNames", configData.getRegisterNames());
-        hash.set<std::string>(baseNodeMain + "timestamp", configData.timestamp);
-
-        addConfiguration(hash, configData.pixelRegisterDataVec);
-        addConfiguration(hash, configData.jtagRegisterDataVec);
-        addConfiguration(hash, configData.iobRegisterData);
-        addConfiguration(hash, configData.epcRegisterData);
-
-        addConfiguration(hash, "Sequencer", configData.sequencerData);
-        addConfiguration(hash, "ControlSequence", configData.controlSequenceData);
-        
-        //m_config_hash
-        if (!karabo::util::similar(hash, m_lastHash)) { // check on similarity of structure, not content
-            
-            
-            //m_lastHash = hash;
-        }//*/       
-        
+        m_last_config_hash = read_config_hash;
+        this->set(Hash(s_dsscConfBaseNode, m_last_config_hash));        
     }
     
     void DsscPpt::updateConfigFromHash(){
         //
+        Hash read_config_hash = this->get<Hash>(s_dsscConfBaseNode);
+        if(read_config_hash != m_last_config_hash){
+            std::cout << "hashes are different" << std::endl;
+           
+        }else{
+            std::cout << "hashes are identical" << std::endl;
+        }
+        
     }
 
     void DsscPpt::doFastInit() {

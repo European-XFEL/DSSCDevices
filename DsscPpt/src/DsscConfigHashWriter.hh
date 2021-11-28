@@ -35,16 +35,25 @@ namespace karabo {
         void addMapData(karabo::util::Hash& hash, const std::string& node, const std::map<std::string, uint32_t>& mapData);
 
         static void HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path);
+        static void HashToSchemaDetConf(const karabo::util::Hash& hash, karabo::util::Schema& expected,\
+            const std::string& path, bool _readonly);        
 
         static void addConfiguration(karabo::util::Hash& hash, DsscHDF5ConfigData& configData);
         static void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfigVec& registerConfigVec);
         static void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfig & registerConfig);
         static void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscHDF5SequenceData& sequenceData);
         
+         static bool compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new);
+        
     private:
 
         static std::string & removeSpaces(std::string& p) {
             std::replace(p.begin(), p.end(), ' ', '_');
+            return p;
+        }
+        
+        static std::string & restoreSpaces(std::string& p) {
+            std::replace(p.begin(), p.end(), '_', ' ');
             return p;
         }
 
