@@ -43,7 +43,8 @@ namespace karabo {
         static void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfig & registerConfig);
         static void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscHDF5SequenceData& sequenceData);
         
-         static bool compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new);
+        std::vector<std::pair<std::string, unsigned int>> compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new);
+        void compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new, std::string path);
         
     private:
 
@@ -56,6 +57,8 @@ namespace karabo {
             std::replace(p.begin(), p.end(), '_', ' ');
             return p;
         }
+        
+        std::vector<std::pair<std::string, unsigned int>> paths_diffVals;
 
     };
 

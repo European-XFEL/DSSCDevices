@@ -177,8 +177,39 @@ namespace karabo {
     }
     
     
-    bool DsscH5ConfigToSchema::compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new){
+    std::vector<std::pair<std::string, unsigned int>> DsscH5ConfigToSchema::compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new){
+        paths_diffVals.clear();
+        compareConfigHashData_rec(hash_old, hash_new, std::string());
+        return paths_diffVals;
         //
+    }
+    
+    void DsscH5ConfigToSchema::compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new, std::string path){
+        //
+        
+        for (Hash::const_iterator it = hash_new.begin(); it != hash_new.end(); ++it){
+
+            switch (it->getType()) {                
+
+                case Types::HASH:
+                    compareConfigHashData_rec(hash_old.get<Hash>(it->getKey()), it->getValue<Hash>(), path + it->getKey() + ".");
+                    break;
+                    
+                case Types::UINT32:                    
+                    if(hash_old.get<unsigned int>(it->getKey()) != it->getValue<unsigned int>()){
+                        paths_diffVals.emplace_back(path + it->getKey(), it->getValue<unsigned int>());
+                    }
+                    break;
+                    
+                case Types::STRING:   
+                case Types::VECTOR_UINT32:
+                    break;//*/
+                default:
+                    std::clog << "Data type " << toString(it->getType()) << " not supported!";
+            }
+            
+        }
+        
     }
 
 

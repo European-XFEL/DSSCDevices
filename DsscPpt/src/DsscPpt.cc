@@ -2152,13 +2152,15 @@ namespace karabo {
     
     void DsscPpt::updateConfigFromHash(){
         //
+        DsscH5ConfigToSchema dsscH5ConfSchObj;
         Hash read_config_hash = this->get<Hash>(s_dsscConfBaseNode);
-        if(read_config_hash != m_last_config_hash){
-            std::cout << "hashes are different" << std::endl;
-           
-        }else{
-            std::cout << "hashes are identical" << std::endl;
-        }
+        std::vector<std::pair<std::string, unsigned int>> diff_entries = \
+                dsscH5ConfSchObj.compareConfigHashData(m_last_config_hash, read_config_hash);
+        if(diff_entries.empty()) return;
+        for(auto it : diff_entries){
+                std::cout << it.first << " : " << it.second  << std::endl;
+            };
+            
         
     }
 
