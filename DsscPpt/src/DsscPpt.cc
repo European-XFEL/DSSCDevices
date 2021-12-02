@@ -2156,24 +2156,14 @@ namespace karabo {
                 dsscH5ConfSchObj.compareConfigHashData(m_last_config_hash, read_config_hash);
         if(diff_entries.empty()) return;
         for(auto it : diff_entries){
-            std::cout << it.first << " : " << it.second  << std::endl;
+            //std::cout << it.first << " : " << it.second  << std::endl;
             vector< std::string > SplitVec;
             boost::split( SplitVec, it.first, boost::is_any_of("."));
-            
-            for(std::string vecstrit : SplitVec){
-                std::cout << vecstrit << std::endl;                
-            }
-            std::cout <<  std::endl;
             
             std::string selModSet = m_loaded_config_hash.getAttribute<std::string>(SplitVec[0]+"."+SplitVec[1], "origKey", '.');
             std::string sigName = m_loaded_config_hash.getAttribute<std::string>(SplitVec[0]+"."+SplitVec[1]+"."+SplitVec[2],\
                     "origKey", '.');
             
-            std::cout << modSetName << std::endl;
-            std::cout << sigName << std::endl;
-            
-             
-                     
             SuS::ConfigReg* configRegister;
             if(it.first.substr(0,4) == "EPCR"){
                 configRegister =  m_ppt->getRegisters("epc");
@@ -2209,31 +2199,6 @@ namespace karabo {
         }
         m_last_config_hash = read_config_hash;
     }
-    
-    /*
-             if (selRegStr.compare("epc") == 0) {
-            {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                m_ppt->programEPCRegister(selModSet);
-            }
-        } else if (selRegStr.compare("iob") == 0) {
-            if (setActiveModule(module)) {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                m_ppt->programIOBRegister(selModSet);
-            }
-        } else if (selRegStr.compare("jtag") == 0) {
-            if (setActiveModule(module)) {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                m_ppt->programJtagSingle(selModSet);
-            }
-        } else if (selRegStr.compare("pixel") == 0) {
-            if (setActiveModule(module)) {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                m_ppt->programPixelRegs();
-            }
-        }
-    //*/
-    
     
     void DsscPpt::doFastInit() {
         DSSC::StateChangeKeeper keeper(this, State::ON);
