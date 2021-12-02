@@ -48,14 +48,10 @@ namespace karabo {
         
     private:
 
-        static std::string & removeSpaces(std::string& p) {
-            std::replace(p.begin(), p.end(), ' ', '_');
-            return p;
-        }
-        
-        static std::string & restoreSpaces(std::string& p) {
-            std::replace(p.begin(), p.end(), '_', ' ');
-            return p;
+        static std::string removeSpaces(std::string& p) {
+            std::string res(p);
+            std::replace(res.begin(), res.end(), ' ', '_');
+            return res;
         }
         
         std::vector<std::pair<std::string, unsigned int>> paths_diffVals;

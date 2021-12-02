@@ -441,6 +441,7 @@ namespace karabo {
 
         DsscH5ConfigToSchema m_dsscConfigtoSchema;
 
+        karabo::util::Hash m_loaded_config_hash;
         karabo::util::Hash m_last_config_hash;
         karabo::util::Hash m_prev_config_hash;
         

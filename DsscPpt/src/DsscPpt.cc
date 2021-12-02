@@ -10,6 +10,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 #include <boost/functional/hash.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <chrono>
 
 #include "DsscPpt.hh"
@@ -2133,10 +2134,6 @@ namespace karabo {
         read_config_hash.set(std::string("PixelRegister_Module_2"), Hash(), '.');        
         read_config_hash.set(std::string("PixelRegister_Module_3"), Hash(), '.');        
         read_config_hash.set(std::string("PixelRegister_Module_4"), Hash(), '.');        
-        read_config_hash.set(std::string("JtagRegister_Module_1"), Hash(), '.');        
-        read_config_hash.set(std::string("JtagRegister_Module_2"), Hash(), '.');        
-        read_config_hash.set(std::string("JtagRegister_Module_3"), Hash(), '.');        
-        read_config_hash.set(std::string("JtagRegister_Module_4"), Hash(), '.');        
         //*/
         
         if (!karabo::util::similar(read_config_hash, m_last_config_hash)){
@@ -2146,7 +2143,8 @@ namespace karabo {
             DsscH5ConfigToSchema::HashToSchemaDetConf(Hash(s_dsscConfBaseNode, read_config_hash), expected, "", true);
             this->appendSchema(expected, true);            
         }
-        m_last_config_hash = read_config_hash;
+        m_loaded_config_hash = read_config_hash;
+        m_last_config_hash = read_config_hash;        
         this->set(Hash(s_dsscConfBaseNode, m_last_config_hash));        
     }
     
@@ -2158,12 +2156,85 @@ namespace karabo {
                 dsscH5ConfSchObj.compareConfigHashData(m_last_config_hash, read_config_hash);
         if(diff_entries.empty()) return;
         for(auto it : diff_entries){
-                std::cout << it.first << " : " << it.second  << std::endl;
-            };
+            std::cout << it.first << " : " << it.second  << std::endl;
+            vector< std::string > SplitVec;
+            boost::split( SplitVec, it.first, boost::is_any_of("."));
             
-        
+            for(std::string vecstrit : SplitVec){
+                std::cout << vecstrit << std::endl;                
+            }
+            std::cout <<  std::endl;
+            
+            std::string selModSet = m_loaded_config_hash.getAttribute<std::string>(SplitVec[0]+"."+SplitVec[1], "origKey", '.');
+            std::string sigName = m_loaded_config_hash.getAttribute<std::string>(SplitVec[0]+"."+SplitVec[1]+"."+SplitVec[2],\
+                    "origKey", '.');
+            
+            std::cout << modSetName << std::endl;
+            std::cout << sigName << std::endl;
+            
+             
+                     
+            SuS::ConfigReg* configRegister;
+            if(it.first.substr(0,4) == "EPCR"){
+                configRegister =  m_ppt->getRegisters("epc");
+                configRegister->setSignalValue(selModSet, SplitVec[4], sigName, it.second);
+                {
+                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                    m_ppt->programEPCRegister(selModSet);
+                }
+            }else if(it.first.substr(0,4) == "IOBR"){
+                configRegister =  m_ppt->getRegisters("iob");
+                configRegister->setSignalValue(selModSet, SplitVec[4], sigName, it.second);
+                const uint32_t module = get<uint32_t>("selModule");
+                setActiveModule(module);
+                {
+                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                    m_ppt->programIOBRegister(selModSet);
+                }
+            }else if(it.first.substr(0,4) == "Jtag"){
+                configRegister =  m_ppt->getRegisters("jtag");
+                uint32_t module = std::stoul(SplitVec[0].substr(SplitVec[0].length()-1, SplitVec[0].length()-1));
+                setActiveModule(module);
+                configRegister->setSignalValue(selModSet, SplitVec[4], sigName, it.second);                
+                {
+                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                    m_ppt->programJtagSingle(selModSet);
+                }                
+            }else{
+                std::clog << "registry is not EPC, IOB, or Jtag";
+                return;
+            }
+            //*/
+            
+        }
+        m_last_config_hash = read_config_hash;
     }
-
+    
+    /*
+             if (selRegStr.compare("epc") == 0) {
+            {
+                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                m_ppt->programEPCRegister(selModSet);
+            }
+        } else if (selRegStr.compare("iob") == 0) {
+            if (setActiveModule(module)) {
+                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                m_ppt->programIOBRegister(selModSet);
+            }
+        } else if (selRegStr.compare("jtag") == 0) {
+            if (setActiveModule(module)) {
+                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                m_ppt->programJtagSingle(selModSet);
+            }
+        } else if (selRegStr.compare("pixel") == 0) {
+            if (setActiveModule(module)) {
+                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                m_ppt->programPixelRegs();
+            }
+        }
+    //*/
+    
+    
     void DsscPpt::doFastInit() {
         DSSC::StateChangeKeeper keeper(this, State::ON);
         {

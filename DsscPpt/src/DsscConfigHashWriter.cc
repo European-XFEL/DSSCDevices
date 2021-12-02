@@ -184,7 +184,8 @@ namespace karabo {
         //
     }
     
-    void DsscH5ConfigToSchema::compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new, std::string path){
+    void DsscH5ConfigToSchema::compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new,\
+            std::string path){
         //
         
         for (Hash::const_iterator it = hash_new.begin(); it != hash_new.end(); ++it){
@@ -192,7 +193,7 @@ namespace karabo {
             switch (it->getType()) {                
 
                 case Types::HASH:
-                    compareConfigHashData_rec(hash_old.get<Hash>(it->getKey()), it->getValue<Hash>(), path + it->getKey() + ".");
+                    compareConfigHashData_rec(hash_old.get<Hash>(it->getKey()), it->getValue<Hash>(), path + it->getKey() + ".");                    
                     break;
                     
                 case Types::UINT32:                    
@@ -243,10 +244,13 @@ namespace karabo {
             return;
         }
 
+        std::string baseNode = registerConfig.registerName;
+        baseNode = removeSpaces(baseNode);
+        
+        hash.set<Hash>(baseNode, Hash());
+        hash.setAttribute<std::string>(baseNode, "origKey", registerConfig.registerName, '.');
 
-        const std::string baseNode = removeSpaces(registerConfig.registerName);
-
-        hash.set<uint32_t>(baseNode + ".NumModuleSets", registerConfig.numModuleSets);
+        hash.set<uint32_t>(baseNode + ".NumModuleSets", registerConfig.numModuleSets);        
 
         std::string moduleSetsStr;
 
@@ -257,7 +261,12 @@ namespace karabo {
 
         int modSet = 0;
         for (auto & modSetName : registerConfig.moduleSets) {
-            const std::string setDirName = baseNode + "." + removeSpaces(modSetName) + ".";
+            std::string setDirName = baseNode + "." + modSetName;
+            setDirName = removeSpaces(setDirName);
+            
+            hash.set<Hash>(setDirName, Hash());
+            hash.setAttribute<std::string>(setDirName, "origKey", modSetName, '.');
+            setDirName += ".";
 
             hsize_t datasize = registerConfig.numberOfModules[modSet];
 
@@ -273,14 +282,19 @@ namespace karabo {
 
             int sig = 0;
             for (auto & signalName : registerConfig.signalNames[modSet]) {
-                const std::string sigDirName = setDirName + removeSpaces(signalName) + ".";
+                std::string sigDirName = setDirName + signalName;
+                sigDirName = removeSpaces(sigDirName);
+                
+                hash.set<Hash>(sigDirName, Hash());
+                hash.setAttribute<std::string>(sigDirName, "origKey", signalName, '.');
+                sigDirName += ".";
+                
                 hash.set<std::string>(sigDirName + "BitPositions", registerConfig.bitPositions[modSet][sig]);
 
                 hash.set<uint32_t>(sigDirName + "ReadOnly", registerConfig.readOnly[modSet][sig]);
                 hash.set<uint32_t>(sigDirName + "ActiveLow", registerConfig.activeLow[modSet][sig]);
                 hash.set<uint32_t>(sigDirName + "AccessLevel", registerConfig.accessLevels[modSet][sig]);
 
-                //hash.set(sigDirName + "ModulesData", registerConfig.registerData[modSet][sig]);
                 hash.set<Hash>(sigDirName + "ModulesData", Hash());
                 
                 for(int i = 0 ; i < datasize; i++){
@@ -301,8 +315,10 @@ namespace karabo {
         const std::string basenode = (node.back() == '.') ? node : node + ".";
 
         for (const auto & mapItem : sequenceData) {
-            std::string path = mapItem.first;
-            hash.set<uint32_t>(basenode + removeSpaces(path), mapItem.second);
+            std::string path = basenode + mapItem.first;
+            path = removeSpaces(path);
+            hash.set<uint32_t>(path, mapItem.second);
+            hash.setAttribute<std::string>(path, "origKey", mapItem.first, '.');            
         }
     }
 }//karabo namespace
