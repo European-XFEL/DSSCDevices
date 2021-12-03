@@ -1011,12 +1011,6 @@ namespace karabo {
                 .description("Detector, EPC, JTAG, IOB config. registers")                
                 .commit();     
         
-        /*SLOT_ELEMENT(expected)
-                .key("updateConfigSchema")
-                .displayedName("Read Config Registers")
-                .description("Trigger one single Burst")
-                .commit();//*/
-       
         SLOT_ELEMENT(expected)
                 .key("updateConfigHash").displayedName("Read Config Data")
                 .description("Read Configuration Data")
