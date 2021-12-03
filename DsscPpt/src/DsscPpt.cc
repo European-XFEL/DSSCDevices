@@ -1202,6 +1202,7 @@ namespace karabo {
         getCoarseGainParamsIntoGui();
         
         updateGainHashValue();
+        updateConfigHash();
 
         KARABO_LOG_INFO << "init done";
 
@@ -2004,6 +2005,9 @@ namespace karabo {
         getCoarseGainParamsIntoGui();
         updateNumFramesToSend();
         updateSequenceCounters();
+        
+        updateGainHashValue();
+        updateConfigHash();
     }
     
 
@@ -2126,16 +2130,22 @@ namespace karabo {
     
     void DsscPpt::updateConfigHash(){
         
-        auto h5config = m_ppt->getHDF5ConfigData();
+        DsscHDF5ConfigData h5config;
+
+        h5config.timestamp = utils::getLocalTimeStr();
+        
+        m_ppt->addJtag_HDF5ConfigData(h5config);
+        
+        m_ppt->addIOB_HDF5ConfigData(h5config);
+
+        m_ppt->addEPC_HDF5ConfigData(h5config);
+        
+        //auto h5config = m_ppt->getHDF5ConfigData();
+        
+        
         Hash read_config_hash;        
-        DsscH5ConfigToSchema::addConfiguration(read_config_hash, h5config);
-        
-        read_config_hash.set(std::string("PixelRegister_Module_1"), Hash(), '.');
-        read_config_hash.set(std::string("PixelRegister_Module_2"), Hash(), '.');        
-        read_config_hash.set(std::string("PixelRegister_Module_3"), Hash(), '.');        
-        read_config_hash.set(std::string("PixelRegister_Module_4"), Hash(), '.');        
-        //*/
-        
+        DsscH5ConfigToSchema::addConfiguration(read_config_hash, h5config);        
+      
         if (!karabo::util::similar(read_config_hash, m_last_config_hash)){
                         
             KARABO_LOG_INFO << "Updating meta config schema: ";
