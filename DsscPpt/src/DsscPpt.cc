@@ -2054,34 +2054,6 @@ namespace karabo {
         }
     }
 
-
-    /*void DsscPpt::updateFullConfigHash() {
-        
-        auto h5config = m_ppt->getHDF5ConfigData();
-        karabo::util::Hash read_config_hash;
-        
-        DsscH5ConfigToSchema::addConfiguration(read_config_hash, h5config);
-        
-        if (!karabo::util::similar(m_last_config_hash, read_config_hash)) { // check on similarity of structure, not content
-            
-            
-            KARABO_LOG_INFO << "Updating meta config schema: ";
-            Schema expected;
-            DsscH5ConfigToSchema::HashToSchema(read_config_hash, expected, "");
-            
-            Schema update;
-            OUTPUT_CHANNEL(update).key("daqOutput")
-                    .displayedName("daqOutput")
-                    .dataSchema(expected)
-                    .commit();
-
-            this->updateSchema(update, true);           
-            
-            m_last_config_hash = read_config_hash;            
-        }
-    }//*/
-
-
     void DsscPpt::sendConfigHashOut() {
         if (m_last_config_hash != Hash()) {
             std::cout << "Sending config data" << std::endl;
@@ -2195,7 +2167,7 @@ namespace karabo {
                     m_ppt->programJtagSingle(selModSet);
                 }                
             }else{
-                std::clog << "registry is not EPC, IOB, or Jtag";
+                KARABO_LOG_DEBUG << "registry is not EPC, IOB, or Jtag";
                 return;
             }
             //*/
