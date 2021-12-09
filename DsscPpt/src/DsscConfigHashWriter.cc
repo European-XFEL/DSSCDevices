@@ -68,11 +68,6 @@ namespace karabo {
                             .assignmentOptional()
                             .noDefaultValue()
                             .commit();
-                    break;
-
-                default:
-                    std::clog << "Data type " << toString(it->getType()) << " not supported!";
-
             }
         }
     }
