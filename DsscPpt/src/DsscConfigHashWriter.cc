@@ -34,21 +34,6 @@ namespace karabo {
     DsscH5ConfigToSchema::~DsscH5ConfigToSchema() {
     };
 
-
-    bool DsscH5ConfigToSchema::getFullConfigHash(const std::string& filename, Hash& hash) {
-
-        auto h5config = SuS::DSSC_PPT_API::getHDF5ConfigData(filename);
-        addConfiguration(hash, h5config);
-
-        if (!karabo::util::similar(hash, m_lastHash)) { // check on similarity of structure, not content
-            m_lastHash = hash;
-            return true;
-        }
-
-        return false;
-    }
-
-
     void DsscH5ConfigToSchema::HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path) {
         for (Hash::const_iterator it = hash.begin(); it != hash.end(); ++it) {
             switch (it->getType()) {
@@ -63,7 +48,8 @@ namespace karabo {
                     UINT32_ELEMENT(expected).key(path + it->getKey())
                             .daqPolicy(DAQPolicy::OMIT)
                             .init()
-                            .assignmentOptional().noDefaultValue()
+                            .assignmentOptional()
+                            .noDefaultValue()
                             .commit();
                     break;
 
@@ -71,29 +57,108 @@ namespace karabo {
                     STRING_ELEMENT(expected).key(path + it->getKey())
                             .daqPolicy(DAQPolicy::OMIT)
                             .init()
-                            .assignmentOptional().noDefaultValue()
+                            .assignmentOptional()
+                            .noDefaultValue()
                             .commit();
                     break;
                 case Types::VECTOR_UINT32:
                     VECTOR_UINT32_ELEMENT(expected).key(path + it->getKey())
                             .daqPolicy(DAQPolicy::OMIT)
                             .init()
-                            .assignmentOptional().noDefaultValue()
+                            .assignmentOptional()
+                            .noDefaultValue()
                             .commit();
-                    break;
-
-                default:
-                    std::clog << "Data type " << toString(it->getType()) << " not supported!";
-
             }
         }
     }
 
 
-    karabo::util::Schema DsscH5ConfigToSchema::getUpdatedSchema() {
-        Schema expected;
-        HashToSchema(m_lastHash, expected, "");
-        return expected;
+    void DsscH5ConfigToSchema::HashToSchemaDetConf(const karabo::util::Hash& hash, karabo::util::Schema& expected,\
+            const std::string& path, bool _readonly) {
+        
+        bool ReadOnly = true;
+        if (hash.has("ReadOnly")){            
+            ReadOnly = hash.get<unsigned int>("ReadOnly");    
+        }
+        
+        bool moduledata = false;
+        if(path.length()>1){
+            std::size_t dotpos = path.substr(0, path.length()-1).rfind('.');
+            if(dotpos != std::string::npos){
+                if(path.substr(dotpos+1, path.length()-2 - dotpos) == "ModulesData"){
+                    moduledata = true;
+                } 
+            }
+        }
+      
+        for (Hash::const_iterator it = hash.begin(); it != hash.end(); ++it) {
+            
+            switch (it->getType()) {
+
+                case Types::HASH:
+                    
+                    NODE_ELEMENT(expected).key(path + it->getKey())
+                            .commit();                    
+                    HashToSchemaDetConf(it->getValue<Hash>(), expected, path + it->getKey() + ".", ReadOnly);
+                    break;
+
+                case Types::UINT32:
+                    if((!_readonly) && moduledata){                         
+                        UINT32_ELEMENT(expected).key(path + it->getKey())
+                                .daqPolicy(DAQPolicy::OMIT)
+                                .init()
+                                .assignmentOptional()
+                                .noDefaultValue()
+                                .reconfigurable()
+                                .commit();
+                    }else{                        
+                        UINT32_ELEMENT(expected).key(path + it->getKey())
+                                .daqPolicy(DAQPolicy::OMIT)
+                                .init()
+                                .assignmentOptional()
+                                .noDefaultValue()                                
+                                .commit();                            
+                    }
+                    break;
+
+                case Types::STRING:
+                    if((!_readonly) && moduledata){
+                        STRING_ELEMENT(expected).key(path + it->getKey())
+                                .daqPolicy(DAQPolicy::OMIT)
+                                .init()
+                                .assignmentOptional()
+                                .noDefaultValue()
+                                .reconfigurable()
+                                .commit();
+                    }else{
+                        STRING_ELEMENT(expected).key(path + it->getKey())
+                                .daqPolicy(DAQPolicy::OMIT)
+                                .init()
+                                .assignmentOptional()
+                                .noDefaultValue()                                
+                                .commit();                        
+                    }
+                    break;
+                case Types::VECTOR_UINT32:
+                    if((!_readonly) && moduledata){
+                        VECTOR_UINT32_ELEMENT(expected).key(path + it->getKey())
+                                .daqPolicy(DAQPolicy::OMIT)
+                                .init()
+                                .assignmentOptional()
+                                .noDefaultValue()
+                                .reconfigurable()
+                                .commit();
+                    }else{
+                        VECTOR_UINT32_ELEMENT(expected).key(path + it->getKey())
+                               .daqPolicy(DAQPolicy::OMIT)
+                               .init()
+                               .assignmentOptional()
+                               .noDefaultValue()                               
+                               .commit();                       
+                    }
+
+            }
+        }//*/
     }
 
 
@@ -102,17 +167,45 @@ namespace karabo {
             hash.set<uint32_t>(node + item.first, item.second);
         }
     }
+    
+    
+    std::vector<std::pair<std::string, unsigned int>> DsscH5ConfigToSchema::compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new){
+        paths_diffVals.clear();
+        compareConfigHashData_rec(hash_old, hash_new, std::string());
+        return paths_diffVals;
+        //
+    }
+    
+    void DsscH5ConfigToSchema::compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new,\
+            std::string path){
+        //
+        
+        for (Hash::const_iterator it = hash_new.begin(); it != hash_new.end(); ++it){
+
+            switch (it->getType()) {                
+
+                case Types::HASH:
+                    compareConfigHashData_rec(hash_old.get<Hash>(it->getKey()), it->getValue<Hash>(), path + it->getKey() + ".");                    
+                    break;
+                    
+                case Types::UINT32:                    
+                    if(hash_old.get<unsigned int>(it->getKey()) != it->getValue<unsigned int>()){
+                        paths_diffVals.emplace_back(path + it->getKey(), it->getValue<unsigned int>());
+                    }
+            }
+            
+        }
+        
+    }
 
 
     void DsscH5ConfigToSchema::addConfiguration(Hash& hash, DsscHDF5ConfigData & configData) {
 
         uint32_t numRegisters = configData.getNumRegisters();
 
-        const std::string baseNodeMain(s_dsscConfBaseNode + ".");
-
-        hash.set<uint32_t>(baseNodeMain + "NumRegisters", numRegisters);
-        hash.set<std::string>(baseNodeMain + "RegisterNames", configData.getRegisterNames());
-        hash.set<std::string>(baseNodeMain + "timestamp", configData.timestamp);
+        hash.set<uint32_t>("NumRegisters", numRegisters);
+        hash.set<std::string>("RegisterNames", configData.getRegisterNames());
+        hash.set<std::string>("timestamp", configData.timestamp);
 
         addConfiguration(hash, configData.pixelRegisterDataVec);
         addConfiguration(hash, configData.jtagRegisterDataVec);
@@ -136,11 +229,13 @@ namespace karabo {
             return;
         }
 
-        const std::string baseNodeMain(s_dsscConfBaseNode + ".");
+        std::string baseNode = registerConfig.registerName;
+        baseNode = removeSpaces(baseNode);
+        
+        hash.set<Hash>(baseNode, Hash());
+        hash.setAttribute<std::string>(baseNode, "origKey", registerConfig.registerName, '.');
 
-        const std::string baseNode = baseNodeMain + removeSpaces(registerConfig.registerName);
-
-        hash.set<uint32_t>(baseNode + ".NumModuleSets", registerConfig.numModuleSets);
+        hash.set<uint32_t>(baseNode + ".NumModuleSets", registerConfig.numModuleSets);        
 
         std::string moduleSetsStr;
 
@@ -151,7 +246,12 @@ namespace karabo {
 
         int modSet = 0;
         for (auto & modSetName : registerConfig.moduleSets) {
-            const std::string setDirName = baseNode + "." + removeSpaces(modSetName) + ".";
+            std::string setDirName = baseNode + "." + modSetName;
+            setDirName = removeSpaces(setDirName);
+            
+            hash.set<Hash>(setDirName, Hash());
+            hash.setAttribute<std::string>(setDirName, "origKey", modSetName, '.');
+            setDirName += ".";
 
             hsize_t datasize = registerConfig.numberOfModules[modSet];
 
@@ -162,19 +262,30 @@ namespace karabo {
             hash.set<uint32_t>(setDirName + "Address", registerConfig.addresses[modSet]);
             hash.set<uint32_t>(setDirName + "SetIsReverse", registerConfig.setIsReverse[modSet]);
             hash.set<uint32_t>(setDirName + "NumSignals", registerConfig.numSignals[modSet]);
-            hash.set<uint32_t>(setDirName + "NumModules", registerConfig.numberOfModules[modSet]);
-
+            //hash.set<string>(setDirName + "signalNames", registerConfig.signalNames[modSet]);
+            hash.set<uint32_t>(setDirName + "NumModules", registerConfig.numberOfModules[modSet]);            
 
             int sig = 0;
             for (auto & signalName : registerConfig.signalNames[modSet]) {
-                const std::string sigDirName = setDirName + removeSpaces(signalName) + ".";
+                std::string sigDirName = setDirName + signalName;
+                sigDirName = removeSpaces(sigDirName);
+                
+                hash.set<Hash>(sigDirName, Hash());
+                hash.setAttribute<std::string>(sigDirName, "origKey", signalName, '.');
+                sigDirName += ".";
+                
                 hash.set<std::string>(sigDirName + "BitPositions", registerConfig.bitPositions[modSet][sig]);
 
                 hash.set<uint32_t>(sigDirName + "ReadOnly", registerConfig.readOnly[modSet][sig]);
                 hash.set<uint32_t>(sigDirName + "ActiveLow", registerConfig.activeLow[modSet][sig]);
                 hash.set<uint32_t>(sigDirName + "AccessLevel", registerConfig.accessLevels[modSet][sig]);
 
-                hash.set(sigDirName + "ConfigValues", registerConfig.registerData[modSet][sig]);
+                hash.set<Hash>(sigDirName + "ModulesData", Hash());
+                
+                for(int i = 0 ; i < datasize; i++){
+                    hash.set(sigDirName + "ModulesData." + std::to_string(registerConfig.modules[modSet][i]),\
+                            registerConfig.registerData[modSet][sig][i] );
+                }
 
                 sig++;
             }
@@ -186,12 +297,13 @@ namespace karabo {
     void DsscH5ConfigToSchema::addConfiguration(Hash & hash, const std::string& node, const DsscHDF5SequenceData & sequenceData) {
         if (sequenceData.empty()) return;
 
-        const std::string baseNodeMain(s_dsscConfBaseNode + ".");
-        const std::string basenode = (node.back() == '.') ? baseNodeMain + node : baseNodeMain + node + ".";
+        const std::string basenode = (node.back() == '.') ? node : node + ".";
 
         for (const auto & mapItem : sequenceData) {
-            std::string path = mapItem.first;
-            hash.set<uint32_t>(basenode + removeSpaces(path), mapItem.second);
+            std::string path = basenode + mapItem.first;
+            path = removeSpaces(path);
+            hash.set<uint32_t>(path, mapItem.second);
+            hash.setAttribute<std::string>(path, "origKey", mapItem.first, '.');            
         }
     }
 }//karabo namespace

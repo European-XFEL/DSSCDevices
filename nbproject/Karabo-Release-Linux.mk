@@ -61,7 +61,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=-L${KARABO}/extern/dssc_minuit/lib -L${KARABO}/extern/lib/dssc -L${KARABO}/extern/lib -L${KARABO}/lib -Wl,-rpath,${KARABO}/extern/lib/dssc -Wl,-rpath,${KARABO}/extern/dssc_minuit/lib -Wl,-rpath,${KARABO}/extern/lib -Wl,-rpath,${KARABO}/lib -lkarabo `pkg-config --libs karaboDependencies` -lDsscDependencies -lCHIPInterface -lSequencer -lUtils -lDsscHdf5 -lPPT -lPPTDataReceiver -lConfigReg  
+LDLIBSOPTIONS=-L${KARABO}/extern/lib/dssc -L${KARABO}/extern/lib -L${KARABO}/lib -Wl,-rpath,${KARABO}/extern/lib/dssc -Wl,-rpath,${KARABO}/extern/dssc_minuit/lib -Wl,-rpath,${KARABO}/extern/lib -Wl,-rpath,${KARABO}/lib -lkarabo `pkg-config --libs karaboDependencies` -lDsscDependencies -lCHIPInterface -lSequencer -lUtils -lDsscHdf5 -lPPT -lPPTDataReceiver -lConfigReg  
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}

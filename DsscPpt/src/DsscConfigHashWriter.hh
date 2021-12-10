@@ -21,8 +21,6 @@
 
 namespace karabo {
 
-    const std::string s_dsscConfBaseNode = "DetConfig";
-
     class DsscH5ConfigToSchema {
 
     public:
@@ -31,25 +29,30 @@ namespace karabo {
 
         virtual ~DsscH5ConfigToSchema();
 
-        bool getFullConfigHash(const std::string& filename, karabo::util::Hash& hash);
-        karabo::util::Schema getUpdatedSchema();
+        //karabo::util::Schema getUpdatedSchema();
         void addMapData(karabo::util::Hash& hash, const std::string& node, const std::map<std::string, uint32_t>& mapData);
 
+        static void HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path);
+        static void HashToSchemaDetConf(const karabo::util::Hash& hash, karabo::util::Schema& expected,\
+            const std::string& path, bool _readonly);        
+
+        static void addConfiguration(karabo::util::Hash& hash, DsscHDF5ConfigData& configData);
+        static void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfigVec& registerConfigVec);
+        static void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfig & registerConfig);
+        static void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscHDF5SequenceData& sequenceData);
+        
+        std::vector<std::pair<std::string, unsigned int>> compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new);
+        void compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new, std::string path);
+        
     private:
 
-        void HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path);
-
-        void addConfiguration(karabo::util::Hash& hash, DsscHDF5ConfigData& configData);
-        void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfigVec& registerConfigVec);
-        void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfig & registerConfig);
-        void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscHDF5SequenceData& sequenceData);
-
-        inline std::string & removeSpaces(std::string& p) const {
-            std::replace(p.begin(), p.end(), ' ', '_');
-            return p;
+        static std::string removeSpaces(std::string& p) {
+            std::string res(p);
+            std::replace(res.begin(), res.end(), ' ', '_');
+            return res;
         }
-
-        karabo::util::Hash m_lastHash;
+        
+        std::vector<std::pair<std::string, unsigned int>> paths_diffVals;
 
     };
 
