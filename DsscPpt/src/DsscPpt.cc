@@ -1472,7 +1472,10 @@ namespace karabo {
 
 
     void DsscPpt::generateAllConfigRegElements() {
-        Schema schema;
+        
+        
+        
+        Schema schema;        
 
         generateConfigRegElements(schema, m_ppt->getEPCRegisters(), "EPCRegisters", m_epcTag);
 
@@ -1970,7 +1973,7 @@ namespace karabo {
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
         updateNumFramesToSend();
-        updateSequenceCounters();
+        //updateSequenceCounters();
         
         updateGainHashValue();
         updateConfigHash();
@@ -2065,17 +2068,69 @@ namespace karabo {
         set<unsigned long long>("gain.gainHash", static_cast<unsigned long long>(seed));
     }
     
+    void DsscPpt::updateDetRegistryGui(SuS::ConfigReg * reg,\
+            std::string regName, std::string tagName, std::string rootNode){
+        
+        
+        std::string rootRegName = rootNode + "." + regName;        
+        
+        const auto moduleSets = reg->getModuleSetNames();
+
+        for (const auto & modSetName : moduleSets) { 
+            std::string keyModuleSetName(rootRegName + "." + modSetName);
+
+            std::vector<std::string> modules_strvec = reg->getModules(modSetName);
+            const auto signalNames = reg->getSignalNames(modSetName);
+            for (const auto & sigName : signalNames) {
+                //  KARABO_LOG_INFO << "Add Signal " + sigName;
+                if (sigName.find("_nc") != string::npos) {
+                    continue;
+                }
+                
+                std::string keySignalName(keyModuleSetName + "." + sigName);
+                
+               
+                std::vector<uint32_t> signalVals = reg->getSignalValues(modSetName,"all",sigName);
+                int i = 0;
+                for(auto module_str : modules_strvec){
+
+                  std::string modSignalName(keySignalName + "." + module_str);
+                  
+                  this->set<unsigned int>(removeSpaces(modSignalName), signalVals[i]);
+
+                  //string keyModuleName(regName + "." + modSetName + "." + sigName);
+
+                  i++;
+                }
+            }
+        }
+        
+        
+    }
+    
     
     void DsscPpt::updateConfigHash(){
         
-        Schema schema;
+        SuS::PPTFullConfig* full_conf = m_ppt->getPPTFullConfig();
+        karabo::util::Schema theschema = this->getFullSchema();
+        if(!theschema.subSchema(s_dsscConfBaseNode).empty()){            
+            
+            updateDetRegistryGui(m_ppt->getEPCRegisters(), "EPCRegisters", "EPCRegisters", s_dsscConfBaseNode);
+            updateDetRegistryGui(m_ppt->getIOBRegisters(), "IOBRegisters", "IOBConfig", s_dsscConfBaseNode);
+            for(int idx=0; idx<full_conf->numJtagRegs(); idx++){
+              updateDetRegistryGui(full_conf->getJtagReg(idx), "JtagRegister_Module_" + to_string(idx+1),\
+                      "JtagRegister_Module", s_dsscConfBaseNode);    
+            }
+            return;
+        }
+        //Schema schema;
+        
+        karabo::util::Schema schema;
         
         NODE_ELEMENT(schema).key(s_dsscConfBaseNode)
             .description("EPC, IOB and JTAG detector registry")
             .displayedName(s_dsscConfBaseNode)
-            .commit();
-        
-        SuS::PPTFullConfig* full_conf = m_ppt->getPPTFullConfig();                        
+            .commit();                  
           
         for(int idx=0; idx<full_conf->numJtagRegs(); idx++){
           generateConfigRegElements(schema, full_conf->getJtagReg(idx), \
@@ -2088,7 +2143,7 @@ namespace karabo {
 
         this->appendSchema(schema, true); 
         
-        m_last_config_hash = this->get<Hash>(s_dsscConfBaseNode);        
+        m_last_config_hash = this->get<Hash>(s_dsscConfBaseNode);
     }
     
     void DsscPpt::updateConfigFromHash(){

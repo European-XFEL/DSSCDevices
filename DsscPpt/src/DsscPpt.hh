@@ -398,6 +398,8 @@ namespace karabo {
         void updateConfigSchema();
         void updateConfigHash();
         void updateConfigFromHash();
+        void updateDetRegistryGui(SuS::ConfigReg * reg, std::string regName, \
+                std::string tagName, std::string rootNode);
 
         class ContModeKeeper {
 
@@ -459,8 +461,6 @@ namespace karabo {
         karabo::util::Hash m_last_config_hash;
         
         void burstAcquisitionPolling();
-        
-
     };
 }
 
