@@ -994,6 +994,16 @@ namespace karabo {
         INPUT_CHANNEL(expected).key("registerConfigInput")
                 .displayedName("Input")
                 .commit();
+
+        BOOL_ELEMENT(expected)
+                .key("iobProgrammed")
+                .displayedName("IOB programmed")
+                .description("IOB programmed")
+                .assignmentOptional()
+                .defaultValue(false)
+                .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .commit();
+
         
         NODE_ELEMENT(expected).key(s_dsscConfBaseNode)
                 .description("EPC, IOB and JTAG detector registry")
@@ -2263,14 +2273,16 @@ namespace karabo {
         
         if (checkAllIOBStatus() == 0) {
             KARABO_LOG_INFO << "No IOBs detected. Will try to program IOB FPGAs";
-          
+            this->set<bool>("iobProgrammed", false);
             std::cout << "initSystem->programAllIOBFPGAs()" <<std::endl;
             try{
                 programAllIOBFPGAs();
             }catch (const std::exception& e) { // caught by reference to base
                 std::cout << "exception was caught in initSystem->programAllIOBFPGAs, with message:"
                     << e.what() << std::endl;
-          }
+            }
+        }else{
+            this->set<bool>("iobProgrammed", true);
         }
 
         {
