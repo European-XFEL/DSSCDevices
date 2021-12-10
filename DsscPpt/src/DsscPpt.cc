@@ -22,6 +22,7 @@
 #include "utils.h"
 #include "DsscModuleInfo.h"
 #include "DsscConfigHashWriter.hh"
+#include "PPTFullConfig.h"
 
 using namespace std;
 using namespace karabo::util;
@@ -993,24 +994,12 @@ namespace karabo {
         INPUT_CHANNEL(expected).key("registerConfigInput")
                 .displayedName("Input")
                 .commit();
-
-        Schema detconfigSchema;
-
-        NODE_ELEMENT(detconfigSchema).key("DetConfig")
-                .description("Detector configuration")
-                .displayedName("DetConfig")
-                .commit();
-        OUTPUT_CHANNEL(expected).key("daqOutput")
-                .displayedName("daqOutput")
-                .dataSchema(detconfigSchema)
-                .commit();
-
-        NODE_ELEMENT(expected)
-                .key("DetConfRegisters")
-                .displayedName("Detector Configuration")
-                .description("Detector, EPC, JTAG, IOB config. registers")                
-                .commit();     
         
+        NODE_ELEMENT(expected).key(s_dsscConfBaseNode)
+                .description("EPC, IOB and JTAG detector registry")
+                .displayedName(s_dsscConfBaseNode)
+                .commit();
+
         SLOT_ELEMENT(expected)
                 .key("updateConfigHash").displayedName("Read Config Data")
                 .description("Read Configuration Data")
@@ -1022,7 +1011,8 @@ namespace karabo {
                 .commit();//*/
     }
 
-
+    const std::string DsscPpt::s_dsscConfBaseNode = "DetectorRegisters";
+    
     DsscPpt::DsscPpt(const karabo::util::Hash& config)
         : Device<>(config),
         m_keepAcquisition(false), m_keepPolling(false), m_burstAcquisition(false),
@@ -1496,108 +1486,90 @@ namespace karabo {
     }
 
 
-    void DsscPpt::generateConfigRegElements(Schema &schema, SuS::ConfigReg * reg, string regName, string tagName, string moduleStr) {
+    void DsscPpt::generateConfigRegElements(Schema &schema, SuS::ConfigReg * reg,\
+            string regName, string tagName, std::string rootNode) {
         // Build schema using the Config Reg Structure
-
-        vector<string> tokens;
-        boost::split(tokens, regName, boost::is_any_of("."));
-        string displayedRegName = tokens.back();
-        KARABO_LOG_INFO << "Add ConfigRegister " + regName + " name: " + displayedRegName;
-        NODE_ELEMENT(schema).key(regName)
+        
+        std::string rootRegName = rootNode + "." + regName;        
+        
+        NODE_ELEMENT(schema).key(removeSpaces(rootRegName))
                 .description(regName)
-                .displayedName(displayedRegName)
+                .displayedName(regName)
                 .commit();
-
+        
         const auto moduleSets = reg->getModuleSetNames();
 
-        if (reg->getNumModules(moduleSets.front()) > 1) {
-            string iobName = regName + ".module";
-            STRING_ELEMENT(schema).key(iobName)
-                    .displayedName("Module")
-                    .description("Select Module (IOB) to change Value, type all for all available Modules")
-                    .tags(tagName)
-                    .assignmentOptional().defaultValue("1").reconfigurable()
-                    .allowedStates(State::ON, State::STOPPED)
-                    .commit();
-        }
+        for (const auto & modSetName : moduleSets) { 
+            string keySetName(rootRegName + "." + modSetName);
 
-        for (const auto & modSetName : moduleSets) { // For all module sets
-            //int address = reg->getRegAddress(set);
-            string keySetName(regName + "." + modSetName);
-            // KARABO_LOG_INFO << "Add ModuleSet " + modSetName;
-            NODE_ELEMENT(schema).key(keySetName)
+            NODE_ELEMENT(schema).key(removeSpaces(keySetName))
                     .description(keySetName)
                     .displayedName(modSetName)
                     .commit();
+            
+            std::string keyModuleSet_modules = keySetName + ".modules";
+            STRING_ELEMENT(schema).key(removeSpaces(keyModuleSet_modules))
+                .displayedName("modules")
+                .description("modules in signalName")
+                .tags(tagName)
+                .assignmentOptional().defaultValue(reg->getModuleNumberList(modSetName))
+                .allowedStates(State::UNKNOWN, State::ON, State::STOPPED)
+                .commit();
 
+            std::vector<std::string> modules_strvec = reg->getModules(modSetName);
             const auto signalNames = reg->getSignalNames(modSetName);
             for (const auto & sigName : signalNames) {
                 //  KARABO_LOG_INFO << "Add Signal " + sigName;
                 if (sigName.find("_nc") != string::npos) {
                     continue;
                 }
-                bool readOnly = reg->isSignalReadOnly(modSetName, sigName);
-                uint32_t maxValue = reg->getMaxSignalValue(modSetName, sigName);
-                uint32_t value = reg->getSignalValue(modSetName, moduleStr, sigName);
-                bool isBool = (maxValue == 1);
+                
+                std::string keySignalName(keySetName + "." + sigName);
+                
+                NODE_ELEMENT(schema).key(removeSpaces(keySignalName))
+                    .description(sigName)
+                    .displayedName(sigName)
+                    .commit();              
+                
+                std::vector<uint32_t> signalVals = reg->getSignalValues(modSetName,"all",sigName);
+                int i = 0;
+                for(auto module_str : modules_strvec){
 
-                //uint32_t accessLevel = reg->getAccessLevel(modSetName,sigName);
-                // description (for tooltip)
-                // TODO compute min/max from numBits
-                // allowedStates??
-                string keyName(regName + "." + modSetName + "." + sigName);
-                if (maxValue == 0) {
-                    KARABO_LOG_ERROR << "MaxValue is 0 for signal " << keyName;
-                }
-                if (isBool) {
-                    if (readOnly) {
+                  std::string modSignalName(keySignalName + "." + module_str);
+                
+                  bool readOnly = reg->isSignalReadOnly(modSetName, sigName);
 
-                        BOOL_ELEMENT(schema).key(keyName)
-                                .description(keyName)
-                                .tags(tagName)
-                                .displayedName(sigName)
-                                .allowedStates(State::ON, State::STOPPED)
-                                .readOnly()
-                                .initialValue(value)
-                                .commit();
-                    } else {
+                  //uint32_t accessLevel = reg->getAccessLevel(modSetName,sigName);
+                  // description (for tooltip)
+                  // TODO compute min/max from numBits
+                  // allowedStates??
+                  string keyModuleName(regName + "." + modSetName + "." + sigName);
+                  unsigned int maxValue = reg->getMaxSignalValue(modSetName, sigName);
 
-                        BOOL_ELEMENT(schema).key(keyName)
-                                .description(keyName)
-                                .tags(tagName)
-                                .displayedName(sigName)
-                                .reconfigurable()
-                                .allowedStates(State::ON, State::STOPPED)
-                                .assignmentOptional().defaultValue(value)
-                                .commit();
-                    }
-                } else {
-                    if (readOnly) {
-
-                        UINT32_ELEMENT(schema).key(keyName)
-                                .description(keyName)
-                                .tags(tagName)
-                                .displayedName(sigName)
-                                .allowedStates(State::ON, State::STOPPED)
-                                .readOnly()
-                                .initialValue(value)
-                                .commit();
-                    } else {
-
-                        UINT32_ELEMENT(schema).key(keyName)
-                                .description(keyName)
-                                .tags(tagName)
-                                .displayedName(sigName)
-                                .reconfigurable()
-                                .allowedStates(State::ON, State::STOPPED)
-                                .maxInc(maxValue)
-                                .assignmentOptional().defaultValue(value)
-                                .commit();
-                    }
+                  if (readOnly) {
+                    UINT32_ELEMENT(schema).key(removeSpaces(modSignalName))
+                        .description(modSignalName)
+                        .tags(tagName)
+                        .displayedName(module_str)
+                        .allowedStates(State::UNKNOWN, State::ON, State::STOPPED)
+                        .readOnly()
+                        .initialValue(signalVals[i])
+                        .commit();
+                  } else {
+                    UINT32_ELEMENT(schema).key(removeSpaces(modSignalName))
+                        .description(modSignalName)
+                        .tags(tagName)
+                        .displayedName(module_str)
+                        .reconfigurable()
+                        .allowedStates(State::UNKNOWN, State::ON, State::STOPPED)
+                        .maxInc(maxValue)
+                        .assignmentOptional().defaultValue(signalVals[i])
+                        .commit();
+                    }//*/
+                  i++;
                 }
             }
         }
-        //   KARABO_LOG_INFO << "Done ";
     }
 
 
@@ -2096,84 +2068,86 @@ namespace karabo {
     
     void DsscPpt::updateConfigHash(){
         
-        DsscHDF5ConfigData h5config;
-
-        h5config.timestamp = utils::getLocalTimeStr();
+        Schema schema;
         
-        m_ppt->addJtag_HDF5ConfigData(h5config);
+        NODE_ELEMENT(schema).key(s_dsscConfBaseNode)
+            .description("EPC, IOB and JTAG detector registry")
+            .displayedName(s_dsscConfBaseNode)
+            .commit();
         
-        m_ppt->addIOB_HDF5ConfigData(h5config);
-
-        m_ppt->addEPC_HDF5ConfigData(h5config);
-        
-        //auto h5config = m_ppt->getHDF5ConfigData();
-        
-        
-        Hash read_config_hash;        
-        DsscH5ConfigToSchema::addConfiguration(read_config_hash, h5config);        
-      
-        if (!karabo::util::similar(read_config_hash, m_last_config_hash)){
-                        
-            KARABO_LOG_INFO << "Updating meta config schema: ";
-            Schema expected;
-            DsscH5ConfigToSchema::HashToSchemaDetConf(Hash(s_dsscConfBaseNode, read_config_hash), expected, "", true);
-            this->appendSchema(expected, true);            
+        SuS::PPTFullConfig* full_conf = m_ppt->getPPTFullConfig();                        
+          
+        for(int idx=0; idx<full_conf->numJtagRegs(); idx++){
+          generateConfigRegElements(schema, full_conf->getJtagReg(idx), \
+                  "JtagRegister_Module_" + to_string(idx+1), "JtagRegister_Module", s_dsscConfBaseNode);    
         }
-        m_loaded_config_hash = read_config_hash;
-        m_last_config_hash = read_config_hash;        
-        this->set(Hash(s_dsscConfBaseNode, m_last_config_hash));        
+
+        generateConfigRegElements(schema, m_ppt->getEPCRegisters(), "EPCRegisters", "EPCRegisters", s_dsscConfBaseNode);
+
+        generateConfigRegElements(schema, m_ppt->getIOBRegisters(), "IOBRegisters", "IOBConfig", s_dsscConfBaseNode);
+
+        this->appendSchema(schema, true); 
+        
+        m_last_config_hash = this->get<Hash>(s_dsscConfBaseNode);        
     }
     
     void DsscPpt::updateConfigFromHash(){
-        //
-        DsscH5ConfigToSchema dsscH5ConfSchObj;
-        Hash read_config_hash = this->get<Hash>(s_dsscConfBaseNode);
+
+        DsscH5ConfigToSchema dsscH5ConfChObj;
+        Hash  read_config_hash = this->get<Hash>(s_dsscConfBaseNode);
         std::vector<std::pair<std::string, unsigned int>> diff_entries = \
-                dsscH5ConfSchObj.compareConfigHashData(m_last_config_hash, read_config_hash);
-        if(diff_entries.empty()) return;
+                dsscH5ConfChObj.compareConfigHashData(m_last_config_hash, read_config_hash);
+        if(diff_entries.empty()) std::cout << "No chenges in config found" << std::endl;
+        
+        karabo::util::Schema theschema = this->getFullSchema();
         for(auto it : diff_entries){
-            //std::cout << it.first << " : " << it.second  << std::endl;
+            //std::cout << it.first <<std::endl;
             vector< std::string > SplitVec;
-            boost::split( SplitVec, it.first, boost::is_any_of("."));
+            boost::split( SplitVec, it.first, boost::is_any_of("."));            
+           
+            std::string selModSet = theschema.getDisplayedName(s_dsscConfBaseNode + "." \
+                    + SplitVec[0]+"."+SplitVec[1]);
+            std::string sigName = theschema.getDisplayedName(s_dsscConfBaseNode + "." + \
+                    SplitVec[0]+"."+SplitVec[1]+ "."+SplitVec[2]);
             
-            std::string selModSet = m_loaded_config_hash.getAttribute<std::string>(SplitVec[0]+"."+SplitVec[1], "origKey", '.');
-            std::string sigName = m_loaded_config_hash.getAttribute<std::string>(SplitVec[0]+"."+SplitVec[1]+"."+SplitVec[2],\
-                    "origKey", '.');
             
             SuS::ConfigReg* configRegister;
-            if(it.first.substr(0,4) == "EPCR"){
-                configRegister =  m_ppt->getRegisters("epc");
-                configRegister->setSignalValue(selModSet, SplitVec[4], sigName, it.second);
-                {
-                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                    m_ppt->programEPCRegister(selModSet);
+            KARABO_LOG_INFO << selModSet + "\t" +  SplitVec.back() + "\t" + sigName + " :\t" << it.second;
+            try{
+                if(it.first.substr(0,4) == "EPCR"){
+                    configRegister =  m_ppt->getRegisters("epc");
+                    configRegister->setSignalValue(selModSet, SplitVec.back(), sigName, it.second);
+                    {
+                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        m_ppt->programEPCRegister(selModSet);
+                    }
+                }else if(it.first.substr(0,4) == "IOBR"){
+                    configRegister =  m_ppt->getRegisters("iob");
+                    configRegister->setSignalValue(selModSet, SplitVec.back(), sigName, it.second);
+                    const uint32_t module = get<uint32_t>("selModule");
+                    setActiveModule(module);
+                    {
+                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        m_ppt->programIOBRegister(selModSet);
+                    }
+                }else if(it.first.substr(0,4) == "Jtag"){
+                    configRegister =  m_ppt->getRegisters("jtag");
+                    uint32_t module = std::stoul(SplitVec[0].substr(SplitVec[0].length()-1, SplitVec[0].length()-1));
+                    setActiveModule(module);
+                    configRegister->setSignalValue(selModSet, SplitVec.back(), sigName, it.second);                
+                    {
+                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        m_ppt->programJtagSingle(selModSet);
+                    }                
+                }else{
+                    KARABO_LOG_DEBUG << "registry is not EPC, IOB, or Jtag";
                 }
-            }else if(it.first.substr(0,4) == "IOBR"){
-                configRegister =  m_ppt->getRegisters("iob");
-                configRegister->setSignalValue(selModSet, SplitVec[4], sigName, it.second);
-                const uint32_t module = get<uint32_t>("selModule");
-                setActiveModule(module);
-                {
-                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                    m_ppt->programIOBRegister(selModSet);
-                }
-            }else if(it.first.substr(0,4) == "Jtag"){
-                configRegister =  m_ppt->getRegisters("jtag");
-                uint32_t module = std::stoul(SplitVec[0].substr(SplitVec[0].length()-1, SplitVec[0].length()-1));
-                setActiveModule(module);
-                configRegister->setSignalValue(selModSet, SplitVec[4], sigName, it.second);                
-                {
-                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                    m_ppt->programJtagSingle(selModSet);
-                }                
-            }else{
-                KARABO_LOG_DEBUG << "registry is not EPC, IOB, or Jtag";
-                return;
+            }catch (std::logic_error){                
             }
-            //*/
-            
+
+
         }
-        m_last_config_hash = read_config_hash;
+        m_last_config_hash = read_config_hash;               
     }
     
     void DsscPpt::doFastInit() {
@@ -4668,10 +4642,6 @@ namespace karabo {
         }
 
         return value;
-    }
-
-
-    void DsscPpt::test1() {
     }
 
 

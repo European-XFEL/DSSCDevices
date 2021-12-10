@@ -156,9 +156,6 @@ namespace karabo {
                                .noDefaultValue()                               
                                .commit();                       
                     }
-                    break;
-                default:
-                    std::clog << "Data type " << toString(it->getType()) << " not supported!";
 
             }
         }//*/
@@ -195,13 +192,6 @@ namespace karabo {
                     if(hash_old.get<unsigned int>(it->getKey()) != it->getValue<unsigned int>()){
                         paths_diffVals.emplace_back(path + it->getKey(), it->getValue<unsigned int>());
                     }
-                    break;
-                    
-                case Types::STRING:   
-                case Types::VECTOR_UINT32:
-                    break;//*/
-                default:
-                    std::clog << "Data type " << toString(it->getType()) << " not supported!";
             }
             
         }

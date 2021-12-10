@@ -21,8 +21,6 @@
 
 namespace karabo {
 
-    const std::string s_dsscConfBaseNode = "DetConfRegisters";
-
     class DsscH5ConfigToSchema {
 
     public:

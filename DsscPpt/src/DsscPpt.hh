@@ -35,6 +35,9 @@
  *         STOPPED -> xfelMode/ContMode -> ON ->
  *         sendData -> ACQUIRING
  */
+
+
+
 namespace karabo {
 
     class SmartMutex : public boost::mutex {
@@ -111,7 +114,7 @@ namespace karabo {
 
         void initialize();
 
-        void test1();
+        const static std::string s_dsscConfBaseNode;
 
 
     private: // State-machine call-backs (override)
@@ -365,7 +368,8 @@ namespace karabo {
 
         void generateAllConfigRegElements();
 
-        void generateConfigRegElements(karabo::util::Schema &schema, SuS::ConfigReg * reg, std::string regName, std::string tagName, std::string moduleStr = "0");
+        void generateConfigRegElements(karabo::util::Schema &schema, SuS::ConfigReg * reg,\
+                    std::string regName, std::string tagName, std::string rootNode = "");
 
         std::string getIOBTag(int iobNumber);
 
@@ -420,11 +424,19 @@ namespace karabo {
             }
 
         private:
+            
             DsscPpt *dsscPpt;
             util::State lastState;
         };
 
     private:
+        
+        inline std::string removeSpaces(std::string& p){
+              std::string res(p);
+              std::replace(res.begin(), res.end(), ' ', '_');
+          return res;
+        }
+        
         bool m_keepAcquisition;
         bool m_keepPolling;
         boost::shared_ptr<boost::thread> m_pollThread;
@@ -441,11 +453,10 @@ namespace karabo {
 
         DsscH5ConfigToSchema m_dsscConfigtoSchema;
 
-        karabo::util::Hash m_loaded_config_hash;
-        karabo::util::Hash m_last_config_hash;
-        karabo::util::Hash m_prev_config_hash;
         
         std::atomic<bool> m_burstAcquisition;
+        
+        karabo::util::Hash m_last_config_hash;
         
         void burstAcquisitionPolling();
         
