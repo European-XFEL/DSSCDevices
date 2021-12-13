@@ -514,6 +514,13 @@
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
+                .key("programSequencers")                                                        \
+                .displayedName("Program Sequencer")                                             \
+                .description("Program Sequencers in all available IOB's")                       \
+                .allowedStates(State::ON, State::STOPPED)                                       \
+                .commit();                                                                     \
+                                                                                                \
+            SLOT_ELEMENT(expected)                                                              \
                 .key("updateSequencer")                                                         \
                 .displayedName("Update Sequencer")                                              \
                 .description("Update sequencer counters from fields and program")               \

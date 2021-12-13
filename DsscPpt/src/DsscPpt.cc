@@ -1067,6 +1067,7 @@ namespace karabo {
         KARABO_SLOT(programJTAG);
         KARABO_SLOT(programPixelRegister);
         KARABO_SLOT(programPixelRegisterDefault);
+        KARABO_SLOT(programSequencers);
         KARABO_SLOT(programSequencer);
         KARABO_SLOT(updateSequencer);
 
@@ -2891,9 +2892,21 @@ namespace karabo {
                                                resetLength, resetIntegOffset, resetHoldLength,
                                                rampLength, rampIntegOffset, backFlipAtReset, backFlipToResetOffset, singleCapLoadLength);
 
-        programSequencer();
+        programSequencers();
 
         getSequencerParamsIntoGui();
+    }
+    
+    void DsscPpt::programSequencers() {
+        bool readBack = get<bool>("sequencerReadBackEnable");
+
+        KARABO_LOG_INFO << "Program Sequencers";
+        {
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            m_ppt->programSequencers(readBack);
+        }
+
+        printPPTErrorMessages(true);    
     }
 
 
