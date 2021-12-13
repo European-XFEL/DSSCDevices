@@ -515,7 +515,7 @@
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
                 .key("programSequencers")                                                        \
-                .displayedName("Program Sequencer")                                             \
+                .displayedName("Program Sequencers")                                             \
                 .description("Program Sequencers in all available IOB's")                       \
                 .allowedStates(State::ON, State::STOPPED)                                       \
                 .commit();                                                                     \
