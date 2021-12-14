@@ -227,6 +227,7 @@ namespace karabo {
         void programPixelRegister();
         void programPixelRegisterDefault();
         void programSequencer();
+        void programSequencers(); 
         void updateSequencer();
 
         bool readbackConfigIOB(int iobNumber);
