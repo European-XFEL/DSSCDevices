@@ -412,7 +412,7 @@ namespace karabo {
                 .description("Select ModuleSet Signal to program")
                 .tags("regAccess")
                 .assignmentOptional().defaultValue("FCF_EnCap").reconfigurable()
-                .options("LOC_PWRD,FCF_SelLowVref,FCF_SelExtRef,CSA_IBoost,CSA_DisSatDet,CSA_FbCap,CSA_Resistor,CSA_Cin_200fF,CSA_Href,FCF_EnCap,FCF_EnIntAmpRes,FCF_HDR,QInjEn10fF,InvertInj,EnPxInjDC,InjBusEn,InjPxQ,DepfetSelCascVref,DepfetUnSampVCasc_B,ShortIconRes,EnPxInj,InjHG,IProgEnAllCaps,PxInjEnAmpNMirr,IconSlower,RmpFineTrm,RmpCurrDouble,RmpEnFineDelayCntrl,RmpDelayCntrl,ADC_EnExtLatch,LocSubcToVSSA,QInjEnCs")
+                .options("LOC_PWRD,MonVP,MonVNEnDecCap,FCF_SelLowVref,FCF_SelExtRef,CSA_IBoost,CSA_DisSatDet,CSA_FbCap,CSA_Resistor,CSA_Cin_200fF,CSA_Href,FCF_EnCap,FCF_EnIntAmpRes,FCF_HDR,QInjEn10fF,InvertInj,EnPxInjDC,InjBusEn,InjPxQ,DepfetSelCascVref,DepfetUnSampVCasc_B,ShortIconRes,EnPxInj,InjHG,IProgEnAllCaps,PxInjEnAmpNMirr,IconSlower,RmpFineTrm,RmpCurrDouble,RmpEnFineDelayCntrl,RmpDelayCntrl,ADC_EnExtLatch,LocSubcToVSSA,QInjEnCs")
                 .commit();
 
         STRING_ELEMENT(expected).key("selJtagMainRegSignal")
