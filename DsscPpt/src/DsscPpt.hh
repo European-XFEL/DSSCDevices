@@ -284,7 +284,6 @@ namespace karabo {
         void disableAllDummyData();
 
         void startAllChannelsDummyData();
-        void setPetraIIISetup();
         void setQuadrantSetup();
 
         //void idleStateOnEntry();

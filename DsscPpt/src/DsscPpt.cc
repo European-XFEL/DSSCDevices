@@ -820,12 +820,6 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("setPetraIIISetup").displayedName("Set Petra III Setup")
-                .description("Select PPT IP Address, number of ASICs, DPs and disables dummy data")
-                .allowedStates(State::UNKNOWN, State::OFF)
-                .commit();
-
-        SLOT_ELEMENT(expected)
                 .key("setQuadrantSetup").displayedName("Set Quadrant Setup")
                 .description("Select number of ASICs and DPs, disables dummy data")
                 .allowedStates(State::UNKNOWN, State::OFF)
@@ -1099,7 +1093,6 @@ namespace karabo {
         KARABO_SLOT(setPixelInjectionMode);
         KARABO_SLOT(setInjectionMode);
 
-        KARABO_SLOT(setPetraIIISetup);
         KARABO_SLOT(setQuadrantSetup);
         //to pass key values with nodes use own Makro
         PROG_IOBSLOTS
@@ -1420,19 +1413,6 @@ namespace karabo {
 
         runContMode(true);
         runAcquisition(true);
-    }
-
-
-    void DsscPpt::setPetraIIISetup() {
-        disableAllDummyData();
-        enableDPChannels(0x1);
-
-        set<string>("pptHost", "192.168.0.125");
-        set<unsigned int>("numActiveASICs", 16);
-
-        const auto environment = "HAMBURG";
-        set<string>("selEnvironment", environment);
-        updateTestEnvironment();
     }
 
 
