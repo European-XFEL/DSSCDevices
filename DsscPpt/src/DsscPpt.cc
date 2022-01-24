@@ -1934,7 +1934,12 @@ namespace karabo {
 
     void DsscPpt::readFullConfigFile(const std::string & fileName) {
         KARABO_LOG_INFO << "Load Full Config File : " << fileName;
+        
+        m_ppt.reset();
+        initialize();
+ 
 
+        /*
         {            
             ContModeKeeper keeper(this);
             m_ppt->loadFullConfig(fileName, false);
@@ -1968,6 +1973,7 @@ namespace karabo {
         
         updateGainHashValue();
         updateConfigHash();
+        //*/
     }
     
 
