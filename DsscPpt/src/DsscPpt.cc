@@ -1934,7 +1934,8 @@ namespace karabo {
 
     void DsscPpt::readFullConfigFile(const std::string & fileName) {
         KARABO_LOG_INFO << "Load Full Config File : " << fileName;
-        
+        stopPolling();
+        DsscScopedLock lock(&m_accessToPptMutex, __func__);
         m_ppt.reset();
         initialize();
  
