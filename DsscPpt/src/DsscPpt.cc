@@ -1934,20 +1934,13 @@ namespace karabo {
 
     void DsscPpt::readFullConfigFile(const std::string & fileName) {
         KARABO_LOG_INFO << "Load Full Config File : " << fileName;
-        stopPolling();
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
-        m_ppt.reset();
-        initialize();
- 
-
-        /*
+                        
         {            
-            ContModeKeeper keeper(this);
-            m_ppt->loadFullConfig(fileName, false);
-            string defaultConfigPath = DEFAULTCONF;
-            m_ppt->storeFullConfigFile(defaultConfigPath);
-
-            //updateSequenceCounters();
+          ContModeKeeper keeper(this);
+          m_ppt->loadFullConfig(fileName, false);
+          string defaultConfigPath = DEFAULTCONF;
+          m_ppt->storeFullConfigFile(defaultConfigPath);
+          //updateSequenceCounters();
         }
 
         const auto * fullConfigInfo = m_ppt->getFullConfig();
@@ -1963,6 +1956,7 @@ namespace karabo {
                             currentState == State::STOPPED ||
                             currentState == State::ACQUIRING);
             if (program) {
+                KARABO_LOG_INFO << "Init CHIP" << fileName;
                 initChip();
             }
         }
@@ -2150,7 +2144,7 @@ namespace karabo {
         Hash  read_config_hash = this->get<Hash>(s_dsscConfBaseNode);
         std::vector<std::pair<std::string, unsigned int>> diff_entries = \
                 dsscH5ConfChObj.compareConfigHashData(m_last_config_hash, read_config_hash);
-        if(diff_entries.empty()) std::cout << "No chenges in config found" << std::endl;
+        if(diff_entries.empty()) std::cout << "No changes in config found" << std::endl;
         
         karabo::util::Schema theschema = this->getFullSchema();
         for(auto it : diff_entries){
