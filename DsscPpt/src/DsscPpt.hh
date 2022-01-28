@@ -175,6 +175,7 @@ namespace karabo {
 
         void doFastInit();
         void initSystem();
+        void initSystem_impl();
         void initSingleModule();
         void initGui();
         bool initIOBs();
