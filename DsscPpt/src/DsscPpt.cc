@@ -2234,66 +2234,71 @@ namespace karabo {
 
 
     void DsscPpt::initSystem() {
-        DSSC::StateChangeKeeper keeper(this, State::ON);        
-        std::cout << "initSystem->resetAll()" << std::endl;
-        try{
-            resetAll();
-        }catch (const std::exception& e) { // caught by reference to base
-            std::cout << "exception was caught in initSystem->resetAll, with message:"
-                  << e.what() << std::endl;
-        }
-
-        std::cout << "initSystem->programPLL()" << std::endl;
-        try{
-          programPLL();
-        }catch (const std::exception& e) { // caught by reference to base
-            std::cout << "exception was caught in initSystem->programPLL, with message:"
-                  << e.what() << std::endl;
-        }
-
         
-        if (checkAllIOBStatus() == 0) {
-            KARABO_LOG_INFO << "No IOBs detected. Will try to program IOB FPGAs";
-            this->set<bool>("iobProgrammed", false);
-            std::cout << "initSystem->programAllIOBFPGAs()" <<std::endl;
-            try{
-                programAllIOBFPGAs();
-            }catch (const std::exception& e) { // caught by reference to base
-                std::cout << "exception was caught in initSystem->programAllIOBFPGAs, with message:"
-                    << e.what() << std::endl;
-            }
-        }else{
-            this->set<bool>("iobProgrammed", true);
-        }
-
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-
-            m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
-            
-            std::cout << "initSystem->initSystem()" <<std::endl;
-
-            int rc;
-            
-            try{
-                rc = m_ppt->initSystem();
-            }catch (const std::exception& e) { // caught by reference to base
-                std::cout << "exception was caught in initSystem->initSystem, with message:"
-                     << e.what() << std::endl;
-            }
-           
-            if (rc != SuS::DSSC_PPT::ERROR_OK) {
-                printPPTErrorMessages();
-            }
-        }
-
-        updateGuiRegisters();
-
-        checkQSFPConnected();
-
-        updateSequenceCounters();
+        //EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::burstAcquisitionPolling, this));
         
-        std::cout << "initSystem finished" <<std::endl;
+        EventLoop::getIOService().post([this]() {        
+        
+            DSSC::StateChangeKeeper keeper(this, State::ON);        
+            std::cout << "initSystem->resetAll()" << std::endl;
+            try{
+                resetAll();
+            }catch (const std::exception& e) { // caught by reference to base
+                std::cout << "exception was caught in initSystem->resetAll, with message:"
+                      << e.what() << std::endl;
+            }
+
+            std::cout << "initSystem->programPLL()" << std::endl;
+            try{
+              programPLL();
+            }catch (const std::exception& e) { // caught by reference to base
+                std::cout << "exception was caught in initSystem->programPLL, with message:"
+                      << e.what() << std::endl;
+            }
+
+
+            if (checkAllIOBStatus() == 0) {
+                KARABO_LOG_INFO << "No IOBs detected. Will try to program IOB FPGAs";
+                this->set<bool>("iobProgrammed", false);
+                std::cout << "initSystem->programAllIOBFPGAs()" <<std::endl;
+                try{
+                    programAllIOBFPGAs();
+                }catch (const std::exception& e) { // caught by reference to base
+                    std::cout << "exception was caught in initSystem->programAllIOBFPGAs, with message:"
+                        << e.what() << std::endl;
+                }
+            }else{
+                this->set<bool>("iobProgrammed", true);
+            }
+
+            {
+                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+
+                m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
+
+                std::cout << "initSystem->initSystem()" <<std::endl;
+
+                int rc;
+
+                try{
+                    rc = m_ppt->initSystem();
+                }catch (const std::exception& e) { // caught by reference to base
+                    std::cout << "exception was caught in initSystem->initSystem, with message:"
+                         << e.what() << std::endl;
+                }
+
+                if (rc != SuS::DSSC_PPT::ERROR_OK) {
+                    printPPTErrorMessages();
+                }
+            }
+
+            updateGuiRegisters();
+
+            checkQSFPConnected();
+
+            std::cout << "initSystem finished" <<std::endl;
+        
+        });        
     }
 
 
