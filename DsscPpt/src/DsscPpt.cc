@@ -1960,11 +1960,12 @@ namespace karabo {
                 initChip();
             }
         }
+        
+        m_ppt->updateAllCounters();
 
         updateGuiMeasurementParameters();
         getCoarseGainParamsIntoGui();
         updateNumFramesToSend();
-        //updateSequenceCounters();
         
         updateGainHashValue();
         updateConfigHash();
