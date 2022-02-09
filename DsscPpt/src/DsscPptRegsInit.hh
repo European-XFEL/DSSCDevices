@@ -91,12 +91,6 @@
           .description("Sequencer configuration")                               \
           .commit();                                                            \
                                                                                 \
-        SLOT_ELEMENT(expected).key("sequencer.updateSequencer")                 \
-                  .displayedName("Update Sequencer")                            \
-                  .description("Update Sequencer configuration and program")    \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
-                  .commit();                                                    \
-                                                                                \
         STRING_ELEMENT(expected).key("sequencer.opMode")                        \
                   .displayedName("Operation Mode")                              \
                   .description("opMode")                                        \
