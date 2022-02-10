@@ -2847,7 +2847,9 @@ namespace karabo {
     void DsscPpt::updateSequencer() {
         const int cycleLength = get<unsigned int>("sequencer.cycleLength");
         if (cycleLength != m_ppt->getSequencer()->getCycleLength()) {
-            KARABO_LOG_WARN << "Cycle length changed, this should not be done in karabo, load different sequencer file instead";
+            //KARABO_LOG_WARN << "Cycle length changed, this should not be done in karabo, load different sequencer file instead";
+            KARABO_LOG_WARN << "Cycle length changed";
+            m_ppt->getSequencer()->setCycleLength(cycleLength);
         }
 
         const auto integrationTime = get<unsigned int>("sequencer.integrationTime");
