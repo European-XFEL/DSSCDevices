@@ -1061,7 +1061,6 @@ namespace karabo {
         KARABO_SLOT(programJTAG);
         KARABO_SLOT(programPixelRegister);
         KARABO_SLOT(programPixelRegisterDefault);
-        KARABO_SLOT(programSequencers);
         KARABO_SLOT(programSequencer);
         KARABO_SLOT(updateSequencer);
 
