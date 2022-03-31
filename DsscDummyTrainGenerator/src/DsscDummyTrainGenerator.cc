@@ -29,7 +29,7 @@ namespace karabo {
             .commit();  
       
         SLOT_ELEMENT(expected)
-                .key("start_cont_mode").displayedName("Start ContMode").description("Send Continuously @10Hz")
+                .key("startContinuousMode").displayedName("Start ContMode").description("Send Continuously @10Hz")
                 .allowedStates(State::STOPPED)
                 .commit();
         
@@ -39,7 +39,7 @@ namespace karabo {
                 .commit();
         
         SLOT_ELEMENT(expected)
-                .key("start_n_trains").displayedName("Send N Trains").description("Send defined number of trains.")
+                .key("startNTrainMode").displayedName("Send N Trains").description("Send defined number of trains.")
                 .allowedStates(State::STOPPED)
                 .commit();
         
@@ -101,9 +101,9 @@ namespace karabo {
     {        
       KARABO_INITIAL_FUNCTION(initialization)
       
-      KARABO_SLOT(start_cont_mode);
+      KARABO_SLOT(startContinuousMode);
       KARABO_SLOT(stop);
-      KARABO_SLOT(start_n_trains);
+      KARABO_SLOT(startNTrainMode);
 
     }
 
@@ -154,7 +154,7 @@ namespace karabo {
       }
     }
     
-    void DsscDummyTrainGenerator::start_cont_mode()
+    void DsscDummyTrainGenerator::startContinuousMode()
     {
       updateState(State::ON);
       m_runthreads.push_back(new std::thread(&DsscDummyTrainGenerator::run,this));
@@ -176,7 +176,7 @@ namespace karabo {
     }
     
         
-    void DsscDummyTrainGenerator::start_n_trains()
+    void DsscDummyTrainGenerator::startNTrainMode()
     {
       updateState(State::ON);
       unsigned long long train_cnt = 0;

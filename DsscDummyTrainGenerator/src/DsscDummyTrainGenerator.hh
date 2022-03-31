@@ -76,10 +76,10 @@ namespace karabo {
             
         void initialization(); 
         
-        void start_cont_mode();
+        void startContinuousMode();
         void stop();
         void run();
-        void start_n_trains();
+        void startNTrainMode();
         void send_train();
 
         static std::vector<unsigned short> m_train_data;      

@@ -2018,7 +2018,7 @@ namespace karabo{
         if (isTestData()) {
             KARABO_LOG_INFO << "Start Dummy Data";
             if (deviceState(m_testDataGeneratorId) != State::ON) {
-                remote().executeNoWait(m_testDataGeneratorId, "start_cont_mode");
+                remote().executeNoWait(m_testDataGeneratorId, "startContinuousMode");
             }
         }
 
