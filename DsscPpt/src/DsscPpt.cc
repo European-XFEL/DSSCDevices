@@ -232,11 +232,11 @@ namespace karabo {
                 .warnHigh(75).needsAcknowledging(false).alarmHigh(80).needsAcknowledging(false)
                 .commit();
 
-        STRING_ELEMENT(expected).key("ethOutputRate")
+        UINT32_ELEMENT(expected).key("ethOutputRate")
                 .displayedName("SFP Output Rate")
                 .description("Ouput rate of the QSFP link, measured in MBit/s, averaged over one second")
                 .readOnly()
-                .initialValue("nA")
+                .initialValue(0)
                 .commit();
 
         UINT32_ELEMENT(expected).key("initDistance")
@@ -1821,6 +1821,8 @@ namespace karabo {
         if (m_ppt->isXFELMode()){
             runContMode(false);
         }
+
+        this->set("ethOutputRate", 0);
     }
 
 
@@ -4569,7 +4571,7 @@ namespace karabo {
                  }
 
                 uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")/(1E6/128.0);
-                set<string>("ethOutputRate", to_string(outputRate) + " MBit/s");
+                this->set("ethOutputRate", outputRate);
                 set<int>("pptTemp", value);
 
                 boost::this_thread::sleep(boost::posix_time::seconds(5));
