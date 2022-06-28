@@ -392,8 +392,6 @@ namespace karabo {
         void SaveQSFPNetConfig();
 
         void setThrottleDivider();
-        //void updateFullConfigHash();
-        void sendConfigHashOut();
         void updateGainHashValue();
         void updateGainHashValue_impl(); 
         void updateConfigSchema();
