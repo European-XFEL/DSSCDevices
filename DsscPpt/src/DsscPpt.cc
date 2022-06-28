@@ -170,16 +170,6 @@ namespace karabo {
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
                 .commit();
 
-        /*SLOT_ELEMENT(expected)
-                .key("updateFullConfigHash").displayedName("Update Config Data Hash").description("Update full config data hash")
-                .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::UNKNOWN)
-                .commit();//*/
-
-        SLOT_ELEMENT(expected)
-                .key("sendConfigHashOut").displayedName("Send Config Data Hash").description("Send full config data hash through p2p channel")
-                .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::UNKNOWN)
-                .commit();
-
         PATH_ELEMENT(expected).key("linuxBinaryName")
                 .description("Path to linux binary")
                 .displayedName("Linux Binary Filename")
@@ -1093,7 +1083,7 @@ namespace karabo {
         KARABO_SLOT(setInjectionMode);
 
         KARABO_SLOT(setQuadrantSetup);
-        //to pass key values with nodes use own Makro
+        //to pass key values with nodes use own Macro
         PROG_IOBSLOTS
 
         KARABO_SLOT(saveConfigIOB);
@@ -1101,7 +1091,6 @@ namespace karabo {
         KARABO_SLOT(storeFullConfigFile);
         KARABO_SLOT(storeFullConfigUnder);
         KARABO_SLOT(storeFullConfigHDF5);
-        KARABO_SLOT(sendConfigHashOut);
 
         KARABO_SLOT(setSendingASICs);
         KARABO_SLOT(programLMKsAuto);
@@ -1128,7 +1117,6 @@ namespace karabo {
 
     void DsscPpt::preDestruction() {
 
-        this->signalEndOfStream("daqOutput");
         const string defaultConfigPath = DEFAULTCONF;
         m_ppt->storeFullConfigFile(defaultConfigPath);
         
@@ -2022,16 +2010,6 @@ namespace karabo {
             DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5", h5config);
         }
     }
-
-    void DsscPpt::sendConfigHashOut() {
-        if (m_last_config_hash != Hash()) {
-            std::cout << "Sending config data" << std::endl;
-            const karabo::util::Timestamp& actualTimestamp = this->getActualTimestamp();
-            std::cout << "Writing data to daqOutput" << std::endl;
-            this->writeChannel("daqOutput", m_last_config_hash, actualTimestamp); //*/
-        }
-    }
-    
 
     void DsscPpt::updateGainHashValue() {
         EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::updateGainHashValue_impl, this)); 
