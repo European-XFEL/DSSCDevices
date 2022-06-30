@@ -452,21 +452,21 @@ namespace karabo {
         UINT32_ELEMENT(expected).key("gain.fcfEnCap")
                 .displayedName("FCF_EnCap")
                 .description("FCF Feedback Capacity setting")
-                .tags("coarseGain")
+                .tags("coarseGain, record")
                 .readOnly()
                 .commit();
 
         UINT32_ELEMENT(expected).key("gain.csaFbCap")
                 .displayedName("CSA_FbCap")
                 .description("CSA Feedback Capacitor setting")
-                .tags("coarseGain")
+                .tags("coarseGain, record")
                 .readOnly()
                 .commit();
 
         UINT32_ELEMENT(expected).key("gain.csaResistor")
                 .displayedName("CSA Resistor")
                 .description("Resistor setting of the CSA, the larger the higher the gain")
-                .tags("coarseGain")
+                .tags("coarseGain, record")
                 .readOnly()
                 .commit();
 
@@ -498,6 +498,7 @@ namespace karabo {
         STRING_ELEMENT(expected).key("gain.irampFineTrm")
                 .displayedName("Iramp Fine Trim")
                 .description("Selected ADC Gain Setting")
+                .tags("record")
                 .readOnly()
                 .commit();
 
@@ -588,7 +589,7 @@ namespace karabo {
                 .description("Name of the epc configuration file")
                 .displayedName("EPC Register Filename")
                 .isInputFile()
-                .tags("EPCConfigPath")
+                .tags("EPCConfigPath, record")
                 .assignmentOptional().defaultValue("~/karabo/devices/DsscPpt/ConfigFiles/PPT_EPCRegs.txt").reconfigurable()
                 .commit();
 
@@ -997,12 +998,12 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("updateConfigHash").displayedName("Read Config Data")
                 .description("Read Configuration Data")
-                .commit();//*/
+                .commit();
         
         SLOT_ELEMENT(expected)
                 .key("updateConfigFromHash").displayedName("Write Config Data")
                 .description("Write Configuration Data")
-                .commit();//*/
+                .commit();
     }
 
     const std::string DsscPpt::s_dsscConfBaseNode = "DetectorRegisters";
@@ -1108,8 +1109,6 @@ namespace karabo {
         KARABO_SLOT(setThrottleDivider);
 
         KARABO_SLOT(startSingleCycle);
-        
-       // KARABO_SLOT(updateConfigSchema);
         
         KARABO_SLOT(updateConfigHash);
         KARABO_SLOT(updateConfigFromHash);
