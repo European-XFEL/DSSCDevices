@@ -100,8 +100,9 @@
         UINT32_ELEMENT(expected).key("sequencer.cycleLength")                   \
                   .displayedName("Cycle Length")                                \
                   .description("cycle length")                                  \
+                  .tags("record")                                               \
                   .assignmentOptional().defaultValue(50).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(State::ON, State::STOPPED)                     \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.integrationTime")               \
