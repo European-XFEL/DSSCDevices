@@ -461,9 +461,9 @@ namespace karabo {
                     std::string fileName = incomingReconfiguration.getAs<string>(path);
                     setSramBlacklist(fileName);
                     if (isSramBlacklistValid()) {
-                        KARABO_LOG_INFO << "Loaded SRAM Blacklist from " << fileName;
+                        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Loaded SRAM Blacklist from " << fileName;
                     } else {
-                        KARABO_LOG_ERROR << "Could not load SRAM Blacklist from " << fileName;
+                        KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Could not load SRAM Blacklist from " << fileName;
                     }
                     set<bool>("sramBlacklistValid", isSramBlacklistValid());
 
@@ -473,7 +473,7 @@ namespace karabo {
                     uint16_t pixel = incomingReconfiguration.getAs<unsigned short>(path);
                     const auto pixelValidAddresses = m_sramBlacklist.getValidSramAddresses(pixel);
                     set < vector<bool>>("pixelSramBlacklistValues", pixelValidAddresses);
-                    KARABO_LOG_INFO << "Vector updated ";
+                    KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Vector updated ";
                 } else if (path.compare("sramCorrectionFileName") == 0) {
                     std::string fileName = incomingReconfiguration.getAs<string>(path);
                     if (utils::checkFileExists(fileName)) {
@@ -484,12 +484,12 @@ namespace karabo {
                             DSSC::StateChangeKeeper keeper(this);
                             corrFileReader.loadCorrectionData(m_pixelBackgroundData, m_sramCorrectionData);
                         } else {
-                            KARABO_LOG_ERROR << "Correction file found, but structure invalid" << fileName;
+                            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Correction file found, but structure invalid: " << fileName;
                         }
                         set<bool>("sramCorrectionValid", valid);
                         set<bool>("baselineValuesValid", valid);
                     } else {
-                        KARABO_LOG_ERROR << "File not found. Could not load SRAM Correction from " << fileName;
+                        KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found. Could not load SRAM Correction from " << fileName;
                     }
                 } else if (path.compare("run") == 0) {
                     m_run = incomingReconfiguration.getAs<bool>(path);
@@ -558,7 +558,7 @@ namespace karabo {
         try {
             updateState(newState);
         } catch (...) {
-            KARABO_LOG_WARN << "DsscProcessor: changeDeviceState : WARNING STATE COULD NOT BE UPDATED!!!!";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " DsscProcessor: changeDeviceState : WARNING STATE COULD NOT BE UPDATED!!!!";
         }
     }
 
@@ -695,7 +695,7 @@ namespace karabo {
        if (get<bool>("measureMean") || get<bool>("measureRMS")) {
            if (m_numIterations == m_iterationCnt) {
                sendMeanValues();
-               KARABO_LOG_INFO << "RESENT DATA ";
+               KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " RESENT DATA ";
                return;
            }
        }
@@ -749,7 +749,7 @@ namespace karabo {
             m_minSram = 0;
             set<unsigned short>("maxSram", m_maxSram);
             set<unsigned short>("minSram", m_minSram);
-            KARABO_LOG_WARN << "Sram Range does not fit to number of frames, is corrected";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Sram Range does not fit to number of frames, is corrected";
         }
 
 
@@ -781,7 +781,7 @@ namespace karabo {
             fillDataHistoVec(data_ptr, m_pixelHistoVec, false);
             m_iterationCnt++;
 
-            KARABO_LOG_DEBUG << "DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
+            KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " DataProcessor: filled histogram " << m_iterationCnt << "/" << m_numIterations;
 
             if (m_iterationCnt % m_updateHistoStride == 0) {
                 displayPixelHistogram();
@@ -797,7 +797,7 @@ namespace karabo {
             sendPixelData(processedPixelData, trainId_ptr[0]);
         }
 
-        //KARABO_LOG_INFO << "Train Processed: " << this_train->first << "/" << minValidTrainId;
+        //KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Train Processed: " << this_train->first << "/" << minValidTrainId;
     }
 
 
@@ -855,7 +855,7 @@ namespace karabo {
             m_sramBlacklist.initFromFile(sramBlacklistFileName, true);
         }
 
-        KARABO_LOG_INFO << "Sram Blacklist updated for injection sweep";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Sram Blacklist updated for injection sweep";
     }
 
 
@@ -891,7 +891,7 @@ namespace karabo {
         set<bool>("measureRMS", false);
 
         accumulate();
-        KARABO_LOG_INFO << "Histogram Generation started";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Histogram Generation started";
     }
 
 
@@ -914,7 +914,7 @@ namespace karabo {
 
         saveMeasurementInfo();
 
-        KARABO_LOG_INFO << "Stored Pixel Histograms to " << h5FileName;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Stored Pixel Histograms to " << h5FileName;
 
         m_acquireHistograms = false;
         set<bool>("acquireHistograms", m_acquireHistograms);
@@ -1033,7 +1033,7 @@ namespace karabo {
             m_minSram = 0;
             set<unsigned short>("maxSram", m_maxSram);
             set<unsigned short>("minSram", m_minSram);
-            KARABO_LOG_WARN << "Sram Range does not fit to number of frames, is corrected";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Sram Range does not fit to number of frames, is corrected";
         }
 
         if (m_previewMaximum) {
