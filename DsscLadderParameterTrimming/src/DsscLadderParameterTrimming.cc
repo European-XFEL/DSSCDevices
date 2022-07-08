@@ -26,8 +26,8 @@
 
 
 #define DSSCSTATUS(statStr) \
-      KARABO_LOG_INFO << statStr;\
-      set<string>("status",statStr);
+      KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " " << statStr;\
+      set<string>("status", statStr);
 
 //#ifdef F1IO
 //#define INITIALCONF "ConfigFiles/Init.conf"
@@ -863,7 +863,7 @@ namespace karabo{
 
 
     void DsscLadderParameterTrimming::stopTrimming() {
-        KARABO_LOG_WARN << "Abort Trimming by user abort";
+        KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Abort Trimming by user abort";
 
         m_trimppt_api->runTrimming = false;
 
@@ -879,7 +879,7 @@ namespace karabo{
         try {
             updateState(newState);
         } catch (...) {
-            KARABO_LOG_WARN << "DsscLadderParameterTrimming: changeDeviceState : WARNING STATE COULD NOT BE UPDATED!!!!";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " DsscLadderParameterTrimming: changeDeviceState : WARNING STATE COULD NOT BE UPDATED!!!!";
         }
     }
 
@@ -910,7 +910,7 @@ namespace karabo{
         boost::replace_all(main_processor_templ, "{QUAD}", m_quadrantId);
         boost::replace_all(main_processor_templ, "{MOD}", to_string(get<int>("activeModule")));
         m_mainProcessorId = main_processor_templ;
-        KARABO_LOG_INFO << "Using " << m_mainProcessorId << " as main processor device";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Using " << m_mainProcessorId << " as main processor device";
 
         m_testDataGeneratorId = "DsscDummyTrainDataGenerator_" + m_quadrantId;
 
@@ -964,7 +964,7 @@ namespace karabo{
         
         //Check the devices are available
         if (allDevicesAvailable()) {
-            KARABO_LOG_INFO << "All Devices started, ready for trimming routines";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " All Devices started, ready for trimming routines";
         } else {
             changeDeviceState(State::ERROR);
             set<string>("status", "Not all devices are available");
@@ -1009,7 +1009,7 @@ namespace karabo{
         std::vector<uint32_t> paramValues;
         ok = utils::getSimpleSweepVector(get<string>("injectionSweepRange"), paramValues);
         if (!ok) {
-            KARABO_LOG_ERROR << "injectionSweepRange has a bad range";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " injectionSweepRange has a bad range";
             return trimmer;
         }
 
@@ -1045,12 +1045,12 @@ namespace karabo{
         m_trimppt_api->sequencer->setOpMode(SuS::Sequencer::BUFFER);
         programSequencer();
 
-        KARABO_LOG_INFO << "Sequencer Mode activated";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Sequencer Mode activated";
     }
 
 
     void DsscLadderParameterTrimming::initPixelSortMap() {
-        KARABO_LOG_INFO << "Init Pixel Sort Map";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Init Pixel Sort Map";
         m_pixelSortMap.assign(utils::s_totalNumPxs, 0);
 
 #pragma omp parallel for
@@ -1085,7 +1085,7 @@ namespace karabo{
 
 
     bool DsscLadderParameterTrimming::waitDataReceived() {
-        //KARABO_LOG_INFO << "Wait Data Received";
+        //KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Wait Data Received";
         initDataAcquisition();
 
         remote().execute(m_mainProcessorId, "accumulate");
@@ -1119,7 +1119,7 @@ namespace karabo{
 
         m_runFastAcquisition = false;
 
-        //KARABO_LOG_DEBUG << "DataReceiver all data received. TrainID = " << get<unsigned long long>("currentTrainId");
+        //KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " DataReceiver all data received. TrainID = " << get<unsigned long long>("currentTrainId");
         return true;
     }
 
@@ -1146,13 +1146,13 @@ namespace karabo{
                 }
             }
         } else if (displayMode == "FinalSlopes") {
-            KARABO_LOG_WARN << " Final Slopes values are not implemented yet";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << "  Final Slopes values are not implemented yet";
         } else if (displayMode == "SramDrift") {
             m_trimppt_api->measureSramDriftMap(m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr);
         } else if (displayMode == "SramSlopes") {
             m_trimppt_api->measureSramSlopesMap(m_trimppt_api->m_trimStartAddr, m_trimppt_api->m_trimEndAddr);
         } else if (displayMode == "Curvature") {
-            KARABO_LOG_WARN << "Curvature values are not implemented yet";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Curvature values are not implemented yet";
         }
     }
 
@@ -1450,7 +1450,7 @@ namespace karabo{
         const auto *data_ptr = (uint16_t*) asicData.getData<unsigned short>();
         const auto numFrames = asicData.size() / 64 / 64 / 16;
         if (numFrames != utils::s_numSram) {
-            KARABO_LOG_ERROR << "Wrong number of data received:" << numFrames;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Wrong number of data received:" << numFrames;
         }
 
         // TODO:
@@ -1525,7 +1525,7 @@ namespace karabo{
         uint32_t pixelToMeasure = get<unsigned int>("displayPixel");
 
         if (!m_trimppt_api->isPixelSending(pixelToMeasure)) {
-            KARABO_LOG_WARN << "Can not measure not sending pixel";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Can not measure not sending pixel";
             auto sendingPixels = m_trimppt_api->getSendingPixels();
             if (!sendingPixels.empty()) {
                 set<unsigned int>("displayPixel", sendingPixels.front());
@@ -1533,7 +1533,7 @@ namespace karabo{
             return;
         }
 
-        KARABO_LOG_INFO << "Measure Mean SRAM Content in pixel " << pixelToMeasure << " from " << m_trimppt_api->m_trimStartAddr << " to " << m_trimppt_api->m_trimEndAddr;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Measure Mean SRAM Content in pixel " << pixelToMeasure << " from " << m_trimppt_api->m_trimStartAddr << " to " << m_trimppt_api->m_trimEndAddr;
 
         m_runFastAcquisition = true;
 
@@ -1560,7 +1560,7 @@ namespace karabo{
     void DsscLadderParameterTrimming::measureMeanSramContentAllPix() {
         StateChangeKeeper keeper(this);
 
-        KARABO_LOG_INFO << "Measure Mean SRAM Content for whole Ladder " << " from " << m_trimppt_api->m_trimStartAddr << " to " << m_trimppt_api->m_trimEndAddr;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Measure Mean SRAM Content for whole Ladder from " << m_trimppt_api->m_trimStartAddr << " to " << m_trimppt_api->m_trimEndAddr;
 
         m_runFastAcquisition = true;
 
@@ -1593,7 +1593,7 @@ namespace karabo{
             remote().set<string>(m_mainProcessorId, "sramBlacklistFileName", fileName);
         }
 
-        KARABO_LOG_INFO << "Saved SramBlacklist to " << fileName;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Saved SramBlacklist to " << fileName;
     }
 
 
@@ -1633,7 +1633,7 @@ namespace karabo{
 
         //triggerPptInitFunction(State::STARTED, "startAcquisition", 3, 3);
 
-        KARABO_LOG_INFO << "Send Configuration to PPT";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Send Configuration to PPT";
 
         m_trimppt_api->updateAllCounters();
 
@@ -1644,7 +1644,7 @@ namespace karabo{
 
 
     bool DsscLadderParameterTrimming::updateAllCounters() {
-        KARABO_LOG_INFO << "update all counters";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " update all counters";
 
         sendBurstParams();
 
@@ -1665,7 +1665,7 @@ namespace karabo{
             remote().execute(m_pptDeviceId, "setBurstParameter");
             remote().execute(m_pptDeviceId, "updateStartWaitOffset");
         } else {
-            KARABO_LOG_ERROR << "PPT DEvice is not available";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " PPT DEvice is not available";
         }
     }
 
@@ -1676,7 +1676,7 @@ namespace karabo{
         m_recvMode = RecvMode::RMS;
 
         if (!allDevicesAvailable()) {
-            KARABO_LOG_ERROR << "Required Karabo Infrastructure not complete - will not run Pixel Delay Trimming";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Required Karabo Infrastructure not complete - will not run Pixel Delay Trimming";
             return;
         }
         initTrimming();
@@ -1709,7 +1709,7 @@ namespace karabo{
 
 
     void DsscLadderParameterTrimming::displayDataHistos(const utils::DataHistoVec & dataHistoVec, const std::vector<uint32_t> & measurePixels) {
-        KARABO_LOG_INFO << "DISPLAY DATAHISTOS---------------------";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " DISPLAY DATAHISTOS---------------------";
 
         if (dataHistoVec.empty()) return;
 
@@ -1773,7 +1773,7 @@ namespace karabo{
                 } else if (path.compare("sendingASICs") == 0) {
                     auto selAsicsStr = filtered.getAs<string>(path);
                     if (selAsicsStr.length() != 17) {
-                        KARABO_LOG_ERROR << "Can not convert sendingASICs string, wrong number of entries";
+                        KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Can not convert sendingASICs string, wrong number of entries";
                         selAsicsStr = utils::bitEnableValueToString(m_trimppt_api->getSendingAsics());
                         set<string>("sendingASICs", selAsicsStr);
                     }
@@ -1793,7 +1793,7 @@ namespace karabo{
                             set<bool>("pixelCalibrationDataSettingsValid", m_calibGenerator.isCalibrationDataConfigLoaded());
                         }
                     } else {
-                        KARABO_LOG_ERROR << "Can not open full config File: " << fullConfigFileName;
+                        KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Can not open full config File: " << fullConfigFileName;
                         set<string>("fullConfigFileName", m_trimppt_api->pptFullConfig->getFullConfigFileName());
                     }
                 }
@@ -1876,7 +1876,7 @@ namespace karabo{
 
             BOOST_FOREACH(string path, paths) {
                 if (path.compare("injectionMode") == 0) {
-                    KARABO_LOG_INFO << "Press SetInjectionMode to change mode";
+                    KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Press SetInjectionMode to change mode";
                 } else if (path.compare("asicsToChange") == 0) {
                     auto asics = filtered.getAs<string>(path);
                     auto asicPixels = get<string>("asicsPixelsToChange");
@@ -1988,7 +1988,7 @@ namespace karabo{
         enablePixelValueAcquisition();
 
         if (isTestData()) {
-            KARABO_LOG_INFO << "Initialize TestDataGenerator";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Initialize TestDataGenerator";
             if (!isDeviceExisting(m_testDataGeneratorId)) {
                 if (!startTestDataGeneratorInstance()) {
                     return false;
@@ -1997,7 +1997,7 @@ namespace karabo{
         }
 
         if (isDsscData()) {
-            KARABO_LOG_INFO << "Initialize DsscDataReceiver";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Initialize DsscDataReceiver";
             if (!isDeviceExisting(m_dsscDataReceiverId)) {
                 if (!startDsscDataGeneratorInstance()) {
                     return false;
@@ -2016,20 +2016,20 @@ namespace karabo{
         //connectAsicDataInputChannel();
 
         if (isTestData()) {
-            KARABO_LOG_INFO << "Start Dummy Data";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start Dummy Data";
             if (deviceState(m_testDataGeneratorId) != State::ON) {
                 remote().executeNoWait(m_testDataGeneratorId, "startContinuousMode");
             }
         }
 
         if (isDsscData()) {
-            KARABO_LOG_INFO << "Start Dssc DataReceiver";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start Dssc DataReceiver";
             if (deviceState(m_dsscDataReceiverId) != State::ACQUIRING) {
                 remote().executeNoWait(m_dsscDataReceiverId, "start");
             }
         }
 
-        KARABO_LOG_INFO << "DataHandler Devices successfully started!!";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " DataHandler Devices successfully started!!";
         return true;
     }
 
@@ -2054,7 +2054,7 @@ namespace karabo{
         cout << m_pptDeviceId << " State is " << pptState.name() << endl;
 
         if (pptState != State::ACQUIRING) {
-            KARABO_LOG_ERROR << "PPT Data Acquisition could not be started";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " PPT Data Acquisition could not be started";
             return false;
         }
 
@@ -2071,7 +2071,7 @@ namespace karabo{
         try {
             return remote().get<util::State>(deviceId, "state");
         } catch (...) {
-            //KARABO_LOG_WARN << "Get Device State Exception, state does not exist: " << deviceId;
+            //KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Get Device State Exception, state does not exist: " << deviceId;
             return util::State::CHANGING;
         }
     }
@@ -2113,11 +2113,11 @@ namespace karabo{
         bool ok = pair.first;
 
         if (!ok) {
-            KARABO_LOG_ERROR << "DsscPpt initialisation failed: " << pair.second;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " DsscPpt initialisation failed: " << pair.second;
             return false;
         }
 
-        KARABO_LOG_INFO << "DsscPpt initialized successfully: " << pair.second;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " DsscPpt initialized successfully: " << pair.second;
         return true;
     }
 
@@ -2131,11 +2131,11 @@ namespace karabo{
 
         bool ok = pair.first;
         if (!ok) {
-            KARABO_LOG_ERROR << "DsscDummyTrainGenerator initialisation failed: " << pair.second;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " DsscDummyTrainGenerator initialisation failed: " << pair.second;
             return false;
         }
 
-        KARABO_LOG_INFO << "DsscDummyTrainGenerator initialized successfully: " << pair.second;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " DsscDummyTrainGenerator initialized successfully: " << pair.second;
         return true;
     }
 
@@ -2153,11 +2153,11 @@ namespace karabo{
 
         bool ok = pair.first;
         if (!ok) {
-            KARABO_LOG_ERROR << "DsscDataReceiver initialisation failed: " << pair.second;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " DsscDataReceiver initialisation failed: " << pair.second;
             return false;
         }
 
-        KARABO_LOG_INFO << "DsscDataReceiver initialized successfully: " << pair.second;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " DsscDataReceiver initialized successfully: " << pair.second;
         return true;
     }
 
@@ -2194,11 +2194,11 @@ namespace karabo{
         bool ok = pair.first;
 
         if (!ok) {
-            KARABO_LOG_ERROR << "DsscProcessor initialisation failed: " << pair.second;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " DsscProcessor initialisation failed: " << pair.second;
             return false;
         }
 
-        KARABO_LOG_INFO << "DsscProcessor initialized successfully: " << pair.second;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " DsscProcessor initialized successfully: " << pair.second;
         return true;
     }
 
@@ -2280,7 +2280,7 @@ namespace karabo{
 
 
     bool DsscLadderParameterTrimming::getContentFromDevice(uint32_t bitStreamLength, std::vector<bool> &data_vec) {
-        KARABO_LOG_ERROR << "The readback function for configuration registers is currently not implemented in the trimming device";
+        KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " The readback function for configuration registers is currently not implemented in the trimming device";
         return true;
     }
 
@@ -2340,7 +2340,7 @@ namespace karabo{
     bool DsscLadderParameterTrimming::programPixelRegs(bool readBack, bool setJtagEngineBusy) {
         ConfigStateKeeper keeper(m_deviceConfigState);
 
-        KARABO_LOG_INFO << "Send Pixel Register Content";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Send Pixel Register Content";
 
         util::Hash outData;
 
@@ -2367,7 +2367,7 @@ namespace karabo{
     void DsscLadderParameterTrimming::programPixelRegDirectly(int px, bool setJtagEngineBusy) {
         ConfigStateKeeper keeper(m_deviceConfigState);
 
-        KARABO_LOG_ERROR << "This function should not be called from the Karabo framework";
+        KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " This function should not be called from the Karabo framework";
     }
 
 
@@ -2449,7 +2449,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         try {
             remote().execute(m_pptDeviceId, "waitJTAGEngineDone", 30);
         } catch (...) {
-            KARABO_LOG_ERROR << "EXCEPETION: COULD NOT WAIT FOR JTAG ENGINE DONE";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " EXCEPETION: COULD NOT WAIT FOR JTAG ENGINE DONE";
         }
     }
 
@@ -2482,7 +2482,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
 
     bool DsscLadderParameterTrimming::fastInitChip() {
-        KARABO_LOG_ERROR << "This function should not be called from the Karabo framework";
+        KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " This function should not be called from the Karabo framework";
         return true;
     }
 
@@ -2512,7 +2512,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
             remote().set<unsigned int>(m_pptDeviceId, "numFramesToSendOut", val);
 
             runContinuousMode(true);
-            KARABO_LOG_INFO << "Change NumFramesToReceive of PPTDevice to" << val;
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Change NumFramesToReceive of PPTDevice to " << val;
         }
 
 
@@ -2577,7 +2577,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
     bool DsscLadderParameterTrimming::fillSramAndReadout(uint16_t pattern, bool init, bool jtagMode) {
         if (dsscPptState() != State::ON) {
-            KARABO_LOG_INFO << "Start DsscPpt and initialize before programming pattern via Jtag";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start DsscPpt and initialize before programming pattern via Jtag";
             return false;
         }
 
@@ -2685,7 +2685,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         string injectionModeName = get<string>("injectionMode");
         auto newMode = m_trimppt_api->getInjectionMode(injectionModeName);
         if (m_trimppt_api->injectionMode == newMode) {
-            KARABO_LOG_WARN << "InjectionMode already set, nothing to do";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " InjectionMode already set, nothing to do";
             return;
         }
 
@@ -2737,7 +2737,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
                 m_lastPptTrainId = remote().get<unsigned int>(m_pptDeviceId, "lastTrainId") + 1;
             }
         } catch (...) {
-            KARABO_LOG_WARN << "Could not read train id from receiver device";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Could not read train id from receiver device";
         }
         return m_lastPptTrainId;
     }
@@ -2750,7 +2750,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
         getLastValidTrainId();
 
-        //KARABO_LOG_DEBUG << "Set Min Train ID "<< m_lastPptTrainId << " at " << m_mainProcessorId;
+        //KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " Set Min Train ID "<< m_lastPptTrainId << " at " << m_mainProcessorId;
 
         remote().set<unsigned long long>(m_mainProcessorId, "minValidTrainId", m_lastPptTrainId);
         remote().set<bool>(m_mainProcessorId, "measureMean", m_recvMode == RecvMode::MEAN);
@@ -2794,7 +2794,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         } while (!allOk && try_cnt < TO);
 
         if (try_cnt == TO) {
-            KARABO_LOG_ERROR << "DataReceiver Error";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " DataReceiver Error";
             return false;
         }
         return true;
@@ -2809,7 +2809,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         std::vector<int> paramValues;
         bool ok = utils::getSimpleSweepVector<int>(get<string>("burstWaitOffsetRange"), paramValues);
         if (!ok) {
-            KARABO_LOG_ERROR << "burstWaitOffsetRange has a bad range";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " burstWaitOffsetRange has a bad range";
             return;
         }
 
@@ -2835,11 +2835,11 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         //show max value
         auto maxElement = std::max_element(binValues.begin(), binValues.end());
         int maxIdx = maxElement - binValues.begin();
-        KARABO_LOG_INFO << "Max Value = " << *maxElement << " at setting " << paramValues[maxIdx];
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Max Value = " << *maxElement << " at setting " << paramValues[maxIdx];
     }
 
     void DsscLadderParameterTrimming::measureADCGainMap() {
-        KARABO_LOG_INFO << "Measure Pixel Slopes for all adc gain settings";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Measure Pixel Slopes for all adc gain settings";
 
         StateChangeKeeper keeper(this);
 
@@ -2882,17 +2882,17 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
             finishSaveRawDataParams();
         }
         m_currentTrimmer = nullptr;
-        KARABO_LOG_INFO << "All ADC Slopes Measured";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " All ADC Slopes Measured";
     }
 
 
     void DsscLadderParameterTrimming::measureInjectionSweepSlopes() {
-        KARABO_LOG_INFO << "Measure Pixel Slopes changing only incjection dac settings";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Measure Pixel Slopes changing only incjection dac settings";
 
         StateChangeKeeper keeper(this);
 
         if (get<string>("injectionMode").find("NORM") != string::npos) {
-            KARABO_LOG_ERROR << "No Injection mode selected";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " No Injection mode selected";
             return;
         }
 
@@ -2910,7 +2910,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
         m_currentTrimmer = nullptr;
 
-        KARABO_LOG_INFO << "Pixel Slopes Measured";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Pixel Slopes Measured";
     }
 
 
@@ -2924,7 +2924,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         }
 
         if (!DsscHDF5Writer::checkModuleInfo(quadrantId, moduleNr, iobSerial)) {
-            KARABO_LOG_WARN << "HDF5 File Writer already has different Module Information, will be overridden, maybe a wrong file was loaded";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " HDF5 File Writer already has different Module Information, will be overridden, maybe a wrong file was loaded";
         }
         DsscHDF5Writer::updateModuleInfo(quadrantId, moduleNr, iobSerial);
 
@@ -2983,7 +2983,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
         m_currentTrimmer = nullptr;
 
-        KARABO_LOG_INFO << "DNL Values Measured";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " DNL Values Measured";
     }
 
 
@@ -3042,7 +3042,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
             const std::string fileName = outputDir + "/CalibratedConfig_" + utils::stringReplace(get<string>("gainSelection"), '/', '_') + ".conf";
             m_trimppt_api->storeFullConfigFile(fileName, true);
 
-            KARABO_LOG_INFO << "Calibrated configuration saved to:\n-->" << fileName;
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Calibrated configuration saved to:\n-->" << fileName;
 
             set<bool>("pixelCalibrationDataSettingsValid", false);
         }
@@ -3061,13 +3061,13 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         double maxDiffAbs = targetSlope * relDiff / 100.0;
 
         if (!allDevicesAvailable()) {
-            KARABO_LOG_ERROR << "Required Karabo Infrastructure not complete - will not run Pixel Delay Trimming";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Required Karabo Infrastructure not complete - will not run Pixel Delay Trimming";
             return;
         }
 
         initTrimming();
 
-        KARABO_LOG_INFO << "Start GainTrimming in Injection Mode " << m_trimppt_api->getInjectionModeName(m_trimppt_api->injectionMode);
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start GainTrimming in Injection Mode " << m_trimppt_api->getInjectionModeName(m_trimppt_api->injectionMode);
 
         bool ok;
         auto trimmer = getNewChipTrimmer(ok);
@@ -3084,7 +3084,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
         saveGainTrimmingOutputs();
 
-        KARABO_LOG_INFO << trimmer.getGoodTrimmedPixelsStr(trimmedSlopes, range, targetSlope, maxDiffAbs, goodSlopesRel);
+        KARABO_LOG_FRAMEWORK_INFO << trimmer.getGoodTrimmedPixelsStr(trimmedSlopes, range, targetSlope, maxDiffAbs, goodSlopesRel);
 
         DSSCSTATUS("Trimmed Slopes Stats: " + utils::getVectorStatsStr(trimmedSlopes));
 
@@ -3093,7 +3093,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         const std::string fileName = get<string>("outputDir") + "/" + utils::getLocalTimeStr() + "_GainTrimmedConfig.conf";
         m_trimppt_api->storeFullConfigFile(fileName, true);
 
-        KARABO_LOG_INFO << "Gain trimming done";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Gain trimming done";
     }
     
     void DsscLadderParameterTrimming::calibrateCurrCompDAC() {
@@ -3135,7 +3135,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
             std::vector<uint32_t> xValues;
             bool ok = utils::getSimpleSweepVector(get<string>("injectionSweepRange"), xValues);
             if (!ok) {
-                KARABO_LOG_ERROR << "Injection Sweep Range Does not fit";
+                KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Injection Sweep Range Does not fit";
                 return;
             }
             std::vector<uint32_t> emptyVec;
@@ -3148,7 +3148,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
         string fileName = get<string>("importDataFileName");
         if (!utils::checkFileExists(fileName)) {
-            KARABO_LOG_ERROR << "File does not exist:" << fileName;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File does not exist: " << fileName;
             return;
         }
 
@@ -3157,7 +3157,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
         updateModuleInfo();
 
-        KARABO_LOG_INFO << "Calibrated Gain Configuration Programmed from " << fileName;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Calibrated Gain Configuration Programmed from " << fileName;
     }
 
 
@@ -3166,18 +3166,18 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         if (fileName.empty()) return;
 
         if (!utils::checkFileExists(fileName)) {
-            KARABO_LOG_ERROR << "PixelInjectionCalibrationFile does not exist: " << fileName;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " PixelInjectionCalibrationFile does not exist: " << fileName;
             return;
         }
 
         if (utils::getFileExtension(fileName) == ".h5") {
             const auto resultPair = DsscHDF5CalibrationDataGenerator::loadPxInjCalibrationFactors(fileName);
             trimmer->setPixelInjectionCalibrationFactors(resultPair.second, resultPair.first);
-            KARABO_LOG_ERROR << "PixelInjectionCalibration factors loaded from: " << fileName;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " PixelInjectionCalibration factors loaded from: " << fileName;
         } else {
             const auto resultPair = utils::importInjectionCalibrationFactors(fileName);
             trimmer->setPixelInjectionCalibrationFactors(resultPair.second, resultPair.first);
-            KARABO_LOG_INFO << "PixelInjectionCalibration factors loaded from: " << fileName;
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " PixelInjectionCalibration factors loaded from: " << fileName;
         }
 
         updateModuleInfo();
@@ -3215,9 +3215,9 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         }
 
         if (ok) {
-            KARABO_LOG_INFO << "MatrixSRAMTest Successful";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " MatrixSRAMTest Successful";
         } else {
-            KARABO_LOG_ERROR << errCnt << " errors during MatrixSRAMTest";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " " << errCnt << " errors during MatrixSRAMTest";
         }
 
         return ok;
@@ -3258,14 +3258,14 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
             case 4: testpattern = 0b010101010;
                 testName = "DIG5E:MatrixSRAMTest";
                 break;
-            default: KARABO_LOG_ERROR << "Bad pattern ID selected.";
+            default: KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Bad pattern ID selected.";
                 return false;
         }
 
-        KARABO_LOG_INFO << "Starting test " << testName;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Starting test " << testName;
 
         if (!fillSramAndReadout(testpattern, true)) {
-            KARABO_LOG_ERROR << "Error during fillSramAndReadout, SRAM Test aborted";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Error during fillSramAndReadout, SRAM Test aborted";
             return false;
         }
         const string testPath = get<string>("outputDir") + "/" + testName;
@@ -3278,7 +3278,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
         bool ok = (errCnt_thisPattern == 0);
         if (!ok) {
-            KARABO_LOG_ERROR << testName << " - " << errCnt_thisPattern << " errors found";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " " << testName << " - " << errCnt_thisPattern << " errors found";
         }
 
         return ok;

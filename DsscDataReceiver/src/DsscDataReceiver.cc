@@ -941,7 +941,7 @@ USING_KARABO_NAMESPACES
 
         setASICsToRecord();
 
-        KARABO_LOG_INFO << "DsscDataReceiver: LadderMode = " << m_ladderMode;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " LadderMode = " << m_ladderMode;
 
         m_asicPixelToShow = get<unsigned int>("monitor.asicPixelToShow");
         m_asicToShow = get<unsigned int>("monitor.asicToShow");
@@ -998,7 +998,7 @@ USING_KARABO_NAMESPACES
         if (utils::checkFileExists(sramBlacklistFileName)) {
             m_processor.setSramBlacklist(sramBlacklistFileName);
         } else {
-            KARABO_LOG_ERROR << "SRAM Blacklist file not found";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " SRAM Blacklist file not found";
         }
         set<bool>("sramBlacklistValid", m_processor.isSramBlacklistValid());
     }
@@ -1029,17 +1029,17 @@ USING_KARABO_NAMESPACES
         dataWriter.setMeasurementName("PixelSpectrum");
         dataWriter.addHistoData("SpektrumData", dataHistoVec, pixels);
 
-        KARABO_LOG_INFO << "DataHisto Stored in : " << fileName;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " DataHisto Stored in : " << fileName;
     }
 
 
     void DsscDataReceiver::setASICsToRecord() {
         string text = get<string>("asicsToRecord");
         if (text.length() == 17) {
-            KARABO_LOG_INFO << "Set ASICs to Record " << text;
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Set ASICs to Record " << text;
             m_actASICs = utils::bitEnableStringToValue(text);
         } else {
-            KARABO_LOG_WARN << "String has wrong format " << text;
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " String has wrong format " << text;
         }
         DsscPacketReceiverSimple::setSendingAsics(m_actASICs);
     }
@@ -1070,7 +1070,7 @@ USING_KARABO_NAMESPACES
         stopPolling();
         m_keepPolling = true;
         m_pollThread.reset(new boost::thread(boost::bind(&DsscDataReceiver::getFillStands, this)));
-        KARABO_LOG_INFO << "PollThread started...";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " PollThread started...";
     }
 
 
@@ -1089,7 +1089,7 @@ USING_KARABO_NAMESPACES
     void DsscDataReceiver::startDataTransfer() {
         string srcDirName = get<string>("transferDirectory");
         if (!boost::filesystem::exists(srcDirName)) {
-            KARABO_LOG_WARN << "ERROR: Directory to transfer not found: " << srcDirName;
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " ERROR: Directory to transfer not found: " << srcDirName;
             return;
         }
 
@@ -1108,8 +1108,7 @@ USING_KARABO_NAMESPACES
         callString += distName + " && echo \"image data transfer done\" & ";
         system(callString.c_str());
 
-        KARABO_LOG_DEBUG << "DataTransfer Command:";
-        KARABO_LOG_DEBUG << callString;
+        KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " DataTransfer Command: " << callString;
     }
 #endif
 
@@ -1140,7 +1139,7 @@ USING_KARABO_NAMESPACES
         corrPath += "/SRAMCorrectionImage.h5";
 
         if (!boost::filesystem::exists(corrPath)) {
-            KARABO_LOG_WARN << "No background information file found in directory";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " No background information file found in directory";
             return;
         }
 
@@ -1158,15 +1157,15 @@ USING_KARABO_NAMESPACES
 
     void DsscDataReceiver::flushTrainStorage() {
         if (getState() == State::UNKNOWN) {
-            KARABO_LOG_INFO << "++++ Cannot Flush in UNKNOWN STATE ++++";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ++++ Cannot Flush in UNKNOWN STATE ++++";
             return;
         }
 
         const auto lastReceivedTrainID = m_trainSorter.getLastReceivedTrainID();
-        KARABO_LOG_INFO << "++++ Dismis Invalid Trains in storage up to train ID " << lastReceivedTrainID << "/" << m_currentTrainID << " ++++";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ++++ Dismis Invalid Trains in storage up to train ID " << lastReceivedTrainID << "/" << m_currentTrainID << " ++++";
         m_trainSorter.dismissInvalidTrains(lastReceivedTrainID + 1);
 
-        KARABO_LOG_INFO << "++++ Flushed train Storage ++++";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ++++ Flushed train Storage ++++";
     }
 
 
@@ -1263,7 +1262,7 @@ USING_KARABO_NAMESPACES
 
     void DsscDataReceiver::updateStatus(const std::string & text) {
         set<string>("status", text);
-        KARABO_LOG_INFO << text;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Status: " << text;
     }
 
 
@@ -1363,13 +1362,13 @@ USING_KARABO_NAMESPACES
                 } else if (path.compare("correction.enThreshold") == 0) {
                     m_enThreshold = filtered.getAs<bool>(path);
                     if (!m_bgDataValid) {
-                        KARABO_LOG_WARN << "Threshold can only be active if background data is available";
+                        KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Threshold can only be active if background data is available";
                     }
                 } else if (path.compare("correction.correct") == 0) {
                     m_correct = filtered.getAs<bool>(path);
 
                     if (!m_bgDataValid) {
-                        KARABO_LOG_WARN << "SRAM Correction can only be active if correction data is available";
+                        KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " SRAM Correction can only be active if correction data is available";
                         m_processor.clearSramCorrectionData();
                     } else {
                         if (m_correct) {
@@ -1381,7 +1380,7 @@ USING_KARABO_NAMESPACES
                 } else if (path.compare("correction.subtract") == 0) {
                     m_subtract = filtered.getAs<bool>(path);
                     if (!m_bgDataValid) {
-                        KARABO_LOG_WARN << "Background can only be active if background data is available";
+                        KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Background can only be active if background data is available";
                     }
                 } else if (path.compare("correction.showRawData") == 0) {
                     m_showRawData = filtered.getAs<bool>(path);
@@ -1390,13 +1389,13 @@ USING_KARABO_NAMESPACES
                     if (utils::checkFileExists(sramBlacklistFileName)) {
                         m_processor.setSramBlacklist(sramBlacklistFileName);
                     } else {
-                        KARABO_LOG_ERROR << "SRAM Blacklist file not found";
+                        KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " SRAM Blacklist file not found";
                     }
                     set<bool>("sramBlacklistValid", m_processor.isSramBlacklistValid());
                 }
             }
             m_correctionFunction = getCorrectionFunction();
-            KARABO_LOG_INFO << "Correction Function Changed";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Correction Function Changed";
         }
     }
 
@@ -1417,7 +1416,7 @@ USING_KARABO_NAMESPACES
     void DsscDataReceiver::open() {
         updateState(State::STARTING);
 
-        KARABO_LOG_INFO << "Open";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Open";
 
         set<unsigned long long>("trainCnt", 0);
 
@@ -1443,13 +1442,13 @@ USING_KARABO_NAMESPACES
     void DsscDataReceiver::activate() {
         DSSC::StateChangeKeeper keeper(this, State::ACQUIRING);
 
-        KARABO_LOG_INFO << "Activate Action";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Activate Action";
 
         set<bool>("enableDAQOutput", true);
 
         // There might be a remnant (but finished) thread from previous write
         if (m_writingThread) {
-            KARABO_LOG_INFO << "Old writing thread to join in write()!";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Old writing thread to join in write()!";
             m_writingThread->join();
             m_writingThread.reset();
         }
@@ -1479,7 +1478,7 @@ USING_KARABO_NAMESPACES
 
 
     void DsscDataReceiver::reset() {
-        KARABO_LOG_INFO << "Reset Action";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Reset Action";
         set<unsigned long long>("trainCnt", 0);
         close();
     }
@@ -1488,7 +1487,7 @@ USING_KARABO_NAMESPACES
     void DsscDataReceiver::close() {
         updateState(State::CLOSING);
 
-        KARABO_LOG_INFO << "Close Action";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Close Action";
 
         stopPolling();
 
@@ -1542,14 +1541,14 @@ USING_KARABO_NAMESPACES
 
 
     void DsscDataReceiver::stopWriteThreads() {
-        KARABO_LOG_INFO << "Stop m_writeHDFThreads!";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Stop m_writeHDFThreads!";
 
         for (auto && th : m_writeHDFThreads) {
             if (th.joinable()) {
                 th.join();
             }
         }
-        KARABO_LOG_INFO << "Stopped m_writeHDFThreads!";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Stopped m_writeHDFThreads!";
     }
 
 
@@ -1565,7 +1564,7 @@ USING_KARABO_NAMESPACES
         for (auto && sendingASIC : m_sendingASICs) {
             const auto testPattern = trainDataToCheck->getTestPattern(sendingASIC);
             if (testPattern != expectedTestPattern) {
-                KARABO_LOG_WARN << "ASIC" << sendingASIC << "did not send data at train : " << trainDataToCheck->trainId;
+                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " ASIC" << sendingASIC << "did not send data at train : " << trainDataToCheck->trainId;
                 return false;
             }
         }
@@ -1577,7 +1576,7 @@ USING_KARABO_NAMESPACES
         for (auto && sendingASIC : m_sendingASICs) {
             const auto tempValue = trainDataToCheck->getTempADCValue(sendingASIC);
             if (tempValue == 511) {
-                KARABO_LOG_WARN << "ASIC" << sendingASIC << " temperature Value indicated a problem : " << trainDataToCheck->trainId;
+                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " ASIC" << sendingASIC << " temperature Value indicated a problem : " << trainDataToCheck->trainId;
                 return false;
             }
         }
@@ -1594,7 +1593,7 @@ USING_KARABO_NAMESPACES
                 m_sendingASICs.push_back(asic);
             } else {
                 m_notSendingASICs[asic]++;
-                //KARABO_LOG_INFO << "ASIC" << asic << "did not send data at train : " << trainDataToCheck->trainId;
+                //KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ASIC" << asic << "did not send data at train : " << trainDataToCheck->trainId;
             }
         }
     }
@@ -1604,7 +1603,7 @@ USING_KARABO_NAMESPACES
         m_numCheckedData += trainDataToCheck->pulseCnt * utils::s_totalNumPxs;
         m_errorCnt += trainDataToCheck->checkTestPatternData(get<unsigned>("testPattern"));
 
-        KARABO_LOG_INFO << "Errors Found:" << m_errorCnt << " - After " << m_numCheckedData << " checked words";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Errors Found:" << m_errorCnt << " - After " << m_numCheckedData << " checked words";
     }
 
 
@@ -2049,10 +2048,10 @@ USING_KARABO_NAMESPACES
         boost::filesystem::path data_dir(outdir);
         if (!boost::filesystem::exists(data_dir)) {
             if (boost::filesystem::create_directories(data_dir)) {
-                KARABO_LOG_INFO << "Created new directory: " << outdir;
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Created new directory: " << outdir;
                 return true;
             } else {
-                KARABO_LOG_ERROR << "Could not create output directory: " << outdir;
+                KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Could not create output directory: " << outdir;
                 return false;
             }
         }
@@ -2067,7 +2066,7 @@ USING_KARABO_NAMESPACES
 
     void DsscDataReceiver::acquireTrains() {
         if (!checkOutputDirExists()) {
-            KARABO_LOG_ERROR << "Could not create directory...will stop";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Could not create directory...will stop";
             return;
         }
 
@@ -2252,7 +2251,7 @@ USING_KARABO_NAMESPACES
 
 
     void DsscDataReceiver::saveToHDF(utils::DsscTrainData * trainDataToStore) {
-        KARABO_LOG_INFO << "Save to HDF5 - TrainID = " << trainDataToStore->trainId;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Save to HDF5 - TrainID = " << trainDataToStore->trainId;
 
         string fileName = utils::getLocalTimeStr() + "_TrainData_" + std::to_string(trainDataToStore->trainId) + ".h5";
         DsscHDF5Writer::saveToFile(get<string>("outputDir") + "/" + fileName, trainDataToStore, 64, 64);
@@ -2300,7 +2299,7 @@ USING_KARABO_NAMESPACES
         const auto imageValues = utils::calcMeanImageFromHistograms(m_pixelHistoVec, pixelNumbers);
         dataWriter.addImageData("SpectrumPedestalImage", 512, imageValues);
 
-        KARABO_LOG_INFO << "Stored Pixel Histograms to " << h5FileName;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Stored Pixel Histograms to " << h5FileName;
     }
 
 
@@ -2363,7 +2362,7 @@ USING_KARABO_NAMESPACES
         m_runDisplay = true;
 
         if (m_displayThread) {
-            KARABO_LOG_INFO << "Old display thread to join in write()!";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Old display thread to join in write()!";
             m_displayThread->join();
             m_displayThread.reset();
         }
@@ -2375,7 +2374,7 @@ USING_KARABO_NAMESPACES
         m_runDisplay = false;
 
         if (m_displayThread) {
-            KARABO_LOG_INFO << "Old display thread to join in write()!";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Old display thread to join in write()!";
             m_displayThread->join();
             m_displayThread.reset();
         }
@@ -2449,7 +2448,7 @@ USING_KARABO_NAMESPACES
                 }
 
                 if (!m_currentTrainData->isValid()) {
-                    KARABO_LOG_ERROR << "Current TRAIN Data is invalid";
+                    KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Current TRAIN Data is invalid";
                     m_trainSorter.returnTrainData(m_currentTrainData);
                     m_currentTrainData = nullptr;
                     continue;
@@ -2471,7 +2470,7 @@ USING_KARABO_NAMESPACES
 
 
         if (!errorMsg.empty()) {
-            KARABO_LOG_ERROR << "Stop writing because:" << errorMsg;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Stop writing because:" << errorMsg;
             this->signalEndOfStream("imageOutput");
             this->signalEndOfStream("ladderImageOutput");
             this->signalEndOfStream("asicImageOutput");
@@ -2480,7 +2479,7 @@ USING_KARABO_NAMESPACES
             updateStatus("Exception in DataReceiving");
             exit(0);
         } else {
-            KARABO_LOG_INFO << get<unsigned long long>("trainCnt") << " trains correctly received. " << errorCnt << " Errors found.";
+            KARABO_LOG_FRAMEWORK_INFO << get<unsigned long long>("trainCnt") << " trains correctly received. " << errorCnt << " Errors found.";
             updateState(State::STARTED);
         }
     }
@@ -2553,7 +2552,7 @@ USING_KARABO_NAMESPACES
 
         if (!allASICTempValuesValid(m_currentTrainData)) {
             utils::CoutColorKeeper keeper(utils::STDRED);
-            KARABO_LOG_WARN << "ASIC TEMP VALUES PROBLEM... Check if this trains have to be removed";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " ASIC TEMP VALUES PROBLEM... Check if this trains have to be removed";
         }
 
         updateProcessorParams();
@@ -2594,7 +2593,7 @@ USING_KARABO_NAMESPACES
 
             m_availableASICs = m_currentTrainData->availableASICs;
         } else {
-            KARABO_LOG_WARN << "not all ASICs sent correct data, or test pattern is wrong, dod not send any data";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " not all ASICs sent correct data, or test pattern is wrong, did not send any data";
         }
     }
 
@@ -2637,7 +2636,7 @@ USING_KARABO_NAMESPACES
 
         this->updateState(m_lastState);
 
-        KARABO_LOG_INFO << "All Trains stored: " << numStoredTrains;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " All Trains stored: " << numStoredTrains;
         set<unsigned int>("numStoredTrains", 0);
     }
 
@@ -2648,7 +2647,7 @@ USING_KARABO_NAMESPACES
         uint iobSerial = get<unsigned int>("specificData.iobSerial");
 
         if (!DsscHDF5Writer::checkModuleInfo(quadrantId, moduleNr, iobSerial)) {
-            KARABO_LOG_WARN << "HDF5 File Writer already has different Module Information, will be overridden, maybe a wrong file was loaded";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " HDF5 File Writer already has different Module Information, will be overridden, maybe a wrong file was loaded";
         }
         DsscHDF5Writer::updateModuleInfo(quadrantId, moduleNr, iobSerial);
 
@@ -2670,7 +2669,7 @@ USING_KARABO_NAMESPACES
         if (maxSram >= pulseCnt) {
             set<unsigned short>("minSram", 0);
             set<unsigned short>("maxSram", pulseCnt - 1);
-            KARABO_LOG_INFO << "SRAM Range updates, fits now to pulse cnt " << pulseCnt;
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " SRAM Range updates, fits now to pulse cnt " << pulseCnt;
         }
 
 

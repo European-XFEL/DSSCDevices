@@ -166,7 +166,7 @@ namespace karabo {
 
     void DsscAsicProcessor::stop() {
         if (m_run) {
-            KARABO_LOG_INFO << "User abort after " << m_iterationCnt << "/" << m_numIterations << " iterations";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " User abort after " << m_iterationCnt << "/" << m_numIterations << " iterations";
         }
         m_run = false;
         updateState(State::STOPPED);

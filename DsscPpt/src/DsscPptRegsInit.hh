@@ -829,23 +829,23 @@
 
     #define CHECK_IOB(iobNumber)                                                                    \
             if (iobNumber < 1 || iobNumber > 4) {                                                   \
-                KARABO_LOG_ERROR << "IOB "  << iobNumber << " unknown!";                            \
+                KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " IOB "  << iobNumber << " unknown!";                            \
                 return;                                                                             \
             }                                                                                       \
                                                                                                     \
             if(!isIOBAvailable(iobNumber)){                                                         \
-                KARABO_LOG_ERROR << "IOB " << iobNumber << " not available, nothing programmed ";   \
+                KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " IOB " << iobNumber << " not available, nothing programmed ";   \
                 return;                                                                             \
             }
 
     #define CHECK_IOB_B(iobNumber)                                                                  \
             if (iobNumber < 1 || iobNumber > 4) {                                                   \
-                KARABO_LOG_ERROR << "IOB "  << iobNumber << " unknown!";                            \
+                KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " IOB "  << iobNumber << " unknown!";                            \
                 return false;                                                                       \
             }                                                                                       \
                                                                                                     \
             if(!isIOBAvailable(iobNumber)){                                                         \
-                KARABO_LOG_ERROR << "IOB " << iobNumber << " not available, nothing programmed ";   \
+                KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " IOB " << iobNumber << " not available, nothing programmed ";   \
                 return false;                                                                       \
             }
 

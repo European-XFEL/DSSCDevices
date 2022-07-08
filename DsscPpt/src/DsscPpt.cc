@@ -47,10 +47,6 @@ using namespace karabo::core;
 
 #define BOOL_CAST boost::lexical_cast<bool>
 
-#define DEVICE_ERROR(messsage)           \
-        KARABO_LOG_ERROR << messsage;    \
-        set<string>("status", messsage);  \
-        this->updateState(State::ERROR);
 
 namespace karabo {
 
@@ -1136,12 +1132,14 @@ namespace karabo {
         KARABO_ON_DATA("registerConfigInput", receiveRegisterConfiguration);
         SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(get<string>("fullConfigFileName"));     
 
-        if(fullconfig->isGood()){
-                  m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(fullconfig));
-        }else{
-                delete fullconfig;
-                DEVICE_ERROR("FullConfigFile invalid");
-                return;
+        if (fullconfig->isGood()) {
+            m_ppt = PPT_Pointer(new SuS::DSSC_PPT_API(fullconfig));
+        } else {
+            delete fullconfig;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " FullConfigFile invalid";
+            this->set<string>("status", "FullConfigFile invalid");
+            this->updateState(State::ERROR);
+            return;
         }
         
 
@@ -1178,7 +1176,7 @@ namespace karabo {
         updateGainHashValue();
         updateConfigHash();
 
-        KARABO_LOG_INFO << "init done";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " init done";
 
     }
 
@@ -1187,10 +1185,10 @@ namespace karabo {
                                                const InputChannel::MetaData& meta) {
         DSSC::StateChangeKeeper keeper(this);
 
-        KARABO_LOG_INFO << "DsscPpt: received new configuration from " << meta.getSource();
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " DsscPpt: received new configuration from " << meta.getSource();
 
         if (!data.has("regType")) {
-            KARABO_LOG_WARN << "Receive Configuration: no regType defined";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Receive Configuration: no regType defined";
             return;
         }
 
@@ -1204,20 +1202,20 @@ namespace karabo {
             receiveConfigRegister(data);
         }
 
-        KARABO_LOG_INFO << "getSequencerParamsIntoGui";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " getSequencerParamsIntoGui";
         getSequencerParamsIntoGui();
 
-        KARABO_LOG_INFO << "getSequenceCountersIntoGui";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " getSequenceCountersIntoGui";
         getSequenceCountersIntoGui();
 
-        KARABO_LOG_INFO << "getCoarseGainParametersIntoGui";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " getCoarseGainParametersIntoGui";
         getCoarseGainParamsIntoGui();
     }
 
 
     void DsscPpt::receiveConfigRegister(const Hash& data) {
         if (!data.has("currentModule")) {
-            KARABO_LOG_WARN << "Receive Configuration: no currentModule defined";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Receive Configuration: no currentModule defined";
             return;
         }
 
@@ -1234,7 +1232,7 @@ namespace karabo {
         utils::split(data.get<string>("moduleSets"), ';', moduleSetNames, 0);
 
         if (moduleSetNames.empty()) {
-            KARABO_LOG_ERROR << "ERROR: no ModuleSet found in incoming configuration";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " ERROR: no ModuleSet found in incoming configuration";
             return;
         }
 
@@ -1258,7 +1256,7 @@ namespace karabo {
                     currentReg->setSignalValue(moduleSet, "all", signalName, signalsData[0]);
                 } else {
                     if (data_size != modules.size()) {
-                        KARABO_LOG_ERROR << "ERROR: Number of signal values does not fit to number of modules: " << data_size << "/" << modules.size();
+                        KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " ERROR: Number of signal values does not fit to number of modules: " << data_size << "/" << modules.size();
                         continue;
                     }
 
@@ -1288,7 +1286,7 @@ namespace karabo {
                 m_ppt->programPixelRegs();
             }
         }
-        KARABO_LOG_INFO << regType << "Configuration Received";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " " << regType << " Configuration Received";
     }
 
 
@@ -1299,10 +1297,10 @@ namespace karabo {
             cnt++;
         }
 
-        KARABO_LOG_DEBUG << "DsscPptDevice receive register cofnig wait count = " << cnt;
+        KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " DsscPptDevice receive register cofnig wait count = " << cnt;
 
         if (cnt == 500) {
-            KARABO_LOG_WARN << "DsscPptDevice state does not change ";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " DsscPptDevice state does not change ";
         }
 
         cnt = 0;
@@ -1326,7 +1324,7 @@ namespace karabo {
 
                 const auto seqOpModeStr = SuS::Sequencer::getOpModeStr(seqOpMode);
                 set<string>("sequencer.opMode", seqOpModeStr);
-                KARABO_LOG_INFO << "Sequencer OpMode is now " << seqOpModeStr;
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Sequencer OpMode is now " << seqOpModeStr;
             } else {
                 auto value = paramData.get<unsigned int>(seqParamName);
                 m_ppt->getSequencer()->setSequencerParameter(seqParamName, value, false);
@@ -1340,7 +1338,7 @@ namespace karabo {
 
         bool cycleLengthChanged = (get<unsigned int>("sequencer.cycleLength") != (unsigned int) m_ppt->getSequencer()->getCycleLength());
         if (cycleLengthChanged) {
-            KARABO_LOG_WARN << "!!!!CYCLE LENGTH CHANGED!!!!";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " !!!!CYCLE LENGTH CHANGED!!!!";
             updateSequenceCounters();
         }
     }
@@ -1419,7 +1417,7 @@ namespace karabo {
         bool ok = true;
 
         if (!boost::filesystem::exists(config.get<string>("fullConfigFileName"))) {
-            KARABO_LOG_ERROR << "FullConfigFile not found: check defined FullConfigFileName";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " FullConfigFile not found: check defined FullConfigFileName";
             ok = false;
         }
 
@@ -1499,7 +1497,7 @@ namespace karabo {
             std::vector<std::string> modules_strvec = reg->getModules(modSetName);
             const auto signalNames = reg->getSignalNames(modSetName);
             for (const auto & sigName : signalNames) {
-                //  KARABO_LOG_INFO << "Add Signal " + sigName;
+                //  KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Add Signal " + sigName;
                 if (sigName.find("_nc") != string::npos) {
                     continue;
                 }
@@ -1558,7 +1556,7 @@ namespace karabo {
 
         m_keepPolling = true;
         m_pollThread.reset(new boost::thread(boost::bind(&DsscPpt::pollHardware, this)));
-        KARABO_LOG_INFO << "PollThread started...";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " PollThread started...";
     }
 
 
@@ -1568,7 +1566,7 @@ namespace karabo {
             m_pollThread->join();
             m_pollThread.reset();
         }
-        KARABO_LOG_INFO << "PollThread joined...";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " PollThread joined...";
     }
 
 
@@ -1617,16 +1615,16 @@ namespace karabo {
             unsigned int port = 10;
             host = get<string>("pptHost");
             port = get<unsigned int>("pptPort");
-            KARABO_LOG_INFO << "About to open PPT using host: " + host + " and port: " + toString(port);
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " About to open PPT using host: " + host + " and port: " + toString(port);
             m_ppt->setPPTAddress(host, port);
             int rc = m_ppt->openConnection();
-            KARABO_LOG_INFO << "Just opened PPT: " << rc;
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Just opened PPT: " << rc;
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
                 close();
                 this->updateState(State::UNKNOWN);
                 std::string message = "Failed to connect to PPT: " + m_ppt->errorString;
                 set<string>("status", message);
-                KARABO_LOG_ERROR << message;
+                KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " " << message;
                 //throw KARABO_NETWORK_EXCEPTION("Failed to connect to PPT: " + m_ppt->errorString);
             }
         }
@@ -1651,7 +1649,7 @@ namespace karabo {
         } 
         /*else {
             this->updateState(State::ERROR);
-            KARABO_LOG_ERROR << "Open failure -- attempt to open a connection to PPT failed";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Open failure -- attempt to open a connection to PPT failed";
             //throw KARABO_NETWORK_EXCEPTION("Open failure -- attempt to open a connection to PPT failed");
         }*/
     }
@@ -1663,7 +1661,7 @@ namespace karabo {
 
         set<bool>("continuous_mode", run);
         {
-            KARABO_LOG_INFO << "runContMode mutex";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " runContMode mutex";
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->runContinuousMode(run);
         }
@@ -1675,7 +1673,7 @@ namespace karabo {
         DSSC::StateChangeKeeper keeper(this, endState);
         set<bool>("disable_sending", false);
         {
-            KARABO_LOG_INFO << "runAcquisition mutex";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " runAcquisition mutex";
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->disableSending(false);
         }
@@ -1708,7 +1706,7 @@ namespace karabo {
     void DsscPpt::burstAcquisitionPolling() {
         
         try {
-            KARABO_LOG_INFO << "Hardware polling started";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Hardware polling started";
        
           unsigned int num_trains = get<unsigned int>("numBurstTrains");
           assert(num_trains);
@@ -1787,9 +1785,9 @@ namespace karabo {
           //updateState(State::ON);
          
         } catch (const Exception& e) {
-            KARABO_LOG_ERROR << e;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << e;
         } catch (...) {
-            KARABO_LOG_ERROR << "Unknown exception was raised in poll thread";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Unknown exception was raised in poll thread";
         }
     }
 
@@ -1839,7 +1837,7 @@ namespace karabo {
 
     void DsscPpt::updateTestEnvironment(const string &environment) {
         if (environment.find("MANNHEIM") != string::npos) {
-            KARABO_LOG_INFO << "TestSetup Environment set to MANNHEIM";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " TestSetup Environment set to MANNHEIM";
 
             cout << "Test Environment Set to Mannheim" << endl;
 
@@ -1859,10 +1857,10 @@ namespace karabo {
                 set<string>("qsfp.chan2.recv.macaddr", "00:1b:21:55:1f:c8");
                 set<string>("qsfp.chan3.recv.macaddr", "00:1b:21:55:1f:c8");
                 set<string>("qsfp.chan4.recv.macaddr", "00:1b:21:55:1f:c8");
-                KARABO_LOG_WARN << "Set QSFP Receiver MAC to 00:1b:21:55:1f:c8";
+                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Set QSFP Receiver MAC to 00:1b:21:55:1f:c8";
             }
         } else {
-            KARABO_LOG_INFO << "TestSetup Environment set to HAMBURG";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " TestSetup Environment set to HAMBURG";
 
             SuS::DSSC_PPT::actSetup = SuS::DSSC_PPT::HAMBURG;
 
@@ -1921,7 +1919,7 @@ namespace karabo {
 
 
     void DsscPpt::readFullConfigFile(const std::string & fileName) {
-        KARABO_LOG_INFO << "Load Full Config File : " << fileName;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Load Full Config File : " << fileName;
                         
         {            
           ContModeKeeper keeper(this);
@@ -1944,7 +1942,7 @@ namespace karabo {
                             currentState == State::STOPPED ||
                             currentState == State::ACQUIRING);
             if (program) {
-                KARABO_LOG_INFO << "Init CHIP" << fileName;
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Init CHIP " << fileName;
                 initChip();
             }
         }
@@ -1988,10 +1986,10 @@ namespace karabo {
         boost::filesystem::path data_dir(filePath);
         if (!boost::filesystem::exists(data_dir)) {
             if (boost::filesystem::create_directories(data_dir)) {
-                KARABO_LOG_INFO << "Created new directory: " << filePath;
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Created new directory: " << filePath;
                 return true;
             } else {
-                KARABO_LOG_ERROR << "Could not create output directory: " << filePath;
+                KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Could not create output directory: " << filePath;
                 return false;
             }
         }
@@ -2053,7 +2051,7 @@ namespace karabo {
             std::vector<std::string> modules_strvec = reg->getModules(modSetName);
             const auto signalNames = reg->getSignalNames(modSetName);
             for (const auto & sigName : signalNames) {
-                //  KARABO_LOG_INFO << "Add Signal " + sigName;
+                //  KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Add Signal " + sigName;
                 if (sigName.find("_nc") != string::npos) {
                     continue;
                 }
@@ -2138,7 +2136,7 @@ namespace karabo {
             
             
             SuS::ConfigReg* configRegister;
-            KARABO_LOG_INFO << selModSet + "\t" +  SplitVec.back() + "\t" + sigName + " :\t" << it.second;
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " " << selModSet + "\t" +  SplitVec.back() + "\t" + sigName + " :\t" << it.second;
             try{
                 if(it.first.substr(0,4) == "EPCR"){
                     configRegister =  m_ppt->getRegisters("epc");
@@ -2166,7 +2164,7 @@ namespace karabo {
                         m_ppt->programJtagSingle(selModSet);
                     }                
                 }else{
-                    KARABO_LOG_DEBUG << "registry is not EPC, IOB, or Jtag";
+                    KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " registry is not EPC, IOB, or Jtag";
                 }
             }catch (std::logic_error){                
             }
@@ -2185,7 +2183,7 @@ namespace karabo {
         }
 
         if (!printPPTErrorMessages()) {
-            KARABO_LOG_INFO << "ASIC Initialized successfully";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ASIC Initialized successfully";
         }
     }
 
@@ -2237,7 +2235,7 @@ namespace karabo {
 
 
         if (checkAllIOBStatus() == 0) {
-            KARABO_LOG_INFO << "No IOBs detected. Will try to program IOB FPGAs";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " No IOBs detected. Will try to program IOB FPGAs";
             this->set<bool>("iobProgrammed", false);
             std::cout << "initSystem->programAllIOBFPGAs()" <<std::endl;
             try{
@@ -2293,7 +2291,7 @@ namespace karabo {
 
 
     bool DsscPpt::initChip() {
-        KARABO_LOG_INFO << "initChip";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " initChip";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->initChip();
@@ -2306,7 +2304,7 @@ namespace karabo {
     void DsscPpt::resetAllBtn() {
         DSSC::StateChangeKeeper keeper(this);
 
-        KARABO_LOG_INFO << "resetAll";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " resetAll";
 
         resetAll();
 
@@ -2340,7 +2338,7 @@ namespace karabo {
 
     void DsscPpt::resetDatapath() {
         DSSC::StateChangeKeeper keeper(this);
-        KARABO_LOG_INFO << "resetDatapath";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " resetDatapath";
 
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2354,7 +2352,7 @@ namespace karabo {
 
 
     void DsscPpt::resetEPC() {
-        KARABO_LOG_INFO << "resetEPC";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " resetEPC";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->epcReset(true);
@@ -2367,7 +2365,7 @@ namespace karabo {
 
 
     void DsscPpt::resetIOBs() {
-        KARABO_LOG_INFO << "resetIOBs";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " resetIOBs";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
@@ -2381,7 +2379,7 @@ namespace karabo {
 
 
     void DsscPpt::resetASICs() {
-        KARABO_LOG_INFO << "resetASICs";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " resetASICs";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
@@ -2397,7 +2395,7 @@ namespace karabo {
 
     void DsscPpt::close() {
         this->updateState(State::CLOSING);
-        KARABO_LOG_INFO << "close";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " close";
         // stop polling before closing the connection
         this->stopPolling();
         int rc = m_ppt->closeConnection();
@@ -2454,7 +2452,7 @@ namespace karabo {
 
 
     void DsscPpt::programAllIOBFPGAs() {
-        KARABO_LOG_INFO << "Program all available IOB FPGAs";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program all available IOB FPGAs";
         DSSC::StateChangeKeeper keeper(this);
         for (int i = 1; i <= 4; i++) {
             programIOBFPGA(i);
@@ -2465,15 +2463,15 @@ namespace karabo {
 
     void DsscPpt::programIOBFPGA(int iobNumber) {
         if (iobNumber < 1 || iobNumber > 4) {
-            KARABO_LOG_ERROR << "Program IOB " << iobNumber << " not possible. Wrong ion number (1-4)";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Program IOB " << iobNumber << " not possible. Wrong ion number (1-4)";
             return;
         }
 
         if (isIOBAvailable(iobNumber)) {
-            KARABO_LOG_WARN << "IOB " << iobNumber << " was already programmed!";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " << iobNumber << " was already programmed!";
         }
 
-        KARABO_LOG_INFO << "Programming IOB  FPGA!";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Programming IOB  FPGA!";
 
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2516,7 +2514,7 @@ namespace karabo {
     void DsscPpt::programLMK(int iobNumber) {
         CHECK_IOB(iobNumber)
 
-        KARABO_LOG_INFO << "Programing LMK of IOB " + toString(iobNumber);
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Programing LMK of IOB " + toString(iobNumber);
         m_ppt->setActiveModule(iobNumber);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2549,7 +2547,7 @@ namespace karabo {
     void DsscPpt::checkPRBs(int iobNumber) {
         CHECK_IOB(iobNumber)
 
-        KARABO_LOG_INFO << "Check PRBs";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Check PRBs";
         int numPRBsfound = 0;
         m_ppt->setActiveModule(iobNumber);
         {
@@ -2564,7 +2562,7 @@ namespace karabo {
     void DsscPpt::resetAurora(int iobNumber) {
         CHECK_IOB(iobNumber)
 
-        KARABO_LOG_INFO << "Reset Aurora";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Reset Aurora";
         m_ppt->setActiveModule(iobNumber);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2599,7 +2597,7 @@ namespace karabo {
 
 
     void DsscPpt::programEPCConfig() {
-        KARABO_LOG_INFO << "Program EPC Config ";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program EPC Config ";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->programEPCRegisters();
@@ -2617,7 +2615,7 @@ namespace karabo {
             return;
         }
 
-        KARABO_LOG_INFO << "Program IOB " << toString(m_ppt->activeIOBs) << " config";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program IOB " << toString(m_ppt->activeIOBs) << " config";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->programIOBRegisters(); // includes already the readback
@@ -2634,7 +2632,7 @@ namespace karabo {
 
         CHECK_IOB(iobNumber)
 
-        KARABO_LOG_INFO << "Program IOB Config " << iobNumber;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program IOB Config " << iobNumber;
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->programIOBRegister(to_string(iobNumber)); // includes already the readback
@@ -2681,12 +2679,12 @@ namespace karabo {
         }
 
         if (!configRegister->moduleSetExists(selModSet)) {
-            KARABO_LOG_ERROR << "ProgSelReg: Given ModuleSet " << selModSet << " invalid";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " ProgSelReg: Given ModuleSet " << selModSet << " invalid";
             return;
         }
 
         if (!configRegister->signalNameExists(selModSet, selSigStr)) {
-            KARABO_LOG_ERROR << "ProgSelReg: Given SignalName " << selSigStr << " invalid";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " ProgSelReg: Given SignalName " << selSigStr << " invalid";
             return;
         }
 
@@ -2748,12 +2746,12 @@ namespace karabo {
             configRegister = m_ppt->getPixelRegisters();
             moduleStr = get<string>("selPixels");
         } else {
-            KARABO_LOG_ERROR << "Register unknown: valid values 'epc', 'iob', 'jtag' or 'pixel'";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Register unknown: valid values 'epc', 'iob', 'jtag' or 'pixel'";
             return;
         }
 
         if (!configRegister->signalNameExists(selModSet, selSigStr)) {
-            KARABO_LOG_ERROR << "ProgSelReg: Given Parameters invalid";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " ProgSelReg: Given Parameters invalid";
             return;
         }
 
@@ -2769,11 +2767,11 @@ namespace karabo {
         CHECK_IOB(iobNumber)
 
         if (!checkIOBVoltageEnabled(iobNumber)) {
-            KARABO_LOG_WARN << "IOB " + toString(iobNumber) + " static power not enabled!";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " + toString(iobNumber) + " static power not enabled!";
             return;
         }
 
-        KARABO_LOG_INFO << "Program ASIC JTAG Chain " + toString(iobNumber);
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program ASIC JTAG Chain " + toString(iobNumber);
         m_ppt->setActiveModule(iobNumber);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2787,11 +2785,11 @@ namespace karabo {
     void DsscPpt::programPixelRegisterDefault() {
         int iobNumber = get<uint32_t>("activeModule");
         if (!checkIOBVoltageEnabled(iobNumber)) {
-            KARABO_LOG_WARN << "IOB " + toString(iobNumber) + " static power not enabled!";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " + toString(iobNumber) + " static power not enabled!";
             return;
         }
 
-        KARABO_LOG_INFO << "Program Pixel Registers to Default Values at IOB " << iobNumber;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program Pixel Registers to Default Values at IOB " << iobNumber;
         m_ppt->setActiveModule(iobNumber);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2807,11 +2805,11 @@ namespace karabo {
         int iobNumber = get<uint32_t>("activeModule");
 
         if (!checkIOBVoltageEnabled(iobNumber)) {
-            KARABO_LOG_WARN << "IOB " + toString(iobNumber) + " static power not enabled!";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " + toString(iobNumber) + " static power not enabled!";
             return;
         }
 
-        KARABO_LOG_INFO << "Program Pixel Registers at IOB " << iobNumber;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program Pixel Registers at IOB " << iobNumber;
         m_ppt->setActiveModule(iobNumber);
 
         {
@@ -2826,8 +2824,8 @@ namespace karabo {
     void DsscPpt::updateSequencer() {
         const int cycleLength = get<unsigned int>("sequencer.cycleLength");
         if (cycleLength != m_ppt->getSequencer()->getCycleLength()) {
-            //KARABO_LOG_WARN << "Cycle length changed, this should not be done in karabo, load different sequencer file instead";
-            KARABO_LOG_WARN << "Cycle length changed";
+            //KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Cycle length changed, this should not be done in karabo, load different sequencer file instead";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Cycle length changed";
             m_ppt->getSequencer()->setCycleLength(cycleLength);
         }
 
@@ -2864,7 +2862,7 @@ namespace karabo {
     void DsscPpt::programSequencers() {
         bool readBack = get<bool>("sequencerReadBackEnable");
 
-        KARABO_LOG_INFO << "Program Sequencers";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program Sequencers";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->programSequencers(readBack);
@@ -2879,11 +2877,11 @@ namespace karabo {
         int iobNumber = get<uint32_t>("activeModule");
 
         if (!checkIOBVoltageEnabled(iobNumber)) {
-            KARABO_LOG_WARN << "IOB " + toString(iobNumber) + " static power not enabled!";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " + toString(iobNumber) + " static power not enabled!";
             return;
         }
 
-        KARABO_LOG_INFO << "Program Sequencer at IOB " << iobNumber;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program Sequencer at IOB " << iobNumber;
         m_ppt->setActiveModule(iobNumber);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2899,7 +2897,7 @@ namespace karabo {
 
         int rc;
 
-        KARABO_LOG_INFO << "Readback IOB " + toString(iobNumber) + " Config Registers";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Readback IOB " + toString(iobNumber) + " Config Registers";
         m_ppt->setActiveModule(iobNumber);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -2909,7 +2907,7 @@ namespace karabo {
         printPPTErrorMessages(true);
 
         if (rc != SuS::DSSC_PPT::ERROR_OK) {
-            KARABO_LOG_ERROR << "Readback IOB Regiser not correct! " + m_ppt->errorString;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Readback IOB Regiser not correct! " + m_ppt->errorString;
             return false;
         }
 
@@ -2954,7 +2952,7 @@ namespace karabo {
 
 
     bool DsscPpt::checkIOBDataFailed() {
-        KARABO_LOG_INFO << "Check IOB Data failed";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Check IOB Data failed";
         bool allOk = true;
 
         for (auto && activeIOB : m_ppt->activeIOBs) {
@@ -2972,7 +2970,7 @@ namespace karabo {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             set<unsigned int>("lastTrainId", m_ppt->getCurrentTrainID());
         }
-        KARABO_LOG_INFO << "Read last Train ID: " << get<unsigned int>("lastTrainId");
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Read last Train ID: " << get<unsigned int>("lastTrainId");
     }
 
 
@@ -2990,15 +2988,15 @@ namespace karabo {
 
 
     void DsscPpt::checkASICReset() {
-        KARABO_LOG_INFO << "Check correct ASIC Reset";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Check correct ASIC Reset";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->checkCorrectASICReset();
         }
         if (!checkPPTDataFailed()) {
-            KARABO_LOG_WARN << "Some ASICs are still not correctly be initialized";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Some ASICs are still not correctly initialized";
         } else {
-            KARABO_LOG_INFO << "All ASICs could correctly be initialized";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " All ASICs could correctly be initialized";
         }
 
     }
@@ -3009,7 +3007,7 @@ namespace karabo {
 
         if (found) {
 
-            KARABO_LOG_INFO << "IOB " + toString(iobNumber) + " Found";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " IOB " + toString(iobNumber) + " Found";
             {
                 DsscScopedLock lock(&m_accessToPptMutex, __func__);
                 m_ppt->setDPEnabled(iobNumber, true);
@@ -3024,7 +3022,7 @@ namespace karabo {
             checkIOBAuroraReady(iobNumber);
 
         } else {
-            KARABO_LOG_WARN << "IOB " + toString(iobNumber) + " not found, probably not programmed";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " + toString(iobNumber) + " not found, probably not programmed";
         }
 
         set<bool>("iob" + toString(iobNumber) + "Status.iob" + toString(iobNumber) + "Available", found);
@@ -3060,7 +3058,7 @@ namespace karabo {
 
 
     void DsscPpt::checkIOBAuroraReady(int iobNumber) {
-        KARABO_LOG_INFO << "checkIOBAuroraReady";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " checkIOBAuroraReady";
         bool ready = false;
         m_ppt->setActiveModule(iobNumber);
         {
@@ -3071,9 +3069,9 @@ namespace karabo {
         set<bool>("iob" + toString(iobNumber) + "Status.iob" + toString(iobNumber) + "Ready", ready);
 
         if (ready) {
-            KARABO_LOG_INFO << "IOB " + toString(iobNumber) + " Aurora Locked, ready to receive data";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " IOB " + toString(iobNumber) + " Aurora Locked, ready to receive data";
         } else {
-            KARABO_LOG_WARN << "IOB " + toString(iobNumber) + " Aurora NOT Locked, unable to receive data";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " + toString(iobNumber) + " Aurora NOT Locked, unable to receive data";
         }
 
     }
@@ -3092,7 +3090,7 @@ namespace karabo {
 
         stopPolling();
 
-        KARABO_LOG_INFO << "Update PPT Firmware Flash, wait 20 minutes before proceeding";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Update PPT Firmware Flash, wait 20 minutes before proceeding";
         string fileName = get<string>("firmwareBinaryName");
 
         if (m_ppt->checkPPTRevision(fileName)) {
@@ -3102,14 +3100,14 @@ namespace karabo {
             pptSendFile("DSSC_PPT_TOP.bin");
 
             {
-                KARABO_LOG_INFO << "Updating flash memory...please wait";
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Updating flash memory...please wait";
                 DsscScopedLock lock(&m_accessToPptMutex, __func__);
                 m_ppt->sendFlashFirmware();
             }
         }
 
         if (printPPTErrorMessages()) {
-            KARABO_LOG_INFO << "Firmware flash memory successfully updated";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Firmware flash memory successfully updated";
         }
     }
 
@@ -3119,7 +3117,7 @@ namespace karabo {
 
         stopPolling();
 
-        KARABO_LOG_INFO << "Update PPT Linux Flash, wait 20 minutes before proceeding";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Update PPT Linux Flash, wait 20 minutes before proceeding";
         string fileName = get<string>("linuxBinaryName");
 
         if (m_ppt->checkLinuxRevision(fileName)) {
@@ -3129,14 +3127,14 @@ namespace karabo {
             pptSendFile("simpleImage.xilinx.bin");
 
             {
-                KARABO_LOG_INFO << "Updating flash memory...please wait";
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Updating flash memory...please wait";
                 DsscScopedLock lock(&m_accessToPptMutex, __func__);
                 m_ppt->sendFlashLinux();
             }
         }
 
         if (printPPTErrorMessages()) {
-            KARABO_LOG_INFO << "Linux flash memory successfully updated";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Linux flash memory successfully updated";
         }
     }
 
@@ -3145,12 +3143,8 @@ namespace karabo {
         DSSC::StateChangeKeeper keeper(this);
 
         stopPolling();
-        KARABO_LOG_INFO << "Update IOB Firmware";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Update IOB Firmware";
         string fileName = get<string>("iobFirmwareBitfile");
-        //      if(fileName.find("IOB_Firmware.xsvf")==string::npos){
-        //        KARABO_LOG_ERROR << "IOB Firmware Bitfile name must exactly be named 'IOB_Firmware.xsvf'";
-        //        return;
-        //      }
 
         if (m_ppt->checkIOBRevision(fileName)) {
             //Copy File is required to guarantee correct fileName
@@ -3165,13 +3159,13 @@ namespace karabo {
         }
 
         if (printPPTErrorMessages()) {
-            KARABO_LOG_INFO << "IOB Firmware file successfully updated";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " IOB Firmware file successfully updated";
         }
     }
 
 
     void DsscPpt::pptSendFile(const string & fileName) {
-        KARABO_LOG_INFO << "FTP Send File: " << fileName;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " FTP Send File: " << fileName;
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->sendFileFtp(fileName);
@@ -3182,7 +3176,7 @@ namespace karabo {
 
 
     void DsscPpt::readEPCRegisters() {
-        KARABO_LOG_INFO << "ReadBack EPC Registers";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ReadBack EPC Registers";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->readBackEPCRegisters();
@@ -3195,7 +3189,7 @@ namespace karabo {
 
 
     void DsscPpt::readEPCPLLRegisters() {
-        KARABO_LOG_INFO << "ReadBack EPC PLL Registers";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ReadBack EPC PLL Registers";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->readBackEPCRegister("PLLReadbackRegister");
@@ -3210,7 +3204,7 @@ namespace karabo {
 
 
     void DsscPpt::readIOBRegisters() {
-        //KARABO_LOG_INFO << "ReadBack IOB Registers";
+        //KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ReadBack IOB Registers";
         for (int i = 1; i <= 4; i++) {
             if (isIOBAvailable(i)) {
                 readIOBRegisters(i);
@@ -3357,7 +3351,7 @@ namespace karabo {
 
                 uint32_t value = m_ppt->getIOBParam(tokens[1], toString(iobNumber), tokens[2]);
 
-                //KARABO_LOG_DEBUG << "IOBParam " + path + ": " + toString(value);
+                //KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " IOBParam " + path + ": " + toString(value);
 
                 //update only if not _nc signal"
                 if (tokens[2].find("_nc") == string::npos)
@@ -3388,7 +3382,7 @@ namespace karabo {
 
                 uint32_t value = m_ppt->getJTAGParam(tokens[1], iobNumber, tokens[2]);
 
-                //KARABO_LOG_DEBUG << "JTAGParam " + path + ": " + toString(value);
+                //KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " JTAGParam " + path + ": " + toString(value);
 
                 //update only if not _nc signal"
                 if (tokens[2].find("_nc") == string::npos)
@@ -3416,7 +3410,7 @@ namespace karabo {
 
                 uint32_t value = m_ppt->getPixelParam(tokens[1], iobNumber, tokens[2]);
 
-                //KARABO_LOG_DEBUG << "PixelParam " + path + ": " + toString(value);
+                //KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " PixelParam " + path + ": " + toString(value);
 
                 //update only if not _nc signal"
                 if (tokens[2].find("_nc") == string::npos)
@@ -3429,7 +3423,7 @@ namespace karabo {
 
 
     void DsscPpt::getSequencerParamsIntoGui() {
-        //KARABO_LOG_INFO << "Load Sequencer parameters into Gui";
+        //KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Load Sequencer parameters into Gui";
 
         const auto seq = m_ppt->getSequencer();
 
@@ -3538,7 +3532,7 @@ namespace karabo {
             set<bool>(keyName, en);
         }
         set<unsigned short>("enableDPChannels", enOneHot);
-        KARABO_LOG_DEBUG << "OneHotvalue = " << enOneHot;
+        KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " OneHotvalue = " << enOneHot;
     }
 
 
@@ -3551,12 +3545,12 @@ namespace karabo {
         if (internal_Pll_used) {
             set<bool>("pptPLL.locked", fpga_pll_locked);
             if (!fpga_pll_locked) {
-                KARABO_LOG_WARN << "PPT PLL not locked! Reprogram PLL";
+                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " PPT PLL not locked! Reprogram PLL";
             }
         } else {
             set<bool>("pptPLL.locked", chip_pll_locked);
             if (!chip_pll_locked) {
-                KARABO_LOG_WARN << "PPT PLL not locked! Reprogram PLL";
+                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " PPT PLL not locked! Reprogram PLL";
             }
         }
 
@@ -3613,26 +3607,26 @@ namespace karabo {
 
     void DsscPpt::configure() {
         DSSC::StateChangeKeeper keeper(this);
-        KARABO_LOG_INFO << "Configure System";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Configure System";
         int rc = SuS::DSSC_PPT::ERROR_OK;
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             rc = m_ppt->initSystem();
         }
         if (rc == SuS::DSSC_PPT::ERROR_IOB_NOT_FOUND) {
-            KARABO_LOG_ERROR << "No IOB Found, init IOBs before init system";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " No IOB Found, init IOBs before init system";
         } else if (rc != SuS::DSSC_PPT::ERROR_OK) {
             throw KARABO_IO_EXCEPTION("PPT upload failure: " + m_ppt->errorString);
         }
 
         if (printPPTErrorMessages()) {
-            KARABO_LOG_INFO << "Configuration done!";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Configuration done!";
         }
     }
 
 
     void DsscPpt::startManualMode() {
-        KARABO_LOG_INFO << "Start Stand Alone Mode";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start Stand Alone Mode";
         set<bool>("xfelMode", false);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -3644,7 +3638,7 @@ namespace karabo {
 
 
     void DsscPpt::stopManualMode() {
-        KARABO_LOG_INFO << "Start XFEL Mode";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start XFEL Mode";
         set<bool>("xfelMode", true);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -3657,7 +3651,7 @@ namespace karabo {
 
 
     void DsscPpt::startManualReadout() {
-        KARABO_LOG_INFO << "Start manual readout";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start manual readout";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->startSingleReadout();
@@ -3667,7 +3661,7 @@ namespace karabo {
 
 
     void DsscPpt::startManualBurstBtn() {
-        KARABO_LOG_INFO << "Start manual burst";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start manual burst";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->startBurst();
@@ -3676,7 +3670,7 @@ namespace karabo {
 
 
     void DsscPpt::readoutTestPattern() {
-        KARABO_LOG_INFO << "Start readout TestPattern";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start readout TestPattern";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->startTestPattern();
@@ -3687,7 +3681,7 @@ namespace karabo {
     void DsscPpt::setIntDACMode() {
         DSSC::StateChangeKeeper keeper(this);
 
-        KARABO_LOG_INFO << "Enable Internal DAC Mode";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable Internal DAC Mode";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->setIntDACMode();
@@ -3698,7 +3692,7 @@ namespace karabo {
     void DsscPpt::setNormalMode() {
         DSSC::StateChangeKeeper keeper(this);
 
-        KARABO_LOG_INFO << "Enable Normal Mode";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable Normal Mode";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->setNormalMode();
@@ -3709,7 +3703,7 @@ namespace karabo {
     void DsscPpt::setPixelInjectionMode() {
         DSSC::StateChangeKeeper keeper(this);
 
-        KARABO_LOG_INFO << "Enable Pixel Injection Mode";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable Pixel Injection Mode";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->setPixelInjectionMode();
@@ -3721,7 +3715,7 @@ namespace karabo {
         DSSC::StateChangeKeeper keeper(this);
 
         const string injectionModeStr = get<string>("injectionMode");
-        KARABO_LOG_INFO << "Enable InjectionMode " << injectionModeStr;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable InjectionMode " << injectionModeStr;
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->setInjectionMode(m_ppt->getInjectionMode(injectionModeStr));
@@ -3740,27 +3734,27 @@ namespace karabo {
 
         getJTAGParamsIntoGui();
 
-        KARABO_LOG_INFO << "Injection DAC: " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " set to " << value;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Injection DAC: " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " set to " << value;
     }
 
 
     void DsscPpt::calibrateCurrentCompDac() {
-        KARABO_LOG_WARN << "Current Comp Dac Calibration not implemented yet";
+        KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Current Comp Dac Calibration not implemented yet";
     }
 
 
     void DsscPpt::calibrateIramp() {
-        KARABO_LOG_WARN << "Iramp Calibration not implemented yet";
+        KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Iramp Calibration not implemented yet";
     }
 
 
     void DsscPpt::checkDACCalibration() {
-        KARABO_LOG_WARN << "Check not implemented yet";
+        KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Check not implemented yet";
     }
 
 
     void DsscPpt::checkIrampCalibration() {
-        KARABO_LOG_WARN << "Check not implemented yet";
+        KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Check not implemented yet";
     }
 
 
@@ -3770,7 +3764,7 @@ namespace karabo {
         const uint32_t lmkNumber = get<uint32_t>("lmkOutputToProgram");
         const uint32_t module = get<uint32_t>("activeModule");
 
-        KARABO_LOG_INFO << "Update LMK Output for ASIC " << lmkNumber << " on iob " << module;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Update LMK Output for ASIC " << lmkNumber << " on iob " << module;
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->setActiveModule(module);
@@ -3793,7 +3787,7 @@ namespace karabo {
 
         set<int>(fieldName, paramValue);
 
-        KARABO_LOG_INFO << "Set Burst Param Value : " << paramName << " = " << paramValue;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Set Burst Param Value : " << paramName << " = " << paramValue;
     }
 
 
@@ -3807,7 +3801,7 @@ namespace karabo {
 
         set<int>(fieldName, paramValue);
 
-        KARABO_LOG_INFO << "Set Sequencer Param Value : " << paramName << " = " << paramValue;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Set Sequencer Param Value : " << paramName << " = " << paramValue;
     }
 
 
@@ -3837,7 +3831,7 @@ namespace karabo {
         const int iprog_clr_en = get<int>("sequence.iprog_clr_en");
         const int SW_PWR_ON = get<int>("sequence.SW_PWR_ON");
 
-        KARABO_LOG_INFO << "Update Sequence Counters";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Update Sequence Counters";
         {
             {
                 DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -3903,7 +3897,7 @@ namespace karabo {
             if (tokens.size() == 3) {
                 int rc = m_ppt->setEPCParam(tokens[1], "0", tokens[2], filtered.getAs<uint32_t>(path));
                 if (rc != SuS::DSSC_PPT::ERROR_OK)
-                    KARABO_LOG_WARN << "Failure while setting " << path << " : " << m_ppt->errorString;
+                    KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Failure while setting " << path << " : " << m_ppt->errorString;
             }
         }
     }
@@ -3921,7 +3915,7 @@ namespace karabo {
             if (tokens.size() == 3) {
                 int rc = m_ppt->setPixelParam(tokens[1], "0", tokens[2], filtered.getAs<uint32_t>(path));
                 if (rc != SuS::DSSC_PPT::ERROR_OK)
-                    KARABO_LOG_WARN << "Failure while setting " << path << " : " << m_ppt->errorString;
+                    KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Failure while setting " << path << " : " << m_ppt->errorString;
             }
         }
     }
@@ -3939,11 +3933,11 @@ namespace karabo {
             if (tokens.size() == 3) {
                 int rc = m_ppt->setJTAGParam(tokens[1], m_jtagCurrIOBNumber, tokens[2], filtered.getAs<uint32_t>(path));
                 if (rc != SuS::DSSC_PPT::ERROR_OK)
-                    KARABO_LOG_WARN << "Failure while setting " << path << " : " << m_ppt->errorString;
+                    KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Failure while setting " << path << " : " << m_ppt->errorString;
             } else if (tokens.size() == 2) {
                 m_jtagCurrIOBNumber = filtered.getAs<string>(path);
                 getJTAGParamsIntoGui();
-                KARABO_LOG_INFO << "JTAG IOB Changed to " << m_jtagCurrIOBNumber;
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " JTAG IOB Changed to " << m_jtagCurrIOBNumber;
             }
         }
     }
@@ -3961,11 +3955,11 @@ namespace karabo {
             if (tokens.size() == 3) {
                 int rc = m_ppt->setIOBParam(tokens[1], m_iobCurrIOBNumber, tokens[2], filtered.getAs<uint32_t>(path));
                 if (rc != SuS::DSSC_PPT::ERROR_OK)
-                    KARABO_LOG_WARN << "Failure while setting " << path << " : " << m_ppt->errorString;
+                    KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Failure while setting " << path << " : " << m_ppt->errorString;
             } else if (tokens.size() == 2) {
                 m_iobCurrIOBNumber = filtered.getAs<string>(path);
                 getIOBParamsIntoGui();
-                KARABO_LOG_INFO << "IOB Changed to " << m_iobCurrIOBNumber;
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " IOB Changed to " << m_iobCurrIOBNumber;
             }
         }
     }
@@ -4001,7 +3995,7 @@ namespace karabo {
                     int value = filtered.getAs<int>(path);
                     m_ppt->setETHPort(channel, recv, value);
                 } else {
-                    KARABO_LOG_ERROR << "Failure while setting " << path << " : Wrong signal";
+                    KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Failure while setting " << path << " : Wrong signal";
                 }
             }
 
@@ -4053,7 +4047,7 @@ namespace karabo {
 
         if (!paths.empty()) {
 
-            KARABO_LOG_INFO << "Pre Reconfigure PLL";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Pre Reconfigure PLL";
 
             programPLL();
             readEPCPLLRegisters();
@@ -4116,7 +4110,7 @@ namespace karabo {
                         }
                     } else if (path.compare("disable_sending") == 0) {
                         {
-                            KARABO_LOG_INFO << (enable ? "Disable Data Sending" : "Enable Data Sending");
+                            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << (enable ? " Disable Data Sending" : " Enable Data Sending");
                             bool disable = enable;
                             DsscScopedLock lock(&m_accessToPptMutex, __func__);
                             m_ppt->disableSending(disable);
@@ -4128,7 +4122,7 @@ namespace karabo {
                         }
                     } else if (path.compare("continuous_mode") == 0) {
                         {
-                            KARABO_LOG_INFO << (enable ? "Enable Continuous Mode" : "Disable Continuous Mode");
+                            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << (enable ? " Enable Continuous Mode" : " Disable Continuous Mode");
                             DsscScopedLock lock(&m_accessToPptMutex, __func__);
                             m_ppt->runContinuousMode(enable);
                             //  m_ppt->disableSending(true);
@@ -4149,7 +4143,7 @@ namespace karabo {
                         }
                     } else if (path.compare("send_dummy_dr_data") == 0) {
                         if (!m_ppt->singleDPEnabled()) {
-                            KARABO_LOG_WARN << "No Datapath enabled, enable at least one datapath to recieve dummy data from datareciever";
+                            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " No Datapath enabled, enable at least one datapath to recieve dummy data from datareciever";
                         }
                         {
                             DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -4163,7 +4157,7 @@ namespace karabo {
                     } else if (path.compare("ASIC_send_dummy_data") == 0) {
 
                         if (!m_ppt->singleDPEnabled()) {
-                            KARABO_LOG_WARN << "No Datapath enabled, enable at least one datapath to recieve dummy data from IOBoard";
+                            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " No Datapath enabled, enable at least one datapath to recieve dummy data from IOBoard";
                         }
 
                         int iobFoundCnt = 0;
@@ -4181,7 +4175,7 @@ namespace karabo {
                         }
 
                         if (iobFoundCnt == 0) {
-                            KARABO_LOG_ERROR << "No IOB Found, program IOBoards before activating dummy data.";
+                            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " No IOB Found, program IOBoards before activating dummy data.";
                         } else {
                             getIOBParamsIntoGui();
                         }
@@ -4232,7 +4226,7 @@ namespace karabo {
 
             BOOST_FOREACH(string path, paths) {
                 if (path.compare("fullConfigFileName") == 0) {
-                    KARABO_LOG_INFO << "Karabo::DsscPpt set full config file";
+                    KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Karabo::DsscPpt set full config file";
                     const string fullConfigFileName = filtered.getAs<string>(path);
                     boost::filesystem::path myfile(fullConfigFileName);
                     if (boost::filesystem::exists(myfile)) {
@@ -4255,10 +4249,10 @@ namespace karabo {
 
             BOOST_FOREACH(string path, paths) {
                 if (path.compare("initDistance") == 0) {
-                    KARABO_LOG_INFO << "Set Init distance";
+                    KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Set Init distance";
                     m_ppt->setInitDist(filtered.getAs<unsigned int>(path));
                 } else if (path.compare("fastInitJTAGSpeed") == 0) {
-                    KARABO_LOG_INFO << "Fast Init ConfigSpeed";
+                    KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Fast Init ConfigSpeed";
                     m_ppt->setFastInitConfigSpeed(filtered.getAs<unsigned int>(path));
                 }
             }
@@ -4330,10 +4324,10 @@ namespace karabo {
     void DsscPpt::updateEPCConfigSchema(const std::string & configFileName) {
 
         if (!boost::filesystem::exists(configFileName)) {
-            KARABO_LOG_ERROR << "File not found: " << configFileName;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << configFileName;
             return;
         }
-        KARABO_LOG_INFO << "EPC Register File reloaded! ";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " EPC Register File reloaded! ";
         m_ppt->getEPCRegisters()->initFromFile(configFileName);
 
         getEPCParamsIntoGui();
@@ -4345,10 +4339,10 @@ namespace karabo {
         //Find a way to delete existing IOBConfig to regenerate it
         string iobFileName = get<string>("iobRegisterFilePath");
         if (!boost::filesystem::exists(iobFileName)) {
-            KARABO_LOG_ERROR << "File not found: " << iobFileName;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << iobFileName;
             return;
         }
-        KARABO_LOG_INFO << "IOB Register File reloaded! ";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " IOB Register File reloaded! ";
         m_ppt->getIOBRegisters()->initFromFile(iobFileName);
 
         getIOBParamsIntoGui();
@@ -4357,10 +4351,10 @@ namespace karabo {
 
     void DsscPpt::updateJTAGConfigSchema(const std::string & configFileName) {
         if (!boost::filesystem::exists(configFileName)) {
-            KARABO_LOG_ERROR << "File not found: " << configFileName;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << configFileName;
             return;
         }
-        KARABO_LOG_INFO << "JTAG Register File reloaded! ";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " JTAG Register File reloaded! ";
         m_ppt->getJTAGRegisters()->initFromFile(configFileName);
 
         //getJTAGParamsIntoGui();
@@ -4373,10 +4367,10 @@ namespace karabo {
 
     void DsscPpt::updatePixelConfigSchema(const std::string & configFileName) {
         if (!boost::filesystem::exists(configFileName)) {
-            KARABO_LOG_ERROR << "File not found: " << configFileName;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << configFileName;
             return;
         }
-        KARABO_LOG_INFO << "Pixel Register File reloaded! ";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Pixel Register File reloaded! ";
         m_ppt->getPixelRegisters()->initFromFile(configFileName);
 
         updateGuiMeasurementParameters();
@@ -4390,10 +4384,10 @@ namespace karabo {
 
     void DsscPpt::updateSeqConfigSchema(const std::string & configFileName) {
         if (!boost::filesystem::exists(configFileName)) {
-            KARABO_LOG_ERROR << "File not found: " << configFileName;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << configFileName;
             return;
         }
-        KARABO_LOG_INFO << "Sequencer File reloaded! ";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Sequencer File reloaded! ";
         m_ppt->getSequencer()->loadFile(configFileName);
 
         getSequencerParamsIntoGui();
@@ -4410,13 +4404,13 @@ namespace karabo {
             uint16_t actASICs = utils::bitEnableStringToValue(text);
             m_ppt->setSendingAsics(actASICs);
         } else {
-            KARABO_LOG_INFO << "String wrong format: ASIC 15-> 11111111_11111111 <- ASIC 0  " << text;
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " String wrong format: ASIC 15-> 11111111_11111111 <- ASIC 0  " << text;
         }
     }
 
 
     void DsscPpt::programLMKsAuto() {
-        KARABO_LOG_INFO << "Program LMKs automatically";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program LMKs automatically";
         DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
         m_ppt->programLMKsDefault();
@@ -4425,12 +4419,12 @@ namespace karabo {
 
     void DsscPpt::acquire() {
 
-        KARABO_LOG_INFO << "Acquisition started";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Acquisition started";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             int rc = m_ppt->start();
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
-                KARABO_LOG_WARN << "DSSC failed to start: " << m_ppt->errorString;
+                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " DSSC failed to start: " << m_ppt->errorString;
                 return;
             }
         }
@@ -4442,18 +4436,18 @@ namespace karabo {
             }
             boost::this_thread::sleep(boost::posix_time::seconds(2));
         }
-        KARABO_LOG_INFO << "Acquisition stopped";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Acquisition stopped";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             int rc = m_ppt->stop();
             if (rc != SuS::DSSC_PPT::ERROR_OK)
-                KARABO_LOG_WARN << "PPT failed to stop: " << m_ppt->errorString;
+                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " PPT failed to stop: " << m_ppt->errorString;
         }
     }
 
 
     void DsscPpt::storePoweredPixels() {
-        KARABO_LOG_INFO << "Powered pixels are = " << utils::positionVectorToList(m_ppt->updatePoweredPixels());
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Powered pixels are = " << utils::positionVectorToList(m_ppt->updatePoweredPixels());
     }
 
 
@@ -4470,13 +4464,13 @@ namespace karabo {
 
         const auto quarter = get<unsigned int>("pixelsColSelect");
         if (quarter > quarterStr.size()) {
-            KARABO_LOG_ERROR << "Pixels Quarter out of range" << quarter;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Pixels Quarter out of range" << quarter;
             return;
         }
 
         const auto quarterPixels = m_ppt->getColumnPixels(quarterStr[quarter]);
         const auto quarterPixelsStr = utils::positionVectorToList(quarterPixels);
-        KARABO_LOG_INFO << "Enable " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " in columns " << quarterStr[quarter];
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " in columns " << quarterStr[quarter];
 
         DsscScopedLock lock(&m_accessToPptMutex, __func__);
         m_ppt->enableMonBusForPixels(quarterPixels);
@@ -4491,8 +4485,8 @@ namespace karabo {
 
         const auto quarterPixels = m_ppt->getPixels(colString);
         const auto quarterPixelsStr = utils::positionVectorToList(quarterPixels);
-        KARABO_LOG_INFO << "Enable " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " in columns " << colString;
-        KARABO_LOG_INFO << "Enable in pixels " << quarterPixelsStr.substr(0, 30) << "  ...";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " in columns " << colString;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable in pixels " << quarterPixelsStr.substr(0, 30) << "  ...";
 
         DsscScopedLock lock(&m_accessToPptMutex, __func__);
         m_ppt->enableMonBusCols(colString);
@@ -4526,7 +4520,7 @@ namespace karabo {
 
         const auto selIdx = get<unsigned int>("pixelsColSelect");
         if (selIdx >= chipParts.size()) {
-            KARABO_LOG_ERROR << "Chip Part Pixel Selection Out of range:" << selIdx;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Chip Part Pixel Selection Out of range: " << selIdx;
             return "";
         }
 
@@ -4536,7 +4530,7 @@ namespace karabo {
 
     void DsscPpt::pollHardware() {
         try {
-            KARABO_LOG_INFO << "Hardware polling started";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Hardware polling started";
             while (m_keepPolling) {
                 
                 int value;
@@ -4554,15 +4548,15 @@ namespace karabo {
                 boost::this_thread::sleep(boost::posix_time::seconds(5));
             }
         } catch (const Exception& e) {
-            KARABO_LOG_ERROR << e;
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " " << e;
         } catch (...) {
-            KARABO_LOG_ERROR << "Unknown exception was raised in poll thread";
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Unknown exception was raised in poll thread";
         }
     }
 
 
     void DsscPpt::programPLL() {
-        KARABO_LOG_INFO << "Program PLL";
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program PLL";
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             if (get<bool>("pptPLL.internalPLL")) {
@@ -4586,12 +4580,12 @@ namespace karabo {
 
         if (fineTuningEnable) {
             if (useInternalPLL) {
-                KARABO_LOG_INFO << "Use PLLMultiplier, not int, frac nor mod value";
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Use PLLMultiplier, not int, frac nor mod value";
             } else {
-                KARABO_LOG_INFO << "Use int, frac and mod value, not PLLMultiplier";
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Use int, frac and mod value, not PLLMultiplier";
             }
         } else {
-            KARABO_LOG_INFO << "Set Default PLL settings";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Set Default PLL settings";
 
             set<unsigned int>("pptPLL.fineTuning.intValue", 280);
             set<unsigned int>("pptPLL.fineTuning.fracValue", 0);
@@ -4602,7 +4596,7 @@ namespace karabo {
 
         bool XFELClockSource = get<bool>("pptPLL.XFELClk");
         if (!XFELClockSource) {
-            KARABO_LOG_WARN << "PPT PLL Programmed in Standalone mode, XFEL C&C not used.";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " PPT PLL Programmed in Standalone mode, XFEL C&C not used.";
         }
 
         unsigned int multiplier = get<unsigned int>("pptPLL.fineTuning.PLLMultiplier");
@@ -4617,7 +4611,7 @@ namespace karabo {
                                                    multiplier, intVal, fracVal, modVal);
         }
 
-        KARABO_LOG_INFO << "Set PLL Frequency to " + resFreqString;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Set PLL Frequency to " + resFreqString;
         set<string>("pptPLL.fineTuning.resultingClockSpeed", resFreqString);
 
         updateGuiPLLParameters();
@@ -4630,12 +4624,12 @@ namespace karabo {
         ok &= (m_ppt->errorMessages.size() == 0);
 
         for (size_t i = 0; i < m_ppt->errorMessages.size(); i++) {
-            KARABO_LOG_ERROR << m_ppt->errorMessages.at(i);
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << m_ppt->errorMessages.at(i);
         }
         m_ppt->errorMessages.clear();
 
         if (printRBCorrect && ok) {
-            KARABO_LOG_INFO << "Readback Correct!";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Readback Correct!";
         }
 
         return ok;
@@ -4664,24 +4658,24 @@ namespace karabo {
         int value = 0;
         ok = true;
         if (anyVal.type() == typeid (int)) {
-            KARABO_LOG_INFO << "Any is int";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Any is int";
             value = boost::any_cast<int>(anyVal);
 
         } else if (anyVal.type() == typeid (bool)) {
-            KARABO_LOG_INFO << "Any is bool";
+            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Any is bool";
             value = (boost::any_cast<bool>(anyVal)) ? 1 : 0;
 
         } else if (anyVal.type() == typeid (string)) {
             try {
-                KARABO_LOG_INFO << "Any is string";
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Any is string";
                 string s = boost::any_cast<string>(anyVal);
                 value = INT_CAST(s);
             } catch (boost::bad_lexical_cast const&) {
-                KARABO_LOG_WARN << "Error converting string to int";
+                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Error converting string to int";
                 ok = false;
             }
         } else {
-            KARABO_LOG_WARN << "Error converting any value";
+            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Error converting any value";
             ok = false;
         }
 
