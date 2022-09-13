@@ -547,7 +547,7 @@ namespace karabo {
                 .displayedName("Sequencer Parameter Name")
                 .description("Sequencer Parameter Name to change")
                 .assignmentOptional().defaultValue(SuS::Sequencer::getParameterNames().front()).reconfigurable()
-                .options(SuS::Sequencer::getParameterNames())
+                .options(SuS::Sequencer::getParameterNames())  // TODO: Set the names from CamelCase to camelCase
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -2841,6 +2841,7 @@ namespace karabo {
         const auto backFlipToResetOffset = get<unsigned int>("sequencer.backFlipToResetOffset");
         const auto singleCapLoadLength = get<unsigned int>("sequencer.singleCapLoadLength");
         const auto emptyInjectCycles = get<unsigned int>("sequencer.emptyInjectCycles");
+        const auto ftInjectOffset = get<unsigned int>("sequencer.ftInjectMode");
 
         const auto singleSHCapMode = get<bool>("sequencer.singleSHCapMode");
         if (emptyInjectCycles) {
@@ -2849,6 +2850,7 @@ namespace karabo {
 
         m_ppt->getSequencer()->setSingleSHCapMode(singleSHCapMode);
         m_ppt->getSequencer()->setSequencerParameter(SuS::Sequencer::EmptyInjectCycles, emptyInjectCycles, false);
+        m_ppt->getSequencer()->setSequencerParameter(SuS::Sequencer::FtInjectOffset, ftInjectOffset, false);
 
         m_ppt->getSequencer()->generateSignals(integrationTime, flattopLength, flattopHoldLength,
                                                resetLength, resetIntegOffset, resetHoldLength,
