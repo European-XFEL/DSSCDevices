@@ -200,7 +200,14 @@
                   .displayedName("Empty Inject Cycles")                        \
                   .description("Number of Cycles without signal between two injections") \
                   .assignmentOptional().defaultValue(20).reconfigurable()       \
-                  .allowedStates(State::ON, State::STOPPED)                                      \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.ftInjectOffset")                \
+                  .displayedName("FT Inject Offset")                            \
+                  .description("Flattop Inject Offset")                         \
+                  .assignmentOptional().defaultValue(7).reconfigurable()        \
+                  .allowedStates(State::ON, State::STOPPED)                     \
                   .commit();                                                    \
 
 
