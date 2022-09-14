@@ -17,6 +17,7 @@
 #include "DsscConfigHashWriter.hh"
 
 #include <atomic>
+#include <vector>
 
 
 /**
@@ -40,6 +41,16 @@
 
 namespace karabo {
 
+   std::vector<std::string> tocamelCase(const std::vector<std::string> vector) {
+        /* Change the PascalCase to camelCase for sequencer parameters. */
+        std::vector<std::string> camelCased;
+        for (auto s: vector) {
+            s[0] = std::tolower(s.at(0));
+            camelCased.push_back(s);
+        }
+        return camelCased;
+   }
+        
     class SmartMutex : public boost::mutex {
 
     public:

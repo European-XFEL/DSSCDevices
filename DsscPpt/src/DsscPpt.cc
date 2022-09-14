@@ -546,8 +546,8 @@ namespace karabo {
         STRING_ELEMENT(expected).key("sequencerParameterName")
                 .displayedName("Sequencer Parameter Name")
                 .description("Sequencer Parameter Name to change")
-                .assignmentOptional().defaultValue(SuS::Sequencer::getParameterNames().front()).reconfigurable()
-                .options(SuS::Sequencer::getParameterNames())  // TODO: Set the names from CamelCase to camelCase
+                .assignmentOptional().defaultValue(tocamelCase(SuS::Sequencer::getParameterNames()).front()).reconfigurable()
+                .options(tocamelCase(SuS::Sequencer::getParameterNames()))
                 .commit();
 
         SLOT_ELEMENT(expected)
