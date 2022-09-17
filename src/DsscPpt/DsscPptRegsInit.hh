@@ -209,6 +209,69 @@
                   .assignmentOptional().defaultValue(7).reconfigurable()        \
                   .allowedStates(State::ON, State::STOPPED)                     \
                   .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.integrationLength")             \
+                  .displayedName("Integration Length")                          \
+                  .description("")                                              \
+                  .assignmentOptional().defaultValue(0).reconfigurable()         \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.holdPos")                       \
+                  .displayedName("")                                            \
+                  .description("")                                              \
+                  .assignmentOptional().defaultValue(0).reconfigurable()         \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.holdLength")                    \
+                  .displayedName("")                                            \
+                  .description("")                                              \
+                  .assignmentOptional().defaultValue(0).reconfigurable()         \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.rampOffset")                    \
+                  .displayedName("")                                            \
+                  .description("")                                              \
+                  .assignmentOptional().defaultValue(0).reconfigurable()         \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.lastIntPhase")                  \
+                  .displayedName("")                                            \
+                  .description("")                                              \
+                  .assignmentOptional().defaultValue(0).reconfigurable()         \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.rightShift")                    \
+                  .displayedName("")                                            \
+                  .description("")                                              \
+                  .assignmentOptional().defaultValue(0).reconfigurable()         \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.ftFlipOffset")                  \
+                  .displayedName("")                                            \
+                  .description("")                                              \
+                  .assignmentOptional().defaultValue(0).reconfigurable()         \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.dumpDelta")                     \
+                  .displayedName("")                                            \
+                  .description("")                                              \
+                  .assignmentOptional().defaultValue(0).reconfigurable()         \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
+                                                                                \
+        UINT32_ELEMENT(expected).key("sequencer.injectionMode")                 \
+                  .displayedName("")                                            \
+                  .description("")                                              \
+                  .assignmentOptional().defaultValue(0).reconfigurable()         \
+                  .allowedStates(State::ON, State::STOPPED)                     \
+                  .commit();                                                    \
 
 
 #define INIT_SEQUENCE_ELEMENTS                                          \

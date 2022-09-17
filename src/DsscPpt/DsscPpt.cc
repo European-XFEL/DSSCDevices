@@ -3800,16 +3800,21 @@ namespace karabo {
 
 
     void DsscPpt::setSequencerParameter() {
-        const auto paramName = get<string>("sequencerParameterName");
+        string paramName = get<string>("sequencerParameterName");
+        string fieldName = "sequencer." + paramName;
+        paramName[0] = std::toupper(paramName.at(0));
         const auto paramValue = get<int>("sequencerParameterValue");
 
         m_ppt->getSequencer()->setSequencerParameter(paramName, paramValue, true);
 
-        string fieldName = "sequencer." + paramName;
 
-        set<int>(fieldName, paramValue);
+        const int hardwareValue = m_ppt->getSequencer()->getSequencerParameter(paramName);
+        set<int>(fieldName, hardwareValue);
 
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Set Sequencer Param Value : " << paramName << " = " << paramValue;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId()
+                                  << " Set Sequencer Param Value : "
+                                  << paramName << " = " << paramValue
+                                  << "HW value = " << hardwareValue;
     }
 
 
