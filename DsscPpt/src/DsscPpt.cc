@@ -166,6 +166,13 @@ namespace karabo {
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
                 .commit();
 
+        BOOL_ELEMENT(expected).key("isDEPFET")
+                .description("Query the hardware for detector type. True means DEPFET, False means miniSDD.")
+                .displayedName("DEPFET Sensor")
+                .readOnly()
+                .initialValue(true)  // The more sensitive type of detector.
+                .commit();
+
         PATH_ELEMENT(expected).key("linuxBinaryName")
                 .description("Path to linux binary")
                 .displayedName("Linux Binary Filename")
@@ -1893,12 +1900,14 @@ namespace karabo {
 
         string firmware;
         string linux;
+        bool isDEPFET;
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
             sern = m_ppt->readSerialNumber();
             firmware = m_ppt->readBuildStamp();
             linux = m_ppt->readLinuxBuildStamp();
+            isDEPFET = m_ppt->isDEPFET();
 
             printPPTErrorMessages();
         }
@@ -1912,9 +1921,12 @@ namespace karabo {
         } else {
             serialStr += " PPTv1";
         }
-        set<string>("pptSerial", serialStr);
-        set<string>("firmwareRev", firmware);
-        set<string>("linuxRev", linux);
+        Hash h;
+        h.set<string>("pptSerial", serialStr);
+        h.set<string>("firmwareRev", firmware);
+        h.set<string>("linuxRev", linux);
+        h.set<bool>("isDEPFET", isDEPFET);
+        this->set(h);
     }
 
 
