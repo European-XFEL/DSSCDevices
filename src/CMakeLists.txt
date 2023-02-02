@@ -98,9 +98,9 @@ if (BUILD_TESTS)
 
     add_executable(
        test-${CMAKE_PROJECT_NAME}
-       tests/testrunner.cc   # The test runner entry point
-       tests/testDsscPpt.cc
-       tests/testLadderParameterTrimming.cc
+       tests/c++/testrunner.cc   # The test runner entry point
+       tests/c++/testDsscPpt.cc
+       tests/c++/testLadderParameterTrimming.cc
 
     )
 

@@ -59,3 +59,4 @@ endif()
 set(BUILD_TESTS OFF CACHE BOOL "Should build unit tests?")
 
 add_subdirectory(src ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME})
+

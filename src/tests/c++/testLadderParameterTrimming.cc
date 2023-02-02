@@ -6,7 +6,7 @@
  * Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
  */
 
-#include "../LadderParameterTrimming/DsscLadderParameterTrimming.hh"
+#include "../../LadderParameterTrimming/DsscLadderParameterTrimming.hh"
 
 #include <boost/shared_ptr.hpp>
 #include <gtest/gtest.h>

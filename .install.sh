@@ -37,3 +37,10 @@ cd $BUILD_DIR
 cmake $BUILD_OPT
 $(cp $BUILD_DIR/DsscDevices/lib*.so $TARGET_DIR | true)
 
+
+cd $SCRIPTPATH
+if ! [ -f "src/_version.py" ]; then
+    python -m pip install .
+else
+    echo "DsscControl package installed in editable mode, skipping."
+fi
