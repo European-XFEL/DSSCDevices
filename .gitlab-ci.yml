@@ -9,7 +9,17 @@
     - source /root/karabo/activate
     - pushd $CI_PROJECT_DIR
     - export GTEST_OUTPUT=xml:$CI_PROJECT_DIR/report.xml
-    - karabo -g https://$XFEL_TOKEN@git.xfel.eu install DsscDependencies 1.9.0-2.11.4
+    - >  # Install Dependencies
+         while read line; do
+             [[ $line =~ ^#.* ]] && continue
+             norm=${line/,/ }
+             norm=`echo $norm | sed -e "s/[[:space:]]\+/ /g"`
+             device=$(echo $norm | cut -f1 -d' ')
+             tag=$(echo $norm | cut -f2 -d' ')
+             echo Installing $device version $tag
+             karabo -g https://$XFEL_TOKEN@git.xfel.eu install $device $tag
+         done < DEPENDS        
+
     - make test
   artifacts:
     when: always
