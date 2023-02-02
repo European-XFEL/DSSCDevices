@@ -29,7 +29,7 @@
 //#define STATE_OFF karabo::util::State::UNKNOWN
 
 #include "DsscHDF5Writer.h"
-#include "version.hh"  // provides PACKAGE_VERSION
+#include "../version.hh"  // provides PACKAGE_VERSION common to all devices
 
 /**
  * States: UNKNOWN -> connect -> OFF -> progIOB/initSystem ->

@@ -1,14 +1,58 @@
-.dep.inc
-DsscAsicProcessor/src/version.hh
-DsscControl_Test/src/version.hh
-DsscDataReceiver/src/version.hh
-DsscDummyTrainGenerator/src/version.hh
-DsscLadderParameterTrimming/src/version.hh
-DsscPpt/src/version.hh
-DsscProcessor/src/version.hh
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# CMake
+CMakeCache.txt
+CMakeLists.txt.user
+CMakeFiles
+CMakeScripts
+Testing
+#Makefile # using the Makefile to interface with `karabo install`
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
 build/
-dist/
-nbproject/Makefile-Release.mk
-nbproject/Makefile-impl.mk
-nbproject/Makefile-variables.mk
-nbproject/private/
+build_debug/
+build_release/
+
+# VSCode settings
+.vscode
+
+# Legacy netbeans
+nbproject/
+
+# clangd specific
+.clangd/
+
+# Karabo version (generated)
+src/version.hh
+
+# Exception for .install.sh
+!.install.sh
