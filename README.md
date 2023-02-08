@@ -5,6 +5,12 @@
 A middlelayer device to configure several PPT device, take darks, and more.  
 Its soft interlock is documented in [doc/soft_interlock.md](doc/soft_interlock.md).
 
+## DSSC SIB
+
+A bound device to read and configure the Safety Interlock Board, which is its own hardware
+device mounted next to the PPT.  
+It is using an ASCII protocol over TCP.
+
 
 ## Contributing
 
@@ -14,7 +20,7 @@ It is recommended to make git ignore changes to the configuration files found in
 git update-index --skip-worktree src/ConfigFiles
 ```
 
-### Python (DsscControl)
+### Python (DsscControl, DsscSIB)
 
 Do an editable installation of the package:  
 

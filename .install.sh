@@ -42,5 +42,5 @@ cd $SCRIPTPATH
 if ! [ -f "src/_version.py" ]; then
     python -m pip install .
 else
-    echo "DsscControl package installed in editable mode, skipping."
+    echo "Python devices installed in editable mode, skipping."
 fi

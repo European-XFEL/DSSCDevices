@@ -30,6 +30,9 @@ setup(name='DsscControl',
               'DsscASICreset = DsscControl.DsscASICreset:DsscASICreset',
               'DsscConfigSetter = DsscControl.dsscConfSetter:DsscConfigSetter'
           ],
+          'karabo.bound_device': [
+              'DsscSIB = DsscSIB.DsscSIB:DsscSIB',
+          ],
       },
       package_data={},
       requires=[],
@@ -40,3 +43,5 @@ setup(name='DsscControl',
 
 shutil.copy(VERSION_FILE_PATH,
             join(ROOT_FOLDER, "src/DsscControl"))
+shutil.copy(VERSION_FILE_PATH,
+            join(ROOT_FOLDER, "src/DsscSIB"))
