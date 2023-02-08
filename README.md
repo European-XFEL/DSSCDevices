@@ -1,11 +1,18 @@
 # Dssc Devices  
 
-## DSSC Control
+### DSSC PPT
 
-A middlelayer device to configure several PPT device, take darks, and more.  
+The Patch Panel Transciever is the interface between the FPGA/ASICs and the outside world (configuration or acquisition), using its own protocol over TCP.  
+This device is responsible for the configuring a quadrant (4 modules/ladders).  
+4 instances of this device are needed to control the whole detector.  
+
+### DSSC Control
+
+A middlelayer device to orchestrate 4 quadrants (PPT devices) of the detector.  
+As well as an unified interface for configuration, this device automates various procedures such as taking darks.  
 Its soft interlock is documented in [doc/soft_interlock.md](doc/soft_interlock.md).
 
-## DSSC SIB
+### DSSC SIB
 
 A bound device to read and configure the Safety Interlock Board, which is its own hardware
 device mounted next to the PPT.  
@@ -75,6 +82,7 @@ ctest -VV
 
 To run the devices, both a C++ and Middlelayer servers are needed:  
 ```bash
-    karabo-cppserver serverId=cppServer/dssc deviceClasses=DsscPpt,DsscLadderParameterTrimming
-    karabo-middlelayerserver serverId=middlelayerServer/dssc  deviceClasses=DsscControl
+karabo-cppserver serverId=cppServer/dssc deviceClasses=DsscPpt,DsscLadderParameterTrimming &
+karabo-middlelayerserver serverId=middlelayerServer/dssc deviceClasses=DsscControl &
+karabo-pythonserver serverId=pythonServer/dssc deviceClasses=DsscSIB
 ```
