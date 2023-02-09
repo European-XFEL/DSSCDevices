@@ -18,6 +18,10 @@ A bound device to read and configure the Safety Interlock Board, which is its ow
 device mounted next to the PPT.  
 It is using an ASCII protocol over TCP.
 
+### DSSC ASIC Reset
+
+A middlelayer device to ease resetting ASICS on the various modules by providing a simple scene.  
+It's meant to be used by detector experts during commissioning. As such, it is its own device.
 
 ## Contributing
 
@@ -27,7 +31,7 @@ It is recommended to make git ignore changes to the configuration files found in
 git update-index --skip-worktree src/ConfigFiles
 ```
 
-### Python (DsscControl, DsscSIB)
+### Python (Control, SIB, ASICReset)
 
 Do an editable installation of the package:  
 
