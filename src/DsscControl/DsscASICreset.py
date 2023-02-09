@@ -1,9 +1,3 @@
-#############################################################################
-# Author: samartse
-# Created on June, 2019, 01:31 PM
-# Copyright (C) European XFEL GmbH Hamburg. All rights reserved.
-#############################################################################
-
 import asyncio
 import datetime
 import os
@@ -21,7 +15,7 @@ from ._version import version as deviceVersion
 from .schemata import PptRowSchema2
 
 
-class DsscASICreset(Device, Injectable):
+class DsscASICreset(Device):
     # provide version for classVersion property
     __version__ = deviceVersion
 
@@ -203,15 +197,6 @@ class DsscASICreset(Device, Injectable):
                                                           accessMode=AccessMode.READONLY))
 
         await self.publishInjectedParameters()
-
-#        def makeASICslot(asicnum):
-#            @Slot(displayedName="_",
-#                  description="ASIC{}".format(asicnum),
-#                  allowedStates={State.ON})
-#            async def asicFun(self):
-#                self.status = "asic{}".format(await self.programASIC(asicnum))
-
-#            return asicFun
 
         for i in range(16):
             setattr(self.__class__, f"asic{i}", makeASICslot(i))
