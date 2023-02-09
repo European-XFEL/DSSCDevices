@@ -2,17 +2,37 @@ import asyncio
 import datetime
 import os
 import time
+
 from asyncio import CancelledError
 from collections import ChainMap
 
 from karabo.middlelayer import (
-    AccessMode, Bool, Configurable, Device, Hash, Injectable, Node,
-    OutputChannel, Slot, State, String, UInt32, VectorHash, allCompleted,
-    connectDevice, gather, setWait, sleep, waitUntil
+    AccessMode,
+    allCompleted,
+    Bool,
+    Configurable,
+    connectDevice,
+    DaqPolicy,
+    Device,
+    gather,
+    Hash,
+    Node,
+    OutputChannel,
+    setWait,
+    sleep,
+    Slot,
+    slot,
+    State,
+    String,
+    UInt32,
+    VectorHash,
+    VectorString,
+    waitUntil,
 )
 
 from ._version import version as deviceVersion
 from .schemata import PptRowSchema2
+from .asic_reset_scene import get_scene
 
 
 class DsscASICreset(Device):
@@ -213,3 +233,33 @@ class DsscASICreset(Device):
                                                           accessMode=AccessMode.READONLY))
 
         await self.publishInjectedParameters()
+
+    availableScenes = VectorString(
+        displayedName="Available Scenes",
+        displayType="Scenes",
+        accessMode=AccessMode.READONLY,
+        defaultValue=["overview"],
+        daqPolicy=DaqPolicy.OMIT
+    )
+
+    @slot
+    def requestScene(self, params):
+        ppt_ids = dict()
+        for idx in range(4):
+            key = f'ppt_q{idx+1}_id'
+            try:
+                ppt_ids[key] = self.ppt_by_indx[idx].deviceId
+            except KeyError:  # We're connected to fewer than 4 quadrants
+                ppt_ids[key] = "disconnected"
+
+        payload = Hash(
+            'success', True,
+            'name', 'overview',
+            'data' , get_scene(self.deviceId, **ppt_ids)
+        )
+
+        return Hash(
+            'type', 'deviceScene',
+            'origin', self.deviceId,
+            'payload', payload
+        )
