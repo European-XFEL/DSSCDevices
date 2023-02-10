@@ -7,6 +7,7 @@ from typing import List
 
 import numpy as np
 from karabo.middlelayer import (
+    AccessLevel,
     AccessMode,
     Assignment,
     Bool,
@@ -18,6 +19,7 @@ from karabo.middlelayer import (
     OutputChannel,
     Overwrite,
     Slot,
+    slot,
     State,
     String,
     UInt16,
@@ -41,7 +43,8 @@ from .schemata import (
     MeasurementInfo,
     PptRowSchema,
 )
-from .utils import MeasurementConfig, get_sweep_vector, sanitize_da, strToByteArray
+from .utils import MeasurementConfig, get_sweep_vector, strToByteArray
+from .take_data import TakeData
 
 NUM_QUADRANTS = 4
 NUM_MODULES = 16
@@ -65,7 +68,7 @@ DEVICE_STATES = [
 ]
 
 
-class DsscControl(Device):
+class DsscControl(TakeData, Device):
 
     # provide version for classVersion property
     __version__ = deviceVersion
@@ -254,6 +257,11 @@ class DsscControl(Device):
                               displayedName="daqOutput",
                               description="Pipeline Output channel")
 
+    availableScenes = VectorString(
+        accessMode=AccessMode.READONLY,
+        defaultValue=[]
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -267,6 +275,7 @@ class DsscControl(Device):
 
         # Reference to background tasks, used to cancel them
         self.task = None
+        self.abortMeasurement = False
 
         # Keeps track of state updates in state fusion
         self._last_state_update: str = None
@@ -276,10 +285,19 @@ class DsscControl(Device):
         self.lock_watchdog_task = None
 
     async def onInitialization(self):
-        self.status = "Ready"
-        self.abortMeasurement = False
+        self.state = State.INIT
+        self.status = "Initializing"
+
         self.selPixels = "all"
         await self.connectDevices()
+
+        self.takeData.parent = self
+
+        self.availableScenes = [
+            kls.__name__ for kls in DsscControl.__bases__[:-1]
+        ]
+
+        self.status = "Ready"
 
     def setMeasurementData(self, measConfig, startDirectory, totalNumOfMeasurements,
                            numOfSweeps, settings1, name1, enSecondParam=False,
@@ -1470,6 +1488,23 @@ class DsscControl(Device):
             self.status = str(e)
             self.state = State.ERROR
 
+    @slot
+    def requestScene(self, params):
+        name = params.get("name")
+        scene = globals()[name].scene(self.deviceId)
+
+        payload = Hash(
+            "success", True,
+            "name", name,
+            "data", scene,
+        )
+
+        return Hash(
+            "type", "deviceScene",
+            "origin", self.deviceId,
+            "payload", payload,
+        )
+
     async def onDestruction(self):
         if not self.expertMode:
             if self.lock_watchdog_task is not None:  # In expert mode
@@ -1484,3 +1519,8 @@ class DsscControl(Device):
                 await gather(*coros)
             except KaraboError as e:  # A proxy went down before this device
                 self.log.WARN(str(e))
+
+    doNotCompressEvents = Bool(
+        accessMode=AccessMode.READONLY,
+        requiredAccessLevel=AccessLevel.GOD,
+    )
