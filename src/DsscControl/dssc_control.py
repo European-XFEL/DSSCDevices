@@ -1,9 +1,3 @@
-"""
-Author: kirchgessner
-Creation date: April, 2017, 01:41 PM
-Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
-"""
-
 import asyncio
 import datetime
 import sys
@@ -89,12 +83,6 @@ class DsscControl(Device):
         displayedName="Ppt devices to connect",
         defaultValue=[Hash([('deviceId', "SCS_CDIDET_DSSC/FPGA/PPT_Q{}".format(i)),
                             ('quadrantId', "Q{}".format(i)), ('connectIt', True)]) for i in range(1, 5)])
-
-    aggregatorConfig = VectorHash(
-        rows=BaseDeviceRowSchema,
-        displayedName="DAQ aggregators",
-        defaultValue=[Hash([('deviceId', "SCS_DET_DSSC1M-1/DET/{}CH0".format(i)),
-                            ('connectIt', True)]) for i in range(16)])
 
     processorConfig = VectorHash(
         rows=BaseDeviceRowSchema,
@@ -258,10 +246,6 @@ class DsscControl(Device):
 
     timingScanRange = String(displayedName="Timing Scan Range")
 
-    runController = String(displayedName="DAQ RunController",
-                           description="Used for taking darks",
-                           assignment=Assignment.MANDATORY)
-
     powerProcedure = String(displayedName="Power Procedure",
                             description="Used for soft interlock",
                             assignment=Assignment.MANDATORY)
@@ -275,16 +259,8 @@ class DsscControl(Device):
 
         # DSSC control proxies
         self.ppt_devices = [None for i in range(NUM_QUADRANTS)]
-        self.aggregators = [None for i in range(NUM_MODULES)]
         self.processors  = [None for i in range(NUM_MODULES)]
         self.ppt_dev = []  # short list of active ppt devices
-
-        # DAQ proxies for darks taking
-        self.run_controller = None
-        self.aggr_dev = []
-        self.proc_dev = []
-        self.ppt_dev_QuadMap = {}  # index map of connected ppt devices
-        self.proc_dev_indx = {}
 
         # Proxy for power procedure
         self.power_procedure = None
@@ -463,32 +439,7 @@ class DsscControl(Device):
                                          agg_dev.state == state))
         await gather(*to_wait_for)
 
-    async def startAcquisition(self):
-        # TODO: Refactor to use karaboDevices/daqController
-        if self.run_controller.state != State.MONITORING:
-            self.status = "XFEL DAQ not in monitoring state"
-            if self.run_controller.state == State.ACQUIRING:
-                await self.stopAcquisition()
-
-        await self.waitAggregators(State.MONITORING)
-        await self.run_controller.record()
-        await waitUntil(lambda: self.run_controller.state == State.ACQUIRING)
-        await self.waitAggregators(State.ACQUIRING)
-
-    async def stopAcquisition(self):
-        if self.run_controller.state != State.ACQUIRING:
-            self.status = "XFEL DAQ not in acquiring state"
-            return
-
-        await self.waitAggregators(State.ACQUIRING)
-        await self.run_controller.tune()
-        await waitUntil(lambda: self.run_controller.state == State.MONITORING)
-        await self.waitAggregators(State.MONITORING)
-
     async def acquireData(self):
-        if not self.singleRunMeasurement:
-            await self.startAcquisition()
-
         await self.call_many_remote(self.ppt_dev,
                                   "startBurstAcquisition",
                                   reraise=True)
@@ -526,9 +477,6 @@ class DsscControl(Device):
 
         await self.sendMeasurementInfoData()
 
-        if not self.singleRunMeasurement:
-            await self.stopAcquisition()
-
     async def update_pptdev_settings(self):
         await self.set_many_remote(self.ppt_dev,
                            numBurstTrains=self.numIterations,
@@ -551,24 +499,6 @@ class DsscControl(Device):
                                       reraise=True)
 
         self.pptInitConfigFile = []
-        await self.runControl_PrepareAndMonitor()
-
-    async def runControl_PrepareAndMonitor(self):
-        if self.run_controller.state == State.MONITORING:
-            return
-
-        if self.run_controller.state == State.IGNORING:
-            await self.run_controller.monitor()
-            await waitUntil(
-                lambda: self.run_controller.state == State.MONITORING)
-            return
-
-        if self.run_controller.state == State.ACQUIRING:
-            await self.stopAcquisition()
-            return
-
-        msg = "DAQ is not ready!"
-        raise RuntimeError(msg)
 
     async def finishMeasurement(self):
         if self.abortMeasurement:
@@ -683,31 +613,6 @@ class DsscControl(Device):
                               f"{self.powerProcedure}, which was not found. "
                               "Instantiate it or contact DET OCD.")
                 return
-
-        to_connect = {}
-        for i, row in enumerate(self.aggregatorConfig.value):
-            aggrnamestr = str(row[0])
-            if row[1]:
-                await sanitize_da(aggrnamestr)
-                to_connect[str(i)] = connectDevice(aggrnamestr)
-
-        if to_connect:
-            done, pending, error = await allCompleted(**to_connect, timeout=10)
-            error = ChainMap(pending, error)
-
-        if len(error):
-            failmsg = [r[0] for i, r in enumerate(self.aggregatorConfig.value)
-                       if str(i) in error]
-            self.status = "Failed connecting Aggregators: {}".format(failmsg)
-            self.state = State.UNKNOWN
-            return
-
-        self.aggregators = [None if r[0] in error else done[str(i)]
-                            for i, r in enumerate(self.aggregatorConfig.value) if r[1]]
-
-        self.aggr_dev = list(done.values())
-
-        self.run_controller = await connectDevice(self.runController)
 
         self.processorsConnect = np.any([row[1] for row in self.processorConfig.value])
 
@@ -872,8 +777,6 @@ class DsscControl(Device):
         self.state = State.ACTIVE
         self.status = "PPTs send dummy data..."
 
-
-
     @Slot(displayedName="Stop Data sending",
           description="Stop continuous mode to reinitialize PPT",
           allowedStates={State.ACQUIRING})
@@ -903,7 +806,6 @@ class DsscControl(Device):
           allowedStates={State.ACQUIRING, State.RUNNING})
     async def abortMeasurementSlot(self):
         self.abortMeasurement = True
-        await self.stopAcquisition()
         await self.stopDataSending()
         if self.task:
             self.task.cancel()
@@ -968,7 +870,6 @@ class DsscControl(Device):
         self.measurementNumber = np.uint32(0)
 
         if self.singleRunMeasurement:
-            await self.startAcquisition()
             self.measurementConfigData[minfbase + "singleRunMeasurementType"] = True
         else:
             self.measurementConfigData[minfbase + "singleRunMeasurementType"] = False
@@ -1011,9 +912,6 @@ class DsscControl(Device):
                     break
             if self.abortMeasurement:  # TODO: this task gets cancelled on abort
                 break
-
-        if self.singleRunMeasurement:
-            await self.stopAcquisition()
 
         await self.finishMeasurement()
 
@@ -1090,7 +988,6 @@ class DsscControl(Device):
         self.measurementConfigData[minfbase + "injSkipType"] = injSelType
 
         if self.singleRunMeasurement:
-            await self.startAcquisition()
             self.measurementConfigData[minfbase + "singleRunMeasurementType"] = True
         else:
             self.measurementConfigData[minfbase + "singleRunMeasurementType"] = False        
@@ -1165,9 +1062,6 @@ class DsscControl(Device):
             if self.abortMeasurement:  # TODO: remove
                 break
 
-        if self.singleRunMeasurement:
-            await self.stopAcquisition()
-
         await self.finishMeasurement()
 
 
@@ -1219,7 +1113,6 @@ class DsscControl(Device):
         self.status = "Running Measurement ..."
 
         if self.singleRunMeasurement:
-            await self.startAcquisition()
             self.measurementConfigData[minfbase + "singleRunMeasurementType"] = True
         else:
             self.measurementConfigData[minfbase + "singleRunMeasurementType"] = False
@@ -1247,16 +1140,7 @@ class DsscControl(Device):
             if self.abortMeasurement:
                 break
 
-        if self.singleRunMeasurement:
-            await self.stopAcquisition()
-
         await self.finishMeasurement()
-
-    @Slot(displayedName="Run Burst Acquisition",
-          description="Start Burst Acquisition of selected number of trains",
-          allowedStates={State.ON, State.ACQUIRING})  # TODO: confirm State.ACQUIRING
-    async def acquireBursts(self):
-        self.task = background(self._acquireBursts())
 
     async def _acquireBursts(self):
 
@@ -1293,15 +1177,9 @@ class DsscControl(Device):
 
         self.measurementConfigData[minfbase + "columnSelect"] = strToByteArray("all")
 
-        if self.singleRunMeasurement:
-            await self.startAcquisition()
-
         self.measurementConfigData[minfbase + "singleRunMeasurementType"] = True
 
         await self.acquireData()
-
-        if self.singleRunMeasurement:
-            await self.stopAcquisition()
 
         await self.finishMeasurement()
 
