@@ -26,7 +26,7 @@
     - make test
 
     - echo "Testing Python Project"
-    - pip install -e . 
+    - pip install -e ".[test]" 
     - pytest -vv .
     # run a device server to test for syntax errors
     - karabo-middlelayerserver serverId=test > test.log &

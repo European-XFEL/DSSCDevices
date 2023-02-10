@@ -36,7 +36,12 @@ setup(name='DsscControl',
       },
       package_data={},
       requires=[],
-      )
+      extras_require={
+        'test': [
+            'pytest-asyncio',
+        ],
+      },
+)
 
 
 # copy to subpaths with Karabo class files
