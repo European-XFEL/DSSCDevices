@@ -53,6 +53,7 @@ nbproject/
 
 # Karabo version (generated)
 src/version.hh
+_version.py
 
 # Exception for .install.sh
 !.install.sh
@@ -60,7 +61,8 @@ src/version.hh
 # Python files
 dist/
 build/
-src/DsscControl.egg-info/
-src/DsscControl/__pycache__/
-src/tests/python/__pycache__/
-_version.py
+*.egg-info/
+__pycache__/
+
+# Vim
+*.swp
