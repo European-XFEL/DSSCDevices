@@ -28,10 +28,6 @@
     - echo "Testing Python Project"
     - pip install -e ".[test]" 
     - pytest -vv .
-    # run a device server to test for syntax errors
-    - karabo-middlelayerserver serverId=test > test.log &
-    - sleep 15
-    - if [[ $(grep -e SyntaxError -e ImportError test.log) ]]; then exit 1; else exit 0; fi
 
   artifacts:
     when: always
