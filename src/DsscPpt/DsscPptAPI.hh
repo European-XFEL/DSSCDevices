@@ -46,7 +46,7 @@ public:
     bool isLadderReadout(){return false;}
     void setLadderReadout(bool enable){}
     
-    void updateStartTrain() override {};
+    void updateStartTrain(int margin) override {};
 
     inline int setEPCParam(const std::string& moduleSet, const std::string& moduleStr, const std::string& signalName, uint32_t value)
     {
