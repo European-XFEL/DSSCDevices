@@ -1,3 +1,8 @@
+"""
+Author: kirchgessner
+Creation date: April 1, 2017, 01:41 PM
+Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
+"""
 import asyncio
 import datetime
 import sys
