@@ -1136,6 +1136,8 @@ namespace karabo {
     }
 
     void DsscPpt::initialize() {
+        this->updateState(State::INIT);
+        this->set<string>("status", "Initializing Karabo device");
         KARABO_ON_DATA("registerConfigInput", receiveRegisterConfiguration);
         SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(get<string>("fullConfigFileName"));     
 
@@ -1184,6 +1186,8 @@ namespace karabo {
         updateConfigHash();
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " init done";
+        this->set<string>("status", "Please connect to PPT device");
+        this->updateState(State::UNKNOWN);
 
     }
 
@@ -1632,13 +1636,10 @@ namespace karabo {
                 std::string message = "Failed to connect to PPT: " + m_ppt->errorString;
                 set<string>("status", message);
                 KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " " << message;
-                //throw KARABO_NETWORK_EXCEPTION("Failed to connect to PPT: " + m_ppt->errorString);
             }
         }
 
         if (m_ppt->isOpen()) {
-            DSSC::StateChangeKeeper keeper(this, State::OFF);
-
             resetAll();
 
             programPLL();
@@ -1651,14 +1652,9 @@ namespace karabo {
 
             checkQSFPConnected();
             
-            set<string>("status", "PPT is connected");
+            set<string>("status", "Connected to PPT");
 
         } 
-        /*else {
-            this->updateState(State::ERROR);
-            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Open failure -- attempt to open a connection to PPT failed";
-            //throw KARABO_NETWORK_EXCEPTION("Open failure -- attempt to open a connection to PPT failed");
-        }*/
     }
 
 
@@ -2085,10 +2081,7 @@ namespace karabo {
                 }
             }
         }
-        
-        
     }
-    
     
     void DsscPpt::updateConfigHash(){
         
@@ -2285,7 +2278,8 @@ namespace karabo {
 
         checkQSFPConnected();
 
-        std::cout << "initSystem finished" <<std::endl;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << "initSystem finished";
+        this->set<string>("status", "Detector initialized");
     }    
 
 
