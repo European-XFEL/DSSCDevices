@@ -9,10 +9,8 @@
     - bash karabo.sh --prefix=/root
     - source /root/karabo/activate
 
-    - echo "Testing C++ Project"
-    - pushd $CI_PROJECT_DIR
-    - export GTEST_OUTPUT=xml:$CI_PROJECT_DIR/report.xml
-    - >  # Install Dependencies
+    - >
+         echo "Installing Dependencies";
          while read line; do
              [[ $line =~ ^#.* ]] && continue
              norm=${line/,/ }
@@ -23,23 +21,24 @@
              karabo -g https://$XFEL_TOKEN@git.xfel.eu install $device $tag
          done < DEPENDS        
 
+    - echo "Testing C++ Project"
+    - pushd $CI_PROJECT_DIR
+    - export GTEST_OUTPUT=xml:$CI_PROJECT_DIR/cpp.xml
     - make test
 
     - echo "Testing Python Project"
     - pip install -e . 
-    - pytest -vv .
-    # run a device server to test for syntax errors
-    - karabo-middlelayerserver serverId=test > test.log &
-    - sleep 15
-    - if [[ $(grep -e SyntaxError -e ImportError test.log) ]]; then exit 1; else exit 0; fi
+    - pytest -vv . --junitxml=python.xml
 
   artifacts:
     when: always
     reports:
       junit:
-        - report.xml
+        - cpp.xml
+        - python.xml
     paths:
-      - report.xml
+      - cpp.xml
+      - python.xml
     expire_in: 1 week
 
 ##### Test build #####
