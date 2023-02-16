@@ -1,13 +1,13 @@
-"""
-Author: kirchgessner
-Creation date: April, 2017, 01:41 PM
-Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
-"""
-
 import asyncio
 import datetime
 import sys
-from asyncio import CancelledError, TimeoutError, gather, wait_for
+
+from asyncio import (
+    CancelledError,
+    gather,
+    TimeoutError,
+    wait_for,
+)
 from collections import ChainMap
 from typing import List
 
@@ -62,7 +62,6 @@ DEVICE_STATES = [
     State.UNKNOWN,  # Devices not connected to (proxies or PPT to HW)
     State.OFF,  # Mapping the power procedure State.PASSIVE to OFF
     State.CHANGING,  # Used when creating proxies or inherited from PPT or power procedure
-    State.RUNNING,  # Used when initializing data sending  # TODO: change to ACTIVE
     State.ON,  # Detector initialized (inherited from PPT)
     State.ACQUIRING,  # Detector acquiring (fuses PPT ACQUIRING and STARTED)
     State.ERROR,  # Any exceptions on this device, PPT, or power procedure
@@ -117,8 +116,7 @@ class DsscControl(Device):
     abortMeasurement = Bool(displayedName="Abort Measurement",
                             defaultValue=False,
                             accessMode=AccessMode.RECONFIGURABLE,
-                            allowedStates={State.ACTIVE, State.ACQUIRING,
-                                           State.RUNNING})
+                            allowedStates={State.ACTIVE, State.ACQUIRING})
 
     ladderMode = UInt32(displayedName="Ladder Mode", defaultValue=1)
 
@@ -539,7 +537,7 @@ class DsscControl(Device):
         self.status = "Init Measurement"
         self.abortMeasurement = False
 
-        self.state = State.RUNNING  # TODO: Change to ACTIVE
+        self.state = State.ACTIVE
 
         await self.stopDataSending()
 
@@ -900,7 +898,7 @@ class DsscControl(Device):
 
     @Slot(displayedName="ABORT",
           description="ABORT current measurement",
-          allowedStates={State.ACQUIRING, State.RUNNING})
+          allowedStates={State.ACQUIRING, State.ACTIVE})
     async def abortMeasurementSlot(self):
         self.abortMeasurement = True
         await self.stopAcquisition()
