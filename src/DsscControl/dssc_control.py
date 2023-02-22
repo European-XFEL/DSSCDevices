@@ -1574,7 +1574,7 @@ class DsscControl(Device):
 
         failures_left = 10
 
-        while failures_left >= 10:
+        while failures_left >= 1:
             try:
                 locks = {ppt: ppt.lockedBy for ppt in self.ppt_dev}
                 locks[self.power_procedure] = self.power_procedure.lockedBy
