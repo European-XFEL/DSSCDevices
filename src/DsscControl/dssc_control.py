@@ -1503,7 +1503,11 @@ class DsscControl(Device):
             try:
                 state = self.state
                 source = ''
-                power_proc_state = self.power_procedure.state
+
+                if self.power_procedure is not None:  # Can happen in expert mode
+                    power_proc_state = self.power_procedure.state
+                else:
+                    power_proc_state = None
 
                 states = [ppt.state for ppt in self.ppt_dev]
                 # Wait for all PPTs to have the same state, typically seen
@@ -1543,7 +1547,9 @@ class DsscControl(Device):
                     self.status = source
                     self._last_state_status = source
 
-                states.append(power_proc_state)
+                if power_proc_state is not None:
+                    states.append(power_proc_state)
+
                 await waitUntilNew(*states)
             except CancelledError:
                 self.log.DEBUG("State fusion cancelled")
