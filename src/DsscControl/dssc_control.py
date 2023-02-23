@@ -791,7 +791,7 @@ class DsscControl(Device):
     async def _initPPTdevices(self):
         self.state = State.INIT
         try:
-            self.stopDataSending()
+            await self.stopDataSending()
             self.status = "Initializing PPT devices..."
             to_init = []
             for ppt_device in self.ppt_dev:
