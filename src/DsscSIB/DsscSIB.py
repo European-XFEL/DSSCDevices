@@ -1,4 +1,4 @@
-#############################################################################
+############################################################################
 # Author: parenti
 # Created on April 30, 2019, 04:41 PM
 # Copyright (C) European XFEL GmbH Hamburg. All rights reserved.
@@ -42,12 +42,23 @@ class DsscSIB(PythonDevice):
         "LocalQloop:{localQloop:d}!GlobalQloop:{globalQloop:d}!"
         "QloopAddress:{qloopAddress:x}!SIBs:{sibs:d}"
     )
+    log_v2_parser = parse.compile(
+        "SIB_MASTER:{sibMaster:d}!"
+        "LocalQloop:{localQloop:d}!GlobalQloop:{globalQloop:d}!"
+        "QloopAddress:{qloopAddress:x}!SIBs:{sibs:d}"
+    )
     last_trainid_parser = parse.compile(
         "SIB[0]!LastTrainID:{lastTrainId:d}!SIB STATE:{sibState:x}!"
         "SIB Operation Mode:{som:d}"
     )
     tstatus_parser = parse.compile(
-        "SIB[0]!T_STATUS:{tStatus:d}[PPFC:{ppfc:d}!IOB:{iob:d}!ASIC:{asic:d}]!"
+        "SIB[0]!T_STATUS:{tStatus:g}[PPFC:{ppfc:d}!IOB:{iob:d}!ASIC:{asic:d}]!"
+        "P_STATUS:{pStatus:d}!H_STATUS:{hStatus:d}!"
+        "CABLE_STATUS:{cableStatus:d}!COOL_STATUS:{coolStatus:d}!"
+        "EXP_STATUS:{expStatus:d}"
+    )
+    tstatus_v2_parser = parse.compile(
+        "SIB[0]!T_STATUS:{tStatus:g}[PPFC:{ppfc:d}!IOB:{iob:d}!Therm:{therm:d}!ASIC:{asic:d}]!"
         "P_STATUS:{pStatus:d}!H_STATUS:{hStatus:d}!"
         "CABLE_STATUS:{cableStatus:d}!COOL_STATUS:{coolStatus:d}!"
         "EXP_STATUS:{expStatus:d}"
@@ -74,9 +85,23 @@ class DsscSIB(PythonDevice):
     t1_parser = parse.compile(
         "SIB[0]!H1:{h1:g}[{h1Status:d}]!H2:{h2:g}[{h2Status:d}]!T1:{t1:g}!T2:{t2:g}"
     )
+    t1_v2_parser = parse.compile(
+        "SIB[0]!"
+        "DP1:{dp1:g}[{dp1Status:d}]!"
+        "DP2:{dp2:g}[{dp2Status:d}]!"
+        "H1:{h1:g}!H2:{h2:g}!"
+        "T1:{t1:g}!T2:{t2:g}"
+    )
     asic_trainid_parser = parse.compile("ASIC!TrainID:{trainId:d}")
     asic_parser = parse.compile(
         "({asic_nr:d})[{ASICXX.status:d}]{ASICXX.t0:g}:{ASICXX.t1:g}"
+    )
+    ntc_parser = parse.compile(
+        "SIB[0]!NTC[{:d}]!"
+        "NTC1:{ntc1:g}[{ntc1Status:d}]!"
+        "NTC2:{ntc2:g}[{ntc2Status:d}]!"
+        "NTC3:{ntc3:g}[{ntc3Status:d}]!"
+        "NTC4:{ntc4:g}[{ntc4Status:d}]"
     )
 
     @staticmethod
@@ -99,6 +124,11 @@ class DsscSIB(PythonDevice):
             .assignmentOptional().defaultValue(1000)
             .minInc(0)
             .init()
+            .commit(),
+
+            STRING_ELEMENT(expected).key("version")
+            .displayedName("F/W Version")
+            .readOnly()
             .commit(),
 
             UINT64_ELEMENT(expected).key("lastUpdated")
@@ -252,6 +282,11 @@ class DsscSIB(PythonDevice):
             .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
+            INT32_ELEMENT(expected).key("therm")
+            .displayedName("THERM")
+            .readOnly()
+            .commit(),
+
             INT32_ELEMENT(expected).key("asic")
             .displayedName("ASIC")
             .readOnly()
@@ -325,6 +360,16 @@ class DsscSIB(PythonDevice):
 
             INT32_ELEMENT(expected).key("ppfcT1Status")
             .displayedName("PPFC_T1_STATUS")
+            .readOnly()
+            .commit(),
+
+            FLOAT_ELEMENT(expected).key("ppfcT2")
+            .displayedName("PPFC_T2")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("ppfcT2Status")
+            .displayedName("PPFC_T2_STATUS")
             .readOnly()
             .commit(),
 
@@ -434,6 +479,26 @@ class DsscSIB(PythonDevice):
             .readOnly()
             .commit(),
 
+            FLOAT_ELEMENT(expected).key("dp1")
+            .displayedName("DP1")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("dp1Status")
+            .displayedName("DP1_STATUS")
+            .readOnly()
+            .commit(),
+
+            FLOAT_ELEMENT(expected).key("dp2")
+            .displayedName("DP2")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("dp2Status")
+            .displayedName("DP2_STATUS")
+            .readOnly()
+            .commit(),
+
             FLOAT_ELEMENT(expected).key("h1")
             .displayedName("H1")
             .readOnly()
@@ -454,8 +519,53 @@ class DsscSIB(PythonDevice):
             .readOnly()
             .commit(),
 
+            FLOAT_ELEMENT(expected).key("t1")
+            .displayedName("T1")
+            .readOnly()
+            .commit(),
+
             FLOAT_ELEMENT(expected).key("t2")
             .displayedName("T2")
+            .readOnly()
+            .commit(),
+
+            FLOAT_ELEMENT(expected).key("ntc1")
+            .displayedName("NTC1")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("ntc1Status")
+            .displayedName("NTC1_STATUS")
+            .readOnly()
+            .commit(),
+
+            FLOAT_ELEMENT(expected).key("ntc2")
+            .displayedName("NTC2")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("ntc2Status")
+            .displayedName("NTC2_STATUS")
+            .readOnly()
+            .commit(),
+
+            FLOAT_ELEMENT(expected).key("ntc3")
+            .displayedName("NTC3")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("ntc3Status")
+            .displayedName("NTC3_STATUS")
+            .readOnly()
+            .commit(),
+
+            FLOAT_ELEMENT(expected).key("ntc4")
+            .displayedName("NTC4")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("ntc4Status")
+            .displayedName("NTC4_STATUS")
             .readOnly()
             .commit(),
         )
@@ -556,8 +666,13 @@ class DsscSIB(PythonDevice):
             self.socket.recv(self.BUFFER_SIZE)  # SIB prompts for password
             password = "DSSC2018"
             self.socket.send(f"{password}{DsscSIB.cmnd_terminator}".encode())
-            reply = self.socket.recv(self.BUFFER_SIZE)
-            self.log.INFO(f"Authentication successful. Reply: {reply}")
+            on_connect = self.socket.recv(self.BUFFER_SIZE)
+
+            self.socket.send(f"VER;{DsscSIB.cmnd_terminator}".encode())
+            fw_version = self.socket.recv(self.BUFFER_SIZE).decode().strip()
+            self.set("version", fw_version)
+
+            self.log.INFO(f"Authentication successful. Reply: {on_connect} - {fw_version}")
         except Exception as e:
             self.log.ERROR(f"Cannot authenticate: {e}")
             self.updateState(State.ERROR)
@@ -683,9 +798,13 @@ class DsscSIB(PythonDevice):
     def process_data_row(self, data, ts):
         data = data.replace('|', '!')  # '|' cannot be parsed correctly
 
-        if data.startswith('LOG['):
-            # LOG data
-            result = DsscSIB.log_parser.parse(data)
+        if 'SIB_MASTER' in data:  # LOG data
+            if data.startswith('LOG['):
+                result = DsscSIB.log_parser.parse(data)
+            elif data.startswith('SIB_MASTER'):
+                result = DsscSIB.log_v2_parser.parse(data)
+            else:
+                return
             if result is not None:
                 self.set_properties(result, ts)
 
@@ -693,7 +812,10 @@ class DsscSIB(PythonDevice):
             if 'LastTrainID:' in data:
                 result = DsscSIB.last_trainid_parser.parse(data)
             elif 'T_STATUS:' in data:
-                result = DsscSIB.tstatus_parser.parse(data)
+                if 'Therm:' in data:
+                    result = DsscSIB.tstatus_v2_parser.parse(data)
+                else:
+                    result = DsscSIB.tstatus_parser.parse(data)
             elif 'VCCSUM:' in data:
                 result = DsscSIB.vccsum_parser.parse(data)
             elif 'PPFC_T1:' in data:
@@ -702,8 +824,12 @@ class DsscSIB(PythonDevice):
                 result = DsscSIB.iob_parser.parse(data)
             elif 'MG:' in data:
                 result = DsscSIB.mg_parser.parse(data)
+            elif 'DP1:' in data:
+                result = DsscSIB.t1_v2_parser.parse(data)
             elif 'H1:' in data:
                 result = DsscSIB.t1_parser.parse(data)
+            elif 'NTC' in data:
+                result = DsscSIB.ntc_parser.parse(data)
             else:
                 # no match -> data won't be parsed
                 return
