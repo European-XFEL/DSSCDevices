@@ -5,17 +5,16 @@
 #############################################################################
 
 import math
-from queue import Queue
+import parse
+from queue import Full, Queue
 import socket
 import threading
 import time
 
-import parse
-
 from karabo.bound import (
     FLOAT_ELEMENT, INT32_ELEMENT, KARABO_CLASSINFO, NODE_ELEMENT,
     OVERWRITE_ELEMENT, SLOT_ELEMENT, STRING_ELEMENT, UINT64_ELEMENT, Hash,
-    PythonDevice, State, Worker
+    PythonDevice, State, Unit, Worker
 )
 
 from ._version import version as deviceVersion
@@ -100,6 +99,20 @@ class DsscSIB(PythonDevice):
             .assignmentOptional().defaultValue(1000)
             .minInc(0)
             .init()
+            .commit(),
+
+            UINT64_ELEMENT(expected).key("lastUpdated")
+            .displayedName("Last Updated")
+            .description("The time elapsed since the last update received "
+                         "from the SIB.")
+            .unit(Unit.SECOND)
+            .readOnly().initialValue(0)
+            .warnHigh(5)
+            .info("No data received for 5 s: connection w/ SIB might be lost")
+            .needsAcknowledging(False)
+            .alarmHigh(10)
+            .info("No data received for 10 s: connection w/ SIB might be lost")
+            .needsAcknowledging(False)
             .commit(),
 
             FLOAT_ELEMENT(expected).key("epsilon")
@@ -433,6 +446,11 @@ class DsscSIB(PythonDevice):
         self.connectWorker = Worker(self.connect_to_sib, 5000, -1)
         self.connectWorker.daemon = True
 
+        self.last_update = time.time()
+        self.last_update_interval = 1
+        self.last_update_worker = Worker(self.last_update_counter, 1000, -1)
+        self.last_update_worker.daemon = True
+
         # Process data in a separate thread
         self.data_queue = Queue(maxsize=20)
         self.processThread = threading.Thread(target=self.consumer)
@@ -459,6 +477,9 @@ class DsscSIB(PythonDevice):
 
         # Connect to SIB in a Worker
         self.connectWorker.start()
+
+        # Count elapsed time since last update
+        self.last_update_worker.start()
 
     def preReconfigure(self, configuration):
         self.configure_sib(configuration)
@@ -511,6 +532,26 @@ class DsscSIB(PythonDevice):
             self.log.ERROR(f"Cannot authenticate: {e}")
             self.updateState(State.ERROR)
 
+    def last_update_counter(self):
+        if self['state'] == State.UNKNOWN:
+            # Not connected
+            return
+
+        elapsed_time = time.time() - self.last_update
+        if elapsed_time > self.last_update_interval:
+            self['lastUpdated'] = elapsed_time
+            if self.last_update_interval < 10:
+                # more frequent updates in the beginning
+                self.last_update_interval += 1
+            else:
+                self.last_update_interval += 10
+
+    def reset_last_updated(self):
+        self.last_update = time.time()
+        self.last_update_interval = 1
+        if self['lastUpdated'] > 0:
+            self['lastUpdated'] = 0
+
     def restart(self):
         self.log.INFO("Restarting SIB")
         self.socket.send(f"RESET;{DsscSIB.cmnd_terminator}".encode())
@@ -531,35 +572,43 @@ class DsscSIB(PythonDevice):
 
             try:
                 new_data = self.socket.recv(self.BUFFER_SIZE).decode('ascii')
-                ts = self.getActualTimestamp()
-                data += new_data  # concatenate to old data
-                self.log.DEBUG(f"Data lenght: tot={len(data)} "
-                               f"new={len(new_data)} Bytes")
-                data_split = data.split(DsscSIB.cmnd_terminator)
-                if data.endswith(DsscSIB.cmnd_terminator):
-                    # complete data -> process all
-                    data = ""
-                else:
-                    # incomplete data -> keep last chunk
-                    data = data_split[-1]
-                    data_split = data_split[:-1]
-                for data_row in data_split:
-                    # Queue data for processing
-                    self.data_queue.put((data_row, ts), block=False)
-
-                counter = 10  # reset counter
-            except Exception as e:
+                self.reset_last_updated()  # reset "last updated" counters
+            except socket.timeout as e:
                 if counter > 0:
                     if self['log'] > 0:
                         # if LOG > 0 updates are expected all the time
                         counter -= 1
-                    self.log.DEBUG(f"Listener caught this: {e}")
+                        self.log.DEBUG(f"Listener caught this: {e}")
                 else:
-                    self.log.INFO(f"Lost connection with SIB: {e}")
+                    self.log.INFO("Lost connection with SIB")
                     self.socket = None
                     self.updateState(State.UNKNOWN)
+                    self.reset_last_updated()  # reset "last updated" counters
+                continue
 
-    def set_properties(self, result, ts, debug=False):
+            ts = self.getActualTimestamp()
+            data += new_data  # concatenate to old data
+            self.log.DEBUG(f"Data lenght: tot={len(data)} "
+                           f"new={len(new_data)} Bytes")
+            data_split = data.split(DsscSIB.cmnd_terminator)
+            if data.endswith(DsscSIB.cmnd_terminator):
+                # complete data -> process all
+                data = ""
+            else:
+                # incomplete data -> keep last chunk
+                data = data_split[-1]
+                data_split = data_split[:-1]
+
+            for data_row in data_split:
+                try:
+                    # Queue data for processing
+                    self.data_queue.put((data_row, ts), block=False)
+                except Full:
+                    self.log.ERROR("'data_queue' full. Discarding new data!")
+
+            counter = 10  # reset counter
+
+    def set_properties(self, result, ts):
         h = Hash()
         epsilon = self['epsilon']
         try:
@@ -580,8 +629,7 @@ class DsscSIB(PythonDevice):
                     )
                     h['status'] = status
 
-                if debug:
-                    self.log.INFO(f"Setting {h}")
+                self.log.DEBUG(f"Setting {h}")
                 self.set(h, ts)  # Bulk set
 
         except Exception as e:
@@ -592,7 +640,7 @@ class DsscSIB(PythonDevice):
         value_on_device = self[key]
         if isinstance(value_on_device, float):
             if math.isclose(value, value_on_device, rel_tol=epsilon):
-                # float: skip update if change smaller then tolerance
+                # float: skip update if change smaller than tolerance
                 return False
         elif value is math.nan and value_on_device is math.nan:
             return False
