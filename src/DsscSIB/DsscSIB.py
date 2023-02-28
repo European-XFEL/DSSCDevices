@@ -47,7 +47,7 @@ class DsscSIB(PythonDevice):
         "SIB Operation Mode:{som:d}"
     )
     tstatus_parser = parse.compile(
-        "SIB[0]!T_STATUS:{tStatus}[PPFC:{ppfc:d}!IOB:{iob:d}!ASIC:{asic:d}]!"
+        "SIB[0]!T_STATUS:{tStatus:d}[PPFC:{ppfc:d}!IOB:{iob:d}!ASIC:{asic:d}]!"
         "P_STATUS:{pStatus:d}!H_STATUS:{hStatus:d}!"
         "CABLE_STATUS:{cableStatus:d}!COOL_STATUS:{coolStatus:d}!"
         "EXP_STATUS:{expStatus:d}"
@@ -58,7 +58,7 @@ class DsscSIB(PythonDevice):
     )
     ppfc_parser = parse.compile(
         "SIB[0]!PPFC[{:d}]!PPFC_T1:{ppfcT1:g}[{ppfcT1Status:d}]!"
-        "PPFC_T2:{:g}[{:d}]!PPFC_T3:{ppfcT3:g}[{ppfcT3Status:d}]!"
+        "PPFC_T2:{ppfcT2:g}[{ppfcT2Status:d}]!PPFC_T3:{ppfcT3:g}[{ppfcT3Status:d}]!"
         "PPFC_T4:{ppfcT4:g}[{ppfcT4Status:d}]"
     )
     iob_parser = parse.compile(
@@ -68,11 +68,11 @@ class DsscSIB(PythonDevice):
         "IOB_T4:{iobT4:g}[{iobT4Status:d}]"
     )
     mg_parser = parse.compile(
-        "SIB[0]!MG:[{mg:d}]!P1:{p1:g}[{p1Status:d}]!P2:{:g}[{:d}]!"
-        "P3:{:g}[{:d}]!P4:{p4:g}[{p4Status:d}]"
+        "SIB[0]!MG:[{mg:d}]!P1:{p1:g}[{p1Status:d}]!P2:{p2:g}[{p2Status:d}]!"
+        "P3:{p3:g}[{p3Status:d}]!P4:{p4:g}[{p4Status:d}]"
     )
     t1_parser = parse.compile(
-        "SIB[0]!H1:{:g}[{:d}]!H2:{h2:g}[{h2Status:d}]!T1:{:g}!T2:{t2:g}"
+        "SIB[0]!H1:{h1:g}[{h1Status:d}]!H2:{h2:g}[{h2Status:d}]!T1:{t1:g}!T2:{t2:g}"
     )
     asic_trainid_parser = parse.compile("ASIC!TrainID:{trainId:d}")
     asic_parser = parse.compile(
@@ -404,6 +404,26 @@ class DsscSIB(PythonDevice):
             .readOnly()
             .commit(),
 
+            FLOAT_ELEMENT(expected).key("p2")
+            .displayedName("P2")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("p2Status")
+            .displayedName("P2_STATUS")
+            .readOnly()
+            .commit(),
+
+            FLOAT_ELEMENT(expected).key("p3")
+            .displayedName("P3")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("p3Status")
+            .displayedName("P3_STATUS")
+            .readOnly()
+            .commit(),
+
             FLOAT_ELEMENT(expected).key("p4")
             .displayedName("P4")
             .readOnly()
@@ -411,6 +431,16 @@ class DsscSIB(PythonDevice):
 
             INT32_ELEMENT(expected).key("p4Status")
             .displayedName("P4_STATUS")
+            .readOnly()
+            .commit(),
+
+            FLOAT_ELEMENT(expected).key("h1")
+            .displayedName("H1")
+            .readOnly()
+            .commit(),
+
+            INT32_ELEMENT(expected).key("h1Status")
+            .displayedName("H1_STATUS")
             .readOnly()
             .commit(),
 
