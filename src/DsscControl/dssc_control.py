@@ -1504,9 +1504,9 @@ class DsscControl(Device):
                 state = self.state
                 source = ''
 
-                if self.power_procedure is not None:  # Can happen in expert mode
+                if self.power_procedure is not None:
                     power_proc_state = self.power_procedure.state
-                else:
+                else:  # Can happen in expert mode
                     power_proc_state = None
 
                 states = [ppt.state for ppt in self.ppt_dev]
