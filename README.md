@@ -1,4 +1,7 @@
-# Dssc Devices  
+# Dssc Devices
+[![pipeline status](https://git.xfel.eu/karaboDevices/dsscDevices/badges/master/pipeline.svg)](https://git.xfel.eu/karaboDevices/dsscDevices/-/commits/master)
+[![coverage report](https://git.xfel.eu/karaboDevices/dsscDevices/badges/master/coverage.svg)](https://git.xfel.eu/karaboDevices/dsscDevices/-/commits/master) 
+
 
 ### DSSC PPT
 

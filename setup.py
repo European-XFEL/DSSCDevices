@@ -36,6 +36,11 @@ setup(name='DsscControl',
       },
       package_data={},
       requires=[],
+      extras_require={
+        'test': [
+            'pytest-cov'
+        ],
+      },
       )
 
 

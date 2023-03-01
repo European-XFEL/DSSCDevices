@@ -27,8 +27,8 @@
     - make test
 
     - echo "Testing Python Project"
-    - pip install -e . 
-    - pytest -vv . --junitxml=python.xml
+    - pip install -e ".[test]"
+    - pytest -vv --junitxml=python.xml --disable-warnings --pyargs --cov=DsscSIB --cov=DsscControl --cov-report term
 
   artifacts:
     when: always

@@ -63,6 +63,7 @@ dist/
 build/
 *.egg-info/
 __pycache__/
+.coverage
 
 # Vim
 *.swp
