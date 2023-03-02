@@ -28,7 +28,7 @@ setup(name='DsscControl',
           'karabo.middlelayer_device': [
               'DsscControl = DsscControl.dssc_control:DsscControl',
               'DsscASICreset = DsscControl.DsscASICreset:DsscASICreset',
-              'DsscConfigSetter = DsscControl.dsscConfSetter:DsscConfigSetter'
+              'DsscConfigurator = DsscControl.configurator:DsscConfigurator',
           ],
           'karabo.bound_device': [
               'DsscSIB = DsscSIB.DsscSIB:DsscSIB',
