@@ -32,7 +32,7 @@ from karabo.middlelayer import (
 
 from ._version import version as deviceVersion
 from .schemata import PptRowSchema2
-from .asic_reset_scene import get_scene
+from .scenes.asic_reset_scene import get_scene
 
 
 class DsscASICreset(Device):
