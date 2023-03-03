@@ -15,6 +15,14 @@ A middlelayer device to orchestrate 4 quadrants (PPT devices) of the detector.
 As well as an unified interface for configuration, this device automates various procedures such as taking darks.  
 Its soft interlock is documented in [doc/soft_interlock.md](doc/soft_interlock.md).
 
+### DSSC Configurator
+
+A middlelayer device used to set and monitor configurations across quadrants.  
+The different quadrants must have the same configuration applied.  
+This device monitors that and shows the configuration in its scene in big letters.  
+It also eases applying known configuration through a drop-down menu, rather than restarting PPT devices.  
+Its architecture is kept simple to eventually merge this within the Control device.
+
 ### DSSC SIB
 
 A bound device to read and configure the Safety Interlock Board, which is its own hardware
@@ -34,7 +42,7 @@ It is recommended to make git ignore changes to the configuration files found in
 git update-index --skip-worktree src/ConfigFiles
 ```
 
-### Python (Control, SIB, ASICReset)
+### Python (Control, SIB, ASICReset, Configurator)
 
 Do an editable installation of the package:  
 
@@ -90,6 +98,6 @@ ctest -VV
 To run the devices, both a C++ and Middlelayer servers are needed:  
 ```bash
 karabo-cppserver serverId=cppServer/dssc deviceClasses=DsscPpt,DsscLadderParameterTrimming &
-karabo-middlelayerserver serverId=middlelayerServer/dssc deviceClasses=DsscControl &
+karabo-middlelayerserver serverId=middlelayerServer/dssc deviceClasses=DsscControl,Configurator &
 karabo-pythonserver serverId=pythonServer/dssc deviceClasses=DsscSIB
 ```
