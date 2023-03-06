@@ -104,6 +104,7 @@ async def test_apply_configuration():
         q1_device.fullConfigFileName = "bleh"
         await sleep(1)
         assert "Different Settings Applied" in proxy.actualGainConfiguration
+        assert proxy.gainConfigurationState == State.ERROR.value
 
         # Check target configurations are validated
         with pytest.raises(ValueError):
@@ -120,6 +121,7 @@ async def test_apply_configuration():
         assert q4_device.init_done
 
         assert proxy.actualGainConfiguration == "bing"
+        assert proxy.gainConfigurationState == State.ON.value
 
 
 @pytest.mark.asyncio
@@ -151,11 +153,7 @@ async def test_missing_proxies():
         proxy = await connectDevice(configurator_id)
         # Check went to error on initialization as proxies are missing
         assert proxy.state == State.ERROR
-        assert "Could not connect" in proxy.status
-
-        # Check that calling apply does nothing
-        await proxy.apply()
-        assert proxy.state == State.ERROR
+        assert proxy.gainConfigurationState == State.ERROR.value
         assert "Could not connect" in proxy.status
 
 

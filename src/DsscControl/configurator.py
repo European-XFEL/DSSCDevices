@@ -75,6 +75,16 @@ class DsscConfigurator(Device):
         defaultValue=[Hash()],
     )
 
+    gainConfigurationState = String(
+        displayedName="Configuration State",
+        description="Shows whether PPTs have matching configurations. "
+                    "Incorrect until proven otherwise.",
+        defaultValue=State.ERROR.value,
+        displayType="State",
+        options={State.ON.value, State.ERROR.value},
+        accessMode=AccessMode.READONLY,
+    )
+
     actualGainConfiguration = String(
         displayedName="Applied Gain Configuration",
         defaultValue="",
@@ -88,6 +98,8 @@ class DsscConfigurator(Device):
         accessMode=AccessMode.RECONFIGURABLE,
     )
 
+    # Lock used to block state check when applying new configurations
+    # to avoid spurrious updates
     lock = None
 
     async def onInitialization(self):
@@ -140,7 +152,7 @@ class DsscConfigurator(Device):
                     msg += ", ".join(f"{qid}: {fname}" for qid, fname in configs.items())
                     self.actualGainConfiguration = msg
                     self.log.INFO(msg)
-                    self.state = State.ERROR
+                    self.gainConfigurationState = State.ERROR.value
                 else:
                     # Convert from filenames to human 
                     row = [row for row in self.availableGainConfigurations.value
@@ -152,7 +164,7 @@ class DsscConfigurator(Device):
                         self.log.INFO(f"Strange: configuration {name} is correct, but not know to me")
 
                     self.actualGainConfiguration = name
-                    self.state = State.ACTIVE
+                    self.gainConfigurationState = State.ON.value
 
             configs = [ppt.fullConfigFileName for ppt in self.ppts.values()]
             await waitUntilNew(*configs)
@@ -160,12 +172,9 @@ class DsscConfigurator(Device):
     @Slot(
         displayedName="Apply",
         description="Apply the selected config to the PPTs",
-        allowedStates={State.ACTIVE, State.ERROR},
+        allowedStates={State.ACTIVE},
     )
     async def apply(self):
-        # In error because initialization failed, not because ppt differ.
-        if self.lock is None:
-            return
         background(self._apply)
 
     async def _apply(self):
@@ -207,8 +216,7 @@ class DsscConfigurator(Device):
         self.status = f"Reinitializing detector"
 
         coros = {qid: ppt.initSystem() for qid, ppt in self.ppts.items()}
-        async with self.lock:
-            done, _, errors = await allCompleted(**coros)
+        done, _, errors = await allCompleted(**coros)
 
         if errors:
             msg = f"Could not init system on "

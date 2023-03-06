@@ -25,7 +25,7 @@ def get_scene(device_id):
     scene1 = DisplayStateColorModel(
         font_size=10,
         height=41.0,
-        keys=[f"{device_id}.state"],
+        keys=[f"{device_id}.gainConfigurationState"],
         parent_component="DisplayComponent",
         width=1161.0,
         x=230.0,
