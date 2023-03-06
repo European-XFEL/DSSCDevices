@@ -666,15 +666,15 @@ class DsscControl(Device):
                             for i, r in enumerate(self.pptConfig.value) if r[2]]
         self.ppt_dev = list(done.values())
 
-
+        connected_ppt_devices = [] 
         for pptdev in self.ppt_dev:
-            for i, row in enumerate(self.pptConfig.value):
-                if pptdev._deviceId_ == row[0]:
+            for row in self.pptConfig.value:
+                if pptdev.deviceId == row[0]:
                     self.ppt_dev_QuadMap[pptdev] = int(row[1][1])
+                    connected_ppt_devices.append(row[1])
                     break
 
-        self.connectedPptDev = ", ".join(["Q{}".format(str(i + 1)) for i, d
-                                          in enumerate(self.ppt_devices) if d])
+        self.connectedPptDev = ", ".join(sorted(connected_ppt_devices))
 
         try:
             self.power_procedure = await wait_for(connectDevice(self.powerProcedure), timeout=3)

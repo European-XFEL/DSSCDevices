@@ -124,8 +124,7 @@ class PptRowSchema(Configurable):
         defaultValue="")
     quadrantId = String(
         displayedName="Quadrant",
-        defaultValue="Q1",
-        accessMode=AccessMode.READONLY)
+        defaultValue="Q1")
     connectIt = Bool(
         displayedName="Connect to Device",
         defaultValue=True)
