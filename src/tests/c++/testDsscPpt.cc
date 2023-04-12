@@ -77,21 +77,35 @@ protected:
 
 
 TEST_F(DsscPptFixture, testDeviceInstantiation){
-
+    using namespace karabo::util;
     // Make use of the default config files saved with the device sources.
     std::stringstream fullConfigFileName;
     const std::string filename = __FILE__;
     std::size_t parent_dir_limit = filename.find_last_of("/", filename.find_last_of("/", filename.find_last_of("/")-1)-1);
     fullConfigFileName << filename.substr(0, parent_dir_limit)  << "/ConfigFiles/F2Init.conf";
 
-    auto hash = karabo::util::Hash(
+    const auto hash = Hash(
         "deviceId", TEST_DEVICE_ID,
         "quadrantId", "FENICE",
         "fullConfigFileName", fullConfigFileName.str());
     instantiateTestDevice(hash);
 
-    // wait for schema injection
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    State state(State::INIT);
+    // test for schema injection
+    do {
+        state = m_deviceCli->get<State>(TEST_DEVICE_ID, "state");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    } while (state == State::INIT);
+
+    // test for autoconnect
+    ASSERT_TRUE(state == State::OPENING);
+    do {
+        state = m_deviceCli->get<State>(TEST_DEVICE_ID, "state");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    } while (state == State::OPENING);
+
+    // test autoconnect failed
+    ASSERT_TRUE(state == State::UNKNOWN);
 
     deinstantiateTestDevice();
 }

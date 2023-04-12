@@ -1185,10 +1185,9 @@ namespace karabo {
         updateGainHashValue();
         updateConfigHash();
 
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " init done";
-        this->set<string>("status", "Please connect to PPT device");
-        this->updateState(State::UNKNOWN);
-
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " init done, connecting to PPT.";
+        this->set<string>("status", "Connecting to PPT");
+        this->open();
     }
 
 
@@ -1640,6 +1639,7 @@ namespace karabo {
         }
 
         if (m_ppt->isOpen()) {
+
             resetAll();
 
             programPLL();
@@ -1651,8 +1651,8 @@ namespace karabo {
             updateTestEnvironment();
 
             checkQSFPConnected();
-            
-            set<string>("status", "Connected to PPT");
+
+            this->updateState(State::OFF, Hash("status", "Connected to PPT"));
 
         } 
     }

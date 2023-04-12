@@ -89,7 +89,7 @@ TEST_F(LadderTrimmingFixture, testDeviceInstantiation){
     // Make use of the default config files saved with the device sources.
     std::stringstream fullConfigFileName;
     const std::string filename = __FILE__;
-    std::size_t parent_dir_limit = filename.find_last_of("/", filename.find_last_of("/")-1);
+    std::size_t parent_dir_limit = filename.find_last_of("/", filename.find_last_of("/", filename.find_last_of("/")-1)-1);
     fullConfigFileName << filename.substr(0, parent_dir_limit)  << "/ConfigFiles/F2Init.conf";
 
     auto hash = karabo::util::Hash(
