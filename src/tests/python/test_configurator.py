@@ -9,6 +9,8 @@ from karabo.middlelayer import (
     isSet,
     sleep,
     State,
+    waitUntil,
+    waitUntilNew,
 )
 from karabo.middlelayer.testing import (
     AsyncDeviceContext,
@@ -102,7 +104,7 @@ async def test_apply_configuration():
 
         # Check mismatched configurations are reported
         q1_device.fullConfigFileName = "bleh"
-        await sleep(1)
+        await waitUntilNew(proxy.actualGainConfiguration)
         assert "Different Settings Applied" in proxy.actualGainConfiguration
         assert proxy.gainConfigurationState == State.ERROR.value
 
@@ -113,7 +115,8 @@ async def test_apply_configuration():
         # Check target configuration applied across selected devices
         proxy.targetGainConfiguration = "bing"
         await proxy.apply()
-        await sleep(1)
+        await waitUntil(lambda: proxy.state == State.CHANGING)
+        await waitUntil(lambda: proxy.state == State.ACTIVE)
 
         assert q1_device.init_done
         assert not q2_device.init_done

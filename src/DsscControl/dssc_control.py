@@ -1542,10 +1542,10 @@ class DsscControl(Device):
                     source = "PPTs"
 
                 source = f"{state} from {source}"
-                if state != self.state or source != self._last_state_status:
+                if state != self.state or source != self._last_state_update:
                     self.state = State(state.value)
                     self.status = source
-                    self._last_state_status = source
+                    self._last_state_update = source
 
                 if power_proc_state is not None:
                     states.append(power_proc_state)

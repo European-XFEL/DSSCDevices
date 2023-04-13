@@ -116,7 +116,9 @@ class DsscConfigurator(Device):
         for row in self.pptDevices.value:
             did, qid, use = row
             if use:
-                ppts[qid] = wait_for(connectDevice(did), 5)
+                # 10 seconds has shown to be on the safer side
+                # while retrieving device schema
+                ppts[qid] = wait_for(connectDevice(did), 10)
 
         ppts, _, errors = await allCompleted(**ppts)
         if errors:
@@ -154,7 +156,7 @@ class DsscConfigurator(Device):
                     self.log.INFO(msg)
                     self.gainConfigurationState = State.ERROR.value
                 else:
-                    # Convert from filenames to human 
+                    # Get description from filenames
                     row = [row for row in self.availableGainConfigurations.value
                             if fnames[0] in row[1]]
                     if row:
@@ -180,9 +182,11 @@ class DsscConfigurator(Device):
     async def _apply(self):
         self.state = State.CHANGING
         self.status = f"Applying {self.targetGainConfiguration}"
-        # Convert from human to filenames
-        row, = [row for row in self.availableGainConfigurations.value
-                if row[0] == self.targetGainConfiguration]
+        # Get filenames from description
+        row, = self.availableGainConfigurations.where_value(
+                    'description',
+                    self.targetGainConfiguration
+                )
         name, q1, q2, q3, q4 = row
 
         d = {
@@ -194,12 +198,11 @@ class DsscConfigurator(Device):
 
         coros = {qid: setWait(ppt, fullConfigFileName=d[qid])
                  for qid, ppt in self.ppts.items()}
-
         async with self.lock:
             done, _, errors = await allCompleted(**coros)
 
         if errors:
-            msg = f"Could not set {name} on "
+            msg = f"Could not set {name.value} on "
             msg += ", ".join(errors.keys())
             self.status = msg
 
@@ -209,7 +212,7 @@ class DsscConfigurator(Device):
             self.state = State.ERROR
             return
 
-        msg = f"Applied {name}"
+        msg = f"Applied {name.value}"
         self.status = msg
         self.log.INFO(msg)
 
@@ -230,7 +233,7 @@ class DsscConfigurator(Device):
             self.state = State.ERROR
             return
 
-        msg = "Reinitialized detector"
+        self.status = "Reinitialized detector"
         self.state = State.ACTIVE
 
     availableScenes = VectorString(
