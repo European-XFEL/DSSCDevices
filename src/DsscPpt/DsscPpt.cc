@@ -2847,7 +2847,7 @@ namespace karabo {
         const auto backFlipToResetOffset = get<unsigned int>("sequencer.backFlipToResetOffset");
         const auto singleCapLoadLength = get<unsigned int>("sequencer.singleCapLoadLength");
         const auto emptyInjectCycles = get<unsigned int>("sequencer.emptyInjectCycles");
-        const auto ftInjectOffset = get<unsigned int>("sequencer.ftInjectMode");
+        const auto ftInjectOffset = get<unsigned int>("sequencer.ftInjectOffset");
 
         const auto singleSHCapMode = get<bool>("sequencer.singleSHCapMode");
         if (emptyInjectCycles) {
