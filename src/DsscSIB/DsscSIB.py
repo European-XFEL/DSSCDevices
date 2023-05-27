@@ -14,7 +14,7 @@ import time
 from karabo.bound import (
     FLOAT_ELEMENT, INT32_ELEMENT, KARABO_CLASSINFO, NODE_ELEMENT,
     OVERWRITE_ELEMENT, SLOT_ELEMENT, STRING_ELEMENT, UINT64_ELEMENT, Hash,
-    PythonDevice, State, Unit, Worker
+    PythonDevice, State, Unit, Worker, MetricPrefix,
 )
 
 from ._version import version as deviceVersion
@@ -41,6 +41,9 @@ class DsscSIB(PythonDevice):
         "LOG[{logCounter:d}];SIB_MASTER:{sibMaster:d}!"
         "LocalQloop:{localQloop:d}!GlobalQloop:{globalQloop:d}!"
         "QloopAddress:{qloopAddress:x}!SIBs:{sibs:d}"
+    )
+    log_counter_v2_parser = parse.compile(
+        "LOG[{logCounter:d}][{decision}]"
     )
     log_v2_parser = parse.compile(
         "SIB_MASTER:{sibMaster:d}!"
@@ -265,6 +268,16 @@ class DsscSIB(PythonDevice):
             .readOnly()
             .commit(),
 
+            STRING_ELEMENT(expected).key("decision")
+            .displayedName("Decision")
+            .description("Previous state -> current state: qloop global status"
+                         " : qloop status : cable status : experiment ok "
+                         "status : temperature status : humidity status : "
+                         "pressure status. 0 means ok; 1 is error; 2 is "
+                         "warning; 3 is undefined")
+            .readOnly()
+            .commit(),
+
             INT32_ELEMENT(expected).key("tStatus")
             .displayedName("T_STATUS")
             .readOnly()
@@ -325,6 +338,9 @@ class DsscSIB(PythonDevice):
 
             FLOAT_ELEMENT(expected).key("vccSum")
             .displayedName("VCCSUM")
+            .unit(Unit.VOLT)
+            .metricPrefix(MetricPrefix.MILLI)
+            .description("In mV, 3V when fully powered")
             .readOnly()
             .commit(),
 
@@ -805,6 +821,11 @@ class DsscSIB(PythonDevice):
                 result = DsscSIB.log_v2_parser.parse(data)
             else:
                 return
+            if result is not None:
+                self.set_properties(result, ts)
+
+        elif data.startswith('LOG['):
+            result = DsscSIB.log_counter_v2_parser.parse(data)
             if result is not None:
                 self.set_properties(result, ts)
 
