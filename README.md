@@ -27,7 +27,8 @@ Its architecture is kept simple to eventually merge this within the Control devi
 
 A bound device to read and configure the Safety Interlock Board, which is its own hardware
 device mounted next to the PPT.  
-It is using an ASCII protocol over TCP.
+It is using an ASCII protocol over TCP.  
+Its features are documented in [doc/sib.md](doc/sib.md)
 
 ### DSSC ASIC Reset
 
@@ -95,7 +96,7 @@ ctest -VV
 
 ### Running
 
-To run the devices, both a C++ and Middlelayer servers are needed:  
+To run the devices, three servers are needed:  
 ```bash
 karabo-cppserver serverId=cppServer/dssc deviceClasses=DsscPpt,DsscLadderParameterTrimming &
 karabo-middlelayerserver serverId=middlelayerServer/dssc deviceClasses=DsscControl,Configurator &
