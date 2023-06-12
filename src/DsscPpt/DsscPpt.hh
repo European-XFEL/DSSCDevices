@@ -407,6 +407,7 @@ namespace karabo {
         void updateGainHashValue_impl(); 
         void updateConfigSchema();
         void updateConfigHash();
+        void _updateConfigHash();
         void updateConfigFromHash();
         void updateDetRegistryGui(SuS::ConfigReg * reg, std::string regName, \
                 std::string tagName, std::string rootNode);

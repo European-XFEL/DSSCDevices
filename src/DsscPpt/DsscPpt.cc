@@ -998,8 +998,8 @@ namespace karabo {
                 .displayedName(s_dsscConfBaseNode)
                 .commit();
 
-        SLOT_ELEMENT(expected)
-                .key("updateConfigHash").displayedName("Read Config Data")
+        SLOT_ELEMENT(expected).key("updateConfigHash")
+                .displayedName("Read Config Data")
                 .description("Read Configuration Data")
                 .commit();
         
@@ -2082,22 +2082,28 @@ namespace karabo {
             }
         }
     }
-    
+
     void DsscPpt::updateConfigHash(){
-        
+        // Delegate the long slot call to the event loop and return early.
+        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::_updateConfigHash, this));
+    }
+    
+    void DsscPpt::_updateConfigHash(){
         SuS::PPTFullConfig* full_conf = m_ppt->getPPTFullConfig();
         karabo::util::Schema theschema = this->getFullSchema();
+
         if(!theschema.subSchema(s_dsscConfBaseNode).empty()){            
-            
+            this->set<std::string>("status", "Reading Configuration Data");
             updateDetRegistryGui(m_ppt->getEPCRegisters(), "EPCRegisters", "EPCRegisters", s_dsscConfBaseNode);
             updateDetRegistryGui(m_ppt->getIOBRegisters(), "IOBRegisters", "IOBConfig", s_dsscConfBaseNode);
             for(int idx=0; idx<full_conf->numJtagRegs(); idx++){
               updateDetRegistryGui(full_conf->getJtagReg(idx), "JtagRegister_Module_" + to_string(idx+1),\
                       "JtagRegister_Module", s_dsscConfBaseNode);    
             }
+            this->set<std::string>("status", "Done Reading Configuration Data");
             return;
         }
-        //Schema schema;
+
         
         karabo::util::Schema schema;
         
