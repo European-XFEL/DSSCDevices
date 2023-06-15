@@ -29,6 +29,7 @@ setup(name='DsscControl',
               'DsscControl = DsscControl.dssc_control:DsscControl',
               'DsscASICreset = DsscControl.DsscASICreset:DsscASICreset',
               'DsscConfigurator = DsscControl.configurator:DsscConfigurator',
+              'DsscVetoCheck = DsscControl.veto_checker:DsscVetoCheck',
           ],
           'karabo.bound_device': [
               'DsscSIB = DsscSIB.DsscSIB:DsscSIB',
