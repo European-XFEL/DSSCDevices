@@ -1,6 +1,18 @@
-# Dssc Devices
-[![pipeline status](https://git.xfel.eu/karaboDevices/dsscDevices/badges/master/pipeline.svg)](https://git.xfel.eu/karaboDevices/dsscDevices/-/commits/master)
-[![coverage report](https://git.xfel.eu/karaboDevices/dsscDevices/badges/master/coverage.svg)](https://git.xfel.eu/karaboDevices/dsscDevices/-/commits/master) 
+# DSSC Devices
+[![pipeline status](https://git.xfel.eu/karaboDevices/dsscDevices/badges/main/pipeline.svg)](https://git.xfel.eu/karaboDevices/dsscDevices/-/commits/main)
+[![coverage report](https://git.xfel.eu/karaboDevices/dsscDevices/badges/main/coverage.svg)](https://git.xfel.eu/karaboDevices/dsscDevices/-/commits/main)
+
+The DSSC, DEPMOS Sensor with Signal Compression, is a detector for soft x-rays in the range of 0.25-6 keV capable of taking  800 frames at 4.5 MHz.
+
+[See the following publication](https://ieeexplore.ieee.org/abstract/document/9419081):
+```text
+M. Porro et al., "The MiniSDD-Based 1-Mpixel Camera of the DSSC Project for the European XFEL,"
+in IEEE Transactions on Nuclear Science, vol. 68, no. 6, pp. 1334-1350, June 2021,
+doi: 10.1109/TNS.2021.3076602.
+```
+This repository contains the Karabo devices for integration at EuXFEL.  
+It makes use of a `DsscDependencies` package, the API for interfacing with the
+detector.
 
 
 ### DSSC PPT
@@ -35,7 +47,7 @@ Its features are documented in [doc/sib.md](doc/sib.md)
 A middlelayer device to ease resetting ASICS on the various modules by providing a simple scene.  
 It's meant to be used by detector experts during commissioning. As such, it is its own device.
 
-## Contributing
+## Developing
 
 It is recommended to make git ignore changes to the configuration files found in `src/ConfigFiles`:  
 
@@ -102,3 +114,39 @@ karabo-cppserver serverId=cppServer/dssc deviceClasses=DsscPpt,DsscLadderParamet
 karabo-middlelayerserver serverId=middlelayerServer/dssc deviceClasses=DsscControl,Configurator &
 karabo-pythonserver serverId=pythonServer/dssc deviceClasses=DsscSIB
 ```
+
+## Contributing
+
+The developement of this project is done on [EuXFEL's Gitlab](https://git.xfel.eu/karaboDevices/DsscDevices).
+
+This software is released by the European XFEL GmbH as is and without any
+warranty under the GPLv3 license.
+If you have questions on contributing to the project, please get in touch at
+opensource@xfel.eu.
+
+External contributors, i.e. anyone not contractually associated to
+the European XFEL GmbH, are asked to sign a Contributor License
+Agreement (CLA):
+
+* people contributing as individuals should sign the Individual CLA
+* people contributing on behalf of an organization should sign the Entity CLA.
+
+The CLAs can be found in the [Contributor License Agreement](doc/contributor_license_agreement.md) and
+[Entity Contributor License Agreement](doc/entity_contributor_license_agreement.md)
+documents located in the `doc` directory in this repository.  
+Please send signed CLAs to opensource [at] xfel.eu. We'll get in touch with you
+then.
+We ask for your understanding that we cannot accept external
+contributions without a CLA in place. Importantly, with signing the CLA you
+acknowledge that
+
+* European XFEL retains all copyrights of the DsscDevices software,
+* European XFEL may relicense the DsscDevices software under other
+  appropriate open source licenses which the Free Software Foundation
+  classifies as Free Software licenses.
+
+However, you are welcome to already suggest modifications you'd like to
+contribute by opening a merge/pull request before you send the CLA.
+
+You are free to use this software under the terms of the GPLv3 without signing
+a CLA.
