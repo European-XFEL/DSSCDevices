@@ -34,6 +34,15 @@ It is using an ASCII protocol over TCP.
 A middlelayer device to ease resetting ASICS on the various modules by providing a simple scene.  
 It's meant to be used by detector experts during commissioning. As such, it is its own device.
 
+### DSSC Veto Check
+
+The detector sometimes sends out invalid data when configuration was not correctly uploaded to the
+detector.  
+This is difficult to check, as the detector behaves otherwise normally.  
+As such, this device takes into account the veto pattern and ensures that the data coming out matches.  
+This is then displayed on a scene and error states can be monitored.  
+This requires an instance for each ladder.  
+
 ## Contributing
 
 It is recommended to make git ignore changes to the configuration files found in `src/ConfigFiles`:  
@@ -42,7 +51,7 @@ It is recommended to make git ignore changes to the configuration files found in
 git update-index --skip-worktree src/ConfigFiles
 ```
 
-### Python (Control, SIB, ASICReset, Configurator)
+### Python (Control, SIB, ASICReset, Configurator, VetoCheck)
 
 Do an editable installation of the package:  
 
@@ -98,6 +107,6 @@ ctest -VV
 To run the devices, both a C++ and Middlelayer servers are needed:  
 ```bash
 karabo-cppserver serverId=cppServer/dssc deviceClasses=DsscPpt,DsscLadderParameterTrimming &
-karabo-middlelayerserver serverId=middlelayerServer/dssc deviceClasses=DsscControl,Configurator &
+karabo-middlelayerserver serverId=middlelayerServer/dssc deviceClasses=DsscControl,Configurator,DsscVetoCheck &
 karabo-pythonserver serverId=pythonServer/dssc deviceClasses=DsscSIB
 ```
