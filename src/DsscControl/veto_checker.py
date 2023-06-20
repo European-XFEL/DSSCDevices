@@ -92,9 +92,9 @@ class DsscVetoCheck(Device):
     ok = String(
         displayedName="Data Ok",
         description="ON when ok, ERROR when not ok",
-        defaultValue=State.ON.value,
+        defaultValue=State.UNKNOWN.value,
         displayType="State",
-        options={State.ON.value, State.ERROR.value},
+        options={State.UNKNOWN.value, State.ON.value, State.ERROR.value},
         accessMode=AccessMode.READONLY,
     )
 
@@ -118,6 +118,8 @@ class DsscVetoCheck(Device):
         self.ccmon_proxy = await connectDevice(self.ccmon)
         self.ppt_proxy = await connectDevice(self.pptControl)
         background(self.monitor_properties)
+        background(self.state_timer)
+        self.status = "Waiting for data"
 
         did, pipeline = self.detOutput.split(":")
         px = await getDevice(did)
@@ -125,24 +127,25 @@ class DsscVetoCheck(Device):
         pipeline.setDataHandler(self.process_input)
         pipeline.connect()
 
-        background(self.state_timer)
-        self.status = "Waiting for data"
-
     async def process_input(self, data: Hash, meta: Hash):
         async with self.lock:
             self.last_update_time = time.time()
-            ok, msg, data = self.process_data(data, self.sim_data)
+            ok, msg, data = self.validate_data(data, self.sim_data)
+
+        if self.state == State.PASSIVE:
+            self.state = State.PROCESSING
 
         ok_string = State.ON.value if ok else State.ERROR.value
         if ok_string != self.ok.value:
             self.ok = ok_string
             self.notOkCount = 0
 
-        if not ok and data is not None:
+        if self.status.value != msg:
+            self.status = msg
+            self.log.ERROR(msg)
+
+        if not ok:
             self.notOkCount = self.notOkCount.value + 1
-            if self.status.value != data:
-                self.status = data
-                self.log.ERROR(data)
 
         if data is not None:  # Forward for GUI display
             det_cell_id, det_pulse_id = data
@@ -192,25 +195,28 @@ class DsscVetoCheck(Device):
         except AssertionError as e:
             return False, str(e), (det_cell_id, det_pulse_id)
         else:
-            return True, '', (det_cell_id, det_pulse_id)
+            return True, 'ok', (det_cell_id, det_pulse_id)
 
     async def monitor_properties(self):
         while True:
             async with self.lock:
                 self.sim_data = self.veto_pattern_to_sim_data(
                     self.ccmon_proxy.veto_pattern.value,
-                    self.ppt_proxy.numPreBurstVetos.value
+                    self.ppt_proxy.numPreBurstVetos.value,
+                    self.ppt_proxy.numFramesToSendOut.value,
                 )
 
             await waitUntilNew(
                 self.ccmon_proxy.veto_pattern,
-                self.ppt_proxy.numPreBurstVetos
+                self.ppt_proxy.numPreBurstVetos,
+                self.ppt_proxy.numFramesToSendOut,
             )
 
     @staticmethod
     def veto_pattern_to_sim_data(
         pattern: List[int],
         preveto: int,
+        frames: int,
     ) -> Tuple[List[int], List[int]]:
         """Convert the veto bit pattern into the expected detector output.
 
@@ -228,7 +234,7 @@ class DsscVetoCheck(Device):
         only matters whether the pulse is used or not.
 
         The detector preveto is also taken into consideration to validate the
-        pattern.
+        pattern for the given number of frames it is configured to send.
 
         This function returns a `cell_id` array describing in which order are
         the memory cells used, and another `pulse_id` describing the veto
@@ -242,19 +248,18 @@ class DsscVetoCheck(Device):
         veto = [0] * veto_latency
         veto += [1] * preveto
 
-        veto += [0 if (e >> 12) == 0b101 else 1 for e in pattern]
+        veto += [False if (e >> 12) == 0b101 else True for e in pattern]
 
         cell_id = []
         pulse_id = []
 
         fifo = Queue(veto_latency)
 
-        # len(veto) is always 2700, as it represents the veto for each train
-        # coming directly from the Clock&Control.
-        for pulse in range(len(veto)):
+        # len(veto) is veto_latency (82) + preveto (variable) + cc pattern (2700)
+        for pulse in range(frames):
             if veto[pulse]:
                 # Although the fifo starts empty, it gets at least the first
-                # {preveto} quantity as the else block is hit first.
+                # {veto_latency} quantity as the else block is hit first.
                 # This is guaranteed due to detector limitations.
                 # Refer to the documentation for detailed information.
                 addr = fifo.get()
@@ -272,25 +277,21 @@ class DsscVetoCheck(Device):
             cell_id.append(addr)
             pulse_id.append(pulse)
 
-            if addr >= 799:
-                break  # The detector has 800 cells
+            if addr >= 799:  # The maximum frames the detector can send
+                break
 
-        return cell_id, pulse_id
+        return cell_id[:frames], pulse_id[:frames]
 
     async def state_timer(self):
         timeout = 10  # seconds
         while True:
             async with self.lock:
-                if time.time() - self.last_update_time > timeout:
-                    if self.state == State.PROCESSING:
-                        self.state = State.PASSIVE
-                        self.status = f"No Data in last {timeout} seconds."
-                        self.ok = State.ON.value
-                else:
-                    if self.state == State.PASSIVE:
-                        self.state = State.PROCESSING
-                        self.status = "New data, resuming."
-
+                if (time.time() - self.last_update_time > timeout
+                    and self.state == State.PROCESSING):
+                    self.state = State.PASSIVE
+                    self.status = f"No Data in last {timeout} seconds."
+                    self.ok = State.UNKNOWN.value
+                    self.notOkCount = 0
             await sleep(5)
 
     availableScenes = VectorString(

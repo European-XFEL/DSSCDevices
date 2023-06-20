@@ -142,6 +142,7 @@ def test_veto_pattern_to_sim_data():
     # The following is read data from the detector, with pattern:
     # "Veto these range(10, 1300, 160)", but truncated for brevity (79-95)
     preveto = 10
+    cells = 16
     pattern = (
         20559, 20560, 20561, 20562, 20563, 20564, 20565, 20566, 20567, 20568,
         20569, 20570, 20571, 20572, 20573, 20574,
@@ -166,7 +167,7 @@ def test_veto_pattern_to_sim_data():
     ]
 
     cell_id, pulse_id = DsscVetoCheck.veto_pattern_to_sim_data(
-        pattern, preveto
+        pattern, preveto, cells
     )
 
     assert np.all(cell_id == expected_cell_id)

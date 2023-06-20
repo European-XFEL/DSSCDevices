@@ -188,6 +188,13 @@ def test_parsers():
     }
     assert ret.named == expected
 
+    ret = DsscSIB.log_counter_v2_parser.parse("LOG[72][3->19: 0:0:0:1:2:0:1]")
+    expected = {
+        'logCounter': 72,
+        'decision': '3->19: 0:0:0:1:2:0:1'
+    }
+    assert ret.named == expected
+
 
 @pytest.mark.parametrize(
     "line, expected",
@@ -257,6 +264,9 @@ def test_parsers():
          {'logCounter': 21357, 'sibMaster': 1, 'localQloop': 0,
          'globalQloop': 0, 'qloopAddress': 0x0, 'sibs': 2,}),
 
+        # Firmware v2
+        ('LOG[72][3->19: 0:0:0:1:2:0:1]',
+         {'logCounter': 72, 'decision': '3->19: 0:0:0:1:2:0:1'}),
     ]
 )
 def test_process_data_row(capsys, monkeypatch, line, expected):

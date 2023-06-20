@@ -998,8 +998,8 @@ namespace karabo {
                 .displayedName(s_dsscConfBaseNode)
                 .commit();
 
-        SLOT_ELEMENT(expected)
-                .key("updateConfigHash").displayedName("Read Config Data")
+        SLOT_ELEMENT(expected).key("updateConfigHash")
+                .displayedName("Read Config Data")
                 .description("Read Configuration Data")
                 .commit();
         
@@ -2082,22 +2082,28 @@ namespace karabo {
             }
         }
     }
-    
+
     void DsscPpt::updateConfigHash(){
-        
+        // Delegate the long slot call to the event loop and return early.
+        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::_updateConfigHash, this));
+    }
+    
+    void DsscPpt::_updateConfigHash(){
         SuS::PPTFullConfig* full_conf = m_ppt->getPPTFullConfig();
         karabo::util::Schema theschema = this->getFullSchema();
+
         if(!theschema.subSchema(s_dsscConfBaseNode).empty()){            
-            
+            this->set<std::string>("status", "Reading Configuration Data");
             updateDetRegistryGui(m_ppt->getEPCRegisters(), "EPCRegisters", "EPCRegisters", s_dsscConfBaseNode);
             updateDetRegistryGui(m_ppt->getIOBRegisters(), "IOBRegisters", "IOBConfig", s_dsscConfBaseNode);
             for(int idx=0; idx<full_conf->numJtagRegs(); idx++){
               updateDetRegistryGui(full_conf->getJtagReg(idx), "JtagRegister_Module_" + to_string(idx+1),\
                       "JtagRegister_Module", s_dsscConfBaseNode);    
             }
+            this->set<std::string>("status", "Done Reading Configuration Data");
             return;
         }
-        //Schema schema;
+
         
         karabo::util::Schema schema;
         
@@ -2847,7 +2853,7 @@ namespace karabo {
         const auto backFlipToResetOffset = get<unsigned int>("sequencer.backFlipToResetOffset");
         const auto singleCapLoadLength = get<unsigned int>("sequencer.singleCapLoadLength");
         const auto emptyInjectCycles = get<unsigned int>("sequencer.emptyInjectCycles");
-        const auto ftInjectOffset = get<unsigned int>("sequencer.ftInjectMode");
+        const auto ftInjectOffset = get<unsigned int>("sequencer.ftInjectOffset");
 
         const auto singleSHCapMode = get<bool>("sequencer.singleSHCapMode");
         if (emptyInjectCycles) {
@@ -3800,16 +3806,21 @@ namespace karabo {
 
 
     void DsscPpt::setSequencerParameter() {
-        const auto paramName = get<string>("sequencerParameterName");
+        string paramName = get<string>("sequencerParameterName");
+        string fieldName = "sequencer." + paramName;
+        paramName[0] = std::toupper(paramName.at(0));
         const auto paramValue = get<int>("sequencerParameterValue");
 
         m_ppt->getSequencer()->setSequencerParameter(paramName, paramValue, true);
 
-        string fieldName = "sequencer." + paramName;
 
-        set<int>(fieldName, paramValue);
+        const int hardwareValue = m_ppt->getSequencer()->getSequencerParameter(paramName);
+        set<int>(fieldName, hardwareValue);
 
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Set Sequencer Param Value : " << paramName << " = " << paramValue;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId()
+                                  << " Set Sequencer Param Value : "
+                                  << paramName << " = " << paramValue
+                                  << "HW value = " << hardwareValue;
     }
 
 
