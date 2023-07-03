@@ -1810,6 +1810,12 @@ namespace karabo {
             runContMode(false);
         }
 
+        // Disable the acquisition of sim data if enabled, as it will otherwise
+        // remain active in subsequent acquisitions.
+        if(this->get<bool>("send_dummy_dr_data")) {
+            this->disableAllDummyData();
+        }
+
         this->set("ethOutputRate", 0);
     }
 
