@@ -574,13 +574,6 @@
                 .commit();                                                                      \
                                                                                                 \
             SLOT_ELEMENT(expected)                                                              \
-                .key("programSequencer")                                                        \
-                .displayedName("Program Sequencer")                                             \
-                .description("Program Sequencer via selected Module")                           \
-                .allowedStates(State::ON, State::STOPPED)                                       \
-                .commit();                                                                      \
-                                                                                                \
-            SLOT_ELEMENT(expected)                                                              \
                 .key("updateSequencer")                                                         \
                 .displayedName("Update Sequencer")                                              \
                 .description("Update sequencer counters from fields and program")               \

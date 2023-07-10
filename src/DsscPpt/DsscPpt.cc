@@ -2894,27 +2894,6 @@ namespace karabo {
         printPPTErrorMessages(true);    
     }
 
-
-    void DsscPpt::programSequencer() {
-        bool readBack = get<bool>("sequencerReadBackEnable");
-        int iobNumber = get<uint32_t>("activeModule");
-
-        if (!checkIOBVoltageEnabled(iobNumber)) {
-            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " + toString(iobNumber) + " static power not enabled!";
-            return;
-        }
-
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program Sequencer at IOB " << iobNumber;
-        m_ppt->setActiveModule(iobNumber);
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            m_ppt->programSequencer(readBack);
-        }
-
-        printPPTErrorMessages(true);
-    }
-
-
     bool DsscPpt::readbackConfigIOB(int iobNumber) {
         CHECK_IOB_B(iobNumber)
 
