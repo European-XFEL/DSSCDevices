@@ -2847,6 +2847,8 @@ namespace karabo {
             m_ppt->getSequencer()->setCycleLength(cycleLength);
         }
 
+        const auto seqOpMode = m_ppt->getSequencer()->getOpModeFromString(this->get<std::string>("sequencer.opMode"));
+
         const auto integrationTime = get<unsigned int>("sequencer.integrationTime");
         const auto flattopLength = get<unsigned int>("sequencer.flattopLength");
         const auto rampLength = get<unsigned int>("sequencer.rampLength");
@@ -2866,6 +2868,7 @@ namespace karabo {
             cout << "ATTENTION: Empty Inject cycles Activated" << endl;
         }
 
+        m_ppt->getSequencer()->setOpMode(seqOpMode);
         m_ppt->getSequencer()->setSingleSHCapMode(singleSHCapMode);
         m_ppt->getSequencer()->setSequencerParameter(SuS::Sequencer::EmptyInjectCycles, emptyInjectCycles, false);
         m_ppt->getSequencer()->setSequencerParameter(SuS::Sequencer::FtInjectOffset, ftInjectOffset, false);

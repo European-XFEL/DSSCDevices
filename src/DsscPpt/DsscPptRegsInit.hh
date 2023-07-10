@@ -94,7 +94,9 @@
         STRING_ELEMENT(expected).key("sequencer.opMode")                        \
                   .displayedName("Operation Mode")                              \
                   .description("opMode")                                        \
-                  .readOnly()                                                   \
+                  .assignmentOptional().defaultValue("NORM").reconfigurable()   \
+                  .options("NORM,SINGLEINT,BUFFER,RESET,MANUAL,EXTLATCH,DEPFET")\
+                  .allowedStates(State::ON, State::STOPPED)                     \
                   .commit();                                                    \
                                                                                 \
         UINT32_ELEMENT(expected).key("sequencer.cycleLength")                   \
