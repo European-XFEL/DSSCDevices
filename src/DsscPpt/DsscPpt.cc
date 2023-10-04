@@ -3143,6 +3143,11 @@ namespace karabo {
 
 
     void DsscPpt::updateIOBFirmware() {
+        // Delegate the long slot call to the event loop and return early.
+        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::_updateIOBFirmware, this));
+    }
+
+    void DsscPpt::_updateIOBFirmware() {
         DSSC::StateChangeKeeper keeper(this);
 
         stopPolling();

@@ -258,6 +258,7 @@ namespace karabo {
         void updateFirmwareFlash();
         void updateLinuxFlash();
         void updateIOBFirmware();
+        void _updateIOBFirmware();
         void configure();
         void errorFound();
 
