@@ -1813,10 +1813,12 @@ namespace karabo {
         // Disable the acquisition of sim data if enabled, as it will otherwise
         // remain active in subsequent acquisitions.
         if(this->get<bool>("send_dummy_dr_data")) {
-            this->disableAllDummyData();
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            m_ppt->enableDummyDRData(false);
         }
 
         this->set("ethOutputRate", 0);
+        this->updateGuiOtherParameters();  // Query the detector for its settings
     }
 
 
