@@ -238,7 +238,6 @@ namespace karabo {
         void programJTAG();
         void programPixelRegister();
         void programPixelRegisterDefault();
-        void programSequencer();
         void programSequencers(); 
         void updateSequencer();
 

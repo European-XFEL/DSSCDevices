@@ -1055,7 +1055,6 @@ namespace karabo {
         KARABO_SLOT(programJTAG);
         KARABO_SLOT(programPixelRegister);
         KARABO_SLOT(programPixelRegisterDefault);
-        KARABO_SLOT(programSequencer);
         KARABO_SLOT(updateSequencer);
 
         KARABO_SLOT(doFastInit);
@@ -4402,7 +4401,7 @@ namespace karabo {
         getSequencerParamsIntoGui();
 
         if (isProgramState()) {
-            programSequencer();
+            this->programSequencers();
         }
     }
 
