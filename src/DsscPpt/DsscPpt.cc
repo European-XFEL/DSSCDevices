@@ -161,11 +161,6 @@ namespace karabo {
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
                 .commit();
         
-        SLOT_ELEMENT(expected)
-                .key("storeFullConfigHDF5").displayedName("Save HDF5 Config").description("Store Configuration as HDF5")
-                .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
-                .commit();
-
         BOOL_ELEMENT(expected).key("isDEPFET")
                 .description("Query the hardware for detector type. True means DEPFET, False means miniSDD.")
                 .displayedName("DEPFET Sensor")
@@ -1093,7 +1088,6 @@ namespace karabo {
         KARABO_SLOT(saveConfiguration);
         KARABO_SLOT(storeFullConfigFile);
         KARABO_SLOT(storeFullConfigUnder);
-        KARABO_SLOT(storeFullConfigHDF5);
 
         KARABO_SLOT(setSendingASICs);
         KARABO_SLOT(programLMKsAuto);
@@ -2011,30 +2005,18 @@ namespace karabo {
         return true;
     }
 
-
-    void DsscPpt::storeFullConfigHDF5() {
-        const auto fileName = get<string>("fullConfigFileName");
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            checkPathExists(fileName);
-            const auto h5config = m_ppt->getHDF5ConfigData(fileName); // no need to use an object of class for calling static function,\
-                                                                  // could be resolved like SuS::DSSC_PPT_API::getHDF5ConfigData(fileName)          
-            DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5", h5config);
-        }
-    }
-
     void DsscPpt::updateGainHashValue() {
         EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::updateGainHashValue_impl, this)); 
     }
     
     void DsscPpt::updateGainHashValue_impl() {
 
-        auto configData = m_ppt->getHDF5ConfigData();
+        auto configData = m_ppt->getConfigData();
         
         std::size_t seed = 0;
         boost::hash<int> hasher;
         
-        for(DsscHDF5RegisterConfigVec::iterator register_data = configData.pixelRegisterDataVec.begin();
+        for(DsscRegisterConfigVec::iterator register_data = configData.pixelRegisterDataVec.begin();
                 register_data != configData.pixelRegisterDataVec.end(); register_data++)
             for(std::vector<std::vector<std::vector<uint32_t>>>::iterator module_set = (*register_data).registerData.begin();
                     module_set != (*register_data).registerData.end(); module_set++) 
@@ -2045,7 +2027,7 @@ namespace karabo {
                         seed ^= hasher(*module_signal_value) + 0x9e3779b9 + (seed<<6) + (seed>>2); 
                     }
         
-        for(DsscHDF5SequenceData::iterator sequencer_data = configData.sequencerData.begin();
+        for(DsscSequenceData::iterator sequencer_data = configData.sequencerData.begin();
                 sequencer_data != configData.sequencerData.end(); sequencer_data++){
             seed ^= hasher(sequencer_data->second) + 0x9e3779b9 + (seed<<6) + (seed>>2); 
         }  
@@ -2135,7 +2117,7 @@ namespace karabo {
     
     void DsscPpt::updateConfigFromHash(){
 
-        DsscH5ConfigToSchema dsscH5ConfChObj;
+        DsscConfigToSchema dsscH5ConfChObj;
         Hash  read_config_hash = this->get<Hash>(s_dsscConfBaseNode);
         std::vector<std::pair<std::string, unsigned int>> diff_entries = \
                 dsscH5ConfChObj.compareConfigHashData(m_last_config_hash, read_config_hash);

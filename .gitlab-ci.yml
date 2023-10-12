@@ -8,7 +8,7 @@
     - curl http://exflserv05.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh > karabo.sh
     - bash karabo.sh --prefix=/root
     - source /root/karabo/activate
-
+    - source /opt/rh/devtoolset-7/enable
     - >
          echo "Installing Dependencies";
          while read line; do
@@ -40,10 +40,11 @@
       - cpp.xml
       - python.xml
     expire_in: 1 week
+  interruptible: true
 
 ##### Test build #####
 test:ubuntu22:
-  image: europeanxfel/karabo-ci:ubuntu-22
+  image: europeanxfel/karabo-ci:centos-7-004
   before_script:
     - export KARABO_TAG="latest_prerelease_build"
   <<: *test_build

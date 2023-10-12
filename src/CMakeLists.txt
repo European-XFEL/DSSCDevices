@@ -22,7 +22,6 @@ target_compile_options(
     PUBLIC -Wfatal-errors -Wno-unused-local-typedefs
            -Wno-deprecated-declarations -Wall
     -DF2IO  # DSSC Acquisition board version
-    -DHAVE_HDF5  # Required for DSSC libraries
 )
 
 
@@ -33,13 +32,10 @@ target_include_directories(
     $ENV{KARABO}/extern/include/dssc
     $ENV{KARABO}/extern/include/dssc/chipinterface
     $ENV{KARABO}/extern/include/dssc/configreg
-    $ENV{KARABO}/extern/include/dssc/dsschdf5
     $ENV{KARABO}/extern/include/dssc/ppt
     $ENV{KARABO}/extern/include/dssc/pptdatareceiver
     $ENV{KARABO}/extern/include/dssc/sequence
     $ENV{KARABO}/extern/include/dssc/utils
-    $ENV{KARABO}/extern/include/hdf5
-    $ENV{KARABO}/extern/dssc_minuit/include
 )
 
 link_directories($ENV{KARABO}/extern/lib/dssc)
@@ -52,7 +48,6 @@ target_link_libraries(
     CHIPInterface
     ConfigReg
     DsscDependencies
-    DsscHdf5
     PPTDataReceiver
     PPT
     Sequencer

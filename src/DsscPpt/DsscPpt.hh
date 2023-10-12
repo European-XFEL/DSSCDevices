@@ -14,6 +14,7 @@
 #include <karabo/karabo.hpp>
 
 #include "DsscPptAPI.hh"
+#include "DsscRegisterConfiguration.hh"
 #include "DsscConfigHashWriter.hh"
 
 #include <atomic>
@@ -28,7 +29,6 @@
 //#define STATE_INIT karabo::util::State::OFF
 //#define STATE_OFF karabo::util::State::UNKNOWN
 
-#include "DsscHDF5Writer.h"
 #include "../version.hh"  // provides PACKAGE_VERSION common to all devices
 
 /**
@@ -365,7 +365,6 @@ namespace karabo {
         void readFullConfigFile(const std::string & fileName);
         void storeFullConfigFile();
         void storeFullConfigUnder();
-        void storeFullConfigHDF5();
 
         void saveConfiguration();
         void saveEPCRegisters();
@@ -464,7 +463,7 @@ namespace karabo {
         std::string m_jtagCurrIOBNumber;
         std::string m_pixelCurrIOBNumber;
 
-        DsscH5ConfigToSchema m_dsscConfigtoSchema;
+        DsscConfigToSchema m_dsscConfigtoSchema;
 
         
         std::atomic<bool> m_burstAcquisition;

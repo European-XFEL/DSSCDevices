@@ -27,14 +27,14 @@ using namespace karabo::core;
 namespace karabo {
 
 
-    DsscH5ConfigToSchema::DsscH5ConfigToSchema() {
+    DsscConfigToSchema::DsscConfigToSchema() {
     };
 
 
-    DsscH5ConfigToSchema::~DsscH5ConfigToSchema() {
+    DsscConfigToSchema::~DsscConfigToSchema() {
     };
 
-    void DsscH5ConfigToSchema::HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path) {
+    void DsscConfigToSchema::HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path) {
         for (Hash::const_iterator it = hash.begin(); it != hash.end(); ++it) {
             switch (it->getType()) {
 
@@ -73,7 +73,7 @@ namespace karabo {
     }
 
 
-    void DsscH5ConfigToSchema::HashToSchemaDetConf(const karabo::util::Hash& hash, karabo::util::Schema& expected,\
+    void DsscConfigToSchema::HashToSchemaDetConf(const karabo::util::Hash& hash, karabo::util::Schema& expected,\
             const std::string& path, bool _readonly) {
         
         bool ReadOnly = true;
@@ -162,21 +162,21 @@ namespace karabo {
     }
 
 
-    void DsscH5ConfigToSchema::addMapData(Hash& hash, const std::string & node, const std::map<std::string, uint32_t> & mapData) {
+    void DsscConfigToSchema::addMapData(Hash& hash, const std::string & node, const std::map<std::string, uint32_t> & mapData) {
         for (const auto & item : mapData) {
             hash.set<uint32_t>(node + item.first, item.second);
         }
     }
     
     
-    std::vector<std::pair<std::string, unsigned int>> DsscH5ConfigToSchema::compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new){
+    std::vector<std::pair<std::string, unsigned int>> DsscConfigToSchema::compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new){
         paths_diffVals.clear();
         compareConfigHashData_rec(hash_old, hash_new, std::string());
         return paths_diffVals;
         //
     }
     
-    void DsscH5ConfigToSchema::compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new,\
+    void DsscConfigToSchema::compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new,\
             std::string path){
         //
         
@@ -199,7 +199,7 @@ namespace karabo {
     }
 
 
-    void DsscH5ConfigToSchema::addConfiguration(Hash& hash, DsscHDF5ConfigData & configData) {
+    void DsscConfigToSchema::addConfiguration(Hash& hash, DsscConfigData & configData) {
 
         uint32_t numRegisters = configData.getNumRegisters();
 
@@ -217,14 +217,14 @@ namespace karabo {
     }
 
 
-    void DsscH5ConfigToSchema::addConfiguration(Hash& hash, DsscHDF5RegisterConfigVec & registerConfigVec) {
+    void DsscConfigToSchema::addConfiguration(Hash& hash, DsscRegisterConfigVec & registerConfigVec) {
         for (auto && registerConfig : registerConfigVec) {
             addConfiguration(hash, registerConfig);
         }
     }
 
 
-    void DsscH5ConfigToSchema::addConfiguration(Hash& hash, DsscHDF5RegisterConfig & registerConfig) {
+    void DsscConfigToSchema::addConfiguration(Hash& hash, DsscRegisterConfig & registerConfig) {
         if (registerConfig.numModuleSets == 0) {
             return;
         }
@@ -294,7 +294,7 @@ namespace karabo {
     }
 
 
-    void DsscH5ConfigToSchema::addConfiguration(Hash & hash, const std::string& node, const DsscHDF5SequenceData & sequenceData) {
+    void DsscConfigToSchema::addConfiguration(Hash & hash, const std::string& node, const DsscSequenceData & sequenceData) {
         if (sequenceData.empty()) return;
 
         const std::string basenode = (node.back() == '.') ? node : node + ".";
