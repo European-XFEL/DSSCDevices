@@ -402,11 +402,11 @@ namespace karabo {
         void SaveQSFPNetConfig();
 
         void setThrottleDivider();
-        void updateGainHashValue();
-        void updateGainHashValue_impl(); 
+        void updateGainHashValue();  // Karabo slot
+        void updateGainHashValue_impl();   // Background task implementation
         void updateConfigSchema();
-        void updateConfigHash();
-        void _updateConfigHash();
+        void updateConfigHash();  // Karabo slot
+        void updateConfigHash_impl();  // Background task implementation
         void updateConfigFromHash();
         void updateDetRegistryGui(SuS::ConfigReg * reg, std::string regName, \
                 std::string tagName, std::string rootNode);

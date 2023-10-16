@@ -2074,10 +2074,10 @@ namespace karabo {
 
     void DsscPpt::updateConfigHash(){
         // Delegate the long slot call to the event loop and return early.
-        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::_updateConfigHash, this));
+        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::updateConfigHash_impl, this));
     }
     
-    void DsscPpt::_updateConfigHash(){
+    void DsscPpt::updateConfigHash_impl(){
         SuS::PPTFullConfig* full_conf = m_ppt->getPPTFullConfig();
         karabo::util::Schema theschema = this->getFullSchema();
 
