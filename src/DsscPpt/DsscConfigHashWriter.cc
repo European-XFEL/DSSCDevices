@@ -253,7 +253,7 @@ namespace karabo {
             hash.setAttribute<std::string>(setDirName, "origKey", modSetName, '.');
             setDirName += ".";
 
-            hsize_t datasize = registerConfig.numberOfModules[modSet];
+            size_t datasize = registerConfig.numberOfModules[modSet];
 
             hash.set(setDirName + "Modules", registerConfig.modules[modSet]);
             hash.set(setDirName + "Outputs", registerConfig.outputs[modSet]);
