@@ -10,10 +10,6 @@ target_sources(
     DsscPpt/DsscPpt.cc
     DsscPpt/DsscConfigHashWriter.cc
     DsscPpt/DsscPptAPI.cc
-
-    LadderParameterTrimming/DsscKaraboRegisterConfig.cc
-    LadderParameterTrimming/DsscLadderParameterTrimming.cc
-    LadderParameterTrimming/DsscTrimPptAPI.cc
 )
 
 
@@ -95,7 +91,6 @@ if (BUILD_TESTS)
        test-${CMAKE_PROJECT_NAME}
        tests/c++/testrunner.cc   # The test runner entry point
        tests/c++/testDsscPpt.cc
-       tests/c++/testLadderParameterTrimming.cc
 
     )
 
