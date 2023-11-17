@@ -14,6 +14,7 @@
 #include <karabo/karabo.hpp>
 
 #include "DsscPptAPI.hh"
+#include "DsscRegisterConfiguration.hh"
 #include "DsscConfigHashWriter.hh"
 
 #include <atomic>
@@ -28,7 +29,6 @@
 //#define STATE_INIT karabo::util::State::OFF
 //#define STATE_OFF karabo::util::State::UNKNOWN
 
-#include "DsscHDF5Writer.h"
 #include "../version.hh"  // provides PACKAGE_VERSION common to all devices
 
 /**
@@ -238,7 +238,6 @@ namespace karabo {
         void programJTAG();
         void programPixelRegister();
         void programPixelRegisterDefault();
-        void programSequencer();
         void programSequencers(); 
         void updateSequencer();
 
@@ -259,6 +258,7 @@ namespace karabo {
         void updateFirmwareFlash();
         void updateLinuxFlash();
         void updateIOBFirmware();
+        void _updateIOBFirmware();
         void configure();
         void errorFound();
 
@@ -365,7 +365,6 @@ namespace karabo {
         void readFullConfigFile(const std::string & fileName);
         void storeFullConfigFile();
         void storeFullConfigUnder();
-        void storeFullConfigHDF5();
 
         void saveConfiguration();
         void saveEPCRegisters();
@@ -403,11 +402,11 @@ namespace karabo {
         void SaveQSFPNetConfig();
 
         void setThrottleDivider();
-        void updateGainHashValue();
-        void updateGainHashValue_impl(); 
+        void updateGainHashValue();  // Karabo slot
+        void updateGainHashValue_impl();   // Background task implementation
         void updateConfigSchema();
-        void updateConfigHash();
-        void _updateConfigHash();
+        void updateConfigHash();  // Karabo slot
+        void updateConfigHash_impl();  // Background task implementation
         void updateConfigFromHash();
         void updateDetRegistryGui(SuS::ConfigReg * reg, std::string regName, \
                 std::string tagName, std::string rootNode);
@@ -464,7 +463,7 @@ namespace karabo {
         std::string m_jtagCurrIOBNumber;
         std::string m_pixelCurrIOBNumber;
 
-        DsscH5ConfigToSchema m_dsscConfigtoSchema;
+        DsscConfigToSchema m_dsscConfigtoSchema;
 
         
         std::atomic<bool> m_burstAcquisition;

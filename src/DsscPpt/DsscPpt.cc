@@ -161,11 +161,6 @@ namespace karabo {
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
                 .commit();
         
-        SLOT_ELEMENT(expected)
-                .key("storeFullConfigHDF5").displayedName("Save HDF5 Config").description("Store Configuration as HDF5")
-                .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
-                .commit();
-
         BOOL_ELEMENT(expected).key("isDEPFET")
                 .description("Query the hardware for detector type. True means DEPFET, False means miniSDD.")
                 .displayedName("DEPFET Sensor")
@@ -1055,7 +1050,6 @@ namespace karabo {
         KARABO_SLOT(programJTAG);
         KARABO_SLOT(programPixelRegister);
         KARABO_SLOT(programPixelRegisterDefault);
-        KARABO_SLOT(programSequencer);
         KARABO_SLOT(updateSequencer);
 
         KARABO_SLOT(doFastInit);
@@ -1094,7 +1088,6 @@ namespace karabo {
         KARABO_SLOT(saveConfiguration);
         KARABO_SLOT(storeFullConfigFile);
         KARABO_SLOT(storeFullConfigUnder);
-        KARABO_SLOT(storeFullConfigHDF5);
 
         KARABO_SLOT(setSendingASICs);
         KARABO_SLOT(programLMKsAuto);
@@ -1810,7 +1803,15 @@ namespace karabo {
             runContMode(false);
         }
 
+        // Disable the acquisition of sim data if enabled, as it will otherwise
+        // remain active in subsequent acquisitions.
+        if(this->get<bool>("send_dummy_dr_data")) {
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            m_ppt->enableDummyDRData(false);
+        }
+
         this->set("ethOutputRate", 0);
+        this->updateGuiOtherParameters();  // Query the detector for its settings
     }
 
 
@@ -2004,30 +2005,18 @@ namespace karabo {
         return true;
     }
 
-
-    void DsscPpt::storeFullConfigHDF5() {
-        const auto fileName = get<string>("fullConfigFileName");
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            checkPathExists(fileName);
-            const auto h5config = m_ppt->getHDF5ConfigData(fileName); // no need to use an object of class for calling static function,\
-                                                                  // could be resolved like SuS::DSSC_PPT_API::getHDF5ConfigData(fileName)          
-            DsscHDF5Writer::saveConfiguration(utils::getFilePath(fileName) + "/Measurement_config.h5", h5config);
-        }
-    }
-
     void DsscPpt::updateGainHashValue() {
         EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::updateGainHashValue_impl, this)); 
     }
     
     void DsscPpt::updateGainHashValue_impl() {
 
-        auto configData = m_ppt->getHDF5ConfigData();
+        auto configData = m_ppt->getConfigData();
         
         std::size_t seed = 0;
         boost::hash<int> hasher;
         
-        for(DsscHDF5RegisterConfigVec::iterator register_data = configData.pixelRegisterDataVec.begin();
+        for(DsscRegisterConfigVec::iterator register_data = configData.pixelRegisterDataVec.begin();
                 register_data != configData.pixelRegisterDataVec.end(); register_data++)
             for(std::vector<std::vector<std::vector<uint32_t>>>::iterator module_set = (*register_data).registerData.begin();
                     module_set != (*register_data).registerData.end(); module_set++) 
@@ -2038,7 +2027,7 @@ namespace karabo {
                         seed ^= hasher(*module_signal_value) + 0x9e3779b9 + (seed<<6) + (seed>>2); 
                     }
         
-        for(DsscHDF5SequenceData::iterator sequencer_data = configData.sequencerData.begin();
+        for(DsscSequenceData::iterator sequencer_data = configData.sequencerData.begin();
                 sequencer_data != configData.sequencerData.end(); sequencer_data++){
             seed ^= hasher(sequencer_data->second) + 0x9e3779b9 + (seed<<6) + (seed>>2); 
         }  
@@ -2085,10 +2074,10 @@ namespace karabo {
 
     void DsscPpt::updateConfigHash(){
         // Delegate the long slot call to the event loop and return early.
-        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::_updateConfigHash, this));
+        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::updateConfigHash_impl, this));
     }
     
-    void DsscPpt::_updateConfigHash(){
+    void DsscPpt::updateConfigHash_impl(){
         SuS::PPTFullConfig* full_conf = m_ppt->getPPTFullConfig();
         karabo::util::Schema theschema = this->getFullSchema();
 
@@ -2128,7 +2117,7 @@ namespace karabo {
     
     void DsscPpt::updateConfigFromHash(){
 
-        DsscH5ConfigToSchema dsscH5ConfChObj;
+        DsscConfigToSchema dsscH5ConfChObj;
         Hash  read_config_hash = this->get<Hash>(s_dsscConfBaseNode);
         std::vector<std::pair<std::string, unsigned int>> diff_entries = \
                 dsscH5ConfChObj.compareConfigHashData(m_last_config_hash, read_config_hash);
@@ -2841,6 +2830,8 @@ namespace karabo {
             m_ppt->getSequencer()->setCycleLength(cycleLength);
         }
 
+        const auto seqOpMode = m_ppt->getSequencer()->getOpModeFromString(this->get<std::string>("sequencer.opMode"));
+
         const auto integrationTime = get<unsigned int>("sequencer.integrationTime");
         const auto flattopLength = get<unsigned int>("sequencer.flattopLength");
         const auto rampLength = get<unsigned int>("sequencer.rampLength");
@@ -2860,6 +2851,7 @@ namespace karabo {
             cout << "ATTENTION: Empty Inject cycles Activated" << endl;
         }
 
+        m_ppt->getSequencer()->setOpMode(seqOpMode);
         m_ppt->getSequencer()->setSingleSHCapMode(singleSHCapMode);
         m_ppt->getSequencer()->setSequencerParameter(SuS::Sequencer::EmptyInjectCycles, emptyInjectCycles, false);
         m_ppt->getSequencer()->setSequencerParameter(SuS::Sequencer::FtInjectOffset, ftInjectOffset, false);
@@ -2884,27 +2876,6 @@ namespace karabo {
 
         printPPTErrorMessages(true);    
     }
-
-
-    void DsscPpt::programSequencer() {
-        bool readBack = get<bool>("sequencerReadBackEnable");
-        int iobNumber = get<uint32_t>("activeModule");
-
-        if (!checkIOBVoltageEnabled(iobNumber)) {
-            KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " + toString(iobNumber) + " static power not enabled!";
-            return;
-        }
-
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program Sequencer at IOB " << iobNumber;
-        m_ppt->setActiveModule(iobNumber);
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            m_ppt->programSequencer(readBack);
-        }
-
-        printPPTErrorMessages(true);
-    }
-
 
     bool DsscPpt::readbackConfigIOB(int iobNumber) {
         CHECK_IOB_B(iobNumber)
@@ -3154,6 +3125,11 @@ namespace karabo {
 
 
     void DsscPpt::updateIOBFirmware() {
+        // Delegate the long slot call to the event loop and return early.
+        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::_updateIOBFirmware, this));
+    }
+
+    void DsscPpt::_updateIOBFirmware() {
         DSSC::StateChangeKeeper keeper(this);
 
         stopPolling();
@@ -4412,7 +4388,7 @@ namespace karabo {
         getSequencerParamsIntoGui();
 
         if (isProgramState()) {
-            programSequencer();
+            this->programSequencers();
         }
     }
 

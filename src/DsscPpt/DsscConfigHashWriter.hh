@@ -18,16 +18,17 @@
 #include <karabo/karabo.hpp>
 
 #include "DsscPptAPI.hh"
+#include "DsscRegisterConfiguration.hh"
 
 namespace karabo {
 
-    class DsscH5ConfigToSchema {
+    class DsscConfigToSchema {
 
     public:
 
-        DsscH5ConfigToSchema();
+        DsscConfigToSchema();
 
-        virtual ~DsscH5ConfigToSchema();
+        virtual ~DsscConfigToSchema();
 
         //karabo::util::Schema getUpdatedSchema();
         void addMapData(karabo::util::Hash& hash, const std::string& node, const std::map<std::string, uint32_t>& mapData);
@@ -36,10 +37,10 @@ namespace karabo {
         static void HashToSchemaDetConf(const karabo::util::Hash& hash, karabo::util::Schema& expected,\
             const std::string& path, bool _readonly);        
 
-        static void addConfiguration(karabo::util::Hash& hash, DsscHDF5ConfigData& configData);
-        static void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfigVec& registerConfigVec);
-        static void addConfiguration(karabo::util::Hash& hash, DsscHDF5RegisterConfig & registerConfig);
-        static void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscHDF5SequenceData& sequenceData);
+        static void addConfiguration(karabo::util::Hash& hash, DsscConfigData& configData);
+        static void addConfiguration(karabo::util::Hash& hash, DsscRegisterConfigVec& registerConfigVec);
+        static void addConfiguration(karabo::util::Hash& hash, DsscRegisterConfig & registerConfig);
+        static void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscSequenceData& sequenceData);
         
         std::vector<std::pair<std::string, unsigned int>> compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new);
         void compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new, std::string path);
