@@ -285,7 +285,6 @@ namespace karabo {
         void programLMKsAuto();
 
         void updateTestEnvironment();
-        void updateTestEnvironment(const std::string &environment);
         void readSerialNumber();
 
         void loadLastFileETHConfig();

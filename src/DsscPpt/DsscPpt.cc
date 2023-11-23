@@ -57,15 +57,6 @@ namespace karabo {
 
         cout << "Started Expected Parameters " << endl;
 
-        STRING_ELEMENT(expected).key("selEnvironment")
-                .displayedName("Environment")
-                .description("Write MANNHEIM or HAMBURG to select test setup environment")
-                .tags("other")
-                .assignmentOptional().defaultValue("HAMBURG")
-                .options("HAMBURG,MANNHEIM", ",")
-                .reconfigurable()
-                .commit();
-
         STRING_ELEMENT(expected).key("pptHost")
                 .displayedName("PPT Host")
                 .description("PPT hostname or IP address")
@@ -1410,8 +1401,6 @@ namespace karabo {
         //set<string>("pptHost","192.168.0.125");
         set<unsigned int>("numActiveASICs", 16);
 
-        const auto environment = "HAMBURG";
-        set<string>("selEnvironment", environment);
         updateTestEnvironment();
     }
 
@@ -1834,50 +1823,12 @@ namespace karabo {
 
 
     void DsscPpt::updateTestEnvironment() {
-        string environment = get<string>("selEnvironment");
-        updateTestEnvironment(environment);
-    }
+        m_ppt->setEPCParam("JTAG_Control_Register", "all", "JTAG_Test_System", 0);
+        m_ppt->setIOBParam("ASIC_invert_chan11", "all", "ASIC_invert_chan11", 0);
 
+        stopManualMode();
 
-    void DsscPpt::updateTestEnvironment(const string &environment) {
-        if (environment.find("MANNHEIM") != string::npos) {
-            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " TestSetup Environment set to MANNHEIM";
-
-            cout << "Test Environment Set to Mannheim" << endl;
-
-            SuS::DSSC_PPT::actSetup = SuS::DSSC_PPT::MANNHEIM;
-
-            m_ppt->setEPCParam("JTAG_Control_Register", "all", "JTAG_Test_System", 1);
-            m_ppt->setIOBParam("ASIC_invert_chan11", "all", "ASIC_invert_chan11", 1);
-
-            uint16_t asics = 1 << (15 - 11 + 8);
-            m_ppt->setActiveAsics(asics);
-            m_ppt->setPRBPowerSelect("3", false);
-
-            startManualMode();
-            if (get<string>("qsfp.chan1.recv.macaddr") == "00:1b:21:55:1f:c9" ||
-                get<string>("qsfp.chan1.recv.macaddr") == "0:1b:21:55:1f:c9") {
-                set<string>("qsfp.chan1.recv.macaddr", "00:1b:21:55:1f:c8");
-                set<string>("qsfp.chan2.recv.macaddr", "00:1b:21:55:1f:c8");
-                set<string>("qsfp.chan3.recv.macaddr", "00:1b:21:55:1f:c8");
-                set<string>("qsfp.chan4.recv.macaddr", "00:1b:21:55:1f:c8");
-                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Set QSFP Receiver MAC to 00:1b:21:55:1f:c8";
-            }
-        } else {
-            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " TestSetup Environment set to HAMBURG";
-
-            SuS::DSSC_PPT::actSetup = SuS::DSSC_PPT::HAMBURG;
-
-            m_ppt->setEPCParam("JTAG_Control_Register", "all", "JTAG_Test_System", 0);
-            m_ppt->setIOBParam("ASIC_invert_chan11", "all", "ASIC_invert_chan11", 0);
-
-            stopManualMode();
-
-            m_ppt->setNumberOfActiveAsics(get<unsigned int>("numActiveASICs"));
-
-            cout << "Test Environment is set to Hamburg" << endl;
-            cout << "QSFP and transceiver have to be defined according to setup" << endl;
-        }
+        m_ppt->setNumberOfActiveAsics(get<unsigned int>("numActiveASICs"));
 
         updateNumFramesToSend();
 
@@ -4078,9 +4029,6 @@ namespace karabo {
                         DsscScopedLock lock(&m_accessToPptMutex, __func__);
                         m_ppt->setBurstVetoOffset(numVetos);
                     }
-                } else if (path.compare("selEnvironment") == 0) {
-                    string setupName = filtered.getAs<string>(path);
-                    updateTestEnvironment(setupName);
                 } else if (path.compare("selPRBActivePowers") == 0) {
                     DsscScopedLock lock(&m_accessToPptMutex, __func__);
                     m_ppt->setPRBPowerSelect(filtered.getAs<string>(path), true);
