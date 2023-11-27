@@ -82,7 +82,7 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("startAllChannelsDummyData").displayedName("Start all channels dummy data").description("After connection start dummy data from all channels")
+                .key("acquireDummyData").displayedName("Acquire Dummy Data").description("Send test data")
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
                 .commit();
 
@@ -157,6 +157,13 @@ namespace karabo {
                 .displayedName("DEPFET Sensor")
                 .readOnly()
                 .initialValue(true)  // The more sensitive type of detector.
+                .commit();
+
+        DOUBLE_ELEMENT(expected).key("frequency")
+                .description("The detector operating frequency (1.125, 2.25, or 4.5 Mhz)")
+                .displayedName("Frequency")
+                .readOnly()
+                .initialValue(0)
                 .commit();
 
         PATH_ELEMENT(expected).key("linuxBinaryName")
@@ -245,11 +252,6 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("startManualBurstBtn").displayedName("Start Burst").description("Trigger one single Burst")
-                .allowedStates(State::ON, State::STOPPED)
-                .commit();
-
-        SLOT_ELEMENT(expected)
                 .key("readoutTestPattern").displayedName("Readout Testpattern").description("Trigger full readout with Testpattern")
                 .allowedStates(State::ON, State::STOPPED)
                 .commit();
@@ -324,58 +326,13 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("runXFEL").displayedName("Run XFEL Mode").description("Activate Continuous Acquistione")
+                .key("acquire").displayedName("Acquire").description("Activate Continuous Acquistione")
                 .allowedStates(State::ON)
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("stopStandalone").displayedName("Stop Running").description("Stop cuntinuous burst operation")
-                .allowedStates(State::STARTED)
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("runStandAlone").displayedName("Run Standalone").description("Activate Continuous Acquisition")
-                .allowedStates(State::ON)
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("stopAcquisition").displayedName("Stop Acquisition").description("Disable continuous data sending")
+                .key("stop").displayedName("Stop").description("Disable continuous data sending")
                 .allowedStates(State::ACQUIRING)
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("startAcquisition").displayedName("Start Acquisition").description("Enable continuous data sending")
-                .allowedStates(State::STARTED)
-                .commit();
-        
-        SLOT_ELEMENT(expected)
-                .key("startBurstAcquisition").displayedName("Start Burst Acquisition").description("Send burst of trains")
-                .allowedStates(State::ON)
-                .commit();
-        
-        NODE_ELEMENT(expected)
-                .key("burstData")
-                .displayedName("burstData")
-                .description("Burst measurement data")
-                .commit();
-
-        UINT64_ELEMENT(expected).key("burstData.startTrainId")
-                .displayedName("startTrainId")
-                .description("start train of burst measurement")
-                .assignmentOptional().defaultValue(0).reconfigurable()
-                .commit();
-                
-        UINT64_ELEMENT(expected).key("burstData.endTrainId")
-                .displayedName("endTrainId")
-                .description("end train of burst measurement")
-                .assignmentOptional().defaultValue(0).reconfigurable()
-                .commit();
-
-        UINT32_ELEMENT(expected).key("numBurstTrains")
-                .displayedName("Number of Trains")
-                .description("Number of trains in the burst")
-                .assignmentOptional().defaultValue(10).reconfigurable()
-                .minInc(1)
                 .commit();
 
         STRING_ELEMENT(expected).key("selRegName")
@@ -818,7 +775,7 @@ namespace karabo {
                 .key("numFramesToSendOut").displayedName("Num Frames in Train")
                 .description("Number of Frames to Send Out. Value * 4096 * 16 * 2 = number of Bytes send per ethernet channel")
                 .tags("other")
-                .assignmentOptional().defaultValue(800).reconfigurable()
+                .assignmentOptional().defaultValue(800).minInc(1).maxInc(800).reconfigurable()
                 .commit();
 
         UINT32_ELEMENT(expected)
@@ -999,10 +956,12 @@ namespace karabo {
     
     DsscPpt::DsscPpt(const karabo::util::Hash& config)
         : Device<>(config),
-        m_keepAcquisition(false), m_keepPolling(false), m_burstAcquisition(false),
+        m_keepPolling(false),
         m_pollThread(),
         m_ppt(),
-        m_epcTag("epcParam"), m_dsscConfigtoSchema() {
+        m_state_on_dummy_acq_entry(State::OFF),
+        m_epcTag("epcParam"),
+        m_dsscConfigtoSchema() {
         
         EventLoop::addThread(16);
 
@@ -1010,14 +969,9 @@ namespace karabo {
 
         KARABO_SLOT(open);
         KARABO_SLOT(close);
-        KARABO_SLOT(runXFEL);
-        KARABO_SLOT(runStandAlone);
-        KARABO_SLOT(stopStandalone);
-        KARABO_SLOT(stopAcquisition);
-        KARABO_SLOT(startManualBurstBtn);
-        KARABO_SLOT(startAcquisition);
-        KARABO_SLOT(startBurstAcquisition);
-        KARABO_SLOT(startAllChannelsDummyData);
+        KARABO_SLOT(acquire);
+        KARABO_SLOT(stop);
+        KARABO_SLOT(acquireDummyData);
 
         KARABO_SLOT(updateFirmwareFlash);
         KARABO_SLOT(updateLinuxFlash);
@@ -1380,7 +1334,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::startAllChannelsDummyData() {
+    void DsscPpt::acquireDummyData() {
         enableDPChannels(0xF);
 
         {
@@ -1388,9 +1342,8 @@ namespace karabo {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->enableDummyDRData(true);
         }
-
-        runContMode(true);
-        runAcquisition(true);
+        this->m_state_on_dummy_acq_entry = this->getState();
+        this->acquire();
     }
 
 
@@ -1562,34 +1515,6 @@ namespace karabo {
     }
 
 
-    /*void DsscPpt::idleStateOnEntry() {
-        if (m_ppt->isOpen()) {
-            startPolling();
-        }
-    }//*/
-
-
-    void DsscPpt::acquisitionStateOnEntry() {
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
-        m_ppt->enableXFELControl(true);
-        updateGuiPLLParameters();
-        runXFEL();
-    }
-
-
-    void DsscPpt::acquisitionStateOnExit() {
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
-        stopAcquisition();
-    }
-
-
-    void DsscPpt::manualAcquisitionStateOnEntry() {
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
-        m_ppt->enableXFELControl(false);
-        updateGuiPLLParameters();
-    }
-
-
     void DsscPpt::setLogoConfig(bool en) {
         int value = en ? 1 : 0;
         DsscScopedLock lock(&m_accessToPptMutex, __func__);
@@ -1603,14 +1528,14 @@ namespace karabo {
             this->updateState(State::OPENING);
 
             // Open client connection to the PPT
-            string host = "Blubb";
-            unsigned int port = 10;
-            host = get<string>("pptHost");
-            port = get<unsigned int>("pptPort");
+            auto host = get<string>("pptHost");
+            auto port = get<unsigned int>("pptPort");
             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " About to open PPT using host: " + host + " and port: " + toString(port);
+
             m_ppt->setPPTAddress(host, port);
             int rc = m_ppt->openConnection();
             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Just opened PPT: " << rc;
+
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
                 close();
                 this->updateState(State::UNKNOWN);
@@ -1621,19 +1546,12 @@ namespace karabo {
         }
 
         if (m_ppt->isOpen()) {
-
             resetAll();
-
             programPLL();
-
             programPLLFine();
-
             readSerialNumber();
-
             updateTestEnvironment();
-
             checkQSFPConnected();
-
             this->updateState(State::OFF, Hash("status", "Connected to PPT"));
 
         } 
@@ -1641,7 +1559,7 @@ namespace karabo {
 
 
     void DsscPpt::runContMode(bool run) {
-        State endState = run ? State::STARTED : State::ON;
+        State endState = run ? State::STARTED : State::ON;  // TODO: this should go to OFF if was OFF and sending dummy data
         DSSC::StateChangeKeeper keeper(this, endState);
 
         set<bool>("continuous_mode", run);
@@ -1669,134 +1587,23 @@ namespace karabo {
     }
 
 
-    void DsscPpt::start() {
-        if (get<bool>("xfelMode")) {
-            runXFEL();
-        } else {
-            runStandAlone();
-        }
+    void DsscPpt::acquire() {
+        this->runContMode(true);
+        this->runAcquisition(true);
     }
 
 
     void DsscPpt::stop() {
-        stopAcquisition();
-        runContMode(false);
-    }
-
-
-    void DsscPpt::startAcquisition() {
-        runAcquisition(true);
-    }
-    
-    void DsscPpt::burstAcquisitionPolling() {
         
-        try {
-            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Hardware polling started";
-       
-          unsigned int num_trains = get<unsigned int>("numBurstTrains");
-          assert(num_trains);
-
-          //const auto currentState = getState();
-          
-          start();
-          
-          //updateState(State::ACQUIRING);
-
-          unsigned long long last_trainId;       
-          unsigned long long first_burstTrainId;
-          {
-            //boost::mutex::scoped_lock lock(m_accessToPptMutex);
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            first_burstTrainId = m_ppt->getCurrentTrainID();
-          }
-        
-          set<unsigned long long>("burstData.startTrainId", 0);
-          set<unsigned long long>("burstData.endTrainId", 0);
-          bool first_train = true;
-        
-          static unsigned int wait_time = 30000;
-
-          unsigned long long current_trainId;        
-          while (m_burstAcquisition.load()) {
-              
-              {
-                  //boost::mutex::scoped_lock lock(m_accessToPptMutex);
-                  DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                  current_trainId = m_ppt->getCurrentTrainID();
-              }
-
-              if(first_train){
-                  if(current_trainId != first_burstTrainId){
-                    unsigned long long elapsedTrains = current_trainId - first_burstTrainId;
-                    if( (elapsedTrains > 0) && elapsedTrains < (unsigned long long)(3) ){
-                        last_trainId = current_trainId;
-                        first_train = false;
-                    }
-                    first_burstTrainId = current_trainId;
-                  }
-                  usleep(wait_time);
-                  continue;
-              }
-
-
-              if(current_trainId > last_trainId){
-                  unsigned long long train_diff = current_trainId - first_burstTrainId;
-                  if(train_diff >= num_trains){
-                      std::cout << "stopped acquisition, current/first trainId: " << current_trainId << "  " << first_burstTrainId << std::endl;
-                      m_burstAcquisition.store(false); 
-                      set<unsigned long long>("burstData.startTrainId", first_burstTrainId);
-                      set<unsigned long long>("burstData.endTrainId", current_trainId);
-                      stop();
-                  }else{
-                      last_trainId = current_trainId;
-                      if(train_diff > 10){
-                          wait_time = 250000;// to prevent often hw polling
-                      }else{
-                          wait_time = 30000;
-                      }
-                  }
-              }else{
-                 if(current_trainId < first_burstTrainId){
-                   std::cout << "current_trainId is less than first_burstTrainId: " << current_trainId << "  " << first_burstTrainId << std::endl; 
-                 }
-              }
-              usleep(wait_time);
-          }
-        
-          set<unsigned long long>("burstData.startTrainId", first_burstTrainId);
-          set<unsigned long long>("burstData.endTrainId", current_trainId);
-          
-          //updateState(currentState);
-          //updateState(State::ON);
-         
-        } catch (const Exception& e) {
-            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << e;
-        } catch (...) {
-            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " Unknown exception was raised in poll thread";
-        }
-    }
-
-
-    void DsscPpt::startBurstAcquisition() {
-       
-        m_burstAcquisition.store(true);
-        EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::burstAcquisitionPolling, this));       
-   }
-    
-    void DsscPpt::stopAcquisition() {
-        
-        m_burstAcquisition.store(false);
-
-        runAcquisition(false);
-        if (m_ppt->isXFELMode()){
-            runContMode(false);
-        }
+        this->runAcquisition(false);
+        this->runContMode(false);
 
         // Disable the acquisition of sim data if enabled, as it will otherwise
         // remain active in subsequent acquisitions.
         if(this->get<bool>("send_dummy_dr_data")) {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->enableDummyDRData(false);
+            this->updateState(this->m_state_on_dummy_acq_entry);
         }
 
         this->set("ethOutputRate", 0);
@@ -1804,29 +1611,9 @@ namespace karabo {
     }
 
 
-    void DsscPpt::runStandAlone() {
-        runContMode(true);
-        runAcquisition(true);
-    }
-
-
-    void DsscPpt::stopStandalone() {
-        runAcquisition(false);
-        runContMode(false);
-    }
-
-
-    void DsscPpt::runXFEL() {
-        runContMode(true);
-        runAcquisition(true);
-    }
-
-
     void DsscPpt::updateTestEnvironment() {
         m_ppt->setEPCParam("JTAG_Control_Register", "all", "JTAG_Test_System", 0);
         m_ppt->setIOBParam("ASIC_invert_chan11", "all", "ASIC_invert_chan11", 0);
-
-        stopManualMode();
 
         m_ppt->setNumberOfActiveAsics(get<unsigned int>("numActiveASICs"));
 
@@ -2170,7 +1957,8 @@ namespace karabo {
         DSSC::StateChangeKeeper keeper(this, State::ON);        
         std::cout << "initSystem->resetAll()" << std::endl;
         try{
-            resetAll();
+            resetAll();  // TODO: This function goes to OFF state, whereas we want to keep CHANGING
+            this->updateState(State::CHANGING);
         }catch (const std::exception& e) { // caught by reference to base
             std::cout << "exception was caught in initSystem->resetAll, with message:"
                   << e.what() << std::endl;
@@ -2190,7 +1978,8 @@ namespace karabo {
             this->set<bool>("iobProgrammed", false);
             std::cout << "initSystem->programAllIOBFPGAs()" <<std::endl;
             try{
-                programAllIOBFPGAs();
+                programAllIOBFPGAs();  // TODO: This function calls StateChangeKeeper
+                this->updateState(State::CHANGING);
             }catch (const std::exception& e) { // caught by reference to base
                 std::cout << "exception was caught in initSystem->programAllIOBFPGAs, with message:"
                     << e.what() << std::endl;
@@ -2727,7 +2516,7 @@ namespace karabo {
         m_ppt->setActiveModule(iobNumber);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            int rc = m_ppt->programJtag(readBack);
+            m_ppt->programJtag(readBack);
         }
 
         printPPTErrorMessages(true);
@@ -3385,6 +3174,8 @@ namespace karabo {
         set<unsigned int>("sequencer.injectRisingEdgeOffset", seq->injectRisingEdgeOffset);
         set<unsigned int>("sequencer.emptyInjectCycles", seq->emptyInjectCycles);
         set<bool>("sequencer.singleSHCapMode", seq->singleSHCapMode);
+
+        set<float>("frequency", 4.5 * (22.0 / seq->getCycleLength()));
     }
 
 
@@ -3566,31 +3357,6 @@ namespace karabo {
     }
 
 
-    void DsscPpt::startManualMode() {
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start Stand Alone Mode";
-        set<bool>("xfelMode", false);
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            m_ppt->enableXFELControl(false);
-        }
-        getEPCParamsIntoGui("Multi_purpose_Register");
-        updateGuiPLLParameters();
-    }
-
-
-    void DsscPpt::stopManualMode() {
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start XFEL Mode";
-        set<bool>("xfelMode", true);
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            m_ppt->enableXFELControl(true);
-        }
-
-        getEPCParamsIntoGui("Multi_purpose_Register");
-        updateGuiPLLParameters();
-    }
-
-
     void DsscPpt::startManualReadout() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start manual readout";
         {
@@ -3599,15 +3365,6 @@ namespace karabo {
         }
     }
 
-
-
-    void DsscPpt::startManualBurstBtn() {
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start manual burst";
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            m_ppt->startBurst();
-        }
-    }
 
 
     void DsscPpt::readoutTestPattern() {
@@ -4360,35 +4117,6 @@ namespace karabo {
     }
 
 
-    void DsscPpt::acquire() {
-
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Acquisition started";
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            int rc = m_ppt->start();
-            if (rc != SuS::DSSC_PPT::ERROR_OK) {
-                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " DSSC failed to start: " << m_ppt->errorString;
-                return;
-            }
-        }
-        while (m_keepAcquisition) {
-            {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                cout << '-';
-                cout.flush();
-            }
-            boost::this_thread::sleep(boost::posix_time::seconds(2));
-        }
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Acquisition stopped";
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            int rc = m_ppt->stop();
-            if (rc != SuS::DSSC_PPT::ERROR_OK)
-                KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " PPT failed to stop: " << m_ppt->errorString;
-        }
-    }
-
-
     void DsscPpt::storePoweredPixels() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Powered pixels are = " << utils::positionVectorToList(m_ppt->updatePoweredPixels());
     }
@@ -4507,11 +4235,6 @@ namespace karabo {
             } else {
                 m_ppt->clockPLLSelect(false);
             }
-        }
-        if (get<bool>("xfelMode")) {
-            stopManualMode();
-        } else {
-            startManualMode();
         }
     }
 

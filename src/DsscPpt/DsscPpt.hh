@@ -171,18 +171,11 @@ namespace karabo {
 
         void open();
         void close();
-        void stopAcquisition();
-        void startAcquisition();
-        void startBurstAcquisition();
-        void runStandAlone();
-        void stopStandalone();
-        void runXFEL();
-
-        void start();
+        void acquire();
         void stop();
 
         void runAcquisition(bool run);
-        void runContMode(bool run);
+        void runContMode(bool);
 
         void doFastInit();
         void initSystem();
@@ -271,11 +264,7 @@ namespace karabo {
 
         bool checkPathExists(const std::string & filePath);
 
-        void startManualMode();
-        void stopManualMode();
         void startManualReadout();
-        void startManualBurst();
-        void startManualBurstBtn();
         void readoutTestPattern();
 
         void startSingleCycle();
@@ -294,7 +283,7 @@ namespace karabo {
 
         void disableAllDummyData();
 
-        void startAllChannelsDummyData();
+        void acquireDummyData();
         void setQuadrantSetup();
 
         //void idleStateOnEntry();
@@ -349,8 +338,6 @@ namespace karabo {
         void getIOBTempIntoGui(int iobNumber);
         void getNumPRBsIntoGui(int iobNumber);
         void setASICChannelReadoutFailure(int iobNumber);
-        // 'acquire' thread
-        void acquire();
         // 'pollHardware' thread
         void pollHardware();
         void updateGuiRegisters();
@@ -464,12 +451,8 @@ namespace karabo {
 
         DsscConfigToSchema m_dsscConfigtoSchema;
 
-        
-        std::atomic<bool> m_burstAcquisition;
-        
         karabo::util::Hash m_last_config_hash;
-        
-        void burstAcquisitionPolling();
+        karabo::util::State m_state_on_dummy_acq_entry;
     };
 }
 
