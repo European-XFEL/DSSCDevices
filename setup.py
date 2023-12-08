@@ -10,6 +10,7 @@ VERSION_FILE_PATH = join(ROOT_FOLDER, 'src', '_version.py')
 try:
     from karabo.packaging.versioning import device_scm_version
     scm_version = device_scm_version(ROOT_FOLDER, VERSION_FILE_PATH)
+    scm_version = scm_version.split("-")[0]  # CPP specifies karabo version, this strips it
 except ImportError:
     # compatibility with karabo versions earlier than 2.10
     scm_version = {'write_to': VERSION_FILE_PATH}
