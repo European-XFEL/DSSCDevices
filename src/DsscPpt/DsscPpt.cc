@@ -1112,10 +1112,11 @@ namespace karabo {
 
     void DsscPpt::preDestruction() {
 
-        const string defaultConfigPath = DEFAULTCONF;
-        m_ppt->storeFullConfigFile(defaultConfigPath);
-        
-        stop();
+        if (this->getState() != State::ERROR) {
+            const string defaultConfigPath = DEFAULTCONF;
+            m_ppt->storeFullConfigFile(defaultConfigPath);
+            this->stop();
+        }
         
         if (m_pollThread && m_pollThread->joinable()) {
             m_keepPolling = false;
