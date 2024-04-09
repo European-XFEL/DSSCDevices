@@ -255,3 +255,21 @@ class DsscConfigurator(Device):
             "origin", self.deviceId,
             "payload", payload
         )
+
+    @slot
+    def requestConfiguration(self, quadrantId: str):
+        """Provide a PPT with its configuration file, as set in this device.
+
+        The PPT is expected to provide its quadrantId as string (eg. "Q1").
+        """
+        row, = self.availableGainConfigurations.where_value(
+                    'description',
+                    self.targetGainConfiguration
+                )
+        config_filename = row[quadrantId.lower()]
+
+        return Hash(
+            "type", "fullConfigFileName",
+            "origin", self.deviceId,
+            "data", config_filename
+        )
