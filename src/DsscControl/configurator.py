@@ -2,8 +2,9 @@
 
 This device monitors several PPTs and ensures they have the same configuration.
 """
-from asyncio import Lock, wait_for
+from asyncio import Lock, sleep, wait_for
 from pathlib import Path
+from typing import Dict
 
 from karabo.middlelayer import (
     AccessMode,
@@ -98,9 +99,11 @@ class DsscConfigurator(Device):
         accessMode=AccessMode.RECONFIGURABLE,
     )
 
-    # Lock used to block state check when applying new configurations
-    # to avoid spurrious updates
+    # Lock used to block configuration check while creating proxies
     lock = None
+
+    # Dictionary of proxies, used for monitoring new configurations.
+    ppts: Dict[str, "proxy"] = {}
 
     async def onInitialization(self):
         self.state = State.INIT
@@ -112,31 +115,49 @@ class DsscConfigurator(Device):
         )
         await self.publishInjectedParameters()
 
-        ppts = {}
+        self.lock = Lock()
+
+        background(self.connect_to_proxies())
+        background(self.monitor_configs())
+
+    async def connect_to_proxies(self):
+        """Connect to proxies upon instantiation.
+
+        This device may be instantiated before PPTs, as PPTs in turn may
+        request their configuration from here.
+        As such, this coro runs in the background during the first connection,
+        blocking the monitoring.
+        """
+        ppts_in_use = {}
         for row in self.pptDevices.value:
             did, qid, use = row
             if use:
+                ppts_in_use[qid] = did
+
+        connected = False
+        async with self.lock:
+            while not connected:
                 # 10 seconds has shown to be on the safer side
                 # while retrieving device schema
-                ppts[qid] = wait_for(connectDevice(did), 10)
+                coros = {
+                    qid: wait_for(connectDevice(did), 10)
+                    for qid, did in ppts_in_use.items()
+                }     
+                ppts, _, errors = await allCompleted(**coros)
 
-        ppts, _, errors = await allCompleted(**ppts)
-        if errors:
-            self.state = State.ERROR
-            msg = f"Could not connect to {list(errors.keys())}"
-            self.status = msg
-            msg += f" {errors}"
-            self.log.INFO(msg)
-            return
+                self.ppts = ppts  # Some PPTs might be instantiated
 
-        self.monitoredDevices = ", ".join(sorted(ppts.keys()))
-        self.ppts = ppts
-
-        self.lock = Lock()
-
-        background(self.monitor_configs())
-        self.status = "Monitoring"
-        self.state = State.ACTIVE
+                if errors:
+                    msg = f"Could not connect to {list(errors.keys())}"
+                    self.status = msg
+                    msg += f" {errors}"
+                    self.log.INFO(msg)
+                else:
+                    self.state = State.ACTIVE
+                    self.status = "Monitoring"
+                    self.monitoredDevices = ", ".join(sorted(self.ppts.keys()))
+                    connected = True
+            await sleep(5)
 
     async def monitor_configs(self):
         while True:
@@ -163,7 +184,7 @@ class DsscConfigurator(Device):
                         name, *_ = row[0]
                     else:
                         name = fnames[0]
-                        self.log.INFO(f"Strange: configuration {name} is correct, but not know to me")
+                        self.log.INFO(f"Strange: configuration {name} is correct, but not know to me")  # noqa
 
                     self.actualGainConfiguration = name
                     self.gainConfigurationState = State.ON.value
