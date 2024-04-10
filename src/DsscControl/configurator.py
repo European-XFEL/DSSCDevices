@@ -11,6 +11,7 @@ from karabo.middlelayer import (
     Bool,
     Configurable,
     Device,
+    DeviceClientBase,
     Hash,
     Overwrite,
     Slot,
@@ -21,8 +22,11 @@ from karabo.middlelayer import (
     allCompleted,
     background,
     connectDevice,
+    getDevices,
+    instantiateFromName,
     setWait,
     slot,
+    shutdown,
     waitUntilNew,
 )
 
@@ -44,7 +48,7 @@ class ConfigurationRowSchema(Configurable):
     q4 = String(displayedName="Q4 ConfigFileName", defaultValue="")
 
 
-class DsscConfigurator(Device):
+class DsscConfigurator(DeviceClientBase, Device):
     __version__ = deviceVersion
 
     state = Overwrite(
@@ -194,8 +198,8 @@ class DsscConfigurator(Device):
 
     @Slot(
         displayedName="Apply",
-        description="Apply the selected config to the PPTs",
-        allowedStates={State.ACTIVE},
+        description="Apply the selected config by restarting the PPTs",
+        allowedStates={State.ACTIVE, State.INIT},
     )
     async def apply(self):
         background(self._apply)
@@ -203,49 +207,54 @@ class DsscConfigurator(Device):
     async def _apply(self):
         self.state = State.CHANGING
         self.status = f"Applying {self.targetGainConfiguration}"
-        # Get filenames from description
-        row, = self.availableGainConfigurations.where_value(
-                    'description',
-                    self.targetGainConfiguration
-                )
-        name, q1, q2, q3, q4 = row
+ 
+        dids = {}
+        for row in self.pptDevices.value:
+            did, qid, use = row
+            if use:
+                dids[qid] = did
 
-        d = {
-            "Q1": q1,
-            "Q2": q2,
-            "Q3": q3,
-            "Q4": q4,
-        }
-
-        coros = {qid: setWait(ppt, fullConfigFileName=d[qid])
-                 for qid, ppt in self.ppts.items()}
-        async with self.lock:
-            done, _, errors = await allCompleted(**coros)
-
-        if errors:
-            msg = f"Could not set {name.value} on "
-            msg += ", ".join(errors.keys())
-            self.status = msg
-
-            msg += f" {errors}"
-            self.log.INFO(msg)
-
-            self.state = State.ERROR
+        # Validate that no PPT is initializing.
+        if any(px.state == State.INIT for px in self.ppts.values()):
+            self.status = "PPTs still initializing, try later."
             return
 
-        msg = f"Applied {name.value}"
-        self.status = msg
-        self.log.INFO(msg)
+        # Check for proxies that are alive, as some might be created already
+        # but may have gone down meanwhile.
+        instantiated_ppts = {
+            qid: did for qid, did in dids.items() if did in getDevices()
+        }
 
-        self.status = f"Reinitializing detector"
+        # Shutdown PPTs, if any.
+        coros = {
+            qid: wait_for(shutdown(did), 2)
+            for qid, did in instantiated_ppts.items()
+        }
+        if coros:
+            done, _, errors = await allCompleted(**coros)
+            if errors:
+                msg = f"Could not shutdown "
+                msg += ", ".join(errors.keys())
+                self.status = msg
 
-        coros = {qid: ppt.initSystem() for qid, ppt in self.ppts.items()}
+                msg += f" {errors}"
+                self.log.INFO(msg)
+
+                self.state = State.ERROR
+                return
+
+            await sleep(1.5)  # Ensure that the PPTs have time to shut down.
+
+        # Using the ConfigurationManager, instantiate the PPTs
+        coros = {
+            qid: instantiateFromName(did, name="default")
+            for qid, did in dids.items()
+        }
         done, _, errors = await allCompleted(**coros)
 
         if errors:
-            msg = f"Could not init system on "
+            msg = f"Could not restart "
             msg += ", ".join(errors.keys())
-
             self.status = msg
 
             msg += f" {errors}"
@@ -254,7 +263,7 @@ class DsscConfigurator(Device):
             self.state = State.ERROR
             return
 
-        self.status = "Reinitialized detector"
+        self.status = "PPTs restarted"
         self.state = State.ACTIVE
 
     availableScenes = VectorString(
