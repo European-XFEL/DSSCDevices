@@ -1146,7 +1146,7 @@ namespace karabo {
                                       << "Tried to get config from "
                                       << this->get<std::string>("remoteConfigurator")
                                       << ": " << std::boolalpha << success;
-             boost::this_thread::sleep(boost::posix_time::milliseconds(200));  // Shown to make a difference, as sometimes it still goes on without having fullConfigFileName set yet.
+             boost::this_thread::sleep(boost::posix_time::milliseconds(1000));  // Shown to make a difference, as sometimes it still goes on without having fullConfigFileName set yet.
         }
 
         // Load and validate

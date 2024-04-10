@@ -2,7 +2,7 @@
 
 This device monitors several PPTs and ensures they have the same configuration.
 """
-from asyncio import Lock, sleep, wait_for
+from asyncio import Lock, TimeoutError, sleep, wait_for
 from pathlib import Path
 from typing import Dict
 
@@ -194,7 +194,11 @@ class DsscConfigurator(DeviceClientBase, Device):
                     self.gainConfigurationState = State.ON.value
 
             configs = [ppt.fullConfigFileName for ppt in self.ppts.values()]
-            await waitUntilNew(*configs)
+            try:
+                # whichever comes first
+                await wait_for(waitUntilNew(*configs), 5)
+            except TimeoutError:
+                pass
 
     @Slot(
         displayedName="Apply",
@@ -227,7 +231,7 @@ class DsscConfigurator(DeviceClientBase, Device):
 
         # Shutdown PPTs, if any.
         coros = {
-            qid: wait_for(shutdown(did), 2)
+            qid: wait_for(shutdown(did), 10)  # delay in case ppt acquiring
             for qid, did in instantiated_ppts.items()
         }
         if coros:
@@ -307,4 +311,4 @@ class DsscConfigurator(DeviceClientBase, Device):
     async def onDestruction(self):
         # Highlight on scenes that this device is down.
         self.gainConfigurationState = State.ERROR.value
-        await sleep(1)  # Give time to broadcast update
+        await sleep(0.1)  # Let event loop process update.
