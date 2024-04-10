@@ -303,3 +303,8 @@ class DsscConfigurator(DeviceClientBase, Device):
             "origin", self.deviceId,
             "data", config_filename
         )
+
+    async def onDestruction(self):
+        # Highlight on scenes that this device is down.
+        self.gainConfigurationState = State.ERROR.value
+        await sleep(1)  # Give time to broadcast update
