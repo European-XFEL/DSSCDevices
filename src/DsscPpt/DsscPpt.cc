@@ -1142,9 +1142,11 @@ namespace karabo {
         // If the config file is not specified, try to get and set it from a remote configurator.
         if(this->get<std::string>("fullConfigFileName").empty()) {
             bool success = this->getConfigurationFromRemote();
-            KARABO_LOG_FRAMEWORK_INFO << "Tried to get config from "
+            KARABO_LOG_FRAMEWORK_INFO << this->getInstanceId()
+                                      << "Tried to get config from "
                                       << this->get<std::string>("remoteConfigurator")
                                       << ": " << std::boolalpha << success;
+             boost::this_thread::sleep(boost::posix_time::milliseconds(200));  // Shown to make a difference, as sometimes it still goes on without having fullConfigFileName set yet.
         }
 
         // Load and validate
