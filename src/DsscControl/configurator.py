@@ -178,18 +178,28 @@ class DsscConfigurator(DeviceClientBase, Device):
                     self.gainConfigurationState = State.ERROR.value
                 else:
                     # Get description from filenames
-                    row = [
-                        row for row
-                        in self.availableGainConfigurations.value
-                        if fnames[0] in row[1]
-                    ]
-                    if row:
-                        name, *_ = row[0]
-                    else:
-                        name = fnames[0]
-                        self.log.INFO(f"Strange: configuration {name} is correct, but not know to me")  # noqa
+                    qid, ppt = list(self.ppts.items())[0]
 
-                    self.actualGainConfiguration = name
+                    # The PPT has its quadrantId in the filename, whereas
+                    # we store generic formattable filenames.
+                    # It is important to look at the full path as
+                    # configurations may have the same name, although some
+                    # details differ (eg. reset length)
+                    filenamePath = ppt.fullConfigFileName.value
+                    filenamePath = filenamePath.replace(qid, '{}')
+
+                    row, = self.availableGainConfigurations.where_value(
+                        'filenamePath',
+                        filenamePath
+                    )
+
+                    if row:  # This configuration has a friendly description
+                       desc, *_ = row
+                    else:
+                        desc = fnames[0]
+                        self.log.INFO(f"Strange: configuration {desc} is correct, but not know to me")  # noqa
+
+                    self.actualGainConfiguration = desc.value
                     self.gainConfigurationState = State.ON.value
 
             configs = [ppt.fullConfigFileName for ppt in self.ppts.values()]
