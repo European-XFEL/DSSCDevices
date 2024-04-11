@@ -24,7 +24,6 @@ from karabo.middlelayer import (
     connectDevice,
     getDevices,
     instantiateFromName,
-    setWait,
     slot,
     shutdown,
     waitUntilNew,
@@ -42,10 +41,7 @@ class PptRowSchema(Configurable):
 
 class ConfigurationRowSchema(Configurable):
     description = String(displayedName="Config. description", defaultValue="")
-    q1 = String(displayedName="Q1 ConfigFileName", defaultValue="")
-    q2 = String(displayedName="Q2 ConfigFileName", defaultValue="")
-    q3 = String(displayedName="Q3 ConfigFileName", defaultValue="")
-    q4 = String(displayedName="Q4 ConfigFileName", defaultValue="")
+    filenamePath = String(displayedName="Filename Path", defaultValue="")
 
 
 class DsscConfigurator(DeviceClientBase, Device):
@@ -64,7 +60,7 @@ class DsscConfigurator(DeviceClientBase, Device):
                 "deviceId", f"SCS_CDIDET_DSSC/FPGA/PPT_Q{q}",
                 "quadrantId", f"Q{q}",
                 "use", True,
-            ) 
+            )
             for q in range(1, 5)]
     )
 
@@ -146,7 +142,7 @@ class DsscConfigurator(DeviceClientBase, Device):
                 coros = {
                     qid: wait_for(connectDevice(did), 10)
                     for qid, did in ppts_in_use.items()
-                }     
+                }
                 ppts, _, errors = await allCompleted(**coros)
 
                 self.ppts = ppts  # Some PPTs might be instantiated
@@ -176,14 +172,17 @@ class DsscConfigurator(DeviceClientBase, Device):
 
                 if not identical:
                     msg = "Different Settings Applied: "
-                    msg += ", ".join(f"{qid}: {fname}" for qid, fname in configs.items())
+                    msg += ", ".join(f"{qid}: {fname}" for qid, fname in configs.items())  # noqa
                     self.actualGainConfiguration = msg
                     self.log.INFO(msg)
                     self.gainConfigurationState = State.ERROR.value
                 else:
                     # Get description from filenames
-                    row = [row for row in self.availableGainConfigurations.value
-                            if fnames[0] in row[1]]
+                    row = [
+                        row for row
+                        in self.availableGainConfigurations.value
+                        if fnames[0] in row[1]
+                    ]
                     if row:
                         name, *_ = row[0]
                     else:
@@ -211,7 +210,7 @@ class DsscConfigurator(DeviceClientBase, Device):
     async def _apply(self):
         self.state = State.CHANGING
         self.status = f"Applying {self.targetGainConfiguration}"
- 
+
         dids = {}
         for row in self.pptDevices.value:
             did, qid, use = row
@@ -237,7 +236,7 @@ class DsscConfigurator(DeviceClientBase, Device):
         if coros:
             done, _, errors = await allCompleted(**coros)
             if errors:
-                msg = f"Could not shutdown "
+                msg = "Could not shutdown "
                 msg += ", ".join(errors.keys())
                 self.status = msg
 
@@ -257,7 +256,7 @@ class DsscConfigurator(DeviceClientBase, Device):
         done, _, errors = await allCompleted(**coros)
 
         if errors:
-            msg = f"Could not restart "
+            msg = "Could not restart "
             msg += ", ".join(errors.keys())
             self.status = msg
 
@@ -296,11 +295,11 @@ class DsscConfigurator(DeviceClientBase, Device):
 
         The PPT is expected to provide its quadrantId as string (eg. "Q1").
         """
-        row, = self.availableGainConfigurations.where_value(
+        (desc, fname), = self.availableGainConfigurations.where_value(
                     'description',
                     self.targetGainConfiguration
                 )
-        config_filename = row[quadrantId.lower()]
+        config_filename = fname.format(quadrantId)
 
         return Hash(
             "type", "fullConfigFileName",
