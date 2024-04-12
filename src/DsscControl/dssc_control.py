@@ -173,8 +173,11 @@ class DsscControl(Device):
                           accessMode=AccessMode.RECONFIGURABLE)
 
 
-    @UInt16(displayedName="Frames to send", defaultValue=400,
-            allowedStates={State.ON})
+    @UInt16(
+        displayedName="Frames to send",
+        defaultValue=400,
+        maxInc=800,
+        allowedStates={State.ON, State.OFF})  # State.OFF allowed as when sending dummy data
     async def framesToSend(self, value):
         self.framesToSend = value
         await self.set_many_remote(self.ppt_dev, numFramesToSendOut=self.framesToSend)
@@ -532,12 +535,6 @@ class DsscControl(Device):
         if not self.singleRunMeasurement:
             await self.stopAcquisition()
 
-    async def update_pptdev_settings(self):
-        await self.set_many_remote(self.ppt_dev,
-                           numBurstTrains=self.numIterations,
-                           numFramesToSendOut=self.framesToSend,
-                           numPreBurstVetos=self.numPreBurstVetos)
-
     async def initMeasurement(self):
         self.status = "Init Measurement"
         self.abortMeasurement = False
@@ -786,7 +783,6 @@ class DsscControl(Device):
     async def initPPTdevices(self):
         ### TODO: Merge this slot and startPPTdevices into a single slot
         self.task = background(self._initPPTdevices())
-        await self.update_pptdev_settings()
 
     async def _initPPTdevices(self):
         self.state = State.INIT
@@ -799,6 +795,9 @@ class DsscControl(Device):
                     to_init.append(ppt_device.initSystem())
             await gather(*to_init)
             self.log.INFO("Init PPT")
+            await self.set_many_remote(self.ppt_dev,
+                               numBurstTrains=self.numIterations,
+                               numFramesToSendOut=self.framesToSend)
             self.status = "PPT devices initialized"
         except:
             self.log.ERROR(f"Exception caught: {sys.exc_info()[0]}")
