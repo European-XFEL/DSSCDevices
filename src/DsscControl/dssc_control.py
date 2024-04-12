@@ -1549,7 +1549,9 @@ class DsscControl(Device):
                 if power_proc_state is not None:
                     states.append(power_proc_state)
 
-                await waitUntilNew(*states)
+                await wait_for(waitUntilNew(*states), timeout=1)
+            except TimeoutError:
+                pass  # Timeout due to forcing state update monitoring just above
             except CancelledError:
                 self.log.DEBUG("State fusion cancelled")
                 return  # eg. the task gets cancelled
