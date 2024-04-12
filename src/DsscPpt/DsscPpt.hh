@@ -408,6 +408,7 @@ namespace karabo {
         void updateConfigHash();  // Karabo slot
         void updateConfigHash_impl();  // Background task implementation
         void updateConfigFromHash();
+        void setActiveModule();
         void updateDetRegistryGui(SuS::ConfigReg * reg, std::string regName, \
                 std::string tagName, std::string rootNode);
 

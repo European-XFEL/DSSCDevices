@@ -1007,6 +1007,9 @@ namespace karabo {
                 .key("updateConfigFromHash").displayedName("Write Config Data")
                 .description("Write Configuration Data")
                 .commit();
+ 
+        SLOT_ELEMENT(expected)
+            .key("setActiveModule").commit();
     }
 
     const std::string DsscPpt::s_dsscConfBaseNode = "DetectorRegisters";
@@ -1052,6 +1055,7 @@ namespace karabo {
         KARABO_SLOT(progSelReg);
         KARABO_SLOT(readSelReg);
 
+        KARABO_SLOT(setActiveModule);
         KARABO_SLOT(programJTAG);
         KARABO_SLOT(programPixelRegister);
         KARABO_SLOT(programPixelRegisterDefault);
@@ -4730,6 +4734,18 @@ namespace karabo {
         m_ppt->setEPCParam("Single_Cycle_Register", "all", "doSingleCycle", 0);
         m_ppt->programEPCRegister("Single_Cycle_Register");
     }
+
+    
+    void DsscPpt::setActiveModule() {
+        int iobNumber = this->get<uint32_t>("activeModule");
+        {
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            m_ppt->setActiveModule(iobNumber);
+        }
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << "Set Active Module " << toString(iobNumber);
+    }
+
+
 
 
     bool DsscPpt::getConfigurationFromRemote() {
