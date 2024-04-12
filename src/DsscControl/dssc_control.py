@@ -1505,42 +1505,42 @@ class DsscControl(Device):
 
                 if self.power_procedure is not None:
                     power_proc_state = self.power_procedure.state
-                else:  # Can happen in expert mode
+                else:  # In expert mode
                     power_proc_state = None
 
                 states = [ppt.state for ppt in self.ppt_dev]
                 # Wait for all PPTs to have the same state, typically seen
                 # when updating settings
                 if not all(state == states[0] for state in states):
-                    wait_time = min(len(self.ppt_dev) * 0.1, 1)
+                    await sleep(1)
                     states = [ppt.state for ppt in self.ppt_dev]
                     if not all(state == states[0] for state in states):
                         state = State.ERROR
                         source = "PPTs have different states"
+                else:
+                    if states[0] in (State.UNKNOWN, State.OFF, State.ON):  # powered off or on
+                        state = states[0]
+                        source = "PPTs"
+                    if states[0] in (State.OPENING, State.CLOSING):
+                        state = State.CHANGING
+                        source = "PPTs"
+                    if any(state == State.CHANGING for state in states):
+                        state = State.CHANGING
+                        source = "PPTs"
+                    if power_proc_state == State.CHANGING:
+                        state = State.CHANGING
+                        source = self.power_procedure.deviceId
+                    if power_proc_state == State.PASSIVE:
+                        state = State.OFF
+                        source = self.power_procedure.deviceId
+                    if power_proc_state == State.ERROR:
+                        state = State.ERROR
+                        source = self.power_procedure.deviceId
+                    if states[0] in (State.ACQUIRING, State.STARTED):
+                        state = State.ACQUIRING  # Acquiring trumps all
+                        source = "PPTs"
 
-                if states[0] in (State.UNKNOWN, State.ON):  # powered off or on
-                    state = states[0]
-                    source = "PPTs"
-                if states[0] in (State.OPENING, State.CLOSING):
-                    state = State.CHANGING
-                    source = "PPTs"
-                if any(state == State.CHANGING for state in states):
-                    state = State.CHANGING
-                    source = "PPTs"
-                if power_proc_state == State.CHANGING:
-                    state = State.CHANGING
-                    source = self.power_procedure.deviceId
-                if power_proc_state == State.PASSIVE:
-                    state = State.OFF
-                    source = self.power_procedure.deviceId
-                if power_proc_state == State.ERROR:
-                    state = State.ERROR
-                    source = self.power_procedure.deviceId
-                if states[0] in (State.ACQUIRING, State.STARTED):
-                    state = State.ACQUIRING  # Acquiring trumps all
-                    source = "PPTs"
-
-                source = f"{state} from {source}"
+                source = f"{state.value} from {source}"
                 if state != self.state or source != self._last_state_update:
                     self.state = State(state.value)
                     self.status = source
