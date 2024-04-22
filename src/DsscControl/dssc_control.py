@@ -173,8 +173,11 @@ class DsscControl(Device):
                           accessMode=AccessMode.RECONFIGURABLE)
 
 
-    @UInt16(displayedName="Frames to send", defaultValue=400,
-            allowedStates={State.ON})
+    @UInt16(
+        displayedName="Frames to send",
+        defaultValue=400,
+        maxInc=800,
+        allowedStates={State.ON, State.OFF})  # State.OFF allowed as when sending dummy data
     async def framesToSend(self, value):
         self.framesToSend = value
         await self.set_many_remote(self.ppt_dev, numFramesToSendOut=self.framesToSend)
@@ -532,12 +535,6 @@ class DsscControl(Device):
         if not self.singleRunMeasurement:
             await self.stopAcquisition()
 
-    async def update_pptdev_settings(self):
-        await self.set_many_remote(self.ppt_dev,
-                           numBurstTrains=self.numIterations,
-                           numFramesToSendOut=self.framesToSend,
-                           numPreBurstVetos=self.numPreBurstVetos)
-
     async def initMeasurement(self):
         self.status = "Init Measurement"
         self.abortMeasurement = False
@@ -786,7 +783,6 @@ class DsscControl(Device):
     async def initPPTdevices(self):
         ### TODO: Merge this slot and startPPTdevices into a single slot
         self.task = background(self._initPPTdevices())
-        await self.update_pptdev_settings()
 
     async def _initPPTdevices(self):
         self.state = State.INIT
@@ -799,6 +795,9 @@ class DsscControl(Device):
                     to_init.append(ppt_device.initSystem())
             await gather(*to_init)
             self.log.INFO("Init PPT")
+            await self.set_many_remote(self.ppt_dev,
+                               numBurstTrains=self.numIterations,
+                               numFramesToSendOut=self.framesToSend)
             self.status = "PPT devices initialized"
         except:
             self.log.ERROR(f"Exception caught: {sys.exc_info()[0]}")
@@ -1506,42 +1505,42 @@ class DsscControl(Device):
 
                 if self.power_procedure is not None:
                     power_proc_state = self.power_procedure.state
-                else:  # Can happen in expert mode
+                else:  # In expert mode
                     power_proc_state = None
 
                 states = [ppt.state for ppt in self.ppt_dev]
                 # Wait for all PPTs to have the same state, typically seen
                 # when updating settings
                 if not all(state == states[0] for state in states):
-                    wait_time = min(len(self.ppt_dev) * 0.1, 1)
+                    await sleep(1)
                     states = [ppt.state for ppt in self.ppt_dev]
                     if not all(state == states[0] for state in states):
                         state = State.ERROR
                         source = "PPTs have different states"
+                else:
+                    if states[0] in (State.UNKNOWN, State.OFF, State.ON):  # powered off or on
+                        state = states[0]
+                        source = "PPTs"
+                    if states[0] in (State.OPENING, State.CLOSING):
+                        state = State.CHANGING
+                        source = "PPTs"
+                    if any(state == State.CHANGING for state in states):
+                        state = State.CHANGING
+                        source = "PPTs"
+                    if power_proc_state == State.CHANGING:
+                        state = State.CHANGING
+                        source = self.power_procedure.deviceId
+                    if power_proc_state == State.PASSIVE:
+                        state = State.OFF
+                        source = self.power_procedure.deviceId
+                    if power_proc_state == State.ERROR:
+                        state = State.ERROR
+                        source = self.power_procedure.deviceId
+                    if states[0] in (State.ACQUIRING, State.STARTED):
+                        state = State.ACQUIRING  # Acquiring trumps all
+                        source = "PPTs"
 
-                if states[0] in (State.UNKNOWN, State.ON):  # powered off or on
-                    state = states[0]
-                    source = "PPTs"
-                if states[0] in (State.OPENING, State.CLOSING):
-                    state = State.CHANGING
-                    source = "PPTs"
-                if any(state == State.CHANGING for state in states):
-                    state = State.CHANGING
-                    source = "PPTs"
-                if power_proc_state == State.CHANGING:
-                    state = State.CHANGING
-                    source = self.power_procedure.deviceId
-                if power_proc_state == State.PASSIVE:
-                    state = State.OFF
-                    source = self.power_procedure.deviceId
-                if power_proc_state == State.ERROR:
-                    state = State.ERROR
-                    source = self.power_procedure.deviceId
-                if states[0] in (State.ACQUIRING, State.STARTED):
-                    state = State.ACQUIRING  # Acquiring trumps all
-                    source = "PPTs"
-
-                source = f"{state} from {source}"
+                source = f"{state.value} from {source}"
                 if state != self.state or source != self._last_state_update:
                     self.state = State(state.value)
                     self.status = source
@@ -1550,7 +1549,9 @@ class DsscControl(Device):
                 if power_proc_state is not None:
                     states.append(power_proc_state)
 
-                await waitUntilNew(*states)
+                await wait_for(waitUntilNew(*states), timeout=1)
+            except TimeoutError:
+                pass  # Timeout due to forcing state update monitoring just above
             except CancelledError:
                 self.log.DEBUG("State fusion cancelled")
                 return  # eg. the task gets cancelled
