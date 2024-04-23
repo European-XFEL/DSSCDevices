@@ -14,6 +14,7 @@ from karabo.middlelayer import (
 )
 from karabo.middlelayer.testing import (
     AsyncDeviceContext,
+    event_loop,
     create_device_server,
 )
 
@@ -139,7 +140,7 @@ async def test_apply_configuration(monkeypatch):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
-async def test_missing_proxies():
+async def test_missing_proxies(event_loop):
     configurator_id = create_instanceId()
     configurator = DsscConfigurator(
         {
@@ -168,7 +169,7 @@ async def test_missing_proxies():
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
-async def test_server_loads_device():
+async def test_server_loads_device(event_loop):
     serverId = create_instanceId()
     server = create_device_server(serverId, [DsscConfigurator])
     async with AsyncDeviceContext(server=server) as ctx:
