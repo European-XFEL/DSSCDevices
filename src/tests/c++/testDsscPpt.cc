@@ -107,7 +107,10 @@ TEST_F(DsscPptFixture, testDeviceInstantiation){
 
     // The device briefly goes to State::CLOSING between opening and unknown.
     // It's a bit silly, but needs dedicated fixing.
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    do {
+        state = m_deviceCli->get<State>(TEST_DEVICE_ID, "state");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    } while (state != State::UNKNOWN);
     ASSERT_TRUE(state == State::UNKNOWN);
 
     deinstantiateTestDevice();
