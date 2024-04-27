@@ -70,11 +70,23 @@ class DsscConfigurator(DeviceClientBase, Device):
         accessMode=AccessMode.READONLY,
     )
 
-    availableGainConfigurations = VectorHash(
+    @VectorHash(
         rows=ConfigurationRowSchema,
         displayedName="Configurations",
         defaultValue=[Hash()],
     )
+    async def availableGainConfigurations(self, table):
+        self.availableGainConfigurations = table
+
+        # Update targetGainConfiguration with the latest available config.
+        configs = [row[0] for row in self.availableGainConfigurations.value]
+
+        self.__class__.targetGainConfiguration = Overwrite(
+            options=configs,
+            defaultValue=configs[-1],  # Most likely appended here.
+        )
+        await self.publishInjectedParameters()
+
 
     gainConfigurationState = String(
         displayedName="Configuration State",
@@ -188,13 +200,13 @@ class DsscConfigurator(DeviceClientBase, Device):
                     filenamePath = ppt.fullConfigFileName.value
                     filenamePath = filenamePath.replace(qid, '{}')
 
-                    row, = self.availableGainConfigurations.where_value(
+                    row = self.availableGainConfigurations.where_value(
                         'filenamePath',
                         filenamePath
                     )
 
                     if row:  # This configuration has a friendly description
-                       desc, *_ = row
+                       desc, *_ = row[0]
                     else:
                         desc = fnames[0]
                         self.log.INFO(f"Strange: configuration {desc} is correct, but not know to me")  # noqa
