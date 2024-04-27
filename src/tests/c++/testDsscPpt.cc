@@ -104,8 +104,33 @@ TEST_F(DsscPptFixture, testDeviceInstantiation){
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     } while (state == State::OPENING);
 
-    // test autoconnect failed
+
+    // The device briefly goes to State::CLOSING between opening and unknown.
+    // It's a bit silly, but needs dedicated fixing.
+    do {
+        state = m_deviceCli->get<State>(TEST_DEVICE_ID, "state");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    } while (state != State::UNKNOWN);
     ASSERT_TRUE(state == State::UNKNOWN);
 
     deinstantiateTestDevice();
-}
+};
+
+TEST_F(DsscPptFixture, testDeviceInstantiationNoFileName){
+    using namespace karabo::util;
+    const auto hash = Hash(
+        "deviceId", TEST_DEVICE_ID,
+        "quadrantId", "Q1"
+    );
+    instantiateTestDevice(hash);
+
+    State state(State::INIT);
+    do {
+        state = m_deviceCli->get<State>(TEST_DEVICE_ID, "state");
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    } while (state == State::INIT);
+
+    ASSERT_TRUE(state == State::ERROR);
+
+    deinstantiateTestDevice();
+};

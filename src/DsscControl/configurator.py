@@ -2,14 +2,16 @@
 
 This device monitors several PPTs and ensures they have the same configuration.
 """
-from asyncio import Lock, wait_for
+from asyncio import Lock, TimeoutError, sleep, wait_for
 from pathlib import Path
+from typing import Dict
 
 from karabo.middlelayer import (
     AccessMode,
     Bool,
     Configurable,
     Device,
+    DeviceClientBase,
     Hash,
     Overwrite,
     Slot,
@@ -20,8 +22,10 @@ from karabo.middlelayer import (
     allCompleted,
     background,
     connectDevice,
-    setWait,
+    getDevices,
+    instantiateFromName,
     slot,
+    shutdown,
     waitUntilNew,
 )
 
@@ -37,13 +41,10 @@ class PptRowSchema(Configurable):
 
 class ConfigurationRowSchema(Configurable):
     description = String(displayedName="Config. description", defaultValue="")
-    q1 = String(displayedName="Q1 ConfigFileName", defaultValue="")
-    q2 = String(displayedName="Q2 ConfigFileName", defaultValue="")
-    q3 = String(displayedName="Q3 ConfigFileName", defaultValue="")
-    q4 = String(displayedName="Q4 ConfigFileName", defaultValue="")
+    filenamePath = String(displayedName="Filename Path", defaultValue="")
 
 
-class DsscConfigurator(Device):
+class DsscConfigurator(DeviceClientBase, Device):
     __version__ = deviceVersion
 
     state = Overwrite(
@@ -59,7 +60,7 @@ class DsscConfigurator(Device):
                 "deviceId", f"SCS_CDIDET_DSSC/FPGA/PPT_Q{q}",
                 "quadrantId", f"Q{q}",
                 "use", True,
-            ) 
+            )
             for q in range(1, 5)]
     )
 
@@ -69,11 +70,23 @@ class DsscConfigurator(Device):
         accessMode=AccessMode.READONLY,
     )
 
-    availableGainConfigurations = VectorHash(
+    @VectorHash(
         rows=ConfigurationRowSchema,
         displayedName="Configurations",
         defaultValue=[Hash()],
     )
+    async def availableGainConfigurations(self, table):
+        self.availableGainConfigurations = table
+
+        # Update targetGainConfiguration with the latest available config.
+        configs = [row[0] for row in self.availableGainConfigurations.value]
+
+        self.__class__.targetGainConfiguration = Overwrite(
+            options=configs,
+            defaultValue=configs[-1],  # Most likely appended here.
+        )
+        await self.publishInjectedParameters()
+
 
     gainConfigurationState = String(
         displayedName="Configuration State",
@@ -98,9 +111,11 @@ class DsscConfigurator(Device):
         accessMode=AccessMode.RECONFIGURABLE,
     )
 
-    # Lock used to block state check when applying new configurations
-    # to avoid spurrious updates
+    # Lock used to block configuration check while creating proxies
     lock = None
+
+    # Dictionary of proxies, used for monitoring new configurations.
+    ppts: Dict[str, "proxy"] = {}
 
     async def onInitialization(self):
         self.state = State.INIT
@@ -112,31 +127,49 @@ class DsscConfigurator(Device):
         )
         await self.publishInjectedParameters()
 
-        ppts = {}
+        self.lock = Lock()
+
+        background(self.connect_to_proxies())
+        background(self.monitor_configs())
+
+    async def connect_to_proxies(self):
+        """Connect to proxies upon instantiation.
+
+        This device may be instantiated before PPTs, as PPTs in turn may
+        request their configuration from here.
+        As such, this coro runs in the background during the first connection,
+        blocking the monitoring.
+        """
+        ppts_in_use = {}
         for row in self.pptDevices.value:
             did, qid, use = row
             if use:
+                ppts_in_use[qid] = did
+
+        connected = False
+        async with self.lock:
+            while not connected:
                 # 10 seconds has shown to be on the safer side
                 # while retrieving device schema
-                ppts[qid] = wait_for(connectDevice(did), 10)
+                coros = {
+                    qid: wait_for(connectDevice(did), 10)
+                    for qid, did in ppts_in_use.items()
+                }
+                ppts, _, errors = await allCompleted(**coros)
 
-        ppts, _, errors = await allCompleted(**ppts)
-        if errors:
-            self.state = State.ERROR
-            msg = f"Could not connect to {list(errors.keys())}"
-            self.status = msg
-            msg += f" {errors}"
-            self.log.INFO(msg)
-            return
+                self.ppts = ppts  # Some PPTs might be instantiated
 
-        self.monitoredDevices = ", ".join(sorted(ppts.keys()))
-        self.ppts = ppts
-
-        self.lock = Lock()
-
-        background(self.monitor_configs())
-        self.status = "Monitoring"
-        self.state = State.ACTIVE
+                if errors:
+                    msg = f"Could not connect to {list(errors.keys())}"
+                    self.status = msg
+                    msg += f" {errors}"
+                    self.log.INFO(msg)
+                else:
+                    self.state = State.ACTIVE
+                    self.status = "Monitoring"
+                    self.monitoredDevices = ", ".join(sorted(self.ppts.keys()))
+                    connected = True
+            await sleep(5)
 
     async def monitor_configs(self):
         while True:
@@ -151,30 +184,47 @@ class DsscConfigurator(Device):
 
                 if not identical:
                     msg = "Different Settings Applied: "
-                    msg += ", ".join(f"{qid}: {fname}" for qid, fname in configs.items())
+                    msg += ", ".join(f"{qid}: {fname}" for qid, fname in configs.items())  # noqa
                     self.actualGainConfiguration = msg
                     self.log.INFO(msg)
                     self.gainConfigurationState = State.ERROR.value
                 else:
                     # Get description from filenames
-                    row = [row for row in self.availableGainConfigurations.value
-                            if fnames[0] in row[1]]
-                    if row:
-                        name, *_ = row[0]
-                    else:
-                        name = fnames[0]
-                        self.log.INFO(f"Strange: configuration {name} is correct, but not know to me")
+                    qid, ppt = list(self.ppts.items())[0]
 
-                    self.actualGainConfiguration = name
+                    # The PPT has its quadrantId in the filename, whereas
+                    # we store generic formattable filenames.
+                    # It is important to look at the full path as
+                    # configurations may have the same name, although some
+                    # details differ (eg. reset length)
+                    filenamePath = ppt.fullConfigFileName.value
+                    filenamePath = filenamePath.replace(qid, '{}')
+
+                    row = self.availableGainConfigurations.where_value(
+                        'filenamePath',
+                        filenamePath
+                    )
+
+                    if row:  # This configuration has a friendly description
+                       desc, *_ = row[0]
+                    else:
+                        desc = fnames[0]
+                        self.log.INFO(f"Strange: configuration {desc} is correct, but not know to me")  # noqa
+
+                    self.actualGainConfiguration = desc.value
                     self.gainConfigurationState = State.ON.value
 
             configs = [ppt.fullConfigFileName for ppt in self.ppts.values()]
-            await waitUntilNew(*configs)
+            try:
+                # whichever comes first
+                await wait_for(waitUntilNew(*configs), 5)
+            except TimeoutError:
+                pass
 
     @Slot(
         displayedName="Apply",
-        description="Apply the selected config to the PPTs",
-        allowedStates={State.ACTIVE},
+        description="Apply the selected config by restarting the PPTs",
+        allowedStates={State.ACTIVE, State.INIT},
     )
     async def apply(self):
         background(self._apply)
@@ -182,49 +232,54 @@ class DsscConfigurator(Device):
     async def _apply(self):
         self.state = State.CHANGING
         self.status = f"Applying {self.targetGainConfiguration}"
-        # Get filenames from description
-        row, = self.availableGainConfigurations.where_value(
-                    'description',
-                    self.targetGainConfiguration
-                )
-        name, q1, q2, q3, q4 = row
 
-        d = {
-            "Q1": q1,
-            "Q2": q2,
-            "Q3": q3,
-            "Q4": q4,
-        }
+        dids = {}
+        for row in self.pptDevices.value:
+            did, qid, use = row
+            if use:
+                dids[qid] = did
 
-        coros = {qid: setWait(ppt, fullConfigFileName=d[qid])
-                 for qid, ppt in self.ppts.items()}
-        async with self.lock:
-            done, _, errors = await allCompleted(**coros)
-
-        if errors:
-            msg = f"Could not set {name.value} on "
-            msg += ", ".join(errors.keys())
-            self.status = msg
-
-            msg += f" {errors}"
-            self.log.INFO(msg)
-
-            self.state = State.ERROR
+        # Validate that no PPT is initializing.
+        if any(px.state == State.INIT for px in self.ppts.values()):
+            self.status = "PPTs still initializing, try later."
             return
 
-        msg = f"Applied {name.value}"
-        self.status = msg
-        self.log.INFO(msg)
+        # Check for proxies that are alive, as some might be created already
+        # but may have gone down meanwhile.
+        instantiated_ppts = {
+            qid: did for qid, did in dids.items() if did in getDevices()
+        }
 
-        self.status = f"Reinitializing detector"
+        # Shutdown PPTs, if any.
+        coros = {
+            qid: wait_for(shutdown(did), 10)  # delay in case ppt acquiring
+            for qid, did in instantiated_ppts.items()
+        }
+        if coros:
+            done, _, errors = await allCompleted(**coros)
+            if errors:
+                msg = "Could not shutdown "
+                msg += ", ".join(errors.keys())
+                self.status = msg
 
-        coros = {qid: ppt.initSystem() for qid, ppt in self.ppts.items()}
+                msg += f" {errors}"
+                self.log.INFO(msg)
+
+                self.state = State.ERROR
+                return
+
+            await sleep(1.5)  # Ensure that the PPTs have time to shut down.
+
+        # Using the ConfigurationManager, instantiate the PPTs
+        coros = {
+            qid: instantiateFromName(did, name="default")
+            for qid, did in dids.items()
+        }
         done, _, errors = await allCompleted(**coros)
 
         if errors:
-            msg = f"Could not init system on "
+            msg = "Could not restart "
             msg += ", ".join(errors.keys())
-
             self.status = msg
 
             msg += f" {errors}"
@@ -233,7 +288,7 @@ class DsscConfigurator(Device):
             self.state = State.ERROR
             return
 
-        self.status = "Reinitialized detector"
+        self.status = "PPTs restarted"
         self.state = State.ACTIVE
 
     availableScenes = VectorString(
@@ -255,3 +310,26 @@ class DsscConfigurator(Device):
             "origin", self.deviceId,
             "payload", payload
         )
+
+    @slot
+    def requestConfiguration(self, quadrantId: str):
+        """Provide a PPT with its configuration file, as set in this device.
+
+        The PPT is expected to provide its quadrantId as string (eg. "Q1").
+        """
+        (desc, fname), = self.availableGainConfigurations.where_value(
+                    'description',
+                    self.targetGainConfiguration
+                )
+        config_filename = fname.format(quadrantId)
+
+        return Hash(
+            "type", "fullConfigFileName",
+            "origin", self.deviceId,
+            "data", config_filename
+        )
+
+    async def onDestruction(self):
+        # Highlight on scenes that this device is down.
+        self.gainConfigurationState = State.ERROR.value
+        await sleep(0.1)  # Let event loop process update.

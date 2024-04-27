@@ -160,6 +160,11 @@ namespace karabo {
                 .key("storeFullConfigUnder").displayedName("Full Config save under").description("Save full config to path")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
                 .commit();
+
+        STRING_ELEMENT(expected).key("remoteConfigurator")
+                .description("Which device to get a configuration, if \"Full Config File\" is unset.")
+                .assignmentOptional().noDefaultValue().init()
+                .commit();
         
         BOOL_ELEMENT(expected).key("isDEPFET")
                 .description("Query the hardware for detector type. True means DEPFET, False means miniSDD.")
@@ -1112,10 +1117,11 @@ namespace karabo {
 
     void DsscPpt::preDestruction() {
 
-        const string defaultConfigPath = DEFAULTCONF;
-        m_ppt->storeFullConfigFile(defaultConfigPath);
-        
-        stop();
+        if (this->getState() != State::ERROR) {
+            const string defaultConfigPath = DEFAULTCONF;
+            m_ppt->storeFullConfigFile(defaultConfigPath);
+            this->stop();
+        }
         
         if (m_pollThread && m_pollThread->joinable()) {
             m_keepPolling = false;
@@ -1132,6 +1138,18 @@ namespace karabo {
         this->updateState(State::INIT);
         this->set<string>("status", "Initializing Karabo device");
         KARABO_ON_DATA("registerConfigInput", receiveRegisterConfiguration);
+
+        // If the config file is not specified, try to get and set it from a remote configurator.
+        if(this->get<std::string>("fullConfigFileName").empty()) {
+            bool success = this->getConfigurationFromRemote();
+            KARABO_LOG_FRAMEWORK_INFO << this->getInstanceId()
+                                      << "Tried to get config from "
+                                      << this->get<std::string>("remoteConfigurator")
+                                      << ": " << std::boolalpha << success;
+             boost::this_thread::sleep(boost::posix_time::milliseconds(1000));  // Shown to make a difference, as sometimes it still goes on without having fullConfigFileName set yet.
+        }
+
+        // Load and validate
         SuS::PPTFullConfig* fullconfig = new SuS::PPTFullConfig(get<string>("fullConfigFileName"));     
 
         if (fullconfig->isGood()) {
@@ -4714,5 +4732,32 @@ namespace karabo {
     }
 
 
+    bool DsscPpt::getConfigurationFromRemote() {
+        // Can only be called at initialization. 
+        bool success = false;
+
+        const std::string remoteConfigurator = this->get<std::string>("remoteConfigurator");
+        if(!remoteConfigurator.empty()) {
+            try {
+                Hash reply;
+                this->request(remoteConfigurator, "requestConfiguration", this->get<std::string>("quadrantId"))
+                    .timeout(1000)
+                    .receive(reply);
+
+                this->set("fullConfigFileName", reply.get<std::string>("data"));
+                success = true;
+            } catch (const TimeoutException&) {
+                success = false;
+            }
+        }
+
+        if(!success) {
+            const std::string msg = std::string("Device "
+                                                + this->get<std::string>("remoteConfigurator")
+                                                + "cannot be reached.");
+            KARABO_LOG_ERROR << msg;
+        }
+        return success;
+    }
 
 }

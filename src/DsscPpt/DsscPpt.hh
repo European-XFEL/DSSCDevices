@@ -471,6 +471,7 @@ namespace karabo {
         karabo::util::Hash m_last_config_hash;
         
         void burstAcquisitionPolling();
+        bool getConfigurationFromRemote();
     };
 }
 

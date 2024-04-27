@@ -1,21 +1,21 @@
 import uuid
 
 import pytest
+
+import DsscControl.configurator  # Used so to mock shutdowns
 from karabo.middlelayer import (
     Device,
     Slot,
     String,
     connectDevice,
-    isSet,
-    sleep,
     State,
     waitUntil,
     waitUntilNew,
 )
 from karabo.middlelayer.testing import (
     AsyncDeviceContext,
-    create_device_server,
     event_loop,
+    create_device_server,
 )
 
 
@@ -40,7 +40,7 @@ class MockPPT(Device):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
-async def test_apply_configuration():
+async def test_apply_configuration(monkeypatch):
     q1_did = create_instanceId()
     q1_device = MockPPT(
         {"_deviceId_": q1_did, "fullConfigFileName": "/path/to/conf.conf"}
@@ -65,17 +65,11 @@ async def test_apply_configuration():
             "availableGainConfigurations": [
                 {
                     "description": "default",
-                    "q1": "/path/to/conf.conf",
-                    "q2": "/path/to/conf.conf",
-                    "q3": "/path/to/conf.conf",
-                    "q4": "/path/to/conf.conf",
+                    "filenamePath": "/path/to/conf.conf",
                 },
                 {
                     "description": "bing",
-                    "q1": "/path/to/q1/config.conf",
-                    "q2": "/path/to/q2/config.conf",
-                    "q3": "/path/to/q3/config.conf",
-                    "q4": "/path/to/q4/config.conf",
+                    "filenamePath": "/path/to/q1/config.conf",
                 },
             ],
             "pptDevices": [
@@ -94,12 +88,33 @@ async def test_apply_configuration():
         q3_did: q3_device,
         q4_did: q4_device,
     }
-    async with AsyncDeviceContext(**instances) as ctx:
+
+    async def mock_mdl_shutdown(device_id):
+        print(f"Shutting down {device_id}")
+
+    monkeypatch.setattr(
+        DsscControl.configurator,
+        "shutdown",
+        mock_mdl_shutdown
+    )
+
+    async with AsyncDeviceContext(**instances):
         proxy = await connectDevice(configurator_id)
+
+        async def mock_mdl_ifm(device_id, name):
+            instances[device_id].fullConfigFileName = "/path/to/q1/config.conf"
+
+        monkeypatch.setattr(
+            DsscControl.configurator,
+            "instantiateFromName",
+            mock_mdl_ifm
+        )
+
         # Check initialization was correct
         assert proxy.monitoredDevices == "Q1, Q3, Q4"
 
-        # Check matched configurations have human name reported
+        # Check matched configurations have friendly description
+        await waitUntilNew(proxy.actualGainConfiguration)
         assert proxy.actualGainConfiguration == "default"
 
         # Check mismatched configurations are reported
@@ -117,11 +132,7 @@ async def test_apply_configuration():
         await proxy.apply()
         await waitUntil(lambda: proxy.state == State.CHANGING)
         await waitUntil(lambda: proxy.state == State.ACTIVE)
-
-        assert q1_device.init_done
-        assert not q2_device.init_done
-        assert q3_device.init_done
-        assert q4_device.init_done
+        await waitUntilNew(proxy.actualGainConfiguration)
 
         assert proxy.actualGainConfiguration == "bing"
         assert proxy.gainConfigurationState == State.ON.value
@@ -129,7 +140,7 @@ async def test_apply_configuration():
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
-async def test_missing_proxies():
+async def test_missing_proxies(event_loop):
     configurator_id = create_instanceId()
     configurator = DsscConfigurator(
         {
@@ -143,10 +154,7 @@ async def test_missing_proxies():
             "availableGainConfigurations": [
                 {
                     "description": "default",
-                    "q1": "/path/to/conf.conf",
-                    "q2": "/path/to/conf.conf",
-                    "q3": "/path/to/conf.conf",
-                    "q4": "/path/to/conf.conf",
+                    "filenamePath": "/path/to/conf.conf",
                 },
             ],
         }
@@ -154,15 +162,14 @@ async def test_missing_proxies():
 
     async with AsyncDeviceContext(configurator_id=configurator):
         proxy = await connectDevice(configurator_id)
-        # Check went to error on initialization as proxies are missing
-        assert proxy.state == State.ERROR
+        # Check goes to init waiting for proxies
+        assert proxy.state == State.INIT
         assert proxy.gainConfigurationState == State.ERROR.value
-        assert "Could not connect" in proxy.status
 
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
-async def test_server_loads_device():
+async def test_server_loads_device(event_loop):
     serverId = create_instanceId()
     server = create_device_server(serverId, [DsscConfigurator])
     async with AsyncDeviceContext(server=server) as ctx:
