@@ -51,5 +51,5 @@ installation:
   <<: *test_build
   parallel:
     matrix:
-      - ARCH_TAG:   ["ubuntu-22-003", "almalinux-8-004", "almalinux-9-005", "centos-7-004"]
-        KARABO_TAG: ["2.17.1", "latest_prerelease_build"]
+      - ARCH_TAG:   ["ubuntu-22-003", "almalinux-9-005", "centos-7-004"]
+        KARABO_TAG: ["2.19.4", "2.20.0a9"]
