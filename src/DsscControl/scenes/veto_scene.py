@@ -123,11 +123,11 @@ def overview(device_id):
         y=490.0,
     )
 
-    did = DisplayLabelModel(
-        font_size=30,
+    did = LabelModel(
+        font='Source Sans Pro,24,-1,5,100,0,0,0,0,0',
         height=51.0,
         parent_component='DisplayComponent',
-        keys=[f'{device_id}.detOutput'],
+        text='SIMULATED OUTPUT NOT VALIDATED YET',
         width=900.0,
         x=5.0,
         y=10.0,

@@ -180,8 +180,8 @@ class DsscVetoCheck(Device):
             det_pulse_id = get_array_data(det_data, path="image.pulseId").squeeze()
 
             assert not np.any(det_cell_id[det_cell_id > 800]), "Cell IDs over 800"
-            assert np.all(det_cell_id == sim_cell_id), "Cell ID not matching simulation"
-            assert np.all(det_pulse_id == sim_pulse_id), "Pulse ID not matching simulation"
+            # assert np.all(det_cell_id == sim_cell_id), "Cell ID not matching simulation"
+            # assert np.all(det_pulse_id == sim_pulse_id), "Pulse ID not matching simulation"
 
         except ValueError:
             return False, "Detector not sending data while DAQ monitoring", None
