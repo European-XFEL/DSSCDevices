@@ -6,7 +6,7 @@ pulse Ids fit the veto pattern, and that detector data values are in range.
 import time
 from asyncio import Lock, sleep
 from queue import Queue
-from typing import List, Tuple, Union
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 from karabo.middlelayer import (
@@ -14,6 +14,7 @@ from karabo.middlelayer import (
     Configurable,
     Device,
     Hash,
+    InputChannel,
     Node,
     OutputChannel,
     Overwrite,
@@ -82,13 +83,6 @@ class DsscVetoCheck(Device):
         accessMode=AccessMode.INITONLY,
     )
 
-    detOutput = String(
-        displayedName="Detector",
-        defaultValue="DETLAB_DSSC2/CAL/CORRECT00_Q1M1:dataOutput",
-        description="Callibration pipeline output for this module",
-        accessMode=AccessMode.INITONLY,
-    )
-
     ok = String(
         displayedName="Data Ok",
         description="ON when ok, ERROR when not ok",
@@ -121,13 +115,12 @@ class DsscVetoCheck(Device):
         background(self.state_timer)
         self.status = "Waiting for data"
 
-        did, pipeline = self.detOutput.split(":")
-        px = await getDevice(did)
-        pipeline = getattr(px, pipeline)
-        pipeline.setDataHandler(self.process_input)
-        pipeline.connect()
-
-    async def process_input(self, data: Hash, meta: Hash):
+    @InputChannel(
+        displayedName="Calibration Pipeline Output",
+        description="CORRECT_DEVICE:dataOutput",
+        raw=True,
+    )
+    async def input(self, data: Hash, meta: Hash):
         async with self.lock:
             self.last_update_time = time.time()
             ok, msg, data = self.validate_data(data, self.sim_data)
@@ -165,7 +158,7 @@ class DsscVetoCheck(Device):
     def validate_data(
         det_data: Hash,
         sim_data: Tuple,
-    ) -> Union[bool, str, Tuple]:
+    ) -> Union[bool, str, Optional[Tuple]]:
         """Process the data from the detector.
 
         Return an ok boolean, a message, and the decoded data.
