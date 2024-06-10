@@ -7,9 +7,9 @@ find_package(Threads REQUIRED)
 target_sources(
     ${CMAKE_PROJECT_NAME}
     PRIVATE
-    DsscPpt/DsscPpt.cc
-    DsscPpt/DsscConfigHashWriter.cc
-    DsscPpt/DsscPptAPI.cc
+    LadderParameterTrimming/DsscKaraboRegisterConfig.cc
+    LadderParameterTrimming/DsscLadderParameterTrimming.cc
+    LadderParameterTrimming/DsscTrimPptAPI.cc
 )
 
 
@@ -32,6 +32,10 @@ target_include_directories(
     $ENV{KARABO}/extern/include/dssc/pptdatareceiver
     $ENV{KARABO}/extern/include/dssc/sequence
     $ENV{KARABO}/extern/include/dssc/utils
+
+    # LadderParameterTrimming Dependencies
+    $ENV{KARABO}/extern/include/dssc/dsschdf5
+    $ENV{KARABO}/extern/include/hdf5
 )
 
 link_directories($ENV{KARABO}/extern/lib/dssc)
