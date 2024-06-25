@@ -139,6 +139,48 @@ async def test_apply_configuration(monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_fix_config_string(event_loop):
+    configurator_id = create_instanceId()
+
+    configurator = DsscConfigurator(
+        {
+            "_deviceId_": configurator_id,
+            "pptDevices": [
+                {"deviceId": "q1_did", "quadrantId": "Q1", "use": True},
+                {"deviceId": "q2_did", "quadrantId": "Q2", "use": False},
+                {"deviceId": "q3_did", "quadrantId": "Q3", "use": True},
+                {"deviceId": "q4_did", "quadrantId": "Q4", "use": True},
+            ],
+            "availableGainConfigurations": [
+                {
+                    "description": "Lancelot",
+                    "filenamePath": "/path/to/Q1/Lancelot.conf",
+                },
+                {
+                    "description": "Arthur",
+                    "filenamePath": "/path/to/Q2/Arthur.conf",
+                },
+                {
+                    "description": "Dennis",
+                    "filenamePath": "/path/to/Q3/Dennis.conf",
+                },
+                {
+                    "description": "Bedivere",
+                    "filenamePath": "/path/to/Q4/Bedivere.conf",
+                },
+            ],
+        }
+    )
+
+    ret = await configurator.requestConfiguration("Q2")
+    assert ret == "/path/to/Q2/Lancelot.conf"
+    
+    # async with AsyncDeviceContext(configurator_id=configurator):
+    #     proxy = await connectDevice(configurator_id)
+    #     ret = proxy.requestConfiguration("Q2")
+    #     assert ret == "/path/to/Q2/Lancelot.conf"
+
+@pytest.mark.asyncio
 @pytest.mark.timeout(30)
 async def test_missing_proxies(event_loop):
     configurator_id = create_instanceId()

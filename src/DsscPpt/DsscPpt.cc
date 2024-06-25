@@ -1007,6 +1007,8 @@ namespace karabo {
                 .key("updateConfigFromHash").displayedName("Write Config Data")
                 .description("Write Configuration Data")
                 .commit();
+
+        INIT_CALIBRATION_ELEMENTS
     }
 
     const std::string DsscPpt::s_dsscConfBaseNode = "DetectorRegisters";
