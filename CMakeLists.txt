@@ -5,7 +5,7 @@ cmake_minimum_required (VERSION 3.14)
 
 project (DsscDevices LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -46,6 +46,12 @@ else()
     include(cmake/import_karabo_lib_legacy.cmake)
     importKaraboLibLegacy()
 endif()
+
+find_package(PkgConfig)
+set(PKG_CONFIG_ARGN "--define-variable=KARABO=$ENV{KARABO}")
+set(ENV{PKG_CONFIG_PATH} "$ENV{KARABO}/lib:$ENV{PKG_CONFIG_PATH}")
+pkg_check_modules(karabo IMPORTED_TARGET karaboDependencies>=1.0)
+
 
 if(NOT DEFINED KARABO_LIB_TARGET_NAME)
     message(FATAL_ERROR
