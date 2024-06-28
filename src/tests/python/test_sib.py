@@ -1,6 +1,6 @@
 import pytest
 
-from DsscSIB.DsscSIB import DsscSIB
+from DsscControl.sib import DsscSIB
 from karabo.bound import Configurator, Hash, PythonDevice
 
 
