@@ -15,12 +15,7 @@
 //#include "DsscHDF5TrimmingDataWriter.h"
 //#include "DsscHDF5TrimmingDataReader.h"
 #include "DsscModuleInfo.h"
-
-
-
 #include "DsscTrimPptAPI.hh"
-
-
 
 //set<string> setst;
 
@@ -904,6 +899,8 @@ namespace karabo{
         boost::replace_all(main_ppt_templ, "{QUAD}", m_quadrantId);
         m_pptDeviceId = main_ppt_templ;
 
+	std::cout << "PPT is: " << m_pptDeviceId << std::endl;
+
         m_recvServerId = get<string>("recvDeviceServerId");
 
         std::string main_processor_templ = get<std::string>("mainProcessorTempl");
@@ -940,20 +937,28 @@ namespace karabo{
 
         if(fullconfig->isGood()){     
             m_trimppt_api.reset(new SuS::DsscTrimPptAPI(this, fullconfig));
+	    KARABO_LOG_FRAMEWORK_INFO << "Full Config Ok";
         } else{
             delete fullconfig;
             changeDeviceState(State::ERROR);
             return false;
         }
 
+	KARABO_LOG_FRAMEWORK_INFO << "Set trimppt_api: " 
+                                  << get<unsigned int>("numIterations") 
+                                  << get<unsigned short>("minSram") 
+                                  << get<unsigned short>("maxSram") 
+                                  << get<unsigned int>("numRuns");
+
         m_trimppt_api->m_iterations = get<unsigned int>("numIterations");
         m_trimppt_api->m_trimStartAddr = get<unsigned short>("minSram");
         m_trimppt_api->m_trimEndAddr = get<unsigned short>("maxSram");
         m_trimppt_api->m_numRuns = get<unsigned int>("numRuns");
 
+	KARABO_LOG_FRAMEWORK_INFO << "Set trimppt_api";
         m_trimppt_api->setD0Mode(true);
 
-        m_trimppt_api->setActiveAsics(0xFFFF);
+        //m_trimppt_api->setActiveAsics(0xFFFF);
 
         m_trimppt_api->setLadderReadout(true);
         
@@ -961,6 +966,7 @@ namespace karabo{
         initPixelSortMap();
         
         m_deviceInitialized = true;
+	KARABO_LOG_FRAMEWORK_INFO << "We are ready";
         
         //Check the devices are available
         if (allDevicesAvailable()) {
@@ -975,7 +981,7 @@ namespace karabo{
 
         loadCoarseGainParamsIntoGui();
 
-        setSendingAsics(utils::bitEnableStringToValue(get<string>("sendingASICs")));
+        //setSendingAsics(utils::bitEnableStringToValue(get<string>("sendingASICs")));
         
         m_calibGenerator.setCurrentPixels(utils::positionListToVector<int>("0-65535"));
         m_calibGenerator.setOutputDir(get<string>("outputDir"));
@@ -1111,6 +1117,7 @@ namespace karabo{
         }
 
         bool ok = (cnt < timeout);
+	std::cout << "ok: " << ok << " " << cnt << " " << timeout << std::endl;
         if (!ok) {
             m_recvStatus = RecvStatus::TIMEOUT;
             DSSCSTATUS("DataReceiver Timeout");
@@ -1429,7 +1436,7 @@ namespace karabo{
 
     void DsscLadderParameterTrimming::onPixelData(const util::Hash& data,
                                                   const xms::InputChannel::MetaData& meta) {
-        //cout << "Got Pixel Data: " << m_lastTrainId << endl;
+        cout << "Got Pixel Data: " << m_lastTrainId << endl;
 
         if (m_recvMode != PIXEL) return;
 
@@ -1778,6 +1785,7 @@ namespace karabo{
                         set<string>("sendingASICs", selAsicsStr);
                     }
                     setSendingAsics(utils::bitEnableStringToValue(selAsicsStr));
+	            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " TRIM API says " << utils::bitEnableValueToString(m_trimppt_api->getSendingAsics()) << " ASICs";
                 } else if (path.compare("activeModule") == 0) {
                     int newActiveModule = filtered.getAs<int>(path);
                     updateActiveModule(newActiveModule);
@@ -1976,7 +1984,7 @@ namespace karabo{
             return false;
         }
         if (!allReceiverDevicesAvailable()) {
-            std::cout << "Not all receiver devices are avilable" << std::endl;
+            std::cout << "Not all receiver devices are available" << std::endl;
             return false;
         }
 
@@ -2035,6 +2043,7 @@ namespace karabo{
 
 
     bool DsscLadderParameterTrimming::isPPTDeviceAvailable() {
+	return true;
         if (!isDeviceExisting(m_pptDeviceId)) {
             if (!startDsscPptInstance()) {
                 return false;
@@ -2102,7 +2111,7 @@ namespace karabo{
         initialConfig.set<string>("sendingASICs", get<string>("sendingASICs"));
         initialConfig.set<string>("deviceId", m_pptDeviceId);
 
-        vector<string> outputChannels{(get<string>("deviceId") + "@registerConfigOutput")};
+        vector<string> outputChannels{(get<string>("deviceId") + ":registerConfigOutput")};
 
         util::Hash inputConfig = createInputChannelConfig(outputChannels, "wait");
 
@@ -2461,7 +2470,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
         if (inputConnection.empty()) return false;
 
-        auto elem = find(inputConnection.begin(), inputConnection.end(), get<string>("deviceId") + "@registerConfigOutput");
+        auto elem = find(inputConnection.begin(), inputConnection.end(), get<string>("deviceId") + ":registerConfigOutput");
         return elem != inputConnection.end();
     }
 
@@ -2505,6 +2514,9 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
 
     void DsscLadderParameterTrimming::setNumFramesToSend(int val, bool saveOldVal) {
+	val = (val < 1) ? 1 : val;
+	val = (val > 800) ? 800 : val;
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Change NumFramesToReceive of PPTDevice to " << val;
         if (isDeviceExisting(m_pptDeviceId)) {
             // stop device running
             runContinuousMode(false);
@@ -2512,7 +2524,6 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
             remote().set<unsigned int>(m_pptDeviceId, "numFramesToSendOut", val);
 
             runContinuousMode(true);
-            KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Change NumFramesToReceive of PPTDevice to " << val;
         }
 
 
@@ -2535,7 +2546,9 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
 
 
     void DsscLadderParameterTrimming::setMaxSram(unsigned int value) {
-        m_trimppt_api->m_trimEndAddr = value;
+	unsigned int actualVal = (value > 799) ? 799 : value;
+	KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Change maxSram to " << value << " fixed to " << actualVal;
+        m_trimppt_api->m_trimEndAddr = actualVal;
         set<unsigned short>("maxSram", m_trimppt_api->m_trimEndAddr);
     }
 
@@ -3096,10 +3109,13 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Gain trimming done";
     }
     
-    void DsscLadderParameterTrimming::calibrateCurrCompDAC() {
+    void DsscLadderParameterTrimming::calibrateCurrCompDAC_impl() {
         m_trimppt_api->calibrateCurrCompDAC();
     }
 
+    void DsscLadderParameterTrimming::calibrateCurrCompDAC() {
+	EventLoop::getIOService().post(karabo::util::bind_weak(&DsscLadderParameterTrimming::calibrateCurrCompDAC_impl, this));
+    }
 
     void DsscLadderParameterTrimming::saveGainTrimmingOutputs() {
         string fileName = get<string>("outputDir") + "/GainTrimmingResults.h5";

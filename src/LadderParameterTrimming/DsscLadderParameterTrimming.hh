@@ -365,6 +365,8 @@ namespace karabo {
 
         void setBufferMode();
 
+        void calibrateCurrCompDAC_impl();
+
         unsigned int getLastValidTrainId();
         util::State dsscPptState();
         util::State deviceState(const std::string & deviceId);

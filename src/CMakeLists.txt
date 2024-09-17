@@ -7,9 +7,10 @@ find_package(Threads REQUIRED)
 target_sources(
     ${CMAKE_PROJECT_NAME}
     PRIVATE
-    DsscPpt/DsscPpt.cc
-    DsscPpt/DsscConfigHashWriter.cc
-    DsscPpt/DsscPptAPI.cc
+    DsscProcessor/DsscProcessor.cc
+    LadderParameterTrimming/DsscLadderParameterTrimming.cc
+    LadderParameterTrimming/DsscKaraboRegisterConfig.cc
+    LadderParameterTrimming/DsscTrimPptAPI.cc
 )
 
 
@@ -32,6 +33,8 @@ target_include_directories(
     $ENV{KARABO}/extern/include/dssc/pptdatareceiver
     $ENV{KARABO}/extern/include/dssc/sequence
     $ENV{KARABO}/extern/include/dssc/utils
+    $ENV{KARABO}/extern/include/dssc/dsschdf5
+    
 )
 
 link_directories($ENV{KARABO}/extern/lib/dssc)
@@ -48,6 +51,7 @@ target_link_libraries(
     PPT
     Sequencer
     Utils
+    DsscHdf5
 )
 
 
@@ -81,35 +85,3 @@ add_custom_target(
 )
 
 add_dependencies(${CMAKE_PROJECT_NAME} UpdateVersionHeader)
-
-
-if (BUILD_TESTS)
-
-    enable_testing()
-
-    add_executable(
-       test-${CMAKE_PROJECT_NAME}
-       tests/c++/testrunner.cc   # The test runner entry point
-       tests/c++/testDsscPpt.cc
-
-    )
-
-    include("../cmake/find_dep.cmake")
-    find_dep(gtest gtest)
-
-    target_compile_options(
-        test-${CMAKE_PROJECT_NAME}
-        PUBLIC -Wfatal-errors -Wno-unused-local-typedefs
-               -Wno-deprecated-declarations -Wall)
-
-    target_link_libraries(
-        test-${CMAKE_PROJECT_NAME}
-        PRIVATE
-        Threads::Threads
-        ${CMAKE_PROJECT_NAME}
-        ${gtest_LIB}
-    )
-
-    add_test(NAME ${CMAKE_PROJECT_NAME}Tests COMMAND test-${CMAKE_PROJECT_NAME})
-
-endif()

@@ -106,7 +106,7 @@ private:
     
     bool inContinuousMode() override;
     
-    void updateStartTrain(int margin) override {};
+    void updateStartTrain() override {};
     
     void disableSending(bool) override {};
    
