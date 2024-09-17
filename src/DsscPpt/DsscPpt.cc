@@ -2353,7 +2353,6 @@ namespace karabo {
 
 
     void DsscPpt::resetAll() {
-        DSSC::StateChangeKeeper keeper(this, State::OFF);
 
         stopPolling();
 

@@ -5,17 +5,17 @@
 #############################################################################
 
 import math
-import parse
-from queue import Full, Queue
 import socket
 import threading
 import time
+from queue import Full, Queue
+
+import parse
 
 from karabo.bound import (
     FLOAT_ELEMENT, INT32_ELEMENT, KARABO_CLASSINFO, NODE_ELEMENT,
     OVERWRITE_ELEMENT, SLOT_ELEMENT, STRING_ELEMENT, UINT64_ELEMENT, Hash,
-    PythonDevice, State, Unit, Worker, MetricPrefix,
-)
+    MetricPrefix, PythonDevice, State, Unit, Worker)
 
 from ._version import version as deviceVersion
 

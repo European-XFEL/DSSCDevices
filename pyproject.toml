@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=42", "setuptools-scm[toml]>=4.1", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+root = "."
+write_to = "src/DsscControl/_version.py"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[project.entry-points."karabo.middlelayer_device"]
+DsscControl = "DsscControl.dssc_control:DsscControl"
+DsscASICreset = "DsscControl.DsscASICreset:DsscASICreset"
+DsscConfigurator = "DsscControl.configurator:DsscConfigurator"
+
+[project.entry-points."karabo.bound_device"]
+DsscSIB = "DsscControl.sib:DsscSIB"
+
+[project.optional-dependencies]
+test = ["pytest-cov"]
+
+[project]
+dynamic = ["version"]
+name = "DsscDevices"
+authors = [
+    {name = "European XFEL Detector Group"},
+    {name = "European XFEL Controls Group"},
+]
+description = "Control Interface for the DSSC Detector"
+readme = "README.md"
