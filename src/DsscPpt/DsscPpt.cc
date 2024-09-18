@@ -1189,6 +1189,18 @@ namespace karabo {
 
         getSequencerParamsIntoGui();
 
+        // TODO: Test with actual config file.
+	// The following is a reimplementation of the standalone gui, and was
+	// tested with "old" config files that do not contain BurstParams
+	// values (i.e. the else branch) (i.e. tested against breaking changes).
+	if(m_ppt->getSequencer()->burstParams.valid) {
+	    m_ppt->loadBurstParamValues();
+	    KARABO_LOG_FRAMEWORK_INFO << "Sequence Counters loaded from config file";
+	} else {
+	    m_ppt->setDefaultBurstParamValues();
+	    KARABO_LOG_FRAMEWORK_INFO << "Sequence Counters loaded from defaults";
+	}
+
         getSequenceCountersIntoGui();
 
         getCoarseGainParamsIntoGui();
@@ -3514,17 +3526,19 @@ namespace karabo {
         set<int>("sequence.start_wait_time", m_ppt->getBurstParam("start_wait_time"));
         set<int>("sequence.start_wait_offs", m_ppt->getBurstParam("start_wait_offs"));
         set<int>("sequence.gdps_on_time", m_ppt->getBurstParam("gdps_on_time"));
-        set<int>("sequence.iprogLength", m_ppt->getJTAGParam("Master FSM Config Register", "all", "Iprog Length") + 1);
-        set<int>("sequence.burstLength", m_ppt->getJTAGParam("Master FSM Config Register", "all", "Burst Length") + 1);
-        set<int>("sequence.refpulseLength", m_ppt->getJTAGParam("Master FSM Config Register", "all", "Refpulse Length") + 1);
         set<int>("sequence.fet_on_time", m_ppt->getBurstParam("fet_on_time"));
         set<int>("sequence.clr_on_time", m_ppt->getBurstParam("clr_on_time"));
         set<int>("sequence.iprog_clr_offset", m_ppt->getBurstParam("iprog_clr_offset"));
         set<int>("sequence.iprog_clr_duty", m_ppt->getBurstParam("iprog_clr_duty"));
         set<int>("sequence.iprog_clr_en", m_ppt->getBurstParam("iprog_clr_en"));
         set<int>("sequence.clr_cycle", m_ppt->getBurstParam("clr_cycle"));
-        set<int>("sequence.clrDuty", m_ppt->getIOBParam("CLR_duty", "1", "CLR_duty") - 1);
         set<int>("sequence.SW_PWR_ON", m_ppt->getBurstParam("SW_PWR_ON"));
+
+        set<int>("sequence.clrDuty", m_ppt->getIOBParam("CLR_duty", "1", "CLR_duty") - 1);
+
+        set<int>("sequence.iprogLength", m_ppt->getJTAGParam("Master FSM Config Register", "all", "Iprog Length") + 1);
+        set<int>("sequence.burstLength", m_ppt->getJTAGParam("Master FSM Config Register", "all", "Burst Length") + 1);
+        set<int>("sequence.refpulseLength", m_ppt->getJTAGParam("Master FSM Config Register", "all", "Refpulse Length") + 1);
     }
 
 
@@ -3859,6 +3873,8 @@ namespace karabo {
         getJTAGParamsIntoGui();
 
         getSequencerParamsIntoGui();
+
+        getSequenceCountersIntoGui();
     }
 
 
