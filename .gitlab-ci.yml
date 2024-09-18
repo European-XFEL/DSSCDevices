@@ -6,6 +6,7 @@
     - export REL_OS_VERS_LONG=${VERSION_ID%%.*}
     - export BUILD_TYPE=Debug
     - export KARABO_BROKER_TOPIC="gitlab_ci_$CI_JOB_ID"
+    - export KARABO_BROKER="amqp://xfel:karabo@exfl-broker-1:5672"
     - >
       if test "$REL_OS_NAME-$REL_OS_VERS_LONG" == "CentOS-7"; then
           source /opt/rh/devtoolset-7/enable
