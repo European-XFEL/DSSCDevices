@@ -594,6 +594,7 @@ namespace karabo {
         m_acquireSramCorrection = false;
 
         m_inputFormat = DATAFORMAT::IMAGE;
+	setInputFormat(m_inputFormat);
 
         m_sourceId = get<std::string>("sourceId");
         unsigned char sourceInfix = get<unsigned char>("sourceInfix");
@@ -617,6 +618,8 @@ namespace karabo {
         m_showPixelCells = get<bool>("showPixelCells");
         m_pixelNumberCellsShow = get<uint32_t>("pixelNumberCellsShow");
         m_updateHistoStride = get<uint32_t>("histoGen.updateHistoStride");
+
+	m_imagedataReshape = get<bool>("imagedataReshape");
     }
 
 
@@ -642,15 +645,13 @@ namespace karabo {
 
         // reformat data array
 
-       cout << "    " << meta.getTimestamp().getTrainId() << " Done validating" << endl;
        const auto imageData = data.get<util::NDArray>("image.data");
        const auto imageDataShape = data.get<vector<unsigned long long>>("image.data.shape");
-
+       
        auto reshapedImageData = util::NDArray(util::Dims(imageDataShape[2], imageDataShape[0], imageDataShape[1]), Types::UINT16);
        const auto dataPtr = imageData.getData<uint16_t>();
        auto dataPtrR = reshapedImageData.getData<uint16_t>();
        const unsigned int singleImShape = imageDataShape[0] * imageDataShape[1];
-
 
        if(m_imagedataReshape)
        {
@@ -664,12 +665,20 @@ namespace karabo {
                  }
             }
         }
-       }
-        
-       const_cast<util::Hash*>(&data)->set("image.data", reshapedImageData);
-        
+       	const_cast<util::Hash*>(&data)->set("image.data", reshapedImageData);
+       	cout << "    reshaped: from:" 
+	     << imageDataShape[0]
+	     << ", " << imageDataShape[1]
+	     << ", " << imageDataShape[2]
 
-
+	     << " to: "
+	     << imageDataShape[2] 
+	     << "," << imageDataShape[0] 
+	     << "," << imageDataShape[1]
+	     << ", pxIdx 30: " << dataPtr[30] << "|" << dataPtrR[30]
+             << endl;
+       }  // endif m_imagedataReshape
+        
        if (m_trainMonitorStart) {
            m_startTrainId = meta.getTimestamp().getTrainId();
            m_trainMonitorStart = false;
@@ -697,15 +706,15 @@ namespace karabo {
            }
        }
 
-       if (data.has("imageFormat")) {
-           string format = data.get<string>("imageFormat");
-           m_inputFormat = utils::DsscTrainData::getFormat(format);
-           set<string>("inputDataFormat", format);
+       //if (data.has("imageFormat")) {
+       //    string format = data.get<string>("imageFormat");
+       //    m_inputFormat = utils::DsscTrainData::getFormat(format);
+       //    set<string>("inputDataFormat", format);
 
-       } else {
-           m_inputFormat = utils::DsscTrainData::DATAFORMAT::IMAGE;
-           set<string>("inputDataFormat", "imagewise");
-       }
+       //} else {
+       //    m_inputFormat = utils::DsscTrainData::DATAFORMAT::IMAGE;
+       //    set<string>("inputDataFormat", "imagewise");
+       //}
        KARABO_LOG_FRAMEWORK_INFO << "DID ALL THE INPUT THINGS";
        processTrain(data.get<util::NDArray>("image.data"),
                     data.get<util::NDArray>("image.cellId"),
@@ -742,6 +751,8 @@ namespace karabo {
             set<unsigned short>("minSram", m_minSram);
             KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Sram Range does not fit to number of frames, is corrected";
         }
+       cout << "    in processTrain: pxIdx 30: " << data_ptr[30] << endl;
+
 
 
         //cout << "DataSize = " << data_size << endl;
@@ -755,6 +766,7 @@ namespace karabo {
 
         set<unsigned long long>("currentTrainId", trainId);
 
+	setInputFormat(m_inputFormat);
 
 
         if (get<bool>("measureMean") || get<bool>("measureRMS")) {
@@ -783,10 +795,10 @@ namespace karabo {
                 displayPixelHistogram();
                 stop();
             }
-        } else {
-            auto processedPixelData = processPixelData(data_ptr, m_inputFormat);
-            sendPixelData(processedPixelData, trainId);
         }
+        auto processedPixelData = processPixelData(data_ptr, m_inputFormat);
+	cout << "Here is pixel 30: " << data_ptr[30] << "|" << processedPixelData[30] << endl;
+        sendPixelData(processedPixelData, trainId);
 
         //KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Train Processed: " << this_train->first << "/" << minValidTrainId;
     }
@@ -794,13 +806,23 @@ namespace karabo {
 
     void DsscProcessor::sendPixelData(const unsigned short * pixel_wise_data_ptr, unsigned long long train_id) {
         static const uint32_t numSram = utils::s_numSram;
+	// static const uint32_t numSram = m_numFrames;
+	cout << "sendPixelData:  " << numSram << endl;
+	cout << "                " << utils::s_totalNumWords << endl;
+	cout << "                " << utils::s_numAsicPixels << endl;
+	cout << "                " << utils::s_numSram << endl;
+	cout << "                " << m_numFrames << endl;
         //do not copy data
         NDArray asicNDArray(pixel_wise_data_ptr, utils::s_totalNumWords, util::NDArray::NullDeleter(), Dims(utils::s_numAsics, utils::s_numAsicPixels, utils::s_numSram));
+	
+        //NDArray asicNDArray(pixel_wise_data_ptr, utils::s_totalNumWords, util::NDArray::NullDeleter(), Dims(utils::s_numAsics, utils::s_numAsicPixels, numSram));
+
 
         util::Hash pixelDataHash;
         pixelDataHash.set("asicData", asicNDArray);
         pixelDataHash.set("trainId", train_id);
-        pixelDataHash.set("pulseCnt", numSram);
+        //pixelDataHash.set("pulseCnt", numSram);
+        pixelDataHash.set("pulseCnt", m_numFrames);
 
         writeChannel("pixelDataOutput", pixelDataHash);
     }

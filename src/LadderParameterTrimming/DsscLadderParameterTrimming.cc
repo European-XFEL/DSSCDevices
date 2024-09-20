@@ -955,6 +955,8 @@ namespace karabo{
         m_trimppt_api->m_trimEndAddr = get<unsigned short>("maxSram");
         m_trimppt_api->m_numRuns = get<unsigned int>("numRuns");
 
+	m_trimppt_api->m_leaveMySettings = true;
+
 	KARABO_LOG_FRAMEWORK_INFO << "Set trimppt_api";
         m_trimppt_api->setD0Mode(true);
 
@@ -981,7 +983,8 @@ namespace karabo{
 
         loadCoarseGainParamsIntoGui();
 
-        //setSendingAsics(utils::bitEnableStringToValue(get<string>("sendingASICs")));
+        setSendingAsics(utils::bitEnableStringToValue(get<string>("sendingASICs")));
+        //setSendingAsics(utils::bitEnableStringToValue("11111110_01111011"));
         
         m_calibGenerator.setCurrentPixels(utils::positionListToVector<int>("0-65535"));
         m_calibGenerator.setOutputDir(get<string>("outputDir"));
@@ -1061,7 +1064,7 @@ namespace karabo{
 
 #pragma omp parallel for
         for (uint px = 0; px < utils::s_totalNumPxs; px++) {
-            m_pixelSortMap[px] = utils::s_dataPixelMap[px] * utils::s_numSram;
+            m_pixelSortMap[px] = utils::s_dataPixelMap[px] * 1;
         }
     }
 
@@ -1436,9 +1439,12 @@ namespace karabo{
 
     void DsscLadderParameterTrimming::onPixelData(const util::Hash& data,
                                                   const xms::InputChannel::MetaData& meta) {
-        cout << "Got Pixel Data: " << m_lastTrainId << endl;
+        KARABO_LOG_FRAMEWORK_INFO << "Got Pixel Data: " << m_lastTrainId;
 
-        if (m_recvMode != PIXEL) return;
+        if (m_recvMode != PIXEL) {
+		cout << "m_recvMode is not PIXELS: " << m_recvMode << endl;
+		return;
+	}
 
         m_lastTrainId = data.get<unsigned long long>("trainId");
         if (m_lastTrainId <= m_lastPptTrainId) {
