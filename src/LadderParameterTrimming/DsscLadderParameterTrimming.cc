@@ -2767,13 +2767,12 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
             //remote().execute(m_dsscDataReceiverId, "flushTrainStorage");
         }
 
-        getLastValidTrainId();
-
         //KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " Set Min Train ID "<< m_lastPptTrainId << " at " << m_mainProcessorId;
 
         remote().set<unsigned long long>(m_mainProcessorId, "minValidTrainId", m_lastPptTrainId);
         remote().set<bool>(m_mainProcessorId, "measureMean", m_recvMode == RecvMode::MEAN);
         remote().set<bool>(m_mainProcessorId, "measureRMS", m_recvMode == RecvMode::RMS);
+	remote().set<bool>(m_mainProcessorId, "waitBetweenSteps", true);
 
         if (m_recvMode == RecvMode::PIXEL) {
             // nothing to to

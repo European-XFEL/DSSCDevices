@@ -412,6 +412,11 @@ namespace karabo {
                 .description("Reshape image data for Calibration pipeline")
                 .assignmentOptional().defaultValue(true).reconfigurable()
                 .commit();
+
+	BOOL_ELEMENT(expected).key("waitBetweenSteps")
+		.displayedName("Wait Between Steps")
+                .assignmentOptional().defaultValue(true).reconfigurable()
+                .commit();
     }
 
 
@@ -758,9 +763,19 @@ namespace karabo {
         //cout << "DataSize = " << data_size << endl;
         //cout << "cellId_size = " << cellId_size << endl;
         //cout << "DataSize = " << data_size << endl;
+	//
+	if(this->get<bool>("waitBetweenSteps")) {
+	    unsigned long long nextValidTid = trainId + 20;
+	    this->set<unsigned long long>("minValidTrainId", nextValidTid);
+	    this->set<bool>("waitBetweenSteps", false);
+	    cout << "Waiting until TID " << nextValidTid << endl;
+	}
 
         const auto minValidTrainId = get<unsigned long long>("minValidTrainId");
-        if (trainId <= minValidTrainId) return;
+        if (trainId <= minValidTrainId) {
+		cout << trainId << " is less than " << minValidTrainId << endl;
+	       	return;
+	}
 
         // business logic starts here
 
@@ -797,7 +812,6 @@ namespace karabo {
             }
         }
         auto processedPixelData = processPixelData(data_ptr, m_inputFormat);
-	cout << "Here is pixel 30: " << data_ptr[30] << "|" << processedPixelData[30] << endl;
         sendPixelData(processedPixelData, trainId);
 
         //KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Train Processed: " << this_train->first << "/" << minValidTrainId;
