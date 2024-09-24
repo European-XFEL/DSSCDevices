@@ -4750,11 +4750,11 @@ namespace karabo {
     bool DsscPpt::getConfigurationFromRemote() {
         // Can only be called at initialization. 
         bool success = false;
+        Hash reply;
 
         const std::string remoteConfigurator = this->get<std::string>("remoteConfigurator");
         if(!remoteConfigurator.empty()) {
             try {
-                Hash reply;
                 this->request(remoteConfigurator, "requestConfiguration", this->get<std::string>("quadrantId"))
                     .timeout(1000)
                     .receive(reply);
@@ -4766,11 +4766,17 @@ namespace karabo {
             }
         }
 
-        if(!success) {
-            const std::string msg = std::string("Device "
-                                                + this->get<std::string>("remoteConfigurator")
-                                                + "cannot be reached.");
-            KARABO_LOG_ERROR << msg;
+        if(success) {
+	    KARABO_LOG_FRAMEWORK_INFO << "Received "
+		                      << this->get<std::string>("fullConfigFileName")
+				      << " ("
+				      << reply.get<std::string>("human")
+				      << " ) from "
+				      << remoteConfigurator;
+	} else {
+            KARABO_LOG_FRAMEWORK_ERROR << "Remote Configurator \""
+		                       << remoteConfigurator
+				       << "\" cannot be reached.";
         }
         return success;
     }

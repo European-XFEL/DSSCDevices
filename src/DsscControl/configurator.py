@@ -81,12 +81,12 @@ class DsscConfigurator(DeviceClientBase, Device):
         # Update targetGainConfiguration with the latest available config.
         configs = [row[0] for row in self.availableGainConfigurations.value]
 
+        # Make it selected by default
         self.__class__.targetGainConfiguration = Overwrite(
             options=configs,
             defaultValue=configs[-1],  # Most likely appended here.
         )
         await self.publishInjectedParameters()
-
 
     gainConfigurationState = String(
         displayedName="Configuration State",
@@ -316,17 +316,34 @@ class DsscConfigurator(DeviceClientBase, Device):
         """Provide a PPT with its configuration file, as set in this device.
 
         The PPT is expected to provide its quadrantId as string (eg. "Q1").
+        It will be used to format the stored targetGainConfiguration (eg.
+        ("GenConfigFiles_V4/Trimmed/{}/GenConf_TG4.2437_nG12_trimmed.conf")
         """
         (desc, fname), = self.availableGainConfigurations.where_value(
                     'description',
                     self.targetGainConfiguration
                 )
+        fname = fname.value
         config_filename = fname.format(quadrantId)
 
+        if (config_filename == fname) and (quadrantId not in fname):
+            # The stored target config is not an expected f-string, and
+            # it's not for this quadrant; try fixing it
+            new = config_filename.replace("Q1", quadrantId)
+            new = new.replace("Q2", quadrantId)
+            new = new.replace("Q3", quadrantId)
+            new = new.replace("Q4", quadrantId)
+            # We did our best, let the PPT validate for itself
+            self.log.INFO(
+                f"Hey, got given {config_filename}, tried to fix it to {new}"
+            )
+            config_filename = new
+
         return Hash(
-            "type", "fullConfigFileName",
-            "origin", self.deviceId,
-            "data", config_filename
+            "type", "fullConfigFileName",  # validate which property is sent
+            "origin", self.deviceId,  # where from, for debugging
+            "data", config_filename,  # the requested information
+            "human", self.targetGainConfiguration,  # desc., for debugging
         )
 
     async def onDestruction(self):
