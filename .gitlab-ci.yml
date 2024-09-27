@@ -38,7 +38,7 @@
 
     - echo "Testing Python Project"
     - pip install -e ".[test]"
-    - pytest -vv --junitxml=python.xml --disable-warnings --pyargs --cov=DsscSIB --cov=DsscControl --cov-report term
+    - pytest -vv --junitxml=python.xml --disable-warnings --pyargs --cov=DsscSIB --cov=DsscControl --cov-report term src/
 
   artifacts:
     when: always
