@@ -61,6 +61,19 @@ class ChannelNode(Configurable):
     data = Node(DataNode)
 
 
+class AsicsNode(Configurable):
+   for idx in range(16):
+       prop = String(
+           displayedName=f"ASIC {idx} State",
+           description="ON when ok, ERROR when not ok, PASSIVE when known to be broken",
+           defaultValue=State.UNKNOWN.value,
+           displayType="State",
+           options={State.UNKNOWN.value, State.ON.value, State.ERROR.value, State.PASSIVE.value},
+           accessMode=AccessMode.READONLY,
+       )
+       locals()[f"asic{idx}"] = prop
+
+
 class DsscVetoCheck(Device):
     state = Overwrite(
         options={State.PASSIVE, State.PROCESSING},
@@ -99,10 +112,16 @@ class DsscVetoCheck(Device):
         accessMode=AccessMode.READONLY,
     )
 
+    asicStatus = Node(
+        AsicsNode,
+        displayedName="ASICs Status",
+    )
+
     def __init__(self, configuration):
         super().__init__(configuration)
         self.sim_data: Tuple[List[int], List[int]] = None
         self.veto_pattern: List[str] = None
+        self.is_ppt_sending_dummy: bool = False
         self.lock: Lock = Lock()
 
         # -100 to stay in PASSIVE mode on first iteration until data comes
@@ -120,10 +139,11 @@ class DsscVetoCheck(Device):
         description="CORRECT_DEVICE:dataOutput",
         raw=True,
     )
-    async def input(self, data: Hash, meta: Hash):
+    async def input(self, det_data: Hash, meta: Hash):
         async with self.lock:
             self.last_update_time = time.time()
-            ok, msg, data = self.validate_data(data, self.sim_data)
+            asic_vetos = self.validate_asic_vetos(det_data, self.is_ppt_sending_dummy)
+            ok, msg, data = self.validate_data(det_data, self.sim_data)
 
         if self.state == State.PASSIVE:
             self.state = State.PROCESSING
@@ -145,7 +165,11 @@ class DsscVetoCheck(Device):
         else:
             det_cell_id, det_pulse_id = [], []
 
-        sim_cell_id, sim_pulse_id = self.sim_data
+        if self.sim_data is not None:
+            sim_cell_id, sim_pulse_id = self.sim_data
+        else:
+            sim_cell_id, sim_pulse_id = [], []
+
         h = Hash(
             "data.detCellId", det_cell_id,
             "data.detPulseId", det_pulse_id,
@@ -153,6 +177,34 @@ class DsscVetoCheck(Device):
             "data.simPulseId", sim_pulse_id,
         )
         await self.output.writeRawData(h)
+
+        for idx, asic_state in enumerate(asic_vetos):
+            curr_asic_state = getattr(self.asicStatus, f"asic{idx}").value
+            if asic_state.value != curr_asic_state:
+                setattr(self.asicStatus, f"asic{idx}", asic_state.value)
+
+    @staticmethod
+    def validate_asic_vetos(
+        det_data: Hash,
+        is_dummy: bool
+    ) -> List[str]:
+        d = det_data["detector.data"]
+        ppt_veto = d[0] + d[1] * 256  # 2 uint8_t to uint16_t
+
+        if is_dummy:
+            return [State.UNKNOWN] * 16
+
+        asic_states = []
+        for idx in range(0, 16):
+            asic_veto = d[162 + idx*16] + (d[163 + idx*16] * 256)
+            asic_state = State.ON
+            if asic_veto != ppt_veto:
+                asic_state = State.ERROR
+            if asic_veto == 384 + idx:
+                asic_state = State.PASSIVE
+            asic_states.append(asic_state)
+
+        return asic_states
 
     @staticmethod
     def validate_data(
@@ -198,11 +250,13 @@ class DsscVetoCheck(Device):
                     self.ppt_proxy.numPreBurstVetos.value,
                     self.ppt_proxy.numFramesToSendOut.value,
                 )
+            self.is_ppt_sending_dummy = self.ppt_proxy.send_dummy_dr_data
 
             await waitUntilNew(
                 self.ccmon_proxy.veto_pattern,
                 self.ppt_proxy.numPreBurstVetos,
                 self.ppt_proxy.numFramesToSendOut,
+                self.ppt_proxy.send_dummy_dr_data,
             )
 
     @staticmethod
@@ -285,6 +339,8 @@ class DsscVetoCheck(Device):
                     self.status = f"No Data in last {timeout} seconds."
                     self.ok = State.UNKNOWN.value
                     self.notOkCount = 0
+                    for idx in range(16):
+                        setattr(self.asicStatus, f"asic{idx}", State.UNKNOWN.value)
             await sleep(5)
 
     availableScenes = VectorString(
