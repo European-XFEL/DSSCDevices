@@ -14,11 +14,11 @@
          yum install gsl-devel --assumeyes
       fi;
     - export KARABO_BROKER_TOPIC="gitlab_ci_$CI_JOB_ID"
+    - export KARABO_BROKER=$KARABO_BROKER
     - echo http://exflctrl01.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh
     - curl http://exflctrl01.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh > karabo.sh
     - bash karabo.sh --prefix=/root
     - source /root/karabo/activate
-    - export KARABO_BROKER="$KARABO_BROKER"
     - pushd $CI_PROJECT_DIR
     - >
          echo "Installing Dependencies";
