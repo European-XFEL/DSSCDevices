@@ -18,7 +18,7 @@
     - curl http://exflctrl01.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh > karabo.sh
     - bash karabo.sh --prefix=/root
     - source /root/karabo/activate
-    - export KARABO_BROKER="amqp://xfel:karabo@exfl-broker-1:5672"
+    - export KARABO_BROKER=$KARABO_BROKER
     - pushd $CI_PROJECT_DIR
     - >
          echo "Installing Dependencies";
