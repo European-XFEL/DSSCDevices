@@ -338,7 +338,7 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("runXFEL").displayedName("Run XFEL Mode").description("Activate Continuous Acquistione")
+                .key("runXFEL").displayedName("Start Acquisition").description("Activate Continuous Acquistione")
                 .allowedStates(State::ON)
                 .commit();
 
@@ -1902,8 +1902,6 @@ namespace karabo {
             m_ppt->setIOBParam("ASIC_invert_chan11", "all", "ASIC_invert_chan11", 0);
 
             stopManualMode();
-
-            m_ppt->setNumberOfActiveAsics(get<unsigned int>("numActiveASICs"));
 
             cout << "Test Environment is set to Hamburg" << endl;
             cout << "QSFP and transceiver have to be defined according to setup" << endl;
