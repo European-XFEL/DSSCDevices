@@ -2298,6 +2298,7 @@ namespace karabo {
         }
 
         updateGuiRegisters();
+        getSequenceCountersIntoGui();
 
         checkQSFPConnected();
 
