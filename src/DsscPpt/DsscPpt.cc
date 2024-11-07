@@ -2220,7 +2220,7 @@ namespace karabo {
         DSSC::StateChangeKeeper keeper(this, State::ON);
 
         int currentModule = get<uint32_t>("activeModule");
-        if (m_ppt->isIOBAvailable(currentModule)) {
+        if (!m_ppt->isIOBAvailable(currentModule)) {
             programIOBFPGA(currentModule);
         }
 
