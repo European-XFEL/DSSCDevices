@@ -160,7 +160,7 @@ async def test_fix_config_string(event_loop):
                 },
                 {
                     "description": "Arthur",
-                    "filenamePath": "/path/to/Q2/Arthur.conf",
+                    "filenamePath": "/path/to/{}/{}_Arthur.conf",
                 },
                 {
                     "description": "Dennis",
@@ -179,6 +179,10 @@ async def test_fix_config_string(event_loop):
         ret = await call(proxy, "requestConfiguration", "Q2")
         assert isinstance(ret, Hash)
         assert ret["data"] == "/path/to/Q2/Lancelot.conf"
+
+        configurator.targetGainConfiguration = "Arthur"
+        ret = await call(proxy, "requestConfiguration", "FIXED")
+        assert ret["data"] == "/path/to/FIXED/FIXED_Arthur.conf"
 
 
 @pytest.mark.asyncio
