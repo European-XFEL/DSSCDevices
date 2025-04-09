@@ -3338,7 +3338,7 @@ namespace karabo {
         }
 
         getIOBParamsIntoGui(iob);
-
+        getIOBSerialIntoGui(iob);
         getIOBSpecialParamsIntoGui(iob);
 
     }
