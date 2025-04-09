@@ -220,7 +220,7 @@ namespace karabo {
                 .description("PPT FPGA Temperature")
                 .unit(Unit::DEGREE_CELSIUS)
                 .readOnly()
-                .initialValue(30)
+                .initialValue(666)
                 .warnLow(10).needsAcknowledging(false).alarmLow(5).needsAcknowledging(false)
                 .warnHigh(75).needsAcknowledging(false).alarmHigh(80).needsAcknowledging(false)
                 .commit();
