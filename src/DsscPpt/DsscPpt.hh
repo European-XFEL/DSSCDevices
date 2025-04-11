@@ -172,10 +172,7 @@ namespace karabo {
         void open();
         void close();
         void stopAcquisition();
-        void startAcquisition();
         void startBurstAcquisition();
-        void runStandAlone();
-        void stopStandalone();
         void runXFEL();
 
         void start();
@@ -275,7 +272,6 @@ namespace karabo {
         void stopManualMode();
         void startManualReadout();
         void startManualBurst();
-        void startManualBurstBtn();
         void readoutTestPattern();
 
         void startSingleCycle();

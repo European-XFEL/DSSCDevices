@@ -259,11 +259,6 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("startManualBurstBtn").displayedName("Start Burst").description("Trigger one single Burst")
-                .allowedStates(State::ON, State::STOPPED)
-                .commit();
-
-        SLOT_ELEMENT(expected)
                 .key("readoutTestPattern").displayedName("Readout Testpattern").description("Trigger full readout with Testpattern")
                 .allowedStates(State::ON, State::STOPPED)
                 .commit();
@@ -343,25 +338,10 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("stopStandalone").displayedName("Stop Running").description("Stop cuntinuous burst operation")
-                .allowedStates(State::STARTED)
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("runStandAlone").displayedName("Run Standalone").description("Activate Continuous Acquisition")
-                .allowedStates(State::ON)
-                .commit();
-
-        SLOT_ELEMENT(expected)
                 .key("stopAcquisition").displayedName("Stop Acquisition").description("Disable continuous data sending")
                 .allowedStates(State::ACQUIRING)
                 .commit();
 
-        SLOT_ELEMENT(expected)
-                .key("startAcquisition").displayedName("Start Acquisition").description("Enable continuous data sending")
-                .allowedStates(State::STARTED)
-                .commit();
-        
         SLOT_ELEMENT(expected)
                 .key("startBurstAcquisition").displayedName("Start Burst Acquisition").description("Send burst of trains")
                 .allowedStates(State::ON)
@@ -1025,11 +1005,7 @@ namespace karabo {
         KARABO_SLOT(open);
         KARABO_SLOT(close);
         KARABO_SLOT(runXFEL);
-        KARABO_SLOT(runStandAlone);
-        KARABO_SLOT(stopStandalone);
         KARABO_SLOT(stopAcquisition);
-        KARABO_SLOT(startManualBurstBtn);
-        KARABO_SLOT(startAcquisition);
         KARABO_SLOT(startBurstAcquisition);
         KARABO_SLOT(startAllChannelsDummyData);
 
@@ -1710,25 +1686,12 @@ namespace karabo {
     }
 
 
-    void DsscPpt::start() {
-        if (get<bool>("xfelMode")) {
-            runXFEL();
-        } else {
-            runStandAlone();
-        }
-    }
-
-
     void DsscPpt::stop() {
         stopAcquisition();
         runContMode(false);
     }
 
 
-    void DsscPpt::startAcquisition() {
-        runAcquisition(true);
-    }
-    
     void DsscPpt::burstAcquisitionPolling() {
         
         try {
@@ -1739,7 +1702,7 @@ namespace karabo {
 
           //const auto currentState = getState();
           
-          start();
+          runXFEL();
           
           //updateState(State::ACQUIRING);
 
@@ -1842,18 +1805,6 @@ namespace karabo {
 
         this->set("ethOutputRate", 0);
         this->updateGuiOtherParameters();  // Query the detector for its settings
-    }
-
-
-    void DsscPpt::runStandAlone() {
-        runContMode(true);
-        runAcquisition(true);
-    }
-
-
-    void DsscPpt::stopStandalone() {
-        runAcquisition(false);
-        runContMode(false);
     }
 
 
@@ -3677,15 +3628,6 @@ namespace karabo {
         }
     }
 
-
-
-    void DsscPpt::startManualBurstBtn() {
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start manual burst";
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            m_ppt->startBurst();
-        }
-    }
 
 
     void DsscPpt::readoutTestPattern() {
