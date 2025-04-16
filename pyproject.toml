@@ -13,6 +13,7 @@ where = ["src"]
 DsscControl = "DsscControl.dssc_control:DsscControl"
 DsscASICreset = "DsscControl.DsscASICreset:DsscASICreset"
 DsscConfigurator = "DsscControl.configurator:DsscConfigurator"
+DsscVetoCheck = "DsscControl.veto_checker:DsscVetoCheck"
 
 [project.entry-points."karabo.bound_device"]
 DsscSIB = "DsscControl.sib:DsscSIB"
