@@ -192,7 +192,7 @@ def overview(device_id):
 
     ppt_veto = DisplayLabelModel(
         font_size=24,
-        font_weight='bold', # 'normal',
+        font_weight='bold',
         height=71,
         keys=[f'{device_id}.asicStatus.pptVeto'],
         parent_component='DisplayComponent',

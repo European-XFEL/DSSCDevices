@@ -52,29 +52,26 @@ class AsicsNode(Configurable):
         accessMode=AccessMode.READONLY,
     )
     for idx in range(0, 16):
-        asic_state = String(
+        locals()[f"asic{idx}"] = String(
            displayedName=f"ASIC {idx} State",
            description="ON if ok, ERROR if not ok, PASSIVE if broken",
-           defaultValue=State.UNKNOWN.value,
+           enum=State,
+           defaultValue=State.UNKNOWN,
            displayType="State",
            options={
-                State.UNKNOWN.value,
-                State.ON.value,
-                State.ERROR.value,
-                State.PASSIVE.value,
+                State.UNKNOWN,
+                State.ON,
+                State.ERROR,
+                State.PASSIVE,
             },
            accessMode=AccessMode.READONLY,
         )
-        asic_veto = UInt32(
+        locals()[f"veto{idx}"] = UInt32(
             displayedName=f"ASIC {idx} Veto",
             description="ASIC Veto code received, should be same as PPT Veto",
             defaultValue=0,
             accessMode=AccessMode.READONLY,
         )
-        locals()[f"asic{idx}"] = asic_state
-        locals()[f"veto{idx}"] = asic_veto
-    locals().pop("asic_state")
-    locals().pop("asic_veto")
 
 
 class DsscVetoCheck(Device):
@@ -87,8 +84,8 @@ class DsscVetoCheck(Device):
 
     ccmon = String(
         displayedName="CCMON",
-        description="The detector's clock and control,"
-                    " used to get the veto pattern",
+        description="The detector's clock and control, "
+                    "used to get the veto pattern",
         accessMode=AccessMode.INITONLY,
     )
 
@@ -102,9 +99,10 @@ class DsscVetoCheck(Device):
     ok = String(
         displayedName="Data Ok",
         description="ON when ok, ERROR when not ok",
-        defaultValue=State.ON.value,
+        enum=State,
+        defaultValue=State.ON,
         displayType="State",
-        options={State.ON.value, State.ERROR.value},
+        options={State.ON, State.ERROR},
         accessMode=AccessMode.READONLY,
     )
 
@@ -153,9 +151,9 @@ class DsscVetoCheck(Device):
         if self.state == State.PASSIVE:
             self.state = State.PROCESSING
 
-        ok_string = State.ON.value if ok else State.ERROR.value
-        if ok_string != self.ok.value:
-            self.ok = ok_string
+        ok_state = State.ON if ok else State.ERROR
+        if ok_state != self.ok:
+            self.ok = ok_state
             self.notOkCount = 0
 
         if self.status.value != msg:
@@ -187,9 +185,9 @@ class DsscVetoCheck(Device):
             self.asicStatus.pptVeto = ppt_veto
 
         for idx, asic_state in enumerate(asic_states):
-            curr_asic_state = getattr(self.asicStatus, f"asic{idx}").value
-            if asic_state.value != curr_asic_state:
-                setattr(self.asicStatus, f"asic{idx}", asic_state.value)
+            curr_asic_state = getattr(self.asicStatus, f"asic{idx}")
+            if asic_state != curr_asic_state:
+                setattr(self.asicStatus, f"asic{idx}", asic_state)
 
         for idx, asic_veto in enumerate(asic_vetos):
             curr_asic_veto = getattr(self.asicStatus, f"veto{idx}").value
@@ -359,13 +357,13 @@ class DsscVetoCheck(Device):
                         and self.state == State.PROCESSING):
                     self.state = State.PASSIVE
                     self.status = f"No Data in last {timeout} seconds."
-                    self.ok = State.UNKNOWN.value
+                    self.ok = State.UNKNOWN
                     self.notOkCount = 0
                     for idx in range(16):
                         setattr(
                             self.asicStatus,
                             f"asic{idx}",
-                            State.UNKNOWN.value
+                            State.UNKNOWN,
                         )
             await sleep(5)
 
