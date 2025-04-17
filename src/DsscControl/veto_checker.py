@@ -158,7 +158,6 @@ class DsscVetoCheck(Device):
 
         if self.status.value != msg:
             self.status = msg
-            self.log.ERROR(msg)
 
         if not ok:
             self.notOkCount = self.notOkCount.value + 1
@@ -185,7 +184,7 @@ class DsscVetoCheck(Device):
             self.asicStatus.pptVeto = ppt_veto
 
         for idx, asic_state in enumerate(asic_states):
-            curr_asic_state = getattr(self.asicStatus, f"asic{idx}")
+            curr_asic_state = getattr(self.asicStatus, f"asic{idx}").value
             if asic_state != curr_asic_state:
                 setattr(self.asicStatus, f"asic{idx}", asic_state)
 
@@ -230,8 +229,8 @@ class DsscVetoCheck(Device):
         data (when ok).
 
         The ok flag describes whether the data is considered sane.
-        The message is set only when the ok is False, describing the type of
-        error.
+        The message describes the encountered error if ok is False, else
+        reports "ok".
         The pulse_id and cell_id data are returned together as two arrays in
         the data tuple, when available.
 
@@ -334,7 +333,6 @@ class DsscVetoCheck(Device):
                 # pulse_id.pop(x)
             else:
                 addr = len(cell_id)
-                print(pulse, addr)
 
             if fifo.full():
                 fifo.get()  # Make some space
@@ -360,11 +358,7 @@ class DsscVetoCheck(Device):
                     self.ok = State.UNKNOWN
                     self.notOkCount = 0
                     for idx in range(16):
-                        setattr(
-                            self.asicStatus,
-                            f"asic{idx}",
-                            State.UNKNOWN,
-                        )
+                        setattr(self.asicStatus, f"asic{idx}", State.UNKNOWN)
             await sleep(5)
 
     availableScenes = VectorString(
