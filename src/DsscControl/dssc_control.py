@@ -128,11 +128,10 @@ class DsscControl(Device):
         self.task = None
 
         # Keeps track of state updates in state fusion
-        self._last_state_update: str = None
+        self._last_status_update: str = None
 
         # Background task initialized in connectDevices
         self.state_fusion_task = None
-        self.lock_watchdog_task = None
 
     async def onInitialization(self):
         await self.connectDevices()
@@ -163,10 +162,6 @@ class DsscControl(Device):
         if self.state_fusion_task is not None:
             self.state_fusion_task.cancel()
             self.state_fusion_task = None
-
-        if self.lock_watchdog_task is not None:
-            self.lock_watchdog_task.cancel()
-            self.lock_watchdog_task = None
 
         self.state = State.CHANGING
         self.status = "Connecting to devices..."
@@ -224,7 +219,6 @@ class DsscControl(Device):
         self.task = background(self._initPPTdevices())
 
     async def _initPPTdevices(self):
-        self.state = State.INIT
         try:
             await self.stopDataSending()
             self.status = "Initializing PPT devices..."
@@ -245,15 +239,12 @@ class DsscControl(Device):
           description="Check ASICs/Reset on all PPT devices",
           allowedStates={State.ACTIVE, State.ON})
     async def checkASICsReset(self):
-        currentState = self.state
-        self.state = State.CHANGING
         self.status = "Check ASICs/Reset on all PPTs ..."
         to_checkReset = []
         for ppt_device in self.ppt_dev:
             to_checkReset.append(ppt_device.checkASICReset())
         await gather(*to_checkReset)
         self.log.INFO("Check ASICs/Reset")
-        self.state = currentState
         self.status = "ASICs are reset on all PPTs"
 
     @Slot(displayedName="Start Data sending",
@@ -310,119 +301,6 @@ class DsscControl(Device):
                                   "by a member of the DET group!",
                       defaultValue=False,
                       accessMode=AccessMode.INITONLY)
-
-    # Power procedure states to possible slots.
-    # Needed as the slots cannot be greyed out in the GUI, so we instead
-    # check if they can be called here and display a message if not.
-    state_to_active_slots = {
-        State.PASSIVE: "Switch ASICs on",
-        State.ACTIVE: "Switch ASICs off or Switch HV on",
-        State.STARTED: "Switch HV off or Switch PLC on",
-        State.ENGAGED: "Switch PLC off or Switch Source on",
-        State.ON: "Switch Source off"
-    }
-
-    @Slot(displayedName="1. ASICs On",
-          allowedStates=POWER_PROCEDURE_ALLOWED_STATES)
-    async def switchAsicsOn(self):
-        # Power Procedure goes from State.PASSIVE to State.ACTIVE
-        if self.power_procedure.state != State.PASSIVE:
-            self.status = ('Cannot do "1. ASICs On",  but can '
-                           f'{self.state_to_active_slots[self.power_procedure.state]}')
-            return
-        background(self.power_procedure.switchAsicsOn)
-
-    @Slot(displayedName="2. HV On",
-          allowedStates=POWER_PROCEDURE_ALLOWED_STATES)
-    async def switchHvOn(self):
-        # Power Procedure goes from State.ACTIVE to State.STARTED
-        if self.power_procedure.state != State.ACTIVE:
-            self.status = ('Cannot do "2. HV On",  but can '
-                           f'{self.state_to_active_slots[self.power_procedure.state]}')
-            return
-        background(self.power_procedure.switchHvOn)
-
-    @Slot(displayedName="3. PLC On",
-          allowedStates=POWER_PROCEDURE_ALLOWED_STATES)
-    async def switchPlcOn(self):
-        # Power Procedure goes from State.STARTED to State.ENGAGED
-        if self.power_procedure.state != State.STARTED:
-            self.status = ('Cannot do "3. PLC On",  but can '
-                           f'{self.state_to_active_slots[self.power_procedure.state]}')
-            return
-        background(self.power_procedure.switchPlcOn)
-
-    @Slot(displayedName="4. SOURCE On",
-          allowedStates=POWER_PROCEDURE_ALLOWED_STATES)
-    async def switchSourceOn(self):
-        # Power Procedure goes from State.ENGAGED to State.ON
-        if self.power_procedure.state !=State.ENGAGED:
-            self.status = ('Cannot do "4. SOURCE On", but can '
-                           f'{self.state_to_active_slots[self.power_procedure.state]}')
-            return
-        background(self.power_procedure.switchSourceOn)
-
-    @Slot(displayedName="All Off",
-           allowedStates=POWER_PROCEDURE_ALLOWED_STATES)
-    async def allOff(self):
-        """Ensure that no data is being sent while powering down."""
-        self.status = "Stopping acquisition before power down"
-        devices = [ppt for ppt in self.ppt_dev if ppt.state == State.ACQUIRING]
-        try:
-            await wait_for(self.call_many_remote(devices, "stopAcquisition"),
-                           timeout=3)
-        except TimeoutError:
-            self.status = "Not all PPTs stopped sending data"
-            self.log.INFO("Not all PPTs stopped sending data within 3 seconds. "
-                          "Something's up. Check and try again.")
-            return
-        await self.power_procedure.switchAllOff()
-
-    @Slot(displayedName="SOURCE Off",
-          allowedStates=POWER_PROCEDURE_ALLOWED_STATES)
-    async def switchSourceOff(self):
-        # Power Procedure goes from State.ON to State.ENGAGED
-        if self.power_procedure.state != State.ON:
-            self.status = ('Cannot do "SOURCE Off",  but can '
-                           f'{self.state_to_active_slots[self.power_procedure.state]}')
-            return
-        background(self.power_procedure.switchHvOff)
-
-    @Slot(displayedName="PLC Off",
-          allowedStates=POWER_PROCEDURE_ALLOWED_STATES)
-    async def switchPlcOff(self):
-        # Power Procedure goes from State.ENGAGED to State.STARTED
-        if self.power_procedure.state != State.ENGAGED:
-            self.status = ('Cannot do "Source Off",  but can '
-                           f'{self.state_to_active_slots[self.power_procedure.state]}')
-            return
-        background(self.power_procedure.switchSourceOff)
-
-    @Slot(displayedName="HV Off",
-          allowedStates=POWER_PROCEDURE_ALLOWED_STATES)
-    async def switchHVOff(self):
-        # Power Procedure goes from State.STARTED to State.ACTIVE
-        if self.power_procedure.state != State.STARTED:
-            self.status = ('Cannot do "HV Off",  but can '
-                           f'{self.state_to_active_slots[self.power_procedure.state]}')
-            return
-        background(self.power_procedure.switchHvOff)
-
-    @Slot(displayedName="ASICS Off",
-          allowedStates=POWER_PROCEDURE_ALLOWED_STATES)
-    async def switchAsicsOff(self):
-        # Power Procedure goes from State.ACTIVE to State.PASSIVE
-        if self.power_procedure.state != State.ACTIVE:
-            self.status = ('Cannot do "ASICs Off",  but can '
-                           f'{self.state_to_active_slots[self.power_procedure.state]}')
-            return
-        background(self.power_procedure.switchAsicsOff)
-
-    lastLockOverwrite = String(
-        displayedName="Last Lock Overwrite",
-        description="Tracking of locking; for troubleshooting",
-        accessMode=AccessMode.READONLY
-    )
 
     async def set_many_remote(self, devices: List['proxy'], **kwargs):
         coros = [setWait(dev, **kwargs) for dev in devices]
@@ -496,11 +374,11 @@ class DsscControl(Device):
                         state = State.ACQUIRING  # Acquiring trumps all
                         source = "PPTs"
 
-                source = f"{state.value} from {source}"
-                if state != self.state or source != self._last_state_update:
+                status = f"{state.value} from {source}"
+                if state != self.state or status != self._last_status_update:
                     self.state = State(state.value)
-                    self.status = source
-                    self._last_state_update = source
+                    self.status = status
+                    self._last_status_update = status
 
                 if power_proc_state is not None:
                     states.append(power_proc_state)
@@ -518,57 +396,34 @@ class DsscControl(Device):
 
             failures_left = 10  # Reset the counter on success
 
-        else:
-            self.status = str(e)
-            self.state = State.ERROR
+            # Update locks on remote devices
+            if self.state in {State.ERROR, State.ACQUIRING, State.CHANGING}:
+                # Set the appropriate locks depending on the source of changes.
+                if self.power_procedure.deviceId == source:
+                    coros = (lock(ppt) for ppt in self.ppt_dev
+                             if not ppt.lockedBy)
+                    await gather(*coros)
+                if "PPTs" in source and not self.power_procedure.lockedBy:
+                    await lock(self.power_procedure)
 
-    async def lock_watchdog(self):
-        """Check that devices are locked by us, and acquire them if possible."""
-        if self.expertMode:
-            self.log.INFO("EXPERT MODE: NOT LOCKING DEVICES")
-            self.status = "EXPERT MODE: NOT LOCKING DEVICES"
-            return
+            if self.state in {State.OFF, State.ON}:
+                # Idling, free all locks that may exist.
+                coros = []
+                for px in [*self.ppt_dev, self.power_procedure]:
+                    if px.lockedBy == self.deviceId:
+                        coros.append(px.slotClearLock())
+                await gather(*coros)
 
-        failures_left = 10
-
-        while failures_left >= 1:
-            try:
-                locks = {ppt: ppt.lockedBy for ppt in self.ppt_dev}
-                locks[self.power_procedure] = self.power_procedure.lockedBy
-
-                broken = [px for px, locked_by in locks.items() if locked_by != self.deviceId]
-                if broken:
-                    msg = f"OVERRULING LOCK ON: {[px.deviceId for px in broken]}"
-                    self.lastLockOverwrite = msg
-                    self.log.INFO(msg)
-                    await gather(*(lock(px) for px in broken))
-
-                await waitUntilNew(*locks.values())
-            except CancelledError:
-                self.log.DEBUG("Lock watchdog cancelled")
-                return  # eg. the task gets cancelled
-            except Exception as e:
-                # Handle issues such as failure to obtain locks
-                self.log.WARN(f"Exception in lock watchdog:\n {e}")
-                failures_left -= 1
-
-            failures_left = 10  # Reset the counter on success
-
-        else:
-            self.status = str(e)
+        else:  # Loop exited after 10 consecutive failures
+            self.status = "State Fusion failed 10 times in a row!"
             self.state = State.ERROR
 
     async def onDestruction(self):
-        if not self.expertMode:
-            if self.lock_watchdog_task is not None:  # In expert mode
-                self.lock_watchdog_task.cancel()
-
-            coros = [ppt.slotClearLock() for ppt in self.ppt_dev]
-
-            if self.power_procedure is not None:  # Failed to create proxy at init
-                coros.append(self.power_procedure.slotClearLock())
-
-            try:
-                await gather(*coros)
-            except KaraboError as e:  # A proxy went down before this device
-                self.log.WARN(str(e))
+        # Clear all locks on remote devices if locked by us.
+        for px in [*self.ppt_dev, self.power_procedure]:
+            if px.lockedBy == self.deviceId:
+                coros.append(px.slotClearLock())
+        try:
+            await gather(*coros)
+        except KaraboError as e:  # A proxy went down before this device
+            self.log.WARN(str(e))
