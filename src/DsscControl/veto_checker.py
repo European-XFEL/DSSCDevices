@@ -96,13 +96,14 @@ class DsscVetoCheck(Device):
         accessMode=AccessMode.INITONLY,
     )
 
+    # This is a State String, not a Bool, as it has 3 possible states
     ok = String(
         displayedName="Data Ok",
-        description="ON when ok, ERROR when not ok",
+        description="ON when ok, ERROR when not ok, UNKNOWN when no data",
         enum=State,
         defaultValue=State.ON,
         displayType="State",
-        options={State.ON, State.ERROR},
+        options={State.ON, State.ERROR, State.UNKNOWN},
         accessMode=AccessMode.READONLY,
     )
 
