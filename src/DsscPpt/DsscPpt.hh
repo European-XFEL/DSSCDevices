@@ -443,10 +443,21 @@ namespace karabo {
 
     private:
         
-        inline std::string removeSpaces(std::string& p){
-              std::string res(p);
-              std::replace(res.begin(), res.end(), ' ', '_');
-          return res;
+        inline std::string sanitizeKey(const std::string& key){
+            std::string res(key);
+            // Substitute spaces with underscores
+            std::replace(res.begin(), res.end(), ' ', '_');
+
+            // Strip characters that are not [a-z|A-Z|0-9|_]
+            res.erase(
+                std::remove_if(
+                    res.begin(),
+                    res.end(),
+                    [](char c) {
+                        return !std::isalnum(c) && c != '_';
+                    }),
+                res.end());
+            return res;
         }
         
         bool m_keepAcquisition;

@@ -1503,7 +1503,7 @@ namespace karabo {
         
         std::string rootRegName = rootNode + "." + regName;        
         
-        NODE_ELEMENT(schema).key(removeSpaces(rootRegName))
+        NODE_ELEMENT(schema).key(sanitizeKey(rootRegName))
                 .description(regName)
                 .displayedName(regName)
                 .commit();
@@ -1513,13 +1513,13 @@ namespace karabo {
         for (const auto & modSetName : moduleSets) { 
             string keySetName(rootRegName + "." + modSetName);
 
-            NODE_ELEMENT(schema).key(removeSpaces(keySetName))
+            NODE_ELEMENT(schema).key(sanitizeKey(keySetName))
                     .description(keySetName)
                     .displayedName(modSetName)
                     .commit();
             
             std::string keyModuleSet_modules = keySetName + ".modules";
-            STRING_ELEMENT(schema).key(removeSpaces(keyModuleSet_modules))
+            STRING_ELEMENT(schema).key(sanitizeKey(keyModuleSet_modules))
                 .displayedName("modules")
                 .description("modules in signalName")
                 .tags(tagName)
@@ -1537,7 +1537,7 @@ namespace karabo {
                 
                 std::string keySignalName(keySetName + "." + sigName);
                 
-                NODE_ELEMENT(schema).key(removeSpaces(keySignalName))
+                NODE_ELEMENT(schema).key(sanitizeKey(keySignalName))
                     .description(sigName)
                     .displayedName(sigName)
                     .commit();              
@@ -1558,7 +1558,7 @@ namespace karabo {
                   unsigned int maxValue = reg->getMaxSignalValue(modSetName, sigName);
 
                   if (readOnly) {
-                    UINT32_ELEMENT(schema).key(removeSpaces(modSignalName))
+                    UINT32_ELEMENT(schema).key(sanitizeKey(modSignalName))
                         .description(modSignalName)
                         .tags(tagName)
                         .displayedName(module_str)
@@ -1567,7 +1567,7 @@ namespace karabo {
                         .initialValue(signalVals[i])
                         .commit();
                   } else {
-                    UINT32_ELEMENT(schema).key(removeSpaces(modSignalName))
+                    UINT32_ELEMENT(schema).key(sanitizeKey(modSignalName))
                         .description(modSignalName)
                         .tags(tagName)
                         .displayedName(module_str)
@@ -2090,7 +2090,7 @@ namespace karabo {
 
                   std::string modSignalName(keySignalName + "." + module_str);
                   
-                  this->set<unsigned int>(removeSpaces(modSignalName), signalVals[i]);
+                  this->set<unsigned int>(sanitizeKey(modSignalName), signalVals[i]);
 
                   //string keyModuleName(regName + "." + modSetName + "." + sigName);
 
