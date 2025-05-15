@@ -23,6 +23,7 @@
 #include "DsscModuleInfo.h"
 #include "DsscConfigHashWriter.hh"
 #include "PPTFullConfig.h"
+#include "DsscPptScenes.hh"
 
 using namespace std;
 using namespace karabo::util;
@@ -1007,6 +1008,13 @@ namespace karabo {
                 .key("updateConfigFromHash").displayedName("Write Config Data")
                 .description("Write Configuration Data")
                 .commit();
+
+        VECTOR_STRING_ELEMENT(expected)
+                .key("availableScenes")
+                .setSpecialDisplayType(KARABO_SCHEMA_DISPLAY_TYPE_SCENES)
+                .readOnly()
+                .defaultValue(std::vector<std::string>{"overview", "configurator"})
+                .commit();
     }
 
     const std::string DsscPpt::s_dsscConfBaseNode = "DetectorRegisters";
@@ -1113,6 +1121,7 @@ namespace karabo {
         
         KARABO_SLOT(updateConfigHash);
         KARABO_SLOT(updateConfigFromHash);
+        KARABO_SLOT(requestScene, Hash);
     }
 
     void DsscPpt::preDestruction() {
@@ -4777,6 +4786,26 @@ namespace karabo {
 				       << "\" cannot be reached.";
         }
         return success;
+    }
+
+    void DsscPpt::requestScene(const Hash& params) {
+        const std::string& which = params.get<std::string>("name");
+
+        Hash reply(
+            "type", "deviceScene",
+            "origin", this->getInstanceId());
+        Hash& payload = reply.bindReference<Hash>("payload");
+        payload.set("name", which);
+        payload.set("success", false);
+
+        if ("overview" == which) {
+            payload.set("data", getControlScene(this->getInstanceId(), this->get<std::string>("quadrantId")));
+            payload.set("success", true);    
+        } else if ("configurator" == which) {
+            payload.set("data", getConfiguratorScene(this->getInstanceId(), this->get<std::string>("quadrantId")));
+            payload.set("success", true);    
+        }
+        this->reply(reply);
     }
 
 }

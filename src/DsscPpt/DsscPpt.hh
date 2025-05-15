@@ -483,6 +483,7 @@ namespace karabo {
         
         void burstAcquisitionPolling();
         bool getConfigurationFromRemote();
+        void requestScene(const karabo::util::Hash&);
     };
 }
 
