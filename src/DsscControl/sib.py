@@ -599,13 +599,11 @@ class DsscSIB(PythonDevice):
 
         self.BUFFER_SIZE = 1024
 
-        self.connectWorker = Worker(self.connect_to_sib, 5000, -1)
-        self.connectWorker.daemon = True
+        self.connectWorker = Worker(self.connect_to_sib, 5000)
 
         self.last_update = time.time()
         self.last_update_interval = 1
-        self.last_update_worker = Worker(self.last_update_counter, 1000, -1)
-        self.last_update_worker.daemon = True
+        self.last_update_worker = Worker(self.last_update_counter, 1000)
 
         # Process data in a separate thread
         self.data_queue = Queue(maxsize=20)
