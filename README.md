@@ -42,6 +42,28 @@ device mounted next to the PPT.
 It is using an ASCII protocol over TCP.  
 Its features are documented in [doc/sib.md](doc/sib.md)
 
+### DsscStateCombiner
+
+Combine the states of various devices.
+
+This device leverages the StateSignifier, but adds a twise for a corner
+case of the DSSC chiller being off.  
+
+When powered off, the BeckhoffChiller device goes to error, as it fails to
+communicate with the hardware, which is the correct thing to do during
+normal operation.  
+There's no way to know that the chiller is off, only that communication
+fails, resulting in a number of alarms being triggered.
+
+However, we can later know, in this device, whether it's fine or not, as
+the detector's interlock has an input of type BeckhoffDigitalInput, also
+monitored here.  
+If that input, SIB_1_SIB_ENABLE, is off, it's fine for the chiller to be in
+error.  
+
+Thus, if the most significant state is ERROR, check if it comes from the
+chiller is disabled (the SIB_ENABLE switch is OFF).
+
 ### DSSC ASIC Reset
 
 A middlelayer device to ease resetting ASICS on the various modules by providing a simple scene.  
