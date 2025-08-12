@@ -43,35 +43,35 @@ class MockDevice(Device):
 async def test_show_ppts_in_use():
     q1_did = create_instanceId()
     q1_device = MockDevice(
-        {"_deviceId_": q1_did, "fullConfigFileName": "/path/to/conf.conf"}
+        {"deviceId": q1_did, "fullConfigFileName": "/path/to/conf.conf"}
     )
     q2_did = create_instanceId()
     q2_device = MockDevice(
-        {"_deviceId_": q2_did, "fullConfigFileName": "/path/to/conf.conf"}
+        {"deviceId": q2_did, "fullConfigFileName": "/path/to/conf.conf"}
     )
     q3_did = create_instanceId()
     q3_device = MockDevice(
-        {"_deviceId_": q3_did, "fullConfigFileName": "/path/to/conf.conf"}
+        {"deviceId": q3_did, "fullConfigFileName": "/path/to/conf.conf"}
     )
     q4_did = create_instanceId()
     q4_device = MockDevice(
-        {"_deviceId_": q4_did, "fullConfigFileName": "/path/to/conf.conf"}
+        {"deviceId": q4_did, "fullConfigFileName": "/path/to/conf.conf"}
     )
 
     daq_controller_id = create_instanceId()
     daq_controller = MockDevice(
-        {"_deviceId_": daq_controller_id}
+        {"deviceId": daq_controller_id}
     )
 
     power_proc_id = create_instanceId()
     power_proc = MockDevice(
-        {"_deviceId_": power_proc_id}
+        {"deviceId": power_proc_id}
     )
 
     controller_id = create_instanceId()
     controller = DsscControl(
         {
-            "_deviceId_": controller_id,
+            "deviceId": controller_id,
             "availableGainConfigurations": [
                 {
                     "description": "default",

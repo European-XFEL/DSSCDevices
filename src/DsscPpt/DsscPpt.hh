@@ -24,10 +24,10 @@
 /**
  * The main Karabo namespace
  */
-//#define STATE_RUN karabo::util::State::STARTED,karabo::util::State::ACQUIRING
-//#define STATE_ON karabo::util::State::ON,karabo::util::State::STOPPED
-//#define STATE_INIT karabo::util::State::OFF
-//#define STATE_OFF karabo::util::State::UNKNOWN
+//#define STATE_RUN karabo::data::State::STARTED,karabo::data::State::ACQUIRING
+//#define STATE_ON karabo::data::State::ON,karabo::data::State::STOPPED
+//#define STATE_INIT karabo::data::State::OFF
+//#define STATE_OFF karabo::data::State::UNKNOWN
 
 #include "../version.hh"  // provides PACKAGE_VERSION common to all devices
 
@@ -96,18 +96,18 @@ namespace karabo {
 
     /** DSSC Patch Panel Transceiver C++ Karabo device
      */
-    class DsscPpt : public karabo::core::Device<> {
+    class DsscPpt : public karabo::core::Device {
 
     public:
 
         // Add reflection and version information to this class
         KARABO_CLASSINFO(DsscPpt, "DsscPpt", PACKAGE_VERSION)
-        typedef boost::shared_ptr<SuS::DSSC_PPT_API> PPT_Pointer;
+        typedef std::shared_ptr<SuS::DSSC_PPT_API> PPT_Pointer;
         /**
          * Necessary method as part of the factory/configuration system
          * @param expected Will contain a description of expected parameters for this device
          */
-        static void expectedParameters(karabo::util::Schema& expected);
+        static void expectedParameters(karabo::data::Schema& expected);
 
         /**
          * Constructor providing the initial configuration in form of a Hash object.
@@ -115,7 +115,7 @@ namespace karabo {
          * already be validated using the information of the expectedParameters function.
          * The configuration is provided in a key/value fashion.
          */
-        DsscPpt(const karabo::util::Hash& config);
+        DsscPpt(const karabo::data::Hash& config);
 
         /**
          * The destructor will be called in case the device gets killed (i.e. the event-loop returns)
@@ -130,12 +130,12 @@ namespace karabo {
 
     private: // State-machine call-backs (override)
 
-        void receiveRegisterConfiguration(const util::Hash& data,
+        void receiveRegisterConfiguration(const data::Hash& data,
                                           const xms::InputChannel::MetaData& meta);
 
-        void receiveSequencerConfig(const util::Hash& data);
-        void receiveBurstParams(const util::Hash& data);
-        void receiveConfigRegister(const util::Hash& data);
+        void receiveSequencerConfig(const data::Hash& data);
+        void receiveBurstParams(const data::Hash& data);
+        void receiveConfigRegister(const data::Hash& data);
 
         void readPLLStatus();
         void programPLL();
@@ -148,7 +148,7 @@ namespace karabo {
 
         void readLastPPTTrainID();
 
-        bool checkConfigFilePaths(const util::Hash& config);
+        bool checkConfigFilePaths(const data::Hash& config);
 
         int checkAllIOBStatus();
         bool checkIOBReady(int iobNumber);
@@ -303,22 +303,22 @@ namespace karabo {
         void manualAcquisitionStateOnEntry();
         void acquisitionStateOnExit();
 
-        void preReconfigure(karabo::util::Hash& incomingReconfiguration);
-        void preReconfigureEPC(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureETH(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureLoadIOBConfig(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureLoadEPCConfig(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureEnableDatapath(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureEnablePLL(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureEnableOthers(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureEnableMeasurement(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureLoadASICConfig(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigurePixel(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureJTAG(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureIOB(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureFullConfig(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureFastInit(karabo::util::Hash & incomingReconfiguration);
-        void preReconfigureRegAccess(karabo::util::Hash & incomingReconfiguration);
+        void preReconfigure(karabo::data::Hash& incomingReconfiguration);
+        void preReconfigureEPC(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureETH(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureLoadIOBConfig(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureLoadEPCConfig(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureEnableDatapath(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureEnablePLL(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureEnableOthers(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureEnableMeasurement(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureLoadASICConfig(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigurePixel(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureJTAG(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureIOB(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureFullConfig(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureFastInit(karabo::data::Hash & incomingReconfiguration);
+        void preReconfigureRegAccess(karabo::data::Hash & incomingReconfiguration);
 
 
         void preDestruction();
@@ -358,7 +358,7 @@ namespace karabo {
 
         void enableDPChannels(uint16_t enOneHot);
 
-        int anyToInt(const boost::any anyVal, bool &ok);
+        int anyToInt(const std::any anyVal, bool &ok);
 
         void checkQSFPConnected();
 
@@ -379,7 +379,7 @@ namespace karabo {
 
         void generateAllConfigRegElements();
 
-        void generateConfigRegElements(karabo::util::Schema &schema, SuS::ConfigReg * reg,\
+        void generateConfigRegElements(karabo::data::Schema &schema, SuS::ConfigReg * reg,\
                     std::string regName, std::string tagName, std::string rootNode = "");
 
         std::string getIOBTag(int iobNumber);
@@ -416,19 +416,19 @@ namespace karabo {
         public:
 
             ContModeKeeper(DsscPpt *ppt) : dsscPpt(ppt), lastState(ppt->getState()) {
-                if (lastState == util::State::ACQUIRING || lastState == util::State::STARTED) {
-                    if (lastState == util::State::ACQUIRING) {
+                if (lastState == data::State::ACQUIRING || lastState == data::State::STARTED) {
+                    if (lastState == data::State::ACQUIRING) {
                         dsscPpt->runAcquisition(false);
                     }
                     dsscPpt->runContMode(false);
                 }
-                dsscPpt->updateState(util::State::CHANGING);
+                dsscPpt->updateState(data::State::CHANGING);
             }
 
             ~ContModeKeeper() {
-                if (lastState == util::State::ACQUIRING || lastState == util::State::STARTED) {
+                if (lastState == data::State::ACQUIRING || lastState == data::State::STARTED) {
                     dsscPpt->runContMode(true);
-                    if (lastState == util::State::ACQUIRING) {
+                    if (lastState == data::State::ACQUIRING) {
                         dsscPpt->runAcquisition(true);
                     }
                 }
@@ -438,7 +438,7 @@ namespace karabo {
         private:
             
             DsscPpt *dsscPpt;
-            util::State lastState;
+            data::State lastState;
         };
 
     private:
@@ -462,11 +462,11 @@ namespace karabo {
         
         bool m_keepAcquisition;
         bool m_keepPolling;
-        boost::shared_ptr<boost::thread> m_pollThread;
+        std::shared_ptr<boost::thread> m_pollThread;
         SmartMutex m_accessToPptMutex;
         boost::mutex m_outMutex;
         PPT_Pointer m_ppt; // Use your main PPT class here
-        karabo::util::Schema m_schema;
+        karabo::data::Schema m_schema;
         std::string m_epcTag;
         std::string m_ethTag;
 
@@ -479,11 +479,11 @@ namespace karabo {
         
         std::atomic<bool> m_burstAcquisition;
         
-        karabo::util::Hash m_last_config_hash;
+        karabo::data::Hash m_last_config_hash;
         
         void burstAcquisitionPolling();
         bool getConfigurationFromRemote();
-        void requestScene(const karabo::util::Hash&);
+        void requestScene(const karabo::data::Hash&);
     };
 }
 

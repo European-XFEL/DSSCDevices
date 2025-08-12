@@ -139,13 +139,7 @@ class DsscSIB(PythonDevice):
             .description("The time elapsed since the last update received "
                          "from the SIB.")
             .unit(Unit.SECOND)
-            .readOnly().initialValue(0)
-            .warnHigh(5)
-            .info("No data received for 5 s: connection w/ SIB might be lost")
-            .needsAcknowledging(False)
-            .alarmHigh(10)
-            .info("No data received for 10 s: connection w/ SIB might be lost")
-            .needsAcknowledging(False)
+            .readOnly().defaultValue(0)
             .commit(),
 
             FLOAT_ELEMENT(expected).key("epsilon")
@@ -238,13 +232,11 @@ class DsscSIB(PythonDevice):
             INT32_ELEMENT(expected).key("localQloop")
             .displayedName("LocalQloop")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             INT32_ELEMENT(expected).key("globalQloop")
             .displayedName("GloballQloop")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             INT32_ELEMENT(expected).key("qloopAddress")
@@ -286,13 +278,11 @@ class DsscSIB(PythonDevice):
             INT32_ELEMENT(expected).key("ppfc")
             .displayedName("PPFC")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             INT32_ELEMENT(expected).key("iob")
             .displayedName("IOB")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             INT32_ELEMENT(expected).key("therm")
@@ -303,37 +293,31 @@ class DsscSIB(PythonDevice):
             INT32_ELEMENT(expected).key("asic")
             .displayedName("ASIC")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             INT32_ELEMENT(expected).key("pStatus")
             .displayedName("P_STATUS")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             INT32_ELEMENT(expected).key("hStatus")
             .displayedName("H_STATUS")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             INT32_ELEMENT(expected).key("cableStatus")
             .displayedName("CABLE_STATUS")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             INT32_ELEMENT(expected).key("coolStatus")
             .displayedName("COOL_STATUS")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             INT32_ELEMENT(expected).key("expStatus")
             .displayedName("EXP_STATUS")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             FLOAT_ELEMENT(expected).key("vccSum")
@@ -452,7 +436,6 @@ class DsscSIB(PythonDevice):
             INT32_ELEMENT(expected).key("mg")
             .displayedName("MG")
             .readOnly()
-            .alarmHigh(0).needsAcknowledging(False)
             .commit(),
 
             FLOAT_ELEMENT(expected).key("p1")
@@ -650,7 +633,7 @@ class DsscSIB(PythonDevice):
             self.socket.settimeout(5)
             self.socket.connect((hostname, port))  # connect
             reply = self.socket.recv(self.BUFFER_SIZE)
-            self.log.INFO(f"Connected to SIB. Reply: {reply}")
+            self.logger.info(f"Connected to SIB. Reply: {reply}")
 
             self.authenticate()  # authenticate
 
@@ -660,7 +643,7 @@ class DsscSIB(PythonDevice):
             self.socket.settimeout(1)
             self.updateState(State.NORMAL)
         except Exception as e:
-            self.log.ERROR(f"Cannot connect to SIB: {e}")
+            self.logger.error(f"Cannot connect to SIB: {e}")
             return
 
     def authenticate(self):
@@ -686,9 +669,9 @@ class DsscSIB(PythonDevice):
             fw_version = self.socket.recv(self.BUFFER_SIZE).decode().strip()
             self.set("version", fw_version)
 
-            self.log.INFO(f"Authentication successful. Reply: {on_connect} - {fw_version}")
+            self.logger.info(f"Authentication successful. Reply: {on_connect} - {fw_version}")
         except Exception as e:
-            self.log.ERROR(f"Cannot authenticate: {e}")
+            self.logger.error(f"Cannot authenticate: {e}")
             self.updateState(State.ERROR)
 
     def last_update_counter(self):
@@ -712,7 +695,7 @@ class DsscSIB(PythonDevice):
             self['lastUpdated'] = 0
 
     def restart(self):
-        self.log.INFO("Restarting SIB")
+        self.logger.info("Restarting SIB")
         self.socket.send(f"RESET;{DsscSIB.cmnd_terminator}".encode())
 
     def consumer(self):
@@ -737,9 +720,9 @@ class DsscSIB(PythonDevice):
                     if self['log'] > 0:
                         # if LOG > 0 updates are expected all the time
                         counter -= 1
-                        self.log.DEBUG(f"Listener caught this: {e}")
+                        self.logger.debug(f"Listener caught this: {e}")
                 else:
-                    self.log.INFO("Lost connection with SIB")
+                    self.logger.info("Lost connection with SIB")
                     self.socket = None
                     self.updateState(State.UNKNOWN)
                     self.reset_last_updated()  # reset "last updated" counters
@@ -747,7 +730,7 @@ class DsscSIB(PythonDevice):
 
             ts = self.getActualTimestamp()
             data += new_data  # concatenate to old data
-            self.log.DEBUG(f"Data lenght: tot={len(data)} "
+            self.logger.debug(f"Data lenght: tot={len(data)} "
                            f"new={len(new_data)} Bytes")
             data_split = data.split(DsscSIB.cmnd_terminator)
             if data.endswith(DsscSIB.cmnd_terminator):
@@ -763,7 +746,7 @@ class DsscSIB(PythonDevice):
                     # Queue data for processing
                     self.data_queue.put((data_row, ts), block=False)
                 except Full:
-                    self.log.ERROR("'data_queue' full. Discarding new data!")
+                    self.logger.error("'data_queue' full. Discarding new data!")
 
             counter = 10  # reset counter
 
@@ -788,11 +771,11 @@ class DsscSIB(PythonDevice):
                     )
                     h['status'] = status
 
-                self.log.DEBUG(f"Setting {h}")
+                self.logger.debug(f"Setting {h}")
                 self.set(h, ts)  # Bulk set
 
         except Exception as e:
-            self.log.WARN(f"Could not set {h}. {e}")
+            self.logger.warning(f"Could not set {h}. {e}")
 
     def is_update_required(self, key, value, epsilon):
         """Return True if 'value' requires an update."""
@@ -891,10 +874,10 @@ class DsscSIB(PythonDevice):
 
             try:
                 if not h.empty():
-                    self.log.DEBUG(f"Setting {h}")
+                    self.logger.debug(f"Setting {h}")
                     self.set(h, ts)  # bulk set
             except Exception as e:
-                self.log.WARN(f"Could not set {h}. {e}")
+                self.logger.warning(f"Could not set {h}. {e}")
 
     def configure_sib(self, configuration):
         if configuration.has('som'):

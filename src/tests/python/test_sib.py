@@ -8,16 +8,16 @@ def test_sib_instantiation():
     sib = Configurator(PythonDevice).create(
         "DsscSIB",
         Hash(
-            "Logger.priority", "DEBUG", "deviceId", "DSSC_SIB_0", "hostname", "1.2.3.4"
+            "log.level", "DEBUG", "deviceId", "DSSC_SIB_0", "hostname", "1.2.3.4"
         ),
     )
-    sib.startFsm()
+    sib.startInitialFunctions()
 
 
 def test_sib_no_ip():
     with pytest.raises(RuntimeError):
         Configurator(PythonDevice).create(
-            "DsscSIB", Hash("Logger.priority", "DEBUG", "deviceId", "DSSC_SIB_0")
+            "DsscSIB", Hash("log.level", "DEBUG", "deviceId", "DSSC_SIB_0")
         )
 
 

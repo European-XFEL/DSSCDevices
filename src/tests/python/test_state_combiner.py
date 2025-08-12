@@ -14,14 +14,14 @@ class TestDsscStateCombiner(DeviceTest):
     @classmethod
     @contextmanager
     def lifetimeManager(cls):
-        cls.chiller = Device({'_deviceId_': 'chiller'})
+        cls.chiller = Device({"deviceId": 'chiller'})
         cls.chiller.classId = 'BeckhoffChiller'
-        cls.sib_switch = Device({'_deviceId_': 'sib_switch'})
+        cls.sib_switch = Device({"deviceId": 'sib_switch'})
         cls.sib_switch.classId = 'BeckhoffDigitalInput'
-        cls.mpod = Device({'_deviceId_': 'mpod'})
+        cls.mpod = Device({"deviceId": 'mpod'})
         conf = {
             "classId": "StateCombiner",
-            "_deviceId_": "TestStateCombiner",
+            "deviceId": "TestStateCombiner",
             "deviceIds": [" chiller", "sib_switch ", "mpod"]
         }
         cls.dev = DsscStateCombiner(conf)
