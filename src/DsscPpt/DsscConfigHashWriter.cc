@@ -18,8 +18,9 @@
 
 
 using namespace karabo::util;
+using namespace karabo::data;
 using namespace karabo::log;
-using namespace karabo::io;
+using namespace karabo::data;
 using namespace karabo::net;
 using namespace karabo::xms;
 using namespace karabo::core;
@@ -34,7 +35,7 @@ namespace karabo {
     DsscConfigToSchema::~DsscConfigToSchema() {
     };
 
-    void DsscConfigToSchema::HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path) {
+    void DsscConfigToSchema::HashToSchema(const karabo::data::Hash& hash, karabo::data::Schema& expected, const std::string& path) {
         for (Hash::const_iterator it = hash.begin(); it != hash.end(); ++it) {
             switch (it->getType()) {
 
@@ -46,7 +47,7 @@ namespace karabo {
 
                 case Types::UINT32:
                     UINT32_ELEMENT(expected).key(path + it->getKey())
-                            .daqPolicy(DAQPolicy::OMIT)
+                            
                             .init()
                             .assignmentOptional()
                             .noDefaultValue()
@@ -55,7 +56,7 @@ namespace karabo {
 
                 case Types::STRING:
                     STRING_ELEMENT(expected).key(path + it->getKey())
-                            .daqPolicy(DAQPolicy::OMIT)
+                            
                             .init()
                             .assignmentOptional()
                             .noDefaultValue()
@@ -63,7 +64,7 @@ namespace karabo {
                     break;
                 case Types::VECTOR_UINT32:
                     VECTOR_UINT32_ELEMENT(expected).key(path + it->getKey())
-                            .daqPolicy(DAQPolicy::OMIT)
+                            
                             .init()
                             .assignmentOptional()
                             .noDefaultValue()
@@ -73,7 +74,7 @@ namespace karabo {
     }
 
 
-    void DsscConfigToSchema::HashToSchemaDetConf(const karabo::util::Hash& hash, karabo::util::Schema& expected,\
+    void DsscConfigToSchema::HashToSchemaDetConf(const karabo::data::Hash& hash, karabo::data::Schema& expected,\
             const std::string& path, bool _readonly) {
         
         bool ReadOnly = true;
@@ -105,7 +106,7 @@ namespace karabo {
                 case Types::UINT32:
                     if((!_readonly) && moduledata){                         
                         UINT32_ELEMENT(expected).key(path + it->getKey())
-                                .daqPolicy(DAQPolicy::OMIT)
+                                
                                 .init()
                                 .assignmentOptional()
                                 .noDefaultValue()
@@ -113,7 +114,7 @@ namespace karabo {
                                 .commit();
                     }else{                        
                         UINT32_ELEMENT(expected).key(path + it->getKey())
-                                .daqPolicy(DAQPolicy::OMIT)
+                                
                                 .init()
                                 .assignmentOptional()
                                 .noDefaultValue()                                
@@ -124,7 +125,7 @@ namespace karabo {
                 case Types::STRING:
                     if((!_readonly) && moduledata){
                         STRING_ELEMENT(expected).key(path + it->getKey())
-                                .daqPolicy(DAQPolicy::OMIT)
+                                
                                 .init()
                                 .assignmentOptional()
                                 .noDefaultValue()
@@ -132,7 +133,7 @@ namespace karabo {
                                 .commit();
                     }else{
                         STRING_ELEMENT(expected).key(path + it->getKey())
-                                .daqPolicy(DAQPolicy::OMIT)
+                                
                                 .init()
                                 .assignmentOptional()
                                 .noDefaultValue()                                
@@ -142,7 +143,7 @@ namespace karabo {
                 case Types::VECTOR_UINT32:
                     if((!_readonly) && moduledata){
                         VECTOR_UINT32_ELEMENT(expected).key(path + it->getKey())
-                                .daqPolicy(DAQPolicy::OMIT)
+                                
                                 .init()
                                 .assignmentOptional()
                                 .noDefaultValue()
@@ -150,7 +151,7 @@ namespace karabo {
                                 .commit();
                     }else{
                         VECTOR_UINT32_ELEMENT(expected).key(path + it->getKey())
-                               .daqPolicy(DAQPolicy::OMIT)
+                               
                                .init()
                                .assignmentOptional()
                                .noDefaultValue()                               
@@ -169,14 +170,14 @@ namespace karabo {
     }
     
     
-    std::vector<std::pair<std::string, unsigned int>> DsscConfigToSchema::compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new){
+    std::vector<std::pair<std::string, unsigned int>> DsscConfigToSchema::compareConfigHashData(karabo::data::Hash& hash_old, karabo::data::Hash& hash_new){
         paths_diffVals.clear();
         compareConfigHashData_rec(hash_old, hash_new, std::string());
         return paths_diffVals;
         //
     }
     
-    void DsscConfigToSchema::compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new,\
+    void DsscConfigToSchema::compareConfigHashData_rec(karabo::data::Hash& hash_old, karabo::data::Hash& hash_new,\
             std::string path){
         //
         

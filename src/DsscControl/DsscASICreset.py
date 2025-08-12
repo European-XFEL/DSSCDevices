@@ -12,7 +12,6 @@ from karabo.middlelayer import (
     Bool,
     Configurable,
     connectDevice,
-    DaqPolicy,
     Device,
     gather,
     Hash,
@@ -239,7 +238,6 @@ class DsscASICreset(Device):
         displayType="Scenes",
         accessMode=AccessMode.READONLY,
         defaultValue=["overview"],
-        daqPolicy=DaqPolicy.OMIT
     )
 
     @slot

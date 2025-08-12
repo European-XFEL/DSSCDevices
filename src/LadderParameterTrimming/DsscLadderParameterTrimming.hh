@@ -28,11 +28,11 @@ class DataPacker;
 
 namespace karabo {
 
-    class DsscLadderParameterTrimming : public karabo::core::Device<>{
+    class DsscLadderParameterTrimming : public karabo::core::Device{
 
     public:
         
-        typedef boost::shared_ptr<SuS::DsscTrimPptAPI> TrimPPT_API_Pointer;
+        typedef std::shared_ptr<SuS::DsscTrimPptAPI> TrimPPT_API_Pointer;
 
         // Add reflection information and Karabo framework compatibility to this class
         KARABO_CLASSINFO(DsscLadderParameterTrimming, "DsscLadderParameterTrimming", PACKAGE_VERSION)
@@ -41,7 +41,7 @@ namespace karabo {
          * Necessary method as part of the factory/configuration system
          * @param expected Will contain a description of expected parameters for this device
          */
-        static void expectedParameters(karabo::util::Schema& expected);
+        static void expectedParameters(karabo::data::Schema& expected);
 
         /**
          * Constructor providing the initial configuration in form of a Hash object.
@@ -49,7 +49,7 @@ namespace karabo {
          * already be validated using the information of the expectedParameters function.
          * The configuration is provided in a key/value fashion.
          */
-        DsscLadderParameterTrimming(const karabo::util::Hash& config);
+        DsscLadderParameterTrimming(const karabo::data::Hash& config);
 
         /**
          * The destructor will be called in case the device gets killed
@@ -68,11 +68,11 @@ namespace karabo {
          *           The reconfiguration will automatically be applied to the current state.
          * @param incomingReconfiguration The reconfiguration information as was triggered externally
          */
-        virtual void preReconfigure(karabo::util::Hash& incomingReconfiguration);
-        virtual void preReconfigureGeneral(karabo::util::Hash& incomingReconfiguration);
-        virtual void preReconfigureMeanReceiver(karabo::util::Hash & incomingReconfiguration);
-        virtual void preReconfigureTrimming(karabo::util::Hash & incomingReconfiguration);
-        virtual void preReconfigureHelper(karabo::util::Hash & incomingReconfiguration);
+        virtual void preReconfigure(karabo::data::Hash& incomingReconfiguration);
+        virtual void preReconfigureGeneral(karabo::data::Hash& incomingReconfiguration);
+        virtual void preReconfigureMeanReceiver(karabo::data::Hash & incomingReconfiguration);
+        virtual void preReconfigureTrimming(karabo::data::Hash & incomingReconfiguration);
+        virtual void preReconfigureHelper(karabo::data::Hash & incomingReconfiguration);
 
         /**
          * This function acts as a hook and is called after an reconfiguration request was received,
@@ -99,7 +99,7 @@ namespace karabo {
         void updateSendingAsics(int moduleNr);
         void updateBaselineValid();
 
-        util::Hash createInputChannelConfig(const std::vector<std::string> & outputChannels, const std::string & onSlowness = "drop");
+        data::Hash createInputChannelConfig(const std::vector<std::string> & outputChannels, const std::string & onSlowness = "drop");
 
         // implementation of pure virtual functions of CHIPInterface
     private:
@@ -135,7 +135,7 @@ namespace karabo {
     public:
         
         bool inContinuousMode() {
-            return dsscPptState() == util::State::ACQUIRING;
+            return dsscPptState() == data::State::ACQUIRING;
         }
         
         int initSystem();// override;
@@ -325,9 +325,9 @@ namespace karabo {
         
         bool initMultiModuleInterface(const std::string);
 
-        void onMeanData(const util::Hash& data,
+        void onMeanData(const data::Hash& data,
                         const xms::InputChannel::MetaData& meta);
-        void onPixelData(const util::Hash& data,
+        void onPixelData(const data::Hash& data,
                          const xms::InputChannel::MetaData& meta);
 
         void saveDataVector(const std::string & outputName, const std::vector<double> & dataVector);
@@ -337,8 +337,8 @@ namespace karabo {
         void showLadderImage(const std::vector<double> & values);
         void showLadderHisto(const std::vector<double> & values);
 
-        static util::Hash getModuleSetHash(SuS::ConfigReg *, const std::string & moduleSetName);
-        static util::Hash getSequencerHash(SuS::Sequencer *seq);
+        static data::Hash getModuleSetHash(SuS::ConfigReg *, const std::string & moduleSetName);
+        static data::Hash getSequencerHash(SuS::Sequencer *seq);
 
         bool allDevicesAvailable();
         bool isPPTDeviceAvailable();
@@ -352,7 +352,7 @@ namespace karabo {
         bool startMainProcessorInstance();
         bool startDsscPptInstance();
         void startPptDevice();
-        void triggerPptInitFunction(util::State originState, const std::string & function, int timeout = 3, int TRY_CNT = 3);
+        void triggerPptInitFunction(data::State originState, const std::string & function, int timeout = 3, int TRY_CNT = 3);
         void fillSramAndReadoutPattern();
 
         void computeTargetGainADCConfiguration();
@@ -366,8 +366,8 @@ namespace karabo {
         void setBufferMode();
 
         unsigned int getLastValidTrainId();
-        util::State dsscPptState();
-        util::State deviceState(const std::string & deviceId);
+        data::State dsscPptState();
+        data::State deviceState(const std::string & deviceId);
 
         bool isDeviceExisting(const std::string & deviceId) {
             return (m_deviceInitialized ? remote().exists(deviceId).first : false);
@@ -440,7 +440,7 @@ namespace karabo {
 
         bool m_deviceInitialized;
 
-        void changeDeviceState(const util::State & newState);
+        void changeDeviceState(const data::State & newState);
 
         bool matrixSRAMTest(int patternID, int &errCnt);
         bool matrixSRAMTest();
@@ -455,16 +455,16 @@ namespace karabo {
 
             StateChangeKeeper(core::Device<> *device) : m_dev(device), m_lastState(m_dev->getState()) {
                 try {
-                    m_dev->updateState(util::State::CHANGING);
+                    m_dev->updateState(data::State::CHANGING);
                     m_dev->set<std::string>("status", "Measuring");
                 } catch (...) {
                     std::cout << "DsscLadderParameterTrimming.h : Could not change device state!!!" << std::endl; // sometimes state is not existing
                 }
             }
 
-            StateChangeKeeper(core::Device<> *device, const util::State & afterState) : m_dev(device), m_lastState(afterState) {
+            StateChangeKeeper(core::Device<> *device, const data::State & afterState) : m_dev(device), m_lastState(afterState) {
                 try {
-                    m_dev->updateState(util::State::CHANGING);
+                    m_dev->updateState(data::State::CHANGING);
                     m_dev->set<std::string>("status", "Measuring");
                 } catch (...) {
                     std::cout << "DsscLadderParameterTrimming.h : Could not change device state!!!" << std::endl; // sometimes state is not existing
@@ -479,13 +479,13 @@ namespace karabo {
                 }
             }
 
-            void change(const util::State & newState) {
+            void change(const data::State & newState) {
                 m_lastState = newState;
             }
 
         private:
             core::Device<> *m_dev;
-            util::State m_lastState;
+            data::State m_lastState;
         };
 
         enum ConfigState {

@@ -30,20 +30,20 @@ namespace karabo {
 
         virtual ~DsscConfigToSchema();
 
-        //karabo::util::Schema getUpdatedSchema();
-        void addMapData(karabo::util::Hash& hash, const std::string& node, const std::map<std::string, uint32_t>& mapData);
+        //karabo::data::Schema getUpdatedSchema();
+        void addMapData(karabo::data::Hash& hash, const std::string& node, const std::map<std::string, uint32_t>& mapData);
 
-        static void HashToSchema(const karabo::util::Hash& hash, karabo::util::Schema& expected, const std::string& path);
-        static void HashToSchemaDetConf(const karabo::util::Hash& hash, karabo::util::Schema& expected,\
+        static void HashToSchema(const karabo::data::Hash& hash, karabo::data::Schema& expected, const std::string& path);
+        static void HashToSchemaDetConf(const karabo::data::Hash& hash, karabo::data::Schema& expected,\
             const std::string& path, bool _readonly);        
 
-        static void addConfiguration(karabo::util::Hash& hash, DsscConfigData& configData);
-        static void addConfiguration(karabo::util::Hash& hash, DsscRegisterConfigVec& registerConfigVec);
-        static void addConfiguration(karabo::util::Hash& hash, DsscRegisterConfig & registerConfig);
-        static void addConfiguration(karabo::util::Hash& hash, const std::string& path, const DsscSequenceData& sequenceData);
+        static void addConfiguration(karabo::data::Hash& hash, DsscConfigData& configData);
+        static void addConfiguration(karabo::data::Hash& hash, DsscRegisterConfigVec& registerConfigVec);
+        static void addConfiguration(karabo::data::Hash& hash, DsscRegisterConfig & registerConfig);
+        static void addConfiguration(karabo::data::Hash& hash, const std::string& path, const DsscSequenceData& sequenceData);
         
-        std::vector<std::pair<std::string, unsigned int>> compareConfigHashData(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new);
-        void compareConfigHashData_rec(karabo::util::Hash& hash_old, karabo::util::Hash& hash_new, std::string path);
+        std::vector<std::pair<std::string, unsigned int>> compareConfigHashData(karabo::data::Hash& hash_old, karabo::data::Hash& hash_new);
+        void compareConfigHashData_rec(karabo::data::Hash& hash_old, karabo::data::Hash& hash_new, std::string path);
         
     private:
 

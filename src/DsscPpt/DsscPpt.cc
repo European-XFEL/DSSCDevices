@@ -7,7 +7,7 @@
  *
  * Copyright (c) 2010-2013 European XFEL GmbH Hamburg. All rights reserved.
  */
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 #include <boost/functional/hash.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -27,8 +27,9 @@
 
 using namespace std;
 using namespace karabo::util;
+using namespace karabo::data;
 using namespace karabo::log;
-using namespace karabo::io;
+using namespace karabo::data;
 using namespace karabo::net;
 using namespace karabo::xms;
 using namespace karabo::core;
@@ -52,7 +53,7 @@ using namespace karabo::core;
 namespace karabo {
 
 
-    KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, DsscPpt)
+    KARABO_REGISTER_FOR_CONFIGURATION(Device, DsscPpt)
 
     void DsscPpt::expectedParameters(Schema& expected) {
 
@@ -71,7 +72,7 @@ namespace karabo {
                 .displayedName("PPT Host")
                 .description("PPT hostname or IP address")
                 .assignmentOptional().defaultValue("192.168.0.125").reconfigurable()
-                .allowedStates(karabo::util::State::UNKNOWN)
+                .allowedStates(karabo::data::State::UNKNOWN)
                 .commit();
 
         UINT32_ELEMENT(expected).key("pptPort")
@@ -171,7 +172,7 @@ namespace karabo {
                 .description("Query the hardware for detector type. True means DEPFET, False means miniSDD.")
                 .displayedName("DEPFET Sensor")
                 .readOnly()
-                .initialValue(true)  // The more sensitive type of detector.
+                .defaultValue(true)  // The more sensitive type of detector.
                 .commit();
 
         PATH_ELEMENT(expected).key("linuxBinaryName")
@@ -199,21 +200,21 @@ namespace karabo {
                 .displayedName("PPT Serial Nr")
                 .description("PPT Serial number read from PPT")
                 .readOnly()
-                .initialValue("connect to PPT")
+                .defaultValue("connect to PPT")
                 .commit();
 
         STRING_ELEMENT(expected).key("firmwareRev")
                 .displayedName("Firmware Built")
                 .description("PPT Firmware Built Revision")
                 .readOnly()
-                .initialValue("nA")
+                .defaultValue("nA")
                 .commit();
 
         STRING_ELEMENT(expected).key("linuxRev")
                 .displayedName("Linux Built")
                 .description("Linux Built Revision")
                 .readOnly()
-                .initialValue("nA")
+                .defaultValue("nA")
                 .commit();
 
         UINT32_ELEMENT(expected).key("pptTemp")
@@ -221,16 +222,13 @@ namespace karabo {
                 .description("PPT FPGA Temperature")
                 .unit(Unit::DEGREE_CELSIUS)
                 .readOnly()
-                .initialValue(666)
-                .warnLow(10).needsAcknowledging(false).alarmLow(5).needsAcknowledging(false)
-                .warnHigh(75).needsAcknowledging(false).alarmHigh(80).needsAcknowledging(false)
-                .commit();
+                .defaultValue(666);
 
         UINT32_ELEMENT(expected).key("ethOutputRate")
                 .displayedName("SFP Output Rate")
                 .description("Ouput rate of the QSFP link, measured in MBit/s, averaged over one second")
                 .readOnly()
-                .initialValue(0)
+                .defaultValue(0)
                 .commit();
 
         UINT32_ELEMENT(expected).key("initDistance")
@@ -283,7 +281,7 @@ namespace karabo {
         UINT32_ELEMENT(expected).key("lastTrainId")
                 .displayedName("Last Train ID from PPT")
                 .description("Holds 4LSB of last train ID from PPT registers. Trigger readout before use")
-                .readOnly().initialValue(0)
+                .readOnly().defaultValue(0)
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -921,7 +919,7 @@ namespace karabo {
                 .displayedName("Connected ETH Channels")
                 .description("PPT can see if a fiber of the QSFP link is connected or not")
                 .readOnly()
-                .initialValue("nA")
+                .defaultValue("nA")
                 .commit();
 
 
@@ -1019,8 +1017,8 @@ namespace karabo {
 
     const std::string DsscPpt::s_dsscConfBaseNode = "DetectorRegisters";
     
-    DsscPpt::DsscPpt(const karabo::util::Hash& config)
-        : Device<>(config),
+    DsscPpt::DsscPpt(const karabo::data::Hash& config)
+        : Device(config),
         m_keepAcquisition(false), m_keepPolling(false), m_burstAcquisition(false),
         m_pollThread(),
         m_ppt(),
@@ -1287,7 +1285,7 @@ namespace karabo {
             utils::split(data.get<string>(moduleSet + ".signalNames"), ';', signalNames, 0);
 
             for (auto && signalName : signalNames) {
-                //const auto signalsData = data.get<util::NDArray>(moduleSet + "." + signalName);
+                //const auto signalsData = data.get<data::NDArray>(moduleSet + "." + signalName);
                 const vector<uint32_t> signalsData = data.get<vector<uint32_t> >(moduleSet + "." + signalName);
                 size_t data_size = signalsData.size();
 
@@ -1334,7 +1332,7 @@ namespace karabo {
 
     void DsscPpt::waitJTAGEngineDone() {
         int cnt = 0;
-        while ((getState() == util::State::CHANGING) && cnt < 500) {
+        while ((getState() == data::State::CHANGING) && cnt < 500) {
             usleep(20000);
             cnt++;
         }
@@ -1349,7 +1347,7 @@ namespace karabo {
         do {
             usleep(20000);
             cnt++;
-        } while ((getState() == util::State::CHANGING) && cnt < 1e5);
+        } while ((getState() == data::State::CHANGING) && cnt < 1e5);
 
     }
 
@@ -1455,10 +1453,10 @@ namespace karabo {
     }
 
 
-    bool DsscPpt::checkConfigFilePaths(const karabo::util::Hash& config) {
+    bool DsscPpt::checkConfigFilePaths(const karabo::data::Hash& config) {
         bool ok = true;
 
-        if (!boost::filesystem::exists(config.get<string>("fullConfigFileName"))) {
+        if (!std::filesystem::exists(config.get<string>("fullConfigFileName"))) {
             KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " FullConfigFile not found: check defined FullConfigFileName";
             ok = false;
         }
@@ -1469,19 +1467,19 @@ namespace karabo {
 
     bool DsscPpt::isProgramState(bool withAcquiring) {
         const auto currentState = getState();
-        if (currentState == util::State::ACQUIRING) {
+        if (currentState == data::State::ACQUIRING) {
             return withAcquiring;
         }
 
-        if (currentState == util::State::ON) {
+        if (currentState == data::State::ON) {
             return true;
         }
 
-        if (currentState == util::State::STARTED) {
+        if (currentState == data::State::STARTED) {
             return true;
         }
 
-        if (currentState == util::State::STOPPED) {
+        if (currentState == data::State::STOPPED) {
             return true;
         }
         return false;
@@ -1573,7 +1571,7 @@ namespace karabo {
                         .displayedName(module_str)
                         .allowedStates(State::UNKNOWN, State::ON, State::STOPPED)
                         .readOnly()
-                        .initialValue(signalVals[i])
+                        .defaultValue(signalVals[i])
                         .commit();
                   } else {
                     UINT32_ELEMENT(schema).key(sanitizeKey(modSignalName))
@@ -1597,7 +1595,7 @@ namespace karabo {
         if (m_keepPolling) return;
 
         m_keepPolling = true;
-        m_pollThread.reset(new boost::thread(boost::bind(&DsscPpt::pollHardware, this)));
+        m_pollThread.reset(new boost::thread(std::bind(&DsscPpt::pollHardware, this)));
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " PollThread started...";
     }
 
@@ -1830,7 +1828,7 @@ namespace karabo {
     void DsscPpt::startBurstAcquisition() {
        
         m_burstAcquisition.store(true);
-        EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::burstAcquisitionPolling, this));       
+        EventLoop::post(karabo::util::bind_weak(&DsscPpt::burstAcquisitionPolling, this));       
    }
     
     void DsscPpt::stopAcquisition() {
@@ -2029,9 +2027,9 @@ namespace karabo {
 
     bool DsscPpt::checkPathExists(const std::string & fileName) {
         const string filePath = utils::getFilePath(fileName);
-        boost::filesystem::path data_dir(filePath);
-        if (!boost::filesystem::exists(data_dir)) {
-            if (boost::filesystem::create_directories(data_dir)) {
+        std::filesystem::path data_dir(filePath);
+        if (!std::filesystem::exists(data_dir)) {
+            if (std::filesystem::create_directories(data_dir)) {
                 KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Created new directory: " << filePath;
                 return true;
             } else {
@@ -2043,7 +2041,7 @@ namespace karabo {
     }
 
     void DsscPpt::updateGainHashValue() {
-        EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::updateGainHashValue_impl, this)); 
+        EventLoop::post(karabo::util::bind_weak(&DsscPpt::updateGainHashValue_impl, this)); 
     }
     
     void DsscPpt::updateGainHashValue_impl() {
@@ -2111,12 +2109,12 @@ namespace karabo {
 
     void DsscPpt::updateConfigHash(){
         // Delegate the long slot call to the event loop and return early.
-        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::updateConfigHash_impl, this));
+        karabo::net::EventLoop::post(karabo::util::bind_weak(&DsscPpt::updateConfigHash_impl, this));
     }
     
     void DsscPpt::updateConfigHash_impl(){
         SuS::PPTFullConfig* full_conf = m_ppt->getPPTFullConfig();
-        karabo::util::Schema theschema = this->getFullSchema();
+        karabo::data::Schema theschema = this->getFullSchema();
 
         if(!theschema.subSchema(s_dsscConfBaseNode).empty()){            
             this->set<std::string>("status", "Reading Configuration Data");
@@ -2131,7 +2129,7 @@ namespace karabo {
         }
 
         
-        karabo::util::Schema schema;
+        karabo::data::Schema schema;
         
         NODE_ELEMENT(schema).key(s_dsscConfBaseNode)
             .description("EPC, IOB and JTAG detector registry")
@@ -2160,7 +2158,7 @@ namespace karabo {
                 dsscH5ConfChObj.compareConfigHashData(m_last_config_hash, read_config_hash);
         if(diff_entries.empty()) std::cout << "No changes in config found" << std::endl;
         
-        karabo::util::Schema theschema = this->getFullSchema();
+        karabo::data::Schema theschema = this->getFullSchema();
         for(auto it : diff_entries){
             //std::cout << it.first <<std::endl;
             vector< std::string > SplitVec;
@@ -2249,7 +2247,7 @@ namespace karabo {
 
 
     void DsscPpt::initSystem(){        
-        EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::initSystem_impl, this));        
+        EventLoop::post(karabo::util::bind_weak(&DsscPpt::initSystem_impl, this));        
     }
     
     void DsscPpt::initSystem_impl(){
@@ -3162,7 +3160,7 @@ namespace karabo {
 
     void DsscPpt::updateIOBFirmware() {
         // Delegate the long slot call to the event loop and return early.
-        karabo::net::EventLoop::getIOService().post(karabo::util::bind_weak(&DsscPpt::_updateIOBFirmware, this));
+        karabo::net::EventLoop::post(karabo::util::bind_weak(&DsscPpt::_updateIOBFirmware, this));
     }
 
     void DsscPpt::_updateIOBFirmware() {
@@ -3890,7 +3888,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigure(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigure(karabo::data::Hash & incomingReconfiguration) {
 
         preReconfigureEPC(incomingReconfiguration);
 
@@ -3920,7 +3918,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureEPC(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureEPC(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, m_epcTag);
         vector<string> paths;
         filtered.getPaths(paths);
@@ -3938,7 +3936,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigurePixel(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigurePixel(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "PixelConfig");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -3956,7 +3954,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureJTAG(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureJTAG(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "JTAGConfig");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -3978,7 +3976,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureIOB(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureIOB(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "IOBConfig");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4000,7 +3998,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureETH(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureETH(karabo::data::Hash & incomingReconfiguration) {
 
 
         Hash filtered = this->filterByTags(incomingReconfiguration, "ethParam");
@@ -4051,7 +4049,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureEnableDatapath(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureEnableDatapath(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "enableDatapath");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4075,7 +4073,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureEnablePLL(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureEnablePLL(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "PLL");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4090,7 +4088,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureEnableOthers(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureEnableOthers(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "other");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4150,9 +4148,9 @@ namespace karabo {
                             DsscScopedLock lock(&m_accessToPptMutex, __func__);
                             m_ppt->disableSending(disable);
                             //  if(disable){
-                            //    this->updateState(karabo::util::State::STARTED);
+                            //    this->updateState(karabo::data::State::STARTED);
                             //  }else{
-                            //    this->updateState(karabo::util::State::ACQUIRING);
+                            //    this->updateState(karabo::data::State::ACQUIRING);
                             //  }
                         }
                     } else if (path.compare("continuous_mode") == 0) {
@@ -4162,9 +4160,9 @@ namespace karabo {
                             m_ppt->runContinuousMode(enable);
                             //  m_ppt->disableSending(true);
                             //  if(enable){
-                            //    this->updateState(karabo::util::State::STARTED);
+                            //    this->updateState(karabo::data::State::STARTED);
                             //  }else{
-                            //    this->updateState(karabo::util::State::ON);
+                            //    this->updateState(karabo::data::State::ON);
                             //  }
                         }
                     } else if (path.compare("clone_eth0_to_eth1") == 0) {
@@ -4222,7 +4220,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureEnableMeasurement(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureEnableMeasurement(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "measurement");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4251,7 +4249,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureFullConfig(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureFullConfig(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "FullConfig");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4263,8 +4261,8 @@ namespace karabo {
                 if (path.compare("fullConfigFileName") == 0) {
                     KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Karabo::DsscPpt set full config file";
                     const string fullConfigFileName = filtered.getAs<string>(path);
-                    boost::filesystem::path myfile(fullConfigFileName);
-                    if (boost::filesystem::exists(myfile)) {
+                    std::filesystem::path myfile(fullConfigFileName);
+                    if (std::filesystem::exists(myfile)) {
                         readFullConfigFile(fullConfigFileName);
                         setQSFPEthernetConfig();
                     }
@@ -4274,7 +4272,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureFastInit(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureFastInit(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "fastInit");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4295,7 +4293,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureRegAccess(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureRegAccess(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "regAccess");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4310,7 +4308,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureLoadIOBConfig(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureLoadIOBConfig(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "IOBConfigPath");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4324,7 +4322,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureLoadEPCConfig(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureLoadEPCConfig(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "EPCConfigPath");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4338,7 +4336,7 @@ namespace karabo {
     }
 
 
-    void DsscPpt::preReconfigureLoadASICConfig(karabo::util::Hash & incomingReconfiguration) {
+    void DsscPpt::preReconfigureLoadASICConfig(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "ASICConfigPath");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -4358,7 +4356,7 @@ namespace karabo {
 
     void DsscPpt::updateEPCConfigSchema(const std::string & configFileName) {
 
-        if (!boost::filesystem::exists(configFileName)) {
+        if (!std::filesystem::exists(configFileName)) {
             KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << configFileName;
             return;
         }
@@ -4373,7 +4371,7 @@ namespace karabo {
         //TODO:
         //Find a way to delete existing IOBConfig to regenerate it
         string iobFileName = get<string>("iobRegisterFilePath");
-        if (!boost::filesystem::exists(iobFileName)) {
+        if (!std::filesystem::exists(iobFileName)) {
             KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << iobFileName;
             return;
         }
@@ -4385,7 +4383,7 @@ namespace karabo {
 
 
     void DsscPpt::updateJTAGConfigSchema(const std::string & configFileName) {
-        if (!boost::filesystem::exists(configFileName)) {
+        if (!std::filesystem::exists(configFileName)) {
             KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << configFileName;
             return;
         }
@@ -4401,7 +4399,7 @@ namespace karabo {
 
 
     void DsscPpt::updatePixelConfigSchema(const std::string & configFileName) {
-        if (!boost::filesystem::exists(configFileName)) {
+        if (!std::filesystem::exists(configFileName)) {
             KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << configFileName;
             return;
         }
@@ -4418,7 +4416,7 @@ namespace karabo {
 
 
     void DsscPpt::updateSeqConfigSchema(const std::string & configFileName) {
-        if (!boost::filesystem::exists(configFileName)) {
+        if (!std::filesystem::exists(configFileName)) {
             KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " File not found: " << configFileName;
             return;
         }
@@ -4689,21 +4687,21 @@ namespace karabo {
     }
 
 
-    int DsscPpt::anyToInt(const boost::any anyVal, bool &ok) {
+    int DsscPpt::anyToInt(const std::any anyVal, bool &ok) {
         int value = 0;
         ok = true;
         if (anyVal.type() == typeid (int)) {
             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Any is int";
-            value = boost::any_cast<int>(anyVal);
+            value = std::any_cast<int>(anyVal);
 
         } else if (anyVal.type() == typeid (bool)) {
             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Any is bool";
-            value = (boost::any_cast<bool>(anyVal)) ? 1 : 0;
+            value = (std::any_cast<bool>(anyVal)) ? 1 : 0;
 
         } else if (anyVal.type() == typeid (string)) {
             try {
                 KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Any is string";
-                string s = boost::any_cast<string>(anyVal);
+                string s = std::any_cast<string>(anyVal);
                 value = INT_CAST(s);
             } catch (boost::bad_lexical_cast const&) {
                 KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Error converting string to int";

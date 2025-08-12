@@ -45,25 +45,25 @@ class MockPPT(Device):
 async def test_apply_configuration(monkeypatch):
     q1_did = create_instanceId()
     q1_device = MockPPT(
-        {"_deviceId_": q1_did, "fullConfigFileName": "/path/to/conf.conf"}
+        {"deviceId": q1_did, "fullConfigFileName": "/path/to/conf.conf"}
     )
     q2_did = create_instanceId()
     q2_device = MockPPT(
-        {"_deviceId_": q2_did, "fullConfigFileName": "/path/to/conf.conf"}
+        {"deviceId": q2_did, "fullConfigFileName": "/path/to/conf.conf"}
     )
     q3_did = create_instanceId()
     q3_device = MockPPT(
-        {"_deviceId_": q3_did, "fullConfigFileName": "/path/to/conf.conf"}
+        {"deviceId": q3_did, "fullConfigFileName": "/path/to/conf.conf"}
     )
     q4_did = create_instanceId()
     q4_device = MockPPT(
-        {"_deviceId_": q4_did, "fullConfigFileName": "/path/to/conf.conf"}
+        {"deviceId": q4_did, "fullConfigFileName": "/path/to/conf.conf"}
     )
 
     configurator_id = create_instanceId()
     configurator = DsscConfigurator(
         {
-            "_deviceId_": configurator_id,
+            "deviceId": configurator_id,
             "availableGainConfigurations": [
                 {
                     "description": "default",
@@ -146,7 +146,7 @@ async def test_fix_config_string(event_loop):
 
     configurator = DsscConfigurator(
         {
-            "_deviceId_": configurator_id,
+            "deviceId": configurator_id,
             "pptDevices": [
                 {"deviceId": "q1_did", "quadrantId": "Q1", "use": True},
                 {"deviceId": "q2_did", "quadrantId": "Q2", "use": False},
@@ -191,7 +191,7 @@ async def test_missing_proxies(event_loop):
     configurator_id = create_instanceId()
     configurator = DsscConfigurator(
         {
-            "_deviceId_": configurator_id,
+            "deviceId": configurator_id,
             "pptDevices": [
                 {"deviceId": "q1_did", "quadrantId": "Q1", "use": True},
                 {"deviceId": "q2_did", "quadrantId": "Q2", "use": False},
