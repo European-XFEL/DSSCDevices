@@ -1,6 +1,5 @@
 # DSSC Devices
-[![pipeline status](https://git.xfel.eu/karaboDevices/dsscDevices/badges/main/pipeline.svg)](https://git.xfel.eu/karaboDevices/dsscDevices/-/commits/main)
-[![coverage report](https://git.xfel.eu/karaboDevices/dsscDevices/badges/main/coverage.svg)](https://git.xfel.eu/karaboDevices/dsscDevices/-/commits/main)
+[![pipeline status](https://git.xfel.eu/karaboDevices3/dsscDevices/badges/main/pipeline.svg)](https://git.xfel.eu/karaboDevices3/dsscDevices/-/commits/main)
 
 The DSSC, DEPMOS Sensor with Signal Compression, is a detector for soft x-rays in the range of 0.25-6 keV capable of taking  800 frames at 4.5 MHz.
 
@@ -64,11 +63,11 @@ fails, resulting in a number of alarms being triggered.
 However, we can later know, in this device, whether it's fine or not, as
 the detector's interlock has an input of type BeckhoffDigitalInput, also
 monitored here.  
-If that input, SIB_1_SIB_ENABLE, is off, it's fine for the chiller to be in
+If that input, `SIB_1_SIB_ENABLE`, is off, it's fine for the chiller to be in
 error.  
 
 Thus, if the most significant state is ERROR, check if it comes from the
-chiller is disabled (the SIB_ENABLE switch is OFF).
+chiller is disabled (the `SIB_ENABLE` switch is OFF).
 
 ### DSSC ASIC Reset
 
@@ -145,7 +144,7 @@ karabo-pythonserver serverId=pythonServer/dssc deviceClasses=DsscSIB
 
 ## Contributing
 
-The developement of this project is done on [EuXFEL's Gitlab](https://git.xfel.eu/karaboDevices/DsscDevices).
+The developement of this project is done on [EuXFEL's Gitlab](https://git.xfel.eu/karaboDevices3/DsscDevices).
 
 This software is released by the European XFEL GmbH as is and without any
 warranty under the GPLv3 license.

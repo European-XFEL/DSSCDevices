@@ -128,22 +128,18 @@ namespace karabo {
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
                 .commit();
 
-        PATH_ELEMENT(expected).key("fullConfigFileName")
+        STRING_ELEMENT(expected).key("fullConfigFileName")
                 .description("Path Full Config File")
                 .displayedName("Full Config File")
-                .isInputFile()
                 .tags("FullConfig")
                 .assignmentOptional().defaultValue(INITIALCONF).reconfigurable()
-                // do not limit states
                 .commit();
         
-        PATH_ELEMENT(expected).key("saveConfigFileToName")
+        STRING_ELEMENT(expected).key("saveConfigFileToName")
                 .description("Full Config save under")
                 .displayedName("Full Config save under")
-                .isInputFile()
                 .tags("FullConfig")
                 .assignmentOptional().defaultValue(INITIALCONF).reconfigurable()
-                // do not limit states
                 .commit();
                        
 
@@ -175,24 +171,21 @@ namespace karabo {
                 .defaultValue(true)  // The more sensitive type of detector.
                 .commit();
 
-        PATH_ELEMENT(expected).key("linuxBinaryName")
+        STRING_ELEMENT(expected).key("linuxBinaryName")
                 .description("Path to linux binary")
                 .displayedName("Linux Binary Filename")
-                .isInputFile()
                 .assignmentOptional().defaultValue("ConfigFiles/simpleImage.xilinx.bin").reconfigurable()
                 .commit();
 
-        PATH_ELEMENT(expected).key("firmwareBinaryName")
+        STRING_ELEMENT(expected).key("firmwareBinaryName")
                 .description("Path to ppt fpga firmware binary")
                 .displayedName("PPT Firmware Binary Filename")
-                .isInputFile()
                 .assignmentOptional().defaultValue("ConfigFiles/DSSC_PPT_TOP.bin").reconfigurable()
                 .commit();
 
-        PATH_ELEMENT(expected).key("iobFirmwareBitfile")
+        STRING_ELEMENT(expected).key("iobFirmwareBitfile")
                 .description("Path to iob fpga firmware bitfile")
                 .displayedName("IOB Firmware Bitfile Filename")
-                .isInputFile()
                 .assignmentOptional().defaultValue("ConfigFiles/IOB_Firmware.xsvf").reconfigurable()
                 .commit();
 
@@ -587,10 +580,9 @@ namespace karabo {
                 .assignmentOptional().defaultValue("all").reconfigurable()
                 .commit();
 
-        PATH_ELEMENT(expected).key("epcRegisterFilePath")
+        STRING_ELEMENT(expected).key("epcRegisterFilePath")
                 .description("Name of the epc configuration file")
                 .displayedName("EPC Register Filename")
-                .isInputFile()
                 .tags("EPCConfigPath, record")
                 .assignmentOptional().defaultValue("~/karabo/devices/DsscPpt/ConfigFiles/PPT_EPCRegs.txt").reconfigurable()
                 .commit();
@@ -733,10 +725,9 @@ namespace karabo {
 
         INIT_PROGRAM_IOB_FPGA_ELEMENTS
 
-        PATH_ELEMENT(expected).key("iobRegisterFilePath")
+        STRING_ELEMENT(expected).key("iobRegisterFilePath")
                 .description("Name of the IOB configuration file")
                 .displayedName("IOB ConfigFile Name")
-                .isInputFile()
                 .tags("IOBConfigPath")
                 .assignmentOptional().defaultValue("~/karabo/devices/DsscPpt/ConfigFiles/IOBConfig.txt").reconfigurable()
                 .commit();
@@ -1153,7 +1144,7 @@ namespace karabo {
                                       << "Tried to get config from "
                                       << this->get<std::string>("remoteConfigurator")
                                       << ": " << std::boolalpha << success;
-             boost::this_thread::sleep(boost::posix_time::milliseconds(1000));  // Shown to make a difference, as sometimes it still goes on without having fullConfigFileName set yet.
+             std::this_thread::sleep_for(1000ms);  // Shown to make a difference, as sometimes it still goes on without having fullConfigFileName set yet.
         }
 
         // Load and validate
@@ -1595,7 +1586,7 @@ namespace karabo {
         if (m_keepPolling) return;
 
         m_keepPolling = true;
-        m_pollThread.reset(new boost::thread(std::bind(&DsscPpt::pollHardware, this)));
+        m_pollThread.reset(new std::thread(std::bind(&DsscPpt::pollHardware, this)));
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " PollThread started...";
     }
 
@@ -2049,7 +2040,7 @@ namespace karabo {
         auto configData = m_ppt->getConfigData();
         
         std::size_t seed = 0;
-        boost::hash<int> hasher;
+        std::hash<int> hasher;
         
         for(DsscRegisterConfigVec::iterator register_data = configData.pixelRegisterDataVec.begin();
                 register_data != configData.pixelRegisterDataVec.end(); register_data++)
@@ -2109,7 +2100,7 @@ namespace karabo {
 
     void DsscPpt::updateConfigHash(){
         // Delegate the long slot call to the event loop and return early.
-        karabo::net::EventLoop::post(karabo::util::bind_weak(&DsscPpt::updateConfigHash_impl, this));
+        EventLoop::post(karabo::util::bind_weak(&DsscPpt::updateConfigHash_impl, this));
     }
     
     void DsscPpt::updateConfigHash_impl(){
@@ -2160,9 +2151,7 @@ namespace karabo {
         
         karabo::data::Schema theschema = this->getFullSchema();
         for(auto it : diff_entries){
-            //std::cout << it.first <<std::endl;
-            vector< std::string > SplitVec;
-            boost::split( SplitVec, it.first, boost::is_any_of("."));            
+            auto SplitVec = splitKey(it.first);
            
             std::string selModSet = theschema.getDisplayedName(s_dsscConfBaseNode + "." \
                     + SplitVec[0]+"."+SplitVec[1]);
@@ -2366,7 +2355,7 @@ namespace karabo {
         DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
         m_ppt->resetAll(true);
-        boost::this_thread::sleep(boost::posix_time::seconds(1));
+        std::this_thread::sleep_for(1000ms);
         m_ppt->resetAll(false);
     }
 
@@ -2378,7 +2367,7 @@ namespace karabo {
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->datapathReset(true);
-            boost::this_thread::sleep(boost::posix_time::seconds(1));
+            std::this_thread::sleep_for(1000ms);
             m_ppt->datapathReset(false);
         }
 
@@ -2391,7 +2380,7 @@ namespace karabo {
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
             m_ppt->epcReset(true);
-            boost::this_thread::sleep(boost::posix_time::seconds(1));
+            std::this_thread::sleep_for(1000ms);
             m_ppt->epcReset(false);
         }
         //reprogramm all EPC register to reset to last configuration
@@ -2406,7 +2395,7 @@ namespace karabo {
 
             //m_ppt->setASICReset(true); this is wrong // ALSO CHECKS IF TEST SYSTEM IN mANNHEIM
             m_ppt->iobReset(true);
-            boost::this_thread::sleep(boost::posix_time::seconds(1));
+            std::this_thread::sleep_for(1000ms);
             m_ppt->iobReset(false);
             //m_ppt->setASICReset(false); this is wrong
         }
@@ -2421,7 +2410,7 @@ namespace karabo {
             m_ppt->setASICReset_TestSystem(true); // required in test system important to minimize current consumption
             //m_ppt->iobReset(true); // ???????????????????????? Nonsense. wrong
             m_ppt->setASICReset(true);
-            boost::this_thread::sleep(boost::posix_time::seconds(1));
+            std::this_thread::sleep_for(1000ms);
             m_ppt->setASICReset(false);
             //m_ppt->iobReset(false); wrong.
         }
@@ -2810,7 +2799,7 @@ namespace karabo {
         m_ppt->setActiveModule(iobNumber);
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            int rc = m_ppt->programJtag(readBack);
+            m_ppt->programJtag(readBack);
         }
 
         printPPTErrorMessages(true);
@@ -3160,7 +3149,7 @@ namespace karabo {
 
     void DsscPpt::updateIOBFirmware() {
         // Delegate the long slot call to the event loop and return early.
-        karabo::net::EventLoop::post(karabo::util::bind_weak(&DsscPpt::_updateIOBFirmware, this));
+        EventLoop::post(karabo::util::bind_weak(&DsscPpt::_updateIOBFirmware, this));
     }
 
     void DsscPpt::_updateIOBFirmware() {
@@ -3367,17 +3356,14 @@ namespace karabo {
         hash.getPaths(paths);
         Hash tmp;
 
+        for (const std::string& path : paths) {
+            auto tokens = splitKey(path);
 
-        BOOST_FOREACH(string path, paths) {
-            vector<string> tokens;
-            boost::split(tokens, path, boost::is_any_of("."));
             if (tokens.size() == 3) {
 
                 uint32_t value = m_ppt->getIOBParam(tokens[1], toString(iobNumber), tokens[2]);
 
-                //KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " IOBParam " + path + ": " + toString(value);
-
-                //update only if not _nc signal"
+                //update only if not _nc signal
                 if (tokens[2].find("_nc") == string::npos)
                     tmp.set(path, value);
             }
@@ -3408,7 +3394,7 @@ namespace karabo {
 
                 //KARABO_LOG_FRAMEWORK_DEBUG << getInstanceId() << " JTAGParam " + path + ": " + toString(value);
 
-                //update only if not _nc signal"
+                //update only if not _nc signal
                 if (tokens[2].find("_nc") == string::npos)
                     tmp.set(path, value);
             }
@@ -4467,7 +4453,7 @@ namespace karabo {
                 cout << '-';
                 cout.flush();
             }
-            boost::this_thread::sleep(boost::posix_time::seconds(2));
+            std::this_thread::sleep_for(2000ms);
         }
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Acquisition stopped";
         {
@@ -4578,7 +4564,7 @@ namespace karabo {
                 this->set("ethOutputRate", outputRate);
                 set<int>("pptTemp", value);
 
-                boost::this_thread::sleep(boost::posix_time::seconds(5));
+                std::this_thread::sleep_for(5000ms);
             }
         } catch (const Exception& e) {
             KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " " << e;
