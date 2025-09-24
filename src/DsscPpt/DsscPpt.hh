@@ -19,6 +19,7 @@
 
 #include <atomic>
 #include <vector>
+#include <sstream>
 
 
 /**
@@ -51,14 +52,14 @@ namespace karabo {
         return camelCased;
    }
         
-    class SmartMutex : public boost::mutex {
+    class SmartMutex : public std::mutex {
 
     public:
-        using boost::mutex::mutex;
+        using std::mutex::mutex;
 
         void unlock() {
             m_origin = "";
-            boost::mutex::unlock();         
+            std::mutex::unlock();         
         }
 
         void trylock(const std::string & info) {
@@ -459,12 +460,24 @@ namespace karabo {
                 res.end());
             return res;
         }
+
+        inline std::vector<std::string> splitKey(const std::string& key) {
+            std::vector<std::string> res;
+            std::stringstream ss(key);
+            std::string item;
+
+            while (std::getline(ss, item, '.')) {
+                res.push_back(item);
+            }
+
+            return res;
+        }
         
         bool m_keepAcquisition;
         bool m_keepPolling;
-        std::shared_ptr<boost::thread> m_pollThread;
+        std::shared_ptr<std::thread> m_pollThread;
         SmartMutex m_accessToPptMutex;
-        boost::mutex m_outMutex;
+        std::mutex m_outMutex;
         PPT_Pointer m_ppt; // Use your main PPT class here
         karabo::data::Schema m_schema;
         std::string m_epcTag;
