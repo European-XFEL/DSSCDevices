@@ -495,12 +495,11 @@
 
 #define INIT_CONFIG_REGISTER_ELEMENTS                                                   \
                                                                                         \
-            PATH_ELEMENT(expected)                                                      \
+            STRING_ELEMENT(expected)                                                      \
                 .key("jtagRegisterFilePath")                                            \
                 .displayedName("JTAG Config File")                                      \
                 .description("configuration File for ASIC JTAG registers")              \
                 .tags("ASICConfigPath")                                                 \
-                .isInputFile()                                                          \
                 .assignmentOptional().defaultValue( "/home/dssc/Desktop/HeraSud_June/PixelInjectionGainTrimmedLin_jtagRegs.xml") \
                 .reconfigurable()                                                       \
                 .commit();                                                              \
@@ -512,12 +511,11 @@
                 .allowedStates(State::ON, State::STOPPED)                                                \
                 .commit();                                                                      \
                                                                                                 \
-            PATH_ELEMENT(expected)                                                              \
+            STRING_ELEMENT(expected)                                                              \
                 .key("pixelRegisterFilePath")                                                   \
                 .displayedName("Pixel Register Config File")                                    \
                 .description("configuration File for ASIC Pixel registers")                     \
                 .tags("ASICConfigPath")                                                         \
-                .isInputFile()                                                                  \
                 .assignmentOptional().defaultValue( "/home/dssc/Desktop/HeraSud_June/PixelInjectionGainTrimmedLin_pxRegs.xml")           \
                 .reconfigurable()                                                               \
                 .commit();                                                                      \
@@ -528,12 +526,11 @@
                 .allowedStates(State::ON, State::STOPPED)                                                        \
                 .commit();                                                                      \
                                                                                                 \
-            PATH_ELEMENT(expected)                                                              \
+            STRING_ELEMENT(expected)                                                              \
                 .key("sequencerFilePath")                                                       \
                 .displayedName("Sequencer Config File")                                         \
                 .description("configuration File for Sequencer")                                \
                 .tags("ASICConfigPath")                                                         \
-                .isInputFile()                                                                  \
                 .assignmentOptional().defaultValue( "/home/dssc/Desktop/HeraSud_June/PixelInjectionGainTrimmedLin_seq.xml")              \
                 .reconfigurable()                                                               \
                 .commit();                                                                      \

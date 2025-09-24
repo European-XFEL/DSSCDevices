@@ -178,10 +178,9 @@ namespace karabo{
                 .readOnly()
                 .commit();
 
-        PATH_ELEMENT(expected).key("fullConfigFileName")
+        STRING_ELEMENT(expected).key("fullConfigFileName")
                 .description("Path Full Config File")
                 .displayedName("Full Config File")
-                .isInputFile()
                 .tags("general")
                 .assignmentMandatory().reconfigurable()
                 .commit();
@@ -216,7 +215,7 @@ namespace karabo{
                 .assignmentOptional().defaultValue(false).reconfigurable()
                 .commit();
 
-        PATH_ELEMENT(expected).key("outputDir")
+        STRING_ELEMENT(expected).key("outputDir")
                 .displayedName("Output Directory")
                 .description("Output directory for HDF5 files")
                 .isDirectory()
@@ -283,10 +282,9 @@ namespace karabo{
                 .description("Enable Selected Injection Mode")
                 .commit();
 
-        PATH_ELEMENT(expected).key("importDataFileName")
+        STRING_ELEMENT(expected).key("importDataFileName")
                 .displayedName("Import Data Filename")
                 .description("Select file to import DNL or Gain Values")
-                .isInputFile()
                 .assignmentOptional().defaultValue("./").reconfigurable()
                 .commit();
 
@@ -495,10 +493,9 @@ namespace karabo{
                 .assignmentOptional().defaultValue(2).reconfigurable()
                 .commit();
 
-        PATH_ELEMENT(expected).key("injectionCalibrationFileName")
+        STRING_ELEMENT(expected).key("injectionCalibrationFileName")
                 .displayedName("Injection Calibration Data Filename")
                 .description("Select file the keeps injection calibration data .h5 and .txt files compatible")
-                .isInputFile()
                 .assignmentOptional().defaultValue("./").reconfigurable()
                 .commit();
 
