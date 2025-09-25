@@ -8,7 +8,7 @@
 
 #include "../../LadderParameterTrimming/DsscLadderParameterTrimming.hh"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <gtest/gtest.h>
 #include <sstream>
 #include <thread>
@@ -17,7 +17,7 @@
 #include "karabo/core/DeviceClient.hh"
 #include "karabo/core/DeviceServer.hh"
 #include "karabo/net/EventLoop.hh"
-#include "karabo/util/Hash.hh"
+#include "karabo/data/types/Hash.hh"
 #include "karabo/util/PluginLoader.hh"
 
 
@@ -40,17 +40,15 @@ protected:
         m_eventLoopThread = std::thread(&karabo::net::EventLoop::work);
 
         // Load the library dynamically
-        const karabo::util::Hash& pluginConfig = karabo::util::Hash("pluginDirectory", ".");
+        const karabo::data::Hash& pluginConfig = karabo::data::Hash("pluginDirectory", ".");
         karabo::util::PluginLoader::create("PluginLoader", pluginConfig)->update();
 
         // Instantiate C++ Device Server.
-        karabo::util::Hash config("serverId", DEVICE_SERVER_ID,
-                                  "scanPlugins", true,
-                                  "Logger.priority", LOG_PRIORITY);
+        karabo::data::Hash config("serverId", DEVICE_SERVER_ID,"log.level", LOG_PRIORITY);
         m_deviceSrv = karabo::core::DeviceServer::create("DeviceServer", config);
         m_deviceSrv->finalizeInternalInitialization();
         // Instantiate Device Client.
-        m_deviceCli = boost::make_shared<karabo::core::DeviceClient>();
+        m_deviceCli = std::make_shared<karabo::core::DeviceClient>();
     }
 
     void TearDown( ) {
@@ -60,7 +58,7 @@ protected:
         m_eventLoopThread.join();
     }
 
-    void instantiateTestDevice(const karabo::util::Hash& devConfig) {
+    void instantiateTestDevice(const karabo::data::Hash& devConfig) {
 
         std::pair<bool, std::string> success =
             m_deviceCli->instantiate(DEVICE_SERVER_ID, "DsscLadderParameterTrimming",
@@ -92,7 +90,7 @@ TEST_F(LadderTrimmingFixture, testDeviceInstantiation){
     std::size_t parent_dir_limit = filename.find_last_of("/", filename.find_last_of("/", filename.find_last_of("/")-1)-1);
     fullConfigFileName << filename.substr(0, parent_dir_limit)  << "/ConfigFiles/F2Init.conf";
 
-    auto hash = karabo::util::Hash(
+    auto hash = karabo::data::Hash(
         "deviceId", TEST_DEVICE_ID,
         "environment", "FENICE",
         "quadrantId", "FENICE",

@@ -5,14 +5,20 @@
     - export REL_OS_NAME=${NAME%% *}
     - export REL_OS_VERS_LONG=${VERSION_ID%%.*}
     - export BUILD_TYPE=Debug
-    - export KARABO_BROKER_TOPIC="gitlab_ci_$CI_JOB_ID"
     - >
-      if test "$REL_OS_NAME-$REL_OS_VERS_LONG" == "CentOS-7"; then
-          source /opt/rh/devtoolset-7/enable
+      if test "$REL_OS_NAME" == "Red"; then
+        REL_OS_NAME=RedHat
       fi;
+    - >
+      if [ "$ID" = "rhel" ] || [ "$ID" = "almalinux" ]; then
+         yum install gsl-devel --assumeyes
+      fi;
+    - export KARABO_BROKER_TOPIC="gitlab_ci_$CI_JOB_ID"
+    - echo http://exflctrl01.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh
     - curl http://exflctrl01.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh > karabo.sh
     - bash karabo.sh --prefix=/root
     - source /root/karabo/activate
+    - export KARABO_BROKER="amqp://xfel:karabo@exfl-broker-1:5672"
     - pushd $CI_PROJECT_DIR
     - >
          echo "Installing Dependencies";
@@ -32,7 +38,7 @@
 
     - echo "Testing Python Project"
     - pip install -e ".[test]"
-    - pytest -vv --junitxml=python.xml --disable-warnings --pyargs --cov=DsscSIB --cov=DsscControl --cov-report term
+    - pytest -vv --junitxml=python.xml --disable-warnings --pyargs --cov=DsscSIB --cov=DsscControl --cov-report term src/
 
   artifacts:
     when: always
@@ -51,5 +57,5 @@ installation:
   <<: *test_build
   parallel:
     matrix:
-      - ARCH_TAG:   ["ubuntu-22-003", "almalinux-9-005", "centos-7-004"]
-        KARABO_TAG: ["2.19.4", "2.20.0a9"]
+      - ARCH_TAG: ["ubuntu-22-003", "almalinux-9-009"]
+        KARABO_TAG: ["2.20.4"]

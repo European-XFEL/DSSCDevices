@@ -37,7 +37,7 @@ USING_KARABO_NAMESPACES
 
 namespace karabo{
 
-    KARABO_REGISTER_FOR_CONFIGURATION(BaseDevice, Device<>, DsscLadderParameterTrimming)
+    KARABO_REGISTER_FOR_CONFIGURATION(Device, DsscLadderParameterTrimming)
 
     void DsscLadderParameterTrimming::expectedParameters(Schema& expected) {
         STRING_ELEMENT(expected).key("environment")
@@ -173,10 +173,9 @@ namespace karabo{
                 .readOnly()
                 .commit();
 
-        PATH_ELEMENT(expected).key("fullConfigFileName")
+        STRING_ELEMENT(expected).key("fullConfigFileName")
                 .description("Path Full Config File")
                 .displayedName("Full Config File")
-                .isInputFile()
                 .tags("general")
                 .assignmentMandatory().reconfigurable()
                 .commit();
@@ -211,7 +210,7 @@ namespace karabo{
                 .assignmentOptional().defaultValue(false).reconfigurable()
                 .commit();
 
-        PATH_ELEMENT(expected).key("outputDir")
+        STRING_ELEMENT(expected).key("outputDir")
                 .displayedName("Output Directory")
                 .description("Output directory for HDF5 files")
                 .isDirectory()
@@ -278,10 +277,9 @@ namespace karabo{
                 .description("Enable Selected Injection Mode")
                 .commit();
 
-        PATH_ELEMENT(expected).key("importDataFileName")
+        STRING_ELEMENT(expected).key("importDataFileName")
                 .displayedName("Import Data Filename")
                 .description("Select file to import DNL or Gain Values")
-                .isInputFile()
                 .assignmentOptional().defaultValue("./").reconfigurable()
                 .commit();
 
@@ -311,22 +309,22 @@ namespace karabo{
 
         BOOL_ELEMENT(expected).key("binningInfoLaoded")
                 .displayedName("Binning Information Loaded")
-                .readOnly().initialValue(false)
+                .readOnly().defaultValue(false)
                 .commit();
 
         BOOL_ELEMENT(expected).key("pixelAdcGainMapLoaded")
                 .displayedName("Pixel ADC Gain Map Loaded")
-                .readOnly().initialValue(false)
+                .readOnly().defaultValue(false)
                 .commit();
 
         BOOL_ELEMENT(expected).key("spectrumFitResultsLoaded")
                 .displayedName("Spectrum Fit Results Loaded")
-                .readOnly().initialValue(false)
+                .readOnly().defaultValue(false)
                 .commit();
 
         BOOL_ELEMENT(expected).key("pixelCalibrationDataSettingsValid")
                 .displayedName("Pixel Calibration Data Settings Valid")
-                .readOnly().initialValue(false)
+                .readOnly().defaultValue(false)
                 .commit();
 
 
@@ -490,10 +488,9 @@ namespace karabo{
                 .assignmentOptional().defaultValue(2).reconfigurable()
                 .commit();
 
-        PATH_ELEMENT(expected).key("injectionCalibrationFileName")
+        STRING_ELEMENT(expected).key("injectionCalibrationFileName")
                 .displayedName("Injection Calibration Data Filename")
                 .description("Select file the keeps injection calibration data .h5 and .txt files compatible")
-                .isInputFile()
                 .assignmentOptional().defaultValue("./").reconfigurable()
                 .commit();
 
@@ -678,17 +675,17 @@ namespace karabo{
 
         VECTOR_UINT32_ELEMENT(expected).key("meanBurstData.burstDataXValues")
                 .displayedName("Burst Data X Values")
-                .readOnly().initialValue(std::vector<unsigned int>(20, 0))
+                .readOnly().defaultValue(std::vector<unsigned int>(20, 0))
                 .commit();
 
         VECTOR_DOUBLE_ELEMENT(expected).key("meanBurstData.burstDataYValues")
                 .displayedName("Burst Data Y Values")
-                .readOnly().initialValue(std::vector<double>(20, 0.0))
+                .readOnly().defaultValue(std::vector<double>(20, 0.0))
                 .commit();
 
         VECTOR_UINT32_ELEMENT(expected).key("pixelBurstSweepPts")
                 .displayedName("Burst Data Values")
-                .readOnly().initialValue(std::vector<unsigned int>(50, 0))
+                .readOnly().defaultValue(std::vector<unsigned int>(50, 0))
                 .commit();
 
 
@@ -708,7 +705,7 @@ namespace karabo{
 
         UINT32_ELEMENT(expected).key("meanBurstData.displayPixel")
                 .displayedName("Display Image Pixel")
-                .readOnly().initialValue(0)
+                .readOnly().defaultValue(0)
                 .commit();
 
         Schema outSchema;
@@ -729,7 +726,7 @@ namespace karabo{
         Schema pixelSchema;
         VECTOR_DOUBLE_ELEMENT(pixelSchema).key("pixelData")
                 .displayedName("Pixel Data")
-                .readOnly().initialValue(std::vector<double>(800, 0.0))
+                .readOnly().defaultValue(std::vector<double>(800, 0.0))
                 .commit();
 
         OUTPUT_CHANNEL(expected).key("pixelValuesOutput")
@@ -744,22 +741,22 @@ namespace karabo{
 
         VECTOR_UINT32_ELEMENT(expected).key("ladderHisto.binValues")
                 .displayedName("Ladder BinValues")
-                .readOnly().initialValue(std::vector<unsigned int>(20, 0))
+                .readOnly().defaultValue(std::vector<unsigned int>(20, 0))
                 .commit();
 
         VECTOR_UINT16_ELEMENT(expected).key("ladderHisto.bins")
                 .displayedName("Ladder Bins")
-                .readOnly().initialValue(std::vector<unsigned short>(20, 0))
+                .readOnly().defaultValue(std::vector<unsigned short>(20, 0))
                 .commit();
 
         DOUBLE_ELEMENT(expected).key("ladderHisto.xScaleFactor")
                 .displayedName("XAxis Scalefactor")
-                .readOnly().initialValue(1)
+                .readOnly().defaultValue(1)
                 .commit();
 
         UINT32_ELEMENT(expected).key("ladderHisto.displayPixel")
                 .displayedName("Shown Pixel")
-                .readOnly().initialValue(0)
+                .readOnly().defaultValue(0)
                 .commit();
 
         BOOL_ELEMENT(expected).key("ladderHisto.enLogScale")
@@ -808,8 +805,8 @@ namespace karabo{
     }
 
 
-    DsscLadderParameterTrimming::DsscLadderParameterTrimming(const karabo::util::Hash& config)
-        : Device<>(config),
+    DsscLadderParameterTrimming::DsscLadderParameterTrimming(const karabo::data::Hash& config)
+        : Device(config),
         m_asicMeanValues(utils::s_totalNumPxs),
         m_pixelData(utils::s_totalNumPxs*utils::s_numSram),
         m_currentTrimmer(nullptr),
@@ -870,7 +867,7 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::changeDeviceState(const util::State & newState) {
+    void DsscLadderParameterTrimming::changeDeviceState(const data::State & newState) {
         try {
             updateState(newState);
         } catch (...) {
@@ -1298,7 +1295,7 @@ namespace karabo{
                            numPixels,
                            NDArray::NullDeleter(),
                            Dims(numRows, numCols));
-        util::Hash dataHash;
+        data::Hash dataHash;
         dataHash.set("ladderImage", ImageData(imageArray));
         writeChannel("ladderImageOutput", dataHash);
 
@@ -1437,7 +1434,7 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::onPixelData(const util::Hash& data,
+    void DsscLadderParameterTrimming::onPixelData(const data::Hash& data,
                                                   const xms::InputChannel::MetaData& meta) {
         KARABO_LOG_FRAMEWORK_INFO << "Got Pixel Data: " << m_lastTrainId;
 
@@ -1459,7 +1456,7 @@ namespace karabo{
             // set next time
         }
 
-        const auto asicData = data.get<util::NDArray>("asicData");
+        const auto asicData = data.get<data::NDArray>("asicData");
         const auto *data_ptr = (uint16_t*) asicData.getData<unsigned short>();
         const auto numFrames = asicData.size() / 64 / 64 / 16;
         if (numFrames != utils::s_numSram) {
@@ -1484,7 +1481,7 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::onMeanData(const util::Hash& data,
+    void DsscLadderParameterTrimming::onMeanData(const data::Hash& data,
                                                  const xms::InputChannel::MetaData& meta) {
         cout << "Got Mean Data: " << m_lastTrainId << endl;
 
@@ -1558,7 +1555,7 @@ namespace karabo{
         size_t pxOffs = m_trimppt_api->sramSize*pixelToMeasure;
         pixelSramData.assign(m_trimppt_api->meanSramContent.begin() + pxOffs + m_trimppt_api->m_trimStartAddr, m_trimppt_api->meanSramContent.begin() + pxOffs + m_trimppt_api->m_trimEndAddr + 1);
 
-        util::Hash dataHash;
+        data::Hash dataHash;
         dataHash.set("pixelData", pixelSramData);
 
         writeChannel("pixelValuesOutput", dataHash);
@@ -1759,7 +1756,7 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::preReconfigure(karabo::util::Hash& incomingReconfiguration) {
+    void DsscLadderParameterTrimming::preReconfigure(karabo::data::Hash& incomingReconfiguration) {
         preReconfigureGeneral(incomingReconfiguration);
 
         preReconfigureMeanReceiver(incomingReconfiguration);
@@ -1770,7 +1767,7 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::preReconfigureGeneral(karabo::util::Hash & incomingReconfiguration) {
+    void DsscLadderParameterTrimming::preReconfigureGeneral(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "general");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -1852,7 +1849,7 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::preReconfigureMeanReceiver(karabo::util::Hash & incomingReconfiguration) {
+    void DsscLadderParameterTrimming::preReconfigureMeanReceiver(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "meanReceiver");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -1880,7 +1877,7 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::preReconfigureTrimming(karabo::util::Hash & incomingReconfiguration) {
+    void DsscLadderParameterTrimming::preReconfigureTrimming(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "trimming");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -1910,7 +1907,7 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::preReconfigureHelper(karabo::util::Hash & incomingReconfiguration) {
+    void DsscLadderParameterTrimming::preReconfigureHelper(karabo::data::Hash & incomingReconfiguration) {
         Hash filtered = this->filterByTags(incomingReconfiguration, "helper");
         vector<string> paths;
         filtered.getPaths(paths);
@@ -2077,17 +2074,17 @@ namespace karabo{
     }
 
 
-    util::State DsscLadderParameterTrimming::dsscPptState() {
+    data::State DsscLadderParameterTrimming::dsscPptState() {
         return deviceState(m_pptDeviceId);
     }
 
 
-    util::State DsscLadderParameterTrimming::deviceState(const string & deviceId) {
+    data::State DsscLadderParameterTrimming::deviceState(const string & deviceId) {
         try {
-            return remote().get<util::State>(deviceId, "state");
+            return remote().get<data::State>(deviceId, "state");
         } catch (...) {
             //KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " Get Device State Exception, state does not exist: " << deviceId;
-            return util::State::CHANGING;
+            return data::State::CHANGING;
         }
     }
 
@@ -2098,7 +2095,7 @@ namespace karabo{
         std::cout << "Start PPT Instance because no was found : " << m_pptDeviceId << std::endl;
         const auto env = get<string>("environment");
 
-        util::Hash initialConfig;
+        data::Hash initialConfig;
         if (env == "MANNHEIM") {
             initialConfig.set<string>("selEnvironment", "MANNHEIM");
             initialConfig.set<string>("pptHost", "192.168.0.120");
@@ -2119,7 +2116,7 @@ namespace karabo{
 
         vector<string> outputChannels{(get<string>("deviceId") + ":registerConfigOutput")};
 
-        util::Hash inputConfig = createInputChannelConfig(outputChannels, "wait");
+        data::Hash inputConfig = createInputChannelConfig(outputChannels, "wait");
 
         initialConfig.set("registerConfigInput", inputConfig);
 
@@ -2138,7 +2135,7 @@ namespace karabo{
 
 
     bool DsscLadderParameterTrimming::startTestDataGeneratorInstance() {
-        util::Hash initialConfig;
+        data::Hash initialConfig;
         initialConfig.set<unsigned int>("send_pause", 95);
         initialConfig.set<string>("deviceId", m_testDataGeneratorId);
 
@@ -2156,7 +2153,7 @@ namespace karabo{
 
 
     bool DsscLadderParameterTrimming::startDsscDataGeneratorInstance() {
-        util::Hash initialConfig;
+        data::Hash initialConfig;
         initialConfig.set<string>("asicsToRecord", get<string>("sendingASICs"));
         initialConfig.set<string>("deviceId", m_dsscDataReceiverId);
         initialConfig.set<unsigned int>("testPattern", m_trimppt_api->getExpectedTestPattern());
@@ -2178,29 +2175,29 @@ namespace karabo{
 
 
     bool DsscLadderParameterTrimming::startMainProcessorInstance() {
-        util::Hash initialConfig;
+        data::Hash initialConfig;
         initialConfig.set<string>("deviceId", m_mainProcessorId);
         initialConfig.set<string>("sendingASICs", get<string>("sendingASICs"));
 
         if (isTestData()) {
             vector<string> outputChannels{(m_testDataGeneratorId + "@dummyTrainOutput")};
 
-            util::Hash inputConfig = createInputChannelConfig(outputChannels);
+            data::Hash inputConfig = createInputChannelConfig(outputChannels);
 
             initialConfig.set("input", inputConfig);
         } else if (isDsscData()) {
             vector<string> outputChannels{(m_dsscDataReceiverId + "@monitorOutput")};
 
-            util::Hash inputConfig = createInputChannelConfig(outputChannels);
+            data::Hash inputConfig = createInputChannelConfig(outputChannels);
 
             initialConfig.set("input", inputConfig);
         } else if (isXFELData()) {
             //connect a special pcLayer output by name
             std::string daqConTempl = get<std::string>("daqConTempl");
             const int qid = boost::lexical_cast<int>(m_quadrantId.substr(1, m_quadrantId.size() - 1));
-            boost::replace_first(daqConTempl, "{CHAN}", karabo::util::toString((qid - 1)*4 + get<int>("activeModule")));
+            boost::replace_first(daqConTempl, "{CHAN}", karabo::data::toString((qid - 1)*4 + get<int>("activeModule")));
             const std::vector<string>& outputChannels{daqConTempl};
-            const util::Hash& inputConfig = createInputChannelConfig(outputChannels);
+            const data::Hash& inputConfig = createInputChannelConfig(outputChannels);
             initialConfig.set("input", inputConfig);
         }
 
@@ -2218,9 +2215,9 @@ namespace karabo{
     }
 
 
-    void DsscLadderParameterTrimming::triggerPptInitFunction(util::State originState, const string & function, int timeout, int TRY_CNT) {
+    void DsscLadderParameterTrimming::triggerPptInitFunction(data::State originState, const string & function, int timeout, int TRY_CNT) {
         int cnt = 0;
-        while ((dsscPptState() == originState) || (dsscPptState() == util::State::CHANGING)) {
+        while ((dsscPptState() == originState) || (dsscPptState() == data::State::CHANGING)) {
             remote().execute(m_pptDeviceId, function, timeout);
 
             if (++cnt == TRY_CNT) {
@@ -2243,8 +2240,8 @@ namespace karabo{
     }
 
 
-    util::Hash DsscLadderParameterTrimming::getModuleSetHash(SuS::ConfigReg * reg, const std::string & moduleSetName) {
-        util::Hash moduleSetHash;
+    data::Hash DsscLadderParameterTrimming::getModuleSetHash(SuS::ConfigReg * reg, const std::string & moduleSetName) {
+        data::Hash moduleSetHash;
 
         const auto signalNames = reg->getSignalNames(moduleSetName);
         const auto moduleNumbers = reg->getModuleNumberList(moduleSetName);
@@ -2261,14 +2258,14 @@ namespace karabo{
 
                 const std::vector<uint32_t> signalValues = reg->getSignalValues(moduleSetName, "all", signalName);
 
-                //util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
-                //moduleSetHash.set<util::NDArray>(signalValues, arr);
+                //data::NDArray arr(signalValues.data(), signalValues.size(), data::Dims(signalValues.size()));
+                //moduleSetHash.set<data::NDArray>(signalValues, arr);
                 moduleSetHash.set(signalName, signalValues);
             } else {
                 unsigned int value = reg->getSignalValue(moduleSetName, "all", signalName);
                 std::vector<unsigned int> signalValues(1, value);
-                //util::NDArray arr(signalValues.data(), signalValues.size(), util::Dims(signalValues.size()));
-                //moduleSetHash.set<util::NDArray>(signalName, arr);
+                //data::NDArray arr(signalValues.data(), signalValues.size(), data::Dims(signalValues.size()));
+                //moduleSetHash.set<data::NDArray>(signalName, arr);
                 moduleSetHash.set(signalName, signalValues);
             }
 
@@ -2281,8 +2278,8 @@ namespace karabo{
     }
 
 
-    util::Hash DsscLadderParameterTrimming::getSequencerHash(SuS::Sequencer * seq) {
-        util::Hash sequencerHash;
+    data::Hash DsscLadderParameterTrimming::getSequencerHash(SuS::Sequencer * seq) {
+        data::Hash sequencerHash;
 
         const auto paramMap = seq->getSequencerParameterMap();
         for (auto && entry : paramMap) {
@@ -2303,7 +2300,7 @@ namespace karabo{
     bool DsscLadderParameterTrimming::programJtag(bool readBack, bool setJtagEngineBusy, bool recalcXors) {
         ConfigStateKeeper keeper(m_deviceConfigState);
 
-        util::Hash outData;
+        data::Hash outData;
 
         outData.set<string>("regType", "jtag");
         outData.set<string>("progType", "new");
@@ -2335,7 +2332,7 @@ namespace karabo{
     bool DsscLadderParameterTrimming::programJtagSingle(const std::string & moduleSetName, bool readBack, bool setJtagEngineBusy, bool recalcXors, bool overwrite) {
         ConfigStateKeeper keeper(m_deviceConfigState);
 
-        util::Hash outData;
+        data::Hash outData;
         outData.set<string>("regType", "jtag");
         outData.set<string>("progType", "new");
         outData.set<int>("currentModule", m_trimppt_api->currentModule);
@@ -2357,7 +2354,7 @@ namespace karabo{
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Send Pixel Register Content";
 
-        util::Hash outData;
+        data::Hash outData;
 
         const string moduleSetName = "Control register";
 
@@ -2389,7 +2386,7 @@ namespace karabo{
     bool DsscLadderParameterTrimming::programSequencer(bool readBack, bool setJtagEngineBusy, bool program) {
         ConfigStateKeeper keeper(m_deviceConfigState);
 
-        util::Hash outData;
+        data::Hash outData;
         outData.set<string>("regType", "sequencer");
         outData.set<string>("progType", "new");
 
@@ -2443,9 +2440,9 @@ namespace karabo{
     void DsscLadderParameterTrimming::sendBurstParams() {
         ConfigStateKeeper keeper(m_deviceConfigState);
 
-        util::Hash outData;
+        data::Hash outData;
         outData.set<string>("regType", "burstParams");
-        util::Hash burstParamData;
+        data::Hash burstParamData;
         auto paramNames = m_trimppt_api->getBurstParamNames();
         for (auto && name : paramNames) {
             burstParamData.set<int>(name, m_trimppt_api->getBurstParam(name));
@@ -2846,7 +2843,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
             pixelBurstOffsetData[paramValues[idx]] = binValues[idx]; 
         }
 
-        util::Hash dataHash;
+        data::Hash dataHash;
         dataHash.set("pixelData", pixelBurstOffsetData);
         writeChannel("pixelValuesOutput", dataHash);
 
@@ -3005,8 +3002,8 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
     }
 
 
-    util::Hash DsscLadderParameterTrimming::createInputChannelConfig(const std::vector<std::string> & outputChannels, const std::string & onSlowness) {
-        util::Hash inputConfig;
+    data::Hash DsscLadderParameterTrimming::createInputChannelConfig(const std::vector<std::string> & outputChannels, const std::string & onSlowness) {
+        data::Hash inputConfig;
         inputConfig.set<vector < string >> ("connectedOutputChannels", outputChannels);
         inputConfig.set<string>("dataDistribution", "shared");
         inputConfig.set<string>("onSlowness", onSlowness);

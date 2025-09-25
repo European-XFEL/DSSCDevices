@@ -431,7 +431,7 @@
                 .displayedName("Current Comp DAC Status")                       \
                 .description("Displays calibration status of Current Comp DAC") \
                 .readOnly()                                                     \
-                .initialValue("not calibrated")                                 \
+                .defaultValue("not calibrated")                                 \
                 .commit();                                                      \
         SLOT_ELEMENT(expected)                                                  \
                 .key("calibration.calibIrampSlot")                              \
@@ -458,7 +458,7 @@
                 .displayedName("Iramp Calibration Status")                      \
                 .description("Displays calibration status of Iramp")            \
                 .readOnly()                                                     \
-                .initialValue("not calibrated")                                 \
+                .defaultValue("not calibrated")                                 \
                 .commit();                                                      \
 
 
@@ -495,12 +495,11 @@
 
 #define INIT_CONFIG_REGISTER_ELEMENTS                                                   \
                                                                                         \
-            PATH_ELEMENT(expected)                                                      \
+            STRING_ELEMENT(expected)                                                      \
                 .key("jtagRegisterFilePath")                                            \
                 .displayedName("JTAG Config File")                                      \
                 .description("configuration File for ASIC JTAG registers")              \
                 .tags("ASICConfigPath")                                                 \
-                .isInputFile()                                                          \
                 .assignmentOptional().defaultValue( "/home/dssc/Desktop/HeraSud_June/PixelInjectionGainTrimmedLin_jtagRegs.xml") \
                 .reconfigurable()                                                       \
                 .commit();                                                              \
@@ -512,12 +511,11 @@
                 .allowedStates(State::ON, State::STOPPED)                                                \
                 .commit();                                                                      \
                                                                                                 \
-            PATH_ELEMENT(expected)                                                              \
+            STRING_ELEMENT(expected)                                                              \
                 .key("pixelRegisterFilePath")                                                   \
                 .displayedName("Pixel Register Config File")                                    \
                 .description("configuration File for ASIC Pixel registers")                     \
                 .tags("ASICConfigPath")                                                         \
-                .isInputFile()                                                                  \
                 .assignmentOptional().defaultValue( "/home/dssc/Desktop/HeraSud_June/PixelInjectionGainTrimmedLin_pxRegs.xml")           \
                 .reconfigurable()                                                               \
                 .commit();                                                                      \
@@ -528,12 +526,11 @@
                 .allowedStates(State::ON, State::STOPPED)                                                        \
                 .commit();                                                                      \
                                                                                                 \
-            PATH_ELEMENT(expected)                                                              \
+            STRING_ELEMENT(expected)                                                              \
                 .key("sequencerFilePath")                                                       \
                 .displayedName("Sequencer Config File")                                         \
                 .description("configuration File for Sequencer")                                \
                 .tags("ASICConfigPath")                                                         \
-                .isInputFile()                                                                  \
                 .assignmentOptional().defaultValue( "/home/dssc/Desktop/HeraSud_June/PixelInjectionGainTrimmedLin_seq.xml")              \
                 .reconfigurable()                                                               \
                 .commit();                                                                      \
@@ -632,7 +629,7 @@
                 .displayedName("Resulting Clock")                                                               \
                 .description("Resulting clock speed of current settings")                                       \
                 .readOnly()                                                                                     \
-                .initialValue("700000000 Hz")                                                                   \
+                .defaultValue("700000000 Hz")                                                                   \
                 .commit();                                                                                      \
         UINT32_ELEMENT(expected).key("pptPLL.fineTuning.intValue")						\
                 .displayedName("Int Value")                                                                     \
@@ -705,14 +702,14 @@
                 .displayedName("Serial Number")                                                                 \
                 .description("Serial Number of IOBoard")                                                        \
                 .readOnly()                                                                                     \
-                .initialValue("program IOB FPGA")                                                               \
+                .defaultValue("program IOB FPGA")                                                               \
                 .commit();                                                                                      \
         STRING_ELEMENT(expected)                                                                                \
                .key("iob"#iobNum"Status.iob"#iobNum"BuiltStamp")                                                \
                .displayedName("Firmware Buildstamp")                                                            \
                .description("Firmware Buildstamp of IOBoard")                                                   \
                .readOnly()                                                                                      \
-               .initialValue("program IOB FPGA")                                                                \
+               .defaultValue("program IOB FPGA")                                                                \
                .commit();                                                                                       \
        BOOL_ELEMENT(expected)                                                                                   \
                 .key("iob"#iobNum"Status.iob"#iobNum"Available").displayedName("IOB "#iobNum" Available")       \
@@ -745,22 +742,22 @@
         UINT16_ELEMENT(expected)                                                                            \
                 .key("pptChannelFailed.failedChannel1").displayedName("PPT Channel 1 Failed Status")        \
                 .description("Status Register indicating which ASIC channel in module 1 failed")            \
-                .readOnly().initialValue(0)                                                                 \
+                .readOnly().defaultValue(0)                                                                 \
                 .commit();                                                                                  \
         UINT16_ELEMENT(expected)                                                                            \
                 .key("pptChannelFailed.failedChannel2").displayedName("PPT Channel 2 Failed Status")        \
                 .description("Status Register indicating which ASIC channel in module 2 failed")            \
-                .readOnly().initialValue(0)                                                                 \
+                .readOnly().defaultValue(0)                                                                 \
                 .commit();                                                                                  \
         UINT16_ELEMENT(expected)                                                                            \
                 .key("pptChannelFailed.failedChannel3").displayedName("PPT Channel 3 Failed Status")        \
                 .description("Status Register indicating which ASIC channel in module 3 failed")            \
-                .readOnly().initialValue(0)                                                                 \
+                .readOnly().defaultValue(0)                                                                 \
                 .commit();                                                                                  \
         UINT16_ELEMENT(expected)                                                                            \
                 .key("pptChannelFailed.failedChannel4").displayedName("PPT Channel 4 Failed Status")        \
                 .description("Status Register indicating which ASIC channel in module 4 failed")            \
-                .readOnly().initialValue(0)                                                                 \
+                .readOnly().defaultValue(0)                                                                 \
                 .commit();                                                                                  \
 
 
@@ -859,31 +856,31 @@
 
 
     #define IOBSLOT1  \
-            this->registerSlot(boost::bind(&Self::resetAurora1,this),"resetAurora1");                \
-            this->registerSlot(boost::bind(&Self::programLMK1,this),"programLMK1");                  \
-            this->registerSlot(boost::bind(&Self::programIOB1Config,this),"programIOBConfig1");      \
-            this->registerSlot(boost::bind(&Self::readIOBRegisters1,this),"readbackIOBConfig1");     \
+            this->registerSlot(std::bind(&Self::resetAurora1,this),"resetAurora1");                \
+            this->registerSlot(std::bind(&Self::programLMK1,this),"programLMK1");                  \
+            this->registerSlot(std::bind(&Self::programIOB1Config,this),"programIOBConfig1");      \
+            this->registerSlot(std::bind(&Self::readIOBRegisters1,this),"readbackIOBConfig1");     \
 
     #define IOBSLOT2  \
-            this->registerSlot(boost::bind(&Self::resetAurora2,this),"resetAurora2");                \
-            this->registerSlot(boost::bind(&Self::programLMK2,this),"programLMK2");                  \
-            this->registerSlot(boost::bind(&Self::programIOB2Config,this),"programIOBConfig2");      \
-            this->registerSlot(boost::bind(&Self::readIOBRegisters2,this),"readbackIOBConfig2");     \
+            this->registerSlot(std::bind(&Self::resetAurora2,this),"resetAurora2");                \
+            this->registerSlot(std::bind(&Self::programLMK2,this),"programLMK2");                  \
+            this->registerSlot(std::bind(&Self::programIOB2Config,this),"programIOBConfig2");      \
+            this->registerSlot(std::bind(&Self::readIOBRegisters2,this),"readbackIOBConfig2");     \
 
     #define IOBSLOT3  \
-            this->registerSlot(boost::bind(&Self::resetAurora3,this),"resetAurora3");                \
-            this->registerSlot(boost::bind(&Self::programLMK3,this),"programLMK3");                  \
-            this->registerSlot(boost::bind(&Self::programIOB3Config,this),"programIOBConfig3");      \
-            this->registerSlot(boost::bind(&Self::readIOBRegisters3,this),"readbackIOBConfig3");     \
+            this->registerSlot(std::bind(&Self::resetAurora3,this),"resetAurora3");                \
+            this->registerSlot(std::bind(&Self::programLMK3,this),"programLMK3");                  \
+            this->registerSlot(std::bind(&Self::programIOB3Config,this),"programIOBConfig3");      \
+            this->registerSlot(std::bind(&Self::readIOBRegisters3,this),"readbackIOBConfig3");     \
 
     #define IOBSLOT4  \
-            this->registerSlot(boost::bind(&Self::resetAurora4,this),"resetAurora4");                \
-            this->registerSlot(boost::bind(&Self::programLMK4,this),"programLMK4");                  \
-            this->registerSlot(boost::bind(&Self::programIOB4Config,this),"programIOBConfig4");      \
-            this->registerSlot(boost::bind(&Self::readIOBRegisters4,this),"readbackIOBConfig4");     \
+            this->registerSlot(std::bind(&Self::resetAurora4,this),"resetAurora4");                \
+            this->registerSlot(std::bind(&Self::programLMK4,this),"programLMK4");                  \
+            this->registerSlot(std::bind(&Self::programIOB4Config,this),"programIOBConfig4");      \
+            this->registerSlot(std::bind(&Self::readIOBRegisters4,this),"readbackIOBConfig4");     \
 
     #define PLLSLOT  \
-            this->registerSlot(boost::bind(&Self::programPLL,this),"programPLL");
+            this->registerSlot(std::bind(&Self::programPLL,this),"programPLL");
 
     #define PROG_IOBSLOTS  \
             IOBSLOT1  \
