@@ -289,7 +289,6 @@ namespace karabo {
         void setSelectedGainConfig();
         void setCoarseGainSettings();
 
-        void setSelectedInjectionMode();
         void setSelectedInjectionMode(const std::string & nextMode);
 
         void measureBurstOffsetSweep();
@@ -307,9 +306,11 @@ namespace karabo {
         void runPixelDelayTrimming();
         void runGainTrimming();
         void calibrateCurrCompDAC();
-        void measureBurstData();
+        void measureBurstDataSlot();
         void setBaseline();
         void clearBaseline();
+        bool matrixSRAMTestSlot();
+        void setSelectedInjectionModeSlot();
 
         void doSingleCycle2() {
             doSingleCycle();
@@ -445,7 +446,6 @@ namespace karabo {
         void changeDeviceState(const data::State & newState);
 
         bool matrixSRAMTest(int patternID, int &errCnt);
-        bool matrixSRAMTest();
 
         void setNumIterations(uint iterations);
         
@@ -455,7 +455,7 @@ namespace karabo {
 
         public:
 
-            StateChangeKeeper(core::Device<> *device) : m_dev(device), m_lastState(m_dev->getState()) {
+            StateChangeKeeper(core::Device *device) : m_dev(device), m_lastState(m_dev->getState()) {
                 try {
                     m_dev->updateState(data::State::CHANGING);
                     m_dev->set<std::string>("status", "Measuring");
@@ -464,7 +464,7 @@ namespace karabo {
                 }
             }
 
-            StateChangeKeeper(core::Device<> *device, const data::State & afterState) : m_dev(device), m_lastState(afterState) {
+            StateChangeKeeper(core::Device *device, const data::State & afterState) : m_dev(device), m_lastState(afterState) {
                 try {
                     m_dev->updateState(data::State::CHANGING);
                     m_dev->set<std::string>("status", "Measuring");
@@ -486,7 +486,7 @@ namespace karabo {
             }
 
         private:
-            core::Device<> *m_dev;
+            core::Device *m_dev;
             data::State m_lastState;
         };
 

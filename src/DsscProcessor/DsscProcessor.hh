@@ -24,7 +24,7 @@
  */
 namespace karabo {
 
-    class DsscProcessor : public karabo::core::Device<>, public utils::DsscTrainDataProcessor {
+    class DsscProcessor : public karabo::core::Device, public utils::DsscTrainDataProcessor {
     public:
 
         // Add reflection information and Karabo framework compatibility to this class
@@ -34,7 +34,7 @@ namespace karabo {
          * Necessary method as part of the factory/configuration system
          * @param expected Will contain a description of expected parameters for this device
          */
-        static void expectedParameters(karabo::util::Schema& expected);
+        static void expectedParameters(karabo::data::Schema& expected);
 
         /**
          * Constructor providing the initial configuration in form of a Hash object.
@@ -42,7 +42,7 @@ namespace karabo {
          * already be validated using the information of the expectedParameters function.
          * The configuration is provided in a key/value fashion.
          */
-        DsscProcessor(const karabo::util::Hash& config);
+        DsscProcessor(const karabo::data::Hash& config);
 
         /**
          * The destructor will be called in case the device gets killed
@@ -61,7 +61,7 @@ namespace karabo {
          *           The reconfiguration will automatically be applied to the current state.
          * @param incomingReconfiguration The reconfiguration information as was triggered externally
          */
-        virtual void preReconfigure(karabo::util::Hash& incomingReconfiguration);
+        virtual void preReconfigure(karabo::data::Hash& incomingReconfiguration);
 
 
         /**
@@ -125,15 +125,15 @@ namespace karabo {
         void runHistogramAcquisition();
 
     private:
-        void changeDeviceState(const util::State & newState);
+        void changeDeviceState(const data::State & newState);
 
         void initialization();
         void updateSelPixelSramBlacklist();
 
-        void onData(const karabo::util::Hash& data,
+        void onData(const karabo::data::Hash& data,
                 const karabo::xms::InputChannel::MetaData& meta);
 
-        void processTrain(const karabo::util::NDArray& data, const karabo::util::NDArray& cellId, unsigned long long trainId);
+        void processTrain(const karabo::data::NDArray& data, const karabo::data::NDArray& cellId, unsigned long long trainId);
 
         void sendPixelData(const unsigned short* train_data_ptr, unsigned long long train_id);
 
@@ -141,13 +141,13 @@ namespace karabo {
         void savePixelHistos();
         void saveMeasurementInfo();
         void displayPixelHistogram();
-	void displayPixelCells(const karabo::util::Hash& data);
+	void displayPixelCells(const karabo::data::Hash& data);
 
         void clearData();
 
         void startPreview();
         void stopPreview();
-        void updatePreviewData(const karabo::util::Hash& data, unsigned long long trainId);
+        void updatePreviewData(const karabo::data::Hash& data, unsigned long long trainId);
         void previewThreadFunc();
         
 

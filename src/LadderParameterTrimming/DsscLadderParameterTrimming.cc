@@ -213,7 +213,6 @@ namespace karabo{
         STRING_ELEMENT(expected).key("outputDir")
                 .displayedName("Output Directory")
                 .description("Output directory for HDF5 files")
-                .isDirectory()
                 .assignmentOptional().defaultValue("./").reconfigurable()
                 .commit();
 
@@ -272,7 +271,7 @@ namespace karabo{
 
 
         SLOT_ELEMENT(expected)
-                .key("setSelectedInjectionMode")
+                .key("setSelectedInjectionModSlot")
                 .displayedName("Enable Selected Injection Mode")
                 .description("Enable Selected Injection Mode")
                 .commit();
@@ -428,13 +427,13 @@ namespace karabo{
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("matrixSRAMTest")
+                .key("matrixSRAMTestSlot")
                 .displayedName("MatrixSRAMTest")
                 .description("Fill Sram And Readout Pattern like in the reticle test for the ladder, also generates bad SRAM cell information which can be imported in SramBlacklist")
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("measureBurstData").displayedName("Measure Burst Data")
+                .key("measureBurstDataSlot").displayedName("Measure Burst Data")
                 .description("Test function to trigger MeasureBurstData")
                 .commit();
 
@@ -813,16 +812,16 @@ namespace karabo{
         m_deviceInitialized(false) {
         KARABO_INITIAL_FUNCTION(initialization)
 
-        KARABO_SLOT(measureBurstData);
+        KARABO_SLOT(measureBurstDataSlot);
         KARABO_SLOT(doSingleCycle2);
         KARABO_SLOT(setBaseline);
         KARABO_SLOT(clearBaseline);
         KARABO_SLOT(fillSramAndReadoutPattern);
-        KARABO_SLOT(matrixSRAMTest);
+        KARABO_SLOT(matrixSRAMTestSlot);
         KARABO_SLOT(runPixelDelayTrimming);
         KARABO_SLOT(runGainTrimming);
         KARABO_SLOT(enableInjectionInSelPixels);
-        KARABO_SLOT(setSelectedInjectionMode);
+        KARABO_SLOT(setSelectedInjectionModeSlot);
         KARABO_SLOT(setSelectedGainConfig);
         KARABO_SLOT(setCoarseGainSettings);
         KARABO_SLOT(powerUpSelPixels);
@@ -1511,7 +1510,7 @@ namespace karabo{
     // test function triggered from GUI
 
 
-    void DsscLadderParameterTrimming::measureBurstData() {
+    void DsscLadderParameterTrimming::measureBurstDataSlot() {
         StateChangeKeeper keeper(this);
 
         static const auto measurePixels = utils::positionListToVector("0-32767");
@@ -1968,7 +1967,7 @@ namespace karabo{
     void DsscLadderParameterTrimming::initTrimming() {
         DSSCSTATUS("Trimming running...");
 
-        setSelectedInjectionMode();
+        setSelectedInjectionModeSlot();
 
         setActiveModule(get<int>("activeModule"));
 
@@ -2693,7 +2692,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
     }
 
 
-    void DsscLadderParameterTrimming::setSelectedInjectionMode() {
+    void DsscLadderParameterTrimming::setSelectedInjectionModeSlot() {
         StateChangeKeeper keeper(this);
 
         setActiveModule(get<int>("activeModule"));
@@ -2911,7 +2910,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
             return;
         }
 
-        setSelectedInjectionMode();
+        setSelectedInjectionModeSlot();
 
         bool ok;
         auto trimmer = getNewChipTrimmer(ok);
@@ -3116,7 +3115,7 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
     }
 
     void DsscLadderParameterTrimming::calibrateCurrCompDAC() {
-	EventLoop::getIOService().post(karabo::util::bind_weak(&DsscLadderParameterTrimming::calibrateCurrCompDAC_impl, this));
+	EventLoop::post(karabo::util::bind_weak(&DsscLadderParameterTrimming::calibrateCurrCompDAC_impl, this));
     }
 
     void DsscLadderParameterTrimming::saveGainTrimmingOutputs() {
@@ -3216,12 +3215,12 @@ void DsscLadderParameterTrimming::waitJTAGEngineDone() {
                 // takes a while to program the whole ladder
                 remote().execute(m_pptDeviceId, "fillSramAndReadout", 600);
             }
-            matrixSRAMTest();
+            matrixSRAMTestSlot();
         }
     }
 
 
-    bool DsscLadderParameterTrimming::matrixSRAMTest() {
+    bool DsscLadderParameterTrimming::matrixSRAMTestSlot() {
         // disable continuous operation
         runContinuousMode(false);
 
