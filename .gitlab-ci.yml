@@ -8,7 +8,7 @@
     - >
       if test "$REL_OS_NAME" == "AlmaLinux"; then
         REL_OS_NAME=RedHat
-        dnf install gsl-devel
+        dnf install gsl-devel --assumeyes
       fi;
     - export KARABO_BROKER_TOPIC="gitlab_ci_$CI_JOB_ID"
     - echo http://exflctrl01.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh
