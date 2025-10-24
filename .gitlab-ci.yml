@@ -26,7 +26,7 @@
              device=$(echo $norm | cut -f1 -d' ')
              tag=$(echo $norm | cut -f2 -d' ')
              echo Installing $device version $tag
-             karabo -g https://$XFEL_TOKEN@git.xfel.eu install $device $tag
+             karabo -g https://gitlab-ci-token:$CI_JOB_TOKEN@git.xfel.eu install $device $tag
          done < DEPENDS        
 
     - echo "Testing C++ Project"
