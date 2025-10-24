@@ -6,12 +6,9 @@
     - export REL_OS_VERS_LONG=${VERSION_ID%%.*}
     - export BUILD_TYPE=Debug
     - >
-      if test "$REL_OS_NAME" == "Red"; then
+      if test "$REL_OS_NAME" == "AlmaLinux"; then
         REL_OS_NAME=RedHat
-      fi;
-    - >
-      if [ "$ID" = "rhel" ] || [ "$ID" = "almalinux" ]; then
-         yum install gsl-devel --assumeyes
+        dnf install gsl-devel
       fi;
     - export KARABO_BROKER_TOPIC="gitlab_ci_$CI_JOB_ID"
     - echo http://exflctrl01.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh
