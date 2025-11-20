@@ -6,12 +6,9 @@
     - export REL_OS_VERS_LONG=${VERSION_ID%%.*}
     - export BUILD_TYPE=Debug
     - >
-      if test "$REL_OS_NAME" == "Red"; then
+      if test "$REL_OS_NAME" == "AlmaLinux"; then
         REL_OS_NAME=RedHat
-      fi;
-    - >
-      if [ "$ID" = "rhel" ] || [ "$ID" = "almalinux" ]; then
-         yum install gsl-devel --assumeyes
+        dnf install gsl-devel --assumeyes
       fi;
     - export KARABO_BROKER_TOPIC="gitlab_ci_$CI_JOB_ID"
     - echo http://exflctrl01.desy.de/karabo/karaboFramework/tags/$KARABO_TAG/karabo-$KARABO_TAG-Release-$REL_OS_NAME-$REL_OS_VERS_LONG-x86_64.sh
@@ -29,7 +26,7 @@
              device=$(echo $norm | cut -f1 -d' ')
              tag=$(echo $norm | cut -f2 -d' ')
              echo Installing $device version $tag
-             karabo -g https://$XFEL_TOKEN@git.xfel.eu install $device $tag
+             karabo -g https://gitlab-ci-token:$CI_JOB_TOKEN@git.xfel.eu install $device $tag
          done < DEPENDS        
 
     - echo "Testing C++ Project"
@@ -57,5 +54,5 @@ installation:
   <<: *test_build
   parallel:
     matrix:
-      - ARCH_TAG: ["ubuntu-22-003", "almalinux-9-009"]
-        KARABO_TAG: ["2.20.4"]
+      - ARCH_TAG: ["almalinux-9-009"]
+        KARABO_TAG: ["latest_build"]
