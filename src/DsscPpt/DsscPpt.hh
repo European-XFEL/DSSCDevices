@@ -455,7 +455,7 @@ namespace karabo {
                     res.begin(),
                     res.end(),
                     [](char c) {
-                        return !std::isalnum(c) && c != '_';
+                        return !std::isalnum(c) && c != '_' && c != '.';
                     }),
                 res.end());
             return res;
