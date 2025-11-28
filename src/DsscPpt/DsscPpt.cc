@@ -1499,9 +1499,9 @@ namespace karabo {
             string regName, string tagName, std::string rootNode) {
         // Build schema using the Config Reg Structure
         
-        std::string rootRegName = rootNode + "." + regName;        
+        std::string rootRegName = sanitizeKey(rootNode + "." + regName);
         
-        NODE_ELEMENT(schema).key(sanitizeKey(rootRegName))
+        NODE_ELEMENT(schema).key(rootRegName)
                 .description(regName)
                 .displayedName(regName)
                 .commit();
@@ -1509,15 +1509,15 @@ namespace karabo {
         const auto moduleSets = reg->getModuleSetNames();
 
         for (const auto & modSetName : moduleSets) { 
-            string keySetName(rootRegName + "." + modSetName);
+            std::string keySetName = sanitizeKey(rootRegName + "." + modSetName);
 
-            NODE_ELEMENT(schema).key(sanitizeKey(keySetName))
+            NODE_ELEMENT(schema).key(keySetName)
                     .description(keySetName)
                     .displayedName(modSetName)
                     .commit();
             
-            std::string keyModuleSet_modules = keySetName + ".modules";
-            STRING_ELEMENT(schema).key(sanitizeKey(keyModuleSet_modules))
+            std::string keyModuleSet_modules = sanitizeKey(keySetName + ".modules");
+            STRING_ELEMENT(schema).key(keyModuleSet_modules)
                 .displayedName("modules")
                 .description("modules in signalName")
                 .tags(tagName)
@@ -1528,14 +1528,14 @@ namespace karabo {
             std::vector<std::string> modules_strvec = reg->getModules(modSetName);
             const auto signalNames = reg->getSignalNames(modSetName);
             for (const auto & sigName : signalNames) {
-                //  KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Add Signal " + sigName;
+                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Add Signal " + sigName;
                 if (sigName.find("_nc") != string::npos) {
                     continue;
                 }
                 
-                std::string keySignalName(keySetName + "." + sigName);
+                std::string keySignalName = sanitizeKey(keySetName + "." + sigName);
                 
-                NODE_ELEMENT(schema).key(sanitizeKey(keySignalName))
+                NODE_ELEMENT(schema).key(keySignalName)
                     .description(sigName)
                     .displayedName(sigName)
                     .commit();              
@@ -1544,7 +1544,7 @@ namespace karabo {
                 int i = 0;
                 for(auto module_str : modules_strvec){
 
-                  std::string modSignalName(keySignalName + "." + module_str);
+                  std::string modSignalName = sanitizeKey(keySignalName + "." + module_str);
                 
                   bool readOnly = reg->isSignalReadOnly(modSetName, sigName);
 
@@ -1556,7 +1556,7 @@ namespace karabo {
                   unsigned int maxValue = reg->getMaxSignalValue(modSetName, sigName);
 
                   if (readOnly) {
-                    UINT32_ELEMENT(schema).key(sanitizeKey(modSignalName))
+                    UINT32_ELEMENT(schema).key(modSignalName)
                         .description(modSignalName)
                         .tags(tagName)
                         .displayedName(module_str)
@@ -1565,7 +1565,7 @@ namespace karabo {
                         .defaultValue(signalVals[i])
                         .commit();
                   } else {
-                    UINT32_ELEMENT(schema).key(sanitizeKey(modSignalName))
+                    UINT32_ELEMENT(schema).key(modSignalName)
                         .description(modSignalName)
                         .tags(tagName)
                         .displayedName(module_str)

@@ -458,6 +458,14 @@ namespace karabo {
                         return !std::isalnum(c) && c != '_' && c != '.';
                     }),
                 res.end());
+
+            // Insert something if the first character character
+            // of a property key is a digit
+            std::cout << res << std::endl;
+            size_t idx = res.find_last_of('.') + 1;
+            if (std::isdigit(res[idx])) {
+                res.insert(idx, "k3s");
+            }
             return res;
         }
 
