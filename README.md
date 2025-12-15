@@ -4,11 +4,17 @@
 
 The DSSC, DEPMOS Sensor with Signal Compression, is a detector for soft x-rays in the range of 0.25-6 keV capable of taking  800 frames at 4.5 MHz.
 
-[See the following publication](https://ieeexplore.ieee.org/abstract/document/9419081):
+[See the following miniSDD publication](https://ieeexplore.ieee.org/abstract/document/9419081):
 ```text
 M. Porro et al., "The MiniSDD-Based 1-Mpixel Camera of the DSSC Project for the European XFEL,"
 in IEEE Transactions on Nuclear Science, vol. 68, no. 6, pp. 1334-1350, June 2021,
 doi: 10.1109/TNS.2021.3076602.
+```
+Or [the following DEPFET publication](https://doi.org/10.1038/s41598-023-38508-9)
+```text
+Maffessanti, S., Hansen, K., Aschauer, S. et al.
+A 64k pixel CMOS-DEPFET module for the soft X-rays DSSC imager operating at MHz-frame rates.
+Sci Rep 13, 11799 (2023)
 ```
 This repository contains the Karabo devices for integration at EuXFEL.  
 It makes use of a `DsscDependencies` package, the API for interfacing with the
