@@ -66,6 +66,7 @@ namespace karabo {
                 .assignmentOptional().defaultValue("HAMBURG")
                 .options("HAMBURG,MANNHEIM", ",")
                 .reconfigurable()
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("pptHost")
@@ -80,6 +81,7 @@ namespace karabo {
                 .description("PPT port number")
                 .assignmentOptional().defaultValue(2384).reconfigurable()
                 .allowedStates(State::UNKNOWN)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -102,6 +104,7 @@ namespace karabo {
                 .displayedName("Update PPT Firmware")
                 .description("Update PPT Firmware Flash - takes about 15 minutes ")
                 .allowedStates(State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -109,6 +112,7 @@ namespace karabo {
                 .displayedName("Update PPT Linux")
                 .description("Update PPT Linux Flash containing kernel and control software - takes about 10 minutes ")
                 .allowedStates(State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -116,6 +120,7 @@ namespace karabo {
                 .displayedName("Update IOB Firmware")
                 .description("Update IOB Firmware, override bitfile in PPT with new version - takes about 10 minutes ")
                 .allowedStates(State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -140,28 +145,38 @@ namespace karabo {
                 .displayedName("Full Config save under")
                 .tags("FullConfig")
                 .assignmentOptional().defaultValue(INITIALCONF).reconfigurable()
+                .expertAccess()
                 .commit();
                        
 
         SLOT_ELEMENT(expected)
-                .key("updateGuiRegisters").displayedName("Update GUI Registers").description("Releoad all Reigsters")
+                .key("updateGuiRegisters")
+                .displayedName("Update GUI Registers")
+                .description("Releoad all Reigsters")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
                 .commit();
 
 
         SLOT_ELEMENT(expected)
-                .key("storeFullConfigFile").displayedName("Save Full Config").description("Store full config file")
+                .key("storeFullConfigFile")
+                .displayedName("Save Full Config")
+                .description("Store full config file")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("storeFullConfigUnder").displayedName("Full Config save under").description("Save full config to path")
+                .key("storeFullConfigUnder")
+                .displayedName("Full Config save under")
+                .description("Save full config to path")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("remoteConfigurator")
                 .description("Which device to get a configuration, if \"Full Config File\" is unset.")
-                .assignmentOptional().noDefaultValue().init()
+                .assignmentOptional()
+                .noDefaultValue()
+                .init()
                 .commit();
         
         BOOL_ELEMENT(expected).key("isDEPFET")
@@ -175,18 +190,21 @@ namespace karabo {
                 .description("Path to linux binary")
                 .displayedName("Linux Binary Filename")
                 .assignmentOptional().defaultValue("ConfigFiles/simpleImage.xilinx.bin").reconfigurable()
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("firmwareBinaryName")
                 .description("Path to ppt fpga firmware binary")
                 .displayedName("PPT Firmware Binary Filename")
                 .assignmentOptional().defaultValue("ConfigFiles/DSSC_PPT_TOP.bin").reconfigurable()
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("iobFirmwareBitfile")
                 .description("Path to iob fpga firmware bitfile")
                 .displayedName("IOB Firmware Bitfile Filename")
                 .assignmentOptional().defaultValue("ConfigFiles/IOB_Firmware.xsvf").reconfigurable()
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("pptSerial")
@@ -215,7 +233,8 @@ namespace karabo {
                 .description("PPT FPGA Temperature")
                 .unit(Unit::DEGREE_CELSIUS)
                 .readOnly()
-                .defaultValue(666);
+                .defaultValue(666)
+                .commit();
 
         UINT32_ELEMENT(expected).key("ethOutputRate")
                 .displayedName("SFP Output Rate")
@@ -230,6 +249,7 @@ namespace karabo {
                 .tags("fastInit")
                 .assignmentOptional().defaultValue(120).reconfigurable()
                 .allowedStates(State::UNKNOWN)
+                .expertAccess()
                 .commit();
 
         UINT32_ELEMENT(expected).key("fastInitJtagSpeed")
@@ -238,37 +258,44 @@ namespace karabo {
                 .tags("fastInit")
                 .assignmentOptional().defaultValue(14).reconfigurable()
                 .allowedStates(State::UNKNOWN)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("doFastInit").displayedName("Fast Init").description("Start Fast Init sequence")
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("initChip").displayedName("reprogram ASICs").description("Program ASICs without powercycling")
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("startManualBurstBtn").displayedName("Start Burst").description("Trigger one single Burst")
                 .allowedStates(State::ON, State::STOPPED)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("readoutTestPattern").displayedName("Readout Testpattern").description("Trigger full readout with Testpattern")
                 .allowedStates(State::ON, State::STOPPED)
+                .expertAccess()
                 .commit();
 
         UINT16_ELEMENT(expected).key("sramPattern")
                 .displayedName("Sram Pattern")
                 .description("Pattern to program into asic via Jtag (9 bit valid)")
                 .assignmentOptional().defaultValue(120).reconfigurable()
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("fillSramAndReadout").displayedName("Fill Sram and Readout").description("Clock in testpattern into ASIc via Jtag and trigger one readout")
                 .allowedStates(State::STOPPED, State::ON)
+                .expertAccess()
                 .commit();
 
         UINT32_ELEMENT(expected).key("lastTrainId")
@@ -289,6 +316,7 @@ namespace karabo {
 
         NODE_ELEMENT(expected).key("singleCycleFields")
                 .displayedName("Single Cycle Fields")
+                .expertAccess()
                 .commit();
 
         UINT32_ELEMENT(expected).key("singleCycleFields.moduloValue")
@@ -4552,17 +4580,16 @@ namespace karabo {
             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Hardware polling started";
             while (m_keepPolling) {
                 
-                int value;
+                int pptTemp;
                 {
-                    //boost::mutex::scoped_lock lock(m_accessToPptMutex);
                     DsscScopedLock lock(&m_accessToPptMutex, __func__);
                     m_ppt->readBackEPCRegister("Eth_Output_Data_Rate");
-                    value = m_ppt->readFPGATemperature();                  
+                    pptTemp = m_ppt->readFPGATemperature();
                  }
 
                 uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")/(1E6/128.0);
                 this->set("ethOutputRate", outputRate);
-                set<int>("pptTemp", value);
+                this->set<int>("pptTemp", pptTemp);
 
                 std::this_thread::sleep_for(5000ms);
             }
