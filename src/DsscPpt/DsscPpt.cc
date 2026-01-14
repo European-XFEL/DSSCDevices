@@ -162,6 +162,7 @@ namespace karabo {
                 .displayedName("Save Full Config")
                 .description("Store full config file")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::UNKNOWN, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -312,6 +313,7 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("startSingleCycle").displayedName("Start Single Cycles").description("Start Single Cylce, module and num cycles should be enabled")
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
+                .expertAccess()
                 .commit();
 
         NODE_ELEMENT(expected).key("singleCycleFields")
@@ -335,26 +337,31 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("resetAllBtn").displayedName("Reset All").description("Full PPT and IOB Reset")
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("resetEPC").displayedName("Reset EPC").description("EPC Reset, reprogramms EPC registers after reset")
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("resetDatapath").displayedName("Reset Datapath").description("Datapath reset, use if aurora is not locked")
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("resetIOBs").displayedName("Reset IOBoards").description("Full IOB Reset, reprogramms IOB registers after reset")
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("resetASICs").displayedName("Reset ASICs").description("Enable Asic and disable after e few milliseconds")
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -365,11 +372,13 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("stopStandalone").displayedName("Stop Running").description("Stop cuntinuous burst operation")
                 .allowedStates(State::STARTED)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("runStandAlone").displayedName("Run Standalone").description("Activate Continuous Acquisition")
                 .allowedStates(State::ON)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -378,8 +387,9 @@ namespace karabo {
                 .commit();
 
         SLOT_ELEMENT(expected)
-                .key("startAcquisition").displayedName("Start Acquisition").description("Enable continuous data sending")
+                .key("startAcquisition").displayedName("Start Cont. Acquisition").description("Enable continuous data sending")
                 .allowedStates(State::STARTED)
+                .expertAccess()
                 .commit();
         
         SLOT_ELEMENT(expected)
@@ -391,6 +401,7 @@ namespace karabo {
                 .key("burstData")
                 .displayedName("burstData")
                 .description("Burst measurement data")
+                .expertAccess()
                 .commit();
 
         UINT64_ELEMENT(expected).key("burstData.startTrainId")
@@ -418,22 +429,25 @@ namespace karabo {
                 .tags("regAccess")
                 .assignmentOptional().defaultValue("pixel").reconfigurable()
                 .options("pixel,jtag")
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("selPixelSignal")
-                .displayedName("Signal")
+                .displayedName("Pixel Signal")
                 .description("Select ModuleSet Signal to program")
                 .tags("regAccess")
                 .assignmentOptional().defaultValue("FCF_EnCap").reconfigurable()
                 .options("LOC_PWRD,MonVP,MonVNEnDecCap,FCF_SelLowVref,FCF_SelExtRef,CSA_IBoost,CSA_DisSatDet,CSA_FbCap,CSA_Resistor,CSA_Cin_200fF,CSA_Href,FCF_EnCap,FCF_EnIntAmpRes,FCF_HDR,QInjEn10fF,InvertInj,EnPxInjDC,InjBusEn,InjPxQ,DepfetSelCascVref,DepfetUnSampVCasc_B,ShortIconRes,EnPxInj,InjHG,IProgEnAllCaps,PxInjEnAmpNMirr,IconSlower,RmpFineTrm,RmpCurrDouble,RmpEnFineDelayCntrl,RmpDelayCntrl,ADC_EnExtLatch,LocSubcToVSSA,QInjEnCs")
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("selJtagMainRegSignal")
-                .displayedName("Signal")
+                .displayedName("JTAG Signal")
                 .description("Select ModuleSet Signal to program")
                 .tags("regAccess")
                 .assignmentOptional().defaultValue("GCC_StartVal_1").reconfigurable()
                 .options("PxInj_UseBG_NotHD_DAC,Pixel Injection Signal Trim,Pixel Injection Bias Current Trim,VDAC_lowrange,VDAC_highrange,LVDS_TX_Vref,LVDS_TX_Ibias,LVDS_RX_Ibias,ClkDeskew_1,ClkDeskew_0,GCC_LT,GCC_StartVal_1,GCC_StartVal_0,SC_EnChainLd,2 Phase Gen - SelDelay")
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("selPixels")
@@ -441,6 +455,7 @@ namespace karabo {
                 .description("PixelRegs: Select Pixels to program, 0-4095 JtagRegs: Select ASIC to program, both: all to select all")
                 .tags("regAccess")
                 .assignmentOptional().defaultValue("all").reconfigurable()
+                .expertAccess()
                 .commit();
 
         UINT32_ELEMENT(expected).key("selModule")
@@ -449,13 +464,15 @@ namespace karabo {
                 .tags("regAccess")
                 .assignmentOptional().defaultValue(1).reconfigurable()
                 .minExc(0).maxExc(5)
+                .expertAccess()
                 .commit();
 
         UINT32_ELEMENT(expected).key("selValue")
-                .displayedName("Value")
+                .displayedName("Signal Value")
                 .description("Signal value")
                 .tags("regAccess")
                 .assignmentOptional().defaultValue(0).reconfigurable()
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -465,6 +482,7 @@ namespace karabo {
                 .tags("regAccess")
                 .assignmentOptional().defaultValue(false).reconfigurable()
                 .allowedStates(State::ON, State::STOPPED)
+                .expertAccess()
                 .commit();
 
         NODE_ELEMENT(expected).key("gain")
@@ -549,18 +567,21 @@ namespace karabo {
                 .key("preProgSelReg").displayedName("Set Register")
                 .description("Set register value only in computer and don't program selected Register")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("progSelReg").displayedName("Program Register")
                 .description("Program selected Register")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("readSelReg").displayedName("Read Register Value")
                 .description("Read selected Register from locals")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
 
@@ -568,6 +589,7 @@ namespace karabo {
                 .displayedName("Sequencer Parameter Value")
                 .description("Sequencer Parameter Value to change")
                 .assignmentOptional().defaultValue(0).reconfigurable()
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("sequencerParameterName")
@@ -575,11 +597,13 @@ namespace karabo {
                 .description("Sequencer Parameter Name to change")
                 .assignmentOptional().defaultValue(tocamelCase(SuS::Sequencer::getParameterNames()).front()).reconfigurable()
                 .options(tocamelCase(SuS::Sequencer::getParameterNames()))
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setSequencerParameter").displayedName("Set Sequencer Parameter")
                 .description("Select Sequencer parameter by name and change its value")
+                .expertAccess()
                 .commit();
 
 
@@ -587,6 +611,7 @@ namespace karabo {
                 .displayedName("Burst Parameter Value")
                 .description("Value of the burst parameter to change")
                 .assignmentOptional().defaultValue(0).reconfigurable()
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("burstParameterName")
@@ -594,11 +619,13 @@ namespace karabo {
                 .description("PPT Serial number read from PPT")
                 .assignmentOptional().defaultValue("start_wait_offs").reconfigurable()
                 // .options("start_wait_offs,start_wait_time")
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setBurstParameter").displayedName("Set Burst Parameter")
                 .description("Select burst parameter by name and change its value")
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("selPRBActivePowers")
@@ -606,12 +633,14 @@ namespace karabo {
                 .description("Select ASIC power to enable during operation")
                 .tags("other")
                 .assignmentOptional().defaultValue("all").reconfigurable()
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("epcRegisterFilePath")
                 .description("Name of the epc configuration file")
                 .displayedName("EPC Register Filename")
                 .tags("EPCConfigPath, record")
+                .expertAccess()
                 .assignmentOptional().defaultValue("~/karabo/devices/DsscPpt/ConfigFiles/PPT_EPCRegs.txt").reconfigurable()
                 .commit();
 
@@ -619,12 +648,14 @@ namespace karabo {
                 .key("programEPCConfig").displayedName("Program EPC Regs")
                 .description("Programming all EPC Regs with defined values")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("readEPCRegisters").displayedName("Readback EPC Regs")
                 .description("Read all EPC regs and compare with defined ")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
 
@@ -632,24 +663,28 @@ namespace karabo {
                 .displayedName("Injection Value")
                 .description("Setting for the injection DAC")
                 .assignmentOptional().defaultValue(4000).reconfigurable()
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setInjectionValue").displayedName("Set Injection Value")
                 .description("Set the value current injection setting")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING, State::OFF)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setIntDACMode").displayedName("Set IntDAC Mode")
                 .description("Set filter in buffer mode and connect internal DAC to Monbus in high range mode")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setNormalMode").displayedName("Enable Normal Mode")
                 .description("Connect IntDAC to Monbus and enable sequencer normal mode")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("injectionMode")
@@ -658,41 +693,48 @@ namespace karabo {
                 .tags("measurements")
                 .assignmentOptional().defaultValue("NORM").reconfigurable()
                 .options({"CURRENT_BGDAC", "CURRENT_SUSDAC", "CHARGE_PXINJ_BGDAC", "CHARGE_PXINJ_SUSDAC", "CHARGE_BUSINJ", "ADC_INJ", "ADC_INJ_LR", "EXT_LATCH", "NORM"})
+                .expertAccess()
         .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setInjectionMode").displayedName("Set Injection Mode")
                 .description("Enable selected Injection Mode")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setPixelInjectionMode").displayedName("En Pixel Injection Mode")
                 .description("Enable Pixel Injection in all pixels")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("storePoweredPixels").displayedName("Store Powered Pixels")
                 .description("Remember currently powered pixels for lated restoring")
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("restorePoweredPixels").displayedName("Restore Powered Pixels")
                 .description("Restore currently remembered powered pixels")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setCurrentQuarterOn").displayedName("Set Current Quarter On")
                 .description("Enable currently selected quarter of pixels")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setCurrentColSkipOn").displayedName("Set Current Col Skip Pattern On")
                 .description("Enable currently selected colskip pattern")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected)
@@ -700,12 +742,14 @@ namespace karabo {
                 .description("Enable special column selection modes")
                 .assignmentOptional().defaultValue("SKIP").reconfigurable()
                 .options({"BLOCK", "SKIP", "SKIPSPLIT"})
-        .commit();
+                .expertAccess()
+                .commit();
 
         STRING_ELEMENT(expected)
                 .key("columnSelect").displayedName("Select Columns to Enable")
                 .description("Enable column to monbus")
                 .assignmentOptional().defaultValue("0-63").reconfigurable()
+                .expertAccess()
                 .commit();
 
         UINT32_ELEMENT(expected)
@@ -713,6 +757,7 @@ namespace karabo {
                 .description("define number of columns which are activated in parallel")
                 .assignmentOptional().defaultValue(8).reconfigurable()
                 .minExc(0).maxInc(64)
+                .expertAccess()
                 .commit();
 
         UINT32_ELEMENT(expected)
@@ -720,6 +765,7 @@ namespace karabo {
                 .description("define quarter number of pixels to be programmed")
                 .assignmentOptional().defaultValue(0).reconfigurable()
                 .minInc(0).maxInc(63)
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -729,6 +775,7 @@ namespace karabo {
                 .tags("measurements")
                 .assignmentOptional().defaultValue(true).reconfigurable()
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -738,11 +785,13 @@ namespace karabo {
                 .tags("measurements")
                 .assignmentOptional().defaultValue(false).reconfigurable()
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("waitJTAGEngineDone")
                 .displayedName("Wait JTAG Done")
+                .expertAccess()
                 .commit();
 
         INIT_PPT_PLL_ELEMENTS
@@ -758,12 +807,14 @@ namespace karabo {
                 .displayedName("IOB ConfigFile Name")
                 .tags("IOBConfigPath")
                 .assignmentOptional().defaultValue("~/karabo/devices/DsscPpt/ConfigFiles/IOBConfig.txt").reconfigurable()
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("saveConfigIOB")
                 .displayedName("Save IOB Config")
                 .description("Save current IOB sysconfig register to selected file")
+                .expertAccess()
                 .commit();
 
 
@@ -779,6 +830,7 @@ namespace karabo {
                 .key("updateSequenceCounters").displayedName("Update Counters")
                 .description("Set cycle counters in device")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -796,6 +848,7 @@ namespace karabo {
                 .minInc(1).maxInc(16)
                 .assignmentOptional().defaultValue(1).reconfigurable()
                 .allowedStates(State::UNKNOWN)
+                .expertAccess()
                 .commit();
 
 
@@ -803,11 +856,13 @@ namespace karabo {
                 .key("sendingASICs").displayedName("Sending ASICs")
                 .description("define ASICs which are sending data")
                 .assignmentOptional().defaultValue("11111111_11111111").reconfigurable()
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setSendingASICs").displayedName("Set Sending ASICs")
                 .description("Define ASICs which are sending and which are not sending data: 11111111_11111111")
+                .expertAccess()
                 .commit();
 
 
@@ -817,24 +872,28 @@ namespace karabo {
                 .tags("other")
                 .assignmentOptional().defaultValue(10).reconfigurable()
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("programLMKOutput").displayedName("Program ASIC LMK Out")
                 .description("Reprogram LMK Output to restart ASIC")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("programLMKsAuto").displayedName("Program LMKs Auto")
                 .description("Automatically initalize the ASIC clocks for correct data transmission")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setQuadrantSetup").displayedName("Set Quadrant Setup")
                 .description("Select number of ASICs and DPs, disables dummy data")
                 .allowedStates(State::UNKNOWN, State::OFF)
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected)
@@ -844,6 +903,7 @@ namespace karabo {
                 .assignmentMandatory()
                 .options(utils::DsscModuleInfo::getQuadrantIdList(), ",")
                 .reconfigurable()
+                .expertAccess()
                 .commit();
 
         UINT32_ELEMENT(expected)
@@ -867,6 +927,7 @@ namespace karabo {
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
                 .allowedStates(State::ON, State::STOPPED, State::OFF)
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -874,6 +935,7 @@ namespace karabo {
                 .description("Set device in continuous running mode")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -881,6 +943,7 @@ namespace karabo {
                 .description("Select if all frames are sent out in continuous mode ")
                 .tags("other")
                 .assignmentOptional().defaultValue(true).reconfigurable()
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -888,6 +951,7 @@ namespace karabo {
                 .description("Enable sending of dummy data packets directly from ethernet engine in continous mode")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -895,6 +959,7 @@ namespace karabo {
                 .description("Send dummy data generated in the aurora core as received from the IOBoard")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -903,6 +968,7 @@ namespace karabo {
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
                 .allowedStates(State::ON, State::STOPPED)
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -911,6 +977,7 @@ namespace karabo {
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
                 .allowedStates(State::ON, State::STOPPED)
+                .expertAccess()
                 .commit();
 
         UINT16_ELEMENT(expected)
@@ -919,6 +986,7 @@ namespace karabo {
                 .tags("other")
                 .assignmentOptional().defaultValue(1).reconfigurable()
                 .minInc(0).maxInc(15)
+                .expertAccess()
                 .commit();
 
         BOOL_ELEMENT(expected)
@@ -926,12 +994,14 @@ namespace karabo {
                 .description("Enable sending of ASIC data from Ladder1 to Ethernet Output 2")
                 .tags("other")
                 .assignmentOptional().defaultValue(false).reconfigurable()
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("checkQSFPConnected")
                 .displayedName("Check QSFP Links")
-                .description("checks the number of connecte links")
+                .description("checks the number of connected links")
+                .expertAccess()
                 .commit();
 
         STRING_ELEMENT(expected).key("connectedETHChannels")
@@ -939,12 +1009,14 @@ namespace karabo {
                 .description("PPT can see if a fiber of the QSFP link is connected or not")
                 .readOnly()
                 .defaultValue("nA")
+                .expertAccess()
                 .commit();
 
 
         SLOT_ELEMENT(expected)
                 .key("checkIOBDataFailed").displayedName("Check IOB Data Failed")
                 .description("Read data receive status register in IOB")
+                .expertAccess()
                 .commit();
 
 
@@ -952,16 +1024,19 @@ namespace karabo {
                 .key("activeChannelReadoutFailure").displayedName("active channel readout failure")
                 .description("Parameter to read from remote. Indicates which channels have not been sending data.")
                 .readOnly()
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("checkPPTDataFailed").displayedName("Check PPT Data Failed")
                 .description("Read data receive status register in PPT")
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("checkASICReset").displayedName("Check ASIC Reset")
                 .description("Check and initialize the readout ASICs of the current Module")
+                .expertAccess()
                 .commit();
 
         PPT_CHANNEL_FAILED_ELEMENTS
@@ -970,22 +1045,25 @@ namespace karabo {
         SLOT_ELEMENT(expected)
                 .key("loadLastFileETHConfig").displayedName("Take over last ETH config")
                 .description("If a new config file was loaded one can take the ETH Config from the file as new valid config")
+                .expertAccess()
                 .commit();
 
         //Initial Ethernet Elements
         //Defined in DsscPptRegsInit.hh
-        INIT_ETH_ELEMENTS
+        INIT_ETH_ELEMENTS(expected);
 
         UINT32_ELEMENT(expected)
                 .key("ethThrottleDivider").displayedName("Eth. throttle divider")
                 .description("Ethernet engine throttle divider parameter")
                 .assignmentOptional().defaultValue(0).reconfigurable()
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected)
                 .key("setThrottleDivider")
                 .displayedName("Set eth. throttle divider")
                 .description("Set ethernet engine throttle divider")
+                .expertAccess()
                 .commit();
 
 
@@ -995,6 +1073,7 @@ namespace karabo {
                 .key("saveConfiguration")
                 .displayedName("Save configuration")
                 .description("Save current configuration to selected files")
+                .expertAccess()
                 .commit();
 
         INPUT_CHANNEL(expected).key("registerConfigInput")
@@ -1014,16 +1093,19 @@ namespace karabo {
         NODE_ELEMENT(expected).key(s_dsscConfBaseNode)
                 .description("EPC, IOB and JTAG detector registry")
                 .displayedName(s_dsscConfBaseNode)
+                .expertAccess()
                 .commit();
 
         SLOT_ELEMENT(expected).key("updateConfigHash")
                 .displayedName("Read Config Data")
                 .description("Read Configuration Data")
+                .expertAccess()
                 .commit();
         
         SLOT_ELEMENT(expected)
                 .key("updateConfigFromHash").displayedName("Write Config Data")
                 .description("Write Configuration Data")
+                .expertAccess()
                 .commit();
 
         VECTOR_STRING_ELEMENT(expected)
@@ -1031,6 +1113,7 @@ namespace karabo {
                 .setSpecialDisplayType(KARABO_SCHEMA_DISPLAY_TYPE_SCENES)
                 .readOnly()
                 .defaultValue(std::vector<std::string>{"overview", "configurator"})
+                .expertAccess()
                 .commit();
     }
 
@@ -1556,7 +1639,6 @@ namespace karabo {
             std::vector<std::string> modules_strvec = reg->getModules(modSetName);
             const auto signalNames = reg->getSignalNames(modSetName);
             for (const auto & sigName : signalNames) {
-                KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Add Signal " + sigName;
                 if (sigName.find("_nc") != string::npos) {
                     continue;
                 }
