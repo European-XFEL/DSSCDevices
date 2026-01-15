@@ -794,13 +794,8 @@ namespace karabo {
                 .expertAccess()
                 .commit();
 
-        INIT_PPT_PLL_ELEMENTS
-
-
-        //Initiate IOB and enable datapath Elements
-        //Defined in DsscPptRegsInit.hh
-
-        INIT_PROGRAM_IOB_FPGA_ELEMENTS
+        init_ppt_pll_elements(expected);
+        init_program_iob_fpga_elements(expected);
 
         STRING_ELEMENT(expected).key("iobRegisterFilePath")
                 .description("Name of the IOB configuration file")
@@ -818,13 +813,13 @@ namespace karabo {
                 .commit();
 
 
-        INIT_IOB_ELEMENTS
+        init_iob_elements(expected);
 
-        INIT_CONFIG_REGISTER_ELEMENTS
+        init_config_register_elements(expected);
 
-        INIT_SEQUENCER_CONTROL_ELEMENTS
+        init_sequencer_control_elements(expected);
 
-        INIT_SEQUENCE_ELEMENTS
+        init_sequence_elements(expected);
 
         SLOT_ELEMENT(expected)
                 .key("updateSequenceCounters").displayedName("Update Counters")
@@ -839,8 +834,6 @@ namespace karabo {
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
                 .commit();
 
-
-
         UINT32_ELEMENT(expected)
                 .key("numActiveASICs").displayedName("Number of Active ASICs")
                 .description("define number of ASICs in jtag chain")
@@ -850,7 +843,6 @@ namespace karabo {
                 .allowedStates(State::UNKNOWN)
                 .expertAccess()
                 .commit();
-
 
         STRING_ELEMENT(expected)
                 .key("sendingASICs").displayedName("Sending ASICs")
@@ -864,7 +856,6 @@ namespace karabo {
                 .description("Define ASICs which are sending and which are not sending data: 11111111_11111111")
                 .expertAccess()
                 .commit();
-
 
         UINT32_ELEMENT(expected)
                 .key("lmkOutputToProgram").displayedName("LMK Clock Output")
@@ -1012,13 +1003,11 @@ namespace karabo {
                 .expertAccess()
                 .commit();
 
-
         SLOT_ELEMENT(expected)
                 .key("checkIOBDataFailed").displayedName("Check IOB Data Failed")
                 .description("Read data receive status register in IOB")
                 .expertAccess()
                 .commit();
-
 
         UINT16_ELEMENT(expected)
                 .key("activeChannelReadoutFailure").displayedName("active channel readout failure")
@@ -1039,8 +1028,7 @@ namespace karabo {
                 .expertAccess()
                 .commit();
 
-        PPT_CHANNEL_FAILED_ELEMENTS
-
+        init_ppt_channel_failed_elements(expected);
 
         SLOT_ELEMENT(expected)
                 .key("loadLastFileETHConfig").displayedName("Take over last ETH config")
@@ -1048,9 +1036,7 @@ namespace karabo {
                 .expertAccess()
                 .commit();
 
-        //Initial Ethernet Elements
-        //Defined in DsscPptRegsInit.hh
-        INIT_ETH_ELEMENTS(expected);
+        init_eth_elements(expected);
 
         UINT32_ELEMENT(expected)
                 .key("ethThrottleDivider").displayedName("Eth. throttle divider")
@@ -1066,8 +1052,7 @@ namespace karabo {
                 .expertAccess()
                 .commit();
 
-
-        INIT_ENABLE_DATAPATH_ELEMENTS
+        init_enable_datapath_elements(expected);
 
         SLOT_ELEMENT(expected)
                 .key("saveConfiguration")
@@ -1089,7 +1074,6 @@ namespace karabo {
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
                 .commit();
 
-        
         NODE_ELEMENT(expected).key(s_dsscConfBaseNode)
                 .description("EPC, IOB and JTAG detector registry")
                 .displayedName(s_dsscConfBaseNode)
@@ -1194,8 +1178,28 @@ namespace karabo {
         KARABO_SLOT(setInjectionMode);
 
         KARABO_SLOT(setQuadrantSetup);
-        //to pass key values with nodes use own Macro
-        PROG_IOBSLOTS
+
+        KARABO_SLOT(resetAurora1);
+        KARABO_SLOT(programLMK1);
+        KARABO_SLOT(programIOB1Config);
+        KARABO_SLOT(readIOBRegisters1);
+
+        KARABO_SLOT(resetAurora2);
+        KARABO_SLOT(programLMK2);
+        KARABO_SLOT(programIOB2Config);
+        KARABO_SLOT(readIOBRegisters2);
+
+        KARABO_SLOT(resetAurora3);
+        KARABO_SLOT(programLMK3);
+        KARABO_SLOT(programIOB3Config);
+        KARABO_SLOT(readIOBRegisters3);
+
+        KARABO_SLOT(resetAurora4);
+        KARABO_SLOT(programLMK4);
+        KARABO_SLOT(programIOB4Config);
+        KARABO_SLOT(readIOBRegisters4);
+
+        KARABO_SLOT(programPLL);
 
         KARABO_SLOT(saveConfigIOB);
         KARABO_SLOT(saveConfiguration);
@@ -2646,7 +2650,9 @@ namespace karabo {
 
 
     void DsscPpt::programLMK(int iobNumber) {
-        CHECK_IOB(iobNumber)
+        if (!check_iob(iobNumber)) {
+            return;
+        }
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Programing LMK of IOB " + toString(iobNumber);
         m_ppt->setActiveModule(iobNumber);
@@ -2679,7 +2685,9 @@ namespace karabo {
 
 
     void DsscPpt::checkPRBs(int iobNumber) {
-        CHECK_IOB(iobNumber)
+        if (!check_iob(iobNumber)) {
+            return;
+        }
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Check PRBs";
         int numPRBsfound = 0;
@@ -2694,7 +2702,9 @@ namespace karabo {
 
 
     void DsscPpt::resetAurora(int iobNumber) {
-        CHECK_IOB(iobNumber)
+        if (!check_iob(iobNumber)) {
+            return;
+        }
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Reset Aurora";
         m_ppt->setActiveModule(iobNumber);
@@ -2763,8 +2773,9 @@ namespace karabo {
 
 
     void DsscPpt::programIOBConfig(int iobNumber) {
-
-        CHECK_IOB(iobNumber)
+        if (!check_iob(iobNumber)) {
+            return;
+        }
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program IOB Config " << iobNumber;
         {
@@ -2898,7 +2909,9 @@ namespace karabo {
         bool readBack = get<bool>("jtagReadBackEnable");
         int iobNumber = get<uint32_t>("activeModule");
 
-        CHECK_IOB(iobNumber)
+        if (!check_iob(iobNumber)) {
+            return;
+        }
 
         if (!checkIOBVoltageEnabled(iobNumber)) {
             KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " IOB " + toString(iobNumber) + " static power not enabled!";
@@ -3011,7 +3024,9 @@ namespace karabo {
     }
 
     bool DsscPpt::readbackConfigIOB(int iobNumber) {
-        CHECK_IOB_B(iobNumber)
+        if(!check_iob(iobNumber)) {
+            return false;
+        }
 
         int rc;
 
@@ -3196,7 +3211,9 @@ namespace karabo {
 
 
     bool DsscPpt::setActiveModule(int iobNumber) {
-        CHECK_IOB_B(iobNumber);
+        if(!check_iob(iobNumber)) {
+            return false;
+        }
 
         m_ppt->setActiveModule(iobNumber);
         return true;
@@ -4893,12 +4910,25 @@ namespace karabo {
 
         if ("overview" == which) {
             payload.set("data", getControlScene(this->getInstanceId(), this->get<std::string>("quadrantId")));
-            payload.set("success", true);    
+            payload.set("success", true);
         } else if ("configurator" == which) {
             payload.set("data", getConfiguratorScene(this->getInstanceId(), this->get<std::string>("quadrantId")));
-            payload.set("success", true);    
+            payload.set("success", true);
         }
         this->reply(reply);
+    }
+
+    bool DsscPpt::check_iob(const int iobNumber) {
+        if (iobNumber < 1 || iobNumber > 4) {
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " IOB "  << iobNumber << " unknown!";
+            return false;
+        }
+
+        if(!isIOBAvailable(iobNumber)){
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << " IOB " << iobNumber << " not available, nothing programmed ";
+            return false;
+        }
+        return true;
     }
 
 }

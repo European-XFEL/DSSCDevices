@@ -504,6 +504,7 @@ namespace karabo {
         void burstAcquisitionPolling();
         bool getConfigurationFromRemote();
         void requestScene(const karabo::data::Hash&);
+        bool check_iob(const int);
     };
 }
 
