@@ -154,6 +154,7 @@ namespace karabo {
                 .displayedName("Update GUI Registers")
                 .description("Releoad all Reigsters")
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
 
@@ -178,6 +179,7 @@ namespace karabo {
                 .assignmentOptional()
                 .noDefaultValue()
                 .init()
+                .expertAccess()
                 .commit();
         
         BOOL_ELEMENT(expected).key("isDEPFET")
@@ -299,15 +301,15 @@ namespace karabo {
                 .expertAccess()
                 .commit();
 
+        SLOT_ELEMENT(expected)
+                .key("readLastPPTTrainID").displayedName("read Last PPT Train ID").description("Reads last Train ID from PPT registers")
+                .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
+                .commit();
+
         UINT32_ELEMENT(expected).key("lastTrainId")
                 .displayedName("Last Train ID from PPT")
                 .description("Holds 4LSB of last train ID from PPT registers. Trigger readout before use")
                 .readOnly().defaultValue(0)
-                .commit();
-
-        SLOT_ELEMENT(expected)
-                .key("readLastPPTTrainID").displayedName("read Last PPT Train ID").description("Reads last Train ID from PPT registers")
-                .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
                 .commit();
 
         SLOT_ELEMENT(expected)
@@ -392,6 +394,13 @@ namespace karabo {
                 .expertAccess()
                 .commit();
         
+        UINT32_ELEMENT(expected).key("numBurstTrains")
+                .displayedName("Burst Acq. Train Count")
+                .description("Number of trains in the burst")
+                .assignmentOptional().defaultValue(10).reconfigurable()
+                .minInc(1)
+                .commit();
+
         SLOT_ELEMENT(expected)
                 .key("startBurstAcquisition").displayedName("Start Burst Acquisition").description("Send burst of trains")
                 .allowedStates(State::ON)
@@ -414,13 +423,6 @@ namespace karabo {
                 .displayedName("endTrainId")
                 .description("end train of burst measurement")
                 .assignmentOptional().defaultValue(0).reconfigurable()
-                .commit();
-
-        UINT32_ELEMENT(expected).key("numBurstTrains")
-                .displayedName("Number of Trains")
-                .description("Number of trains in the burst")
-                .assignmentOptional().defaultValue(10).reconfigurable()
-                .minInc(1)
                 .commit();
 
         STRING_ELEMENT(expected).key("selRegName")
@@ -832,6 +834,7 @@ namespace karabo {
                 .key("updateStartWaitOffset").displayedName("Update Burst Wait Offset")
                 .description("Update Burst Wait Offset")
                 .allowedStates(State::ON, State::STOPPED, State::STARTED, State::ACQUIRING)
+                .expertAccess()
                 .commit();
 
         UINT32_ELEMENT(expected)
