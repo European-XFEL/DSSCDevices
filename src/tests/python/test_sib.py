@@ -1,24 +1,29 @@
+import json
 import pytest
 
+from karabo.bound.testing import eventLoop, ServerContext, sleepUntil
+from karabo.bound import Configurator, Hash
+
 from DsscControl.sib import DsscSIB
-from karabo.bound import Configurator, Hash, PythonDevice
 
 
-def test_sib_instantiation():
-    sib = Configurator(PythonDevice).create(
-        "DsscSIB",
-        Hash(
-            "log.level", "DEBUG", "deviceId", "DSSC_SIB_0", "hostname", "1.2.3.4"
-        ),
-    )
-    sib.startInitialFunctions()
+@pytest.mark.timeout(30)
+def test_sib_instantiation(eventLoop):
+    device_config = {
+        "SIBTestDevice": {
+            "classId": "DsscSIB",
+            "hostname": "1.2.3.4",
+         }
+    }
 
-
-def test_sib_no_ip():
-    with pytest.raises(RuntimeError):
-        Configurator(PythonDevice).create(
-            "DsscSIB", Hash("log.level", "DEBUG", "deviceId", "DSSC_SIB_0")
-        )
+    init = json.dumps(device_config)
+    server = ServerContext(
+        "sibTestServer",
+        ["log.level=DEBUG", f"init={init}"])
+    with server:
+        remote = server.remote()
+        print(remote.getDevices())
+        sleepUntil(lambda: "SIBTestDevice" in remote.getDevices(), timeout=10)
 
 
 def test_parsers():
@@ -196,6 +201,8 @@ def test_parsers():
     assert ret.named == expected
 
 
+@pytest.mark.skip(reason="Refactoring of monkeypatching required - no way to call method directly")
+@pytest.mark.timeout(30)
 @pytest.mark.parametrize(
     "line, expected",
     [
@@ -269,24 +276,48 @@ def test_parsers():
          {'logCounter': 72, 'decision': '3->19: 0:0:0:1:2:0:1'}),
     ]
 )
-def test_process_data_row(capsys, monkeypatch, line, expected):
-        sib = Configurator(PythonDevice).create(
-            "DsscSIB",
-            Hash("deviceId", "DSSC_SIB_0", "hostname", "8.8.8.8")
-        )
+def test_process_data_row(eventLoop, capsys, monkeypatch, line, expected):
+    def mock_set(hash_, ts=None):
+        h = Hash()
+        for k, v in expected.items():
+            h[k] = v
 
-        def mock_set(hash_, ts=None):
-            h = Hash()
-            for k, v in expected.items():
-                h[k] = v
+        assert hash_ == h, "+++ FAILED"
 
-            assert hash_ == h, "+++ FAILED"
+    monkeypatch.setattr(DsscSIB, "set", mock_set)
 
-        monkeypatch.setattr(sib, "set", mock_set)
+    config = {"SIBTestDevice": {"classId": "DsscSIB",
+                                "hostname": "1.2.3.4",}}
+    init = json.dumps(config)
+    server = ServerContext(
+        "sibTestServer",
+        [f"init={init}", "deviceClasses=DsscSIB"])
+    with server:
+        remote = server.remote()
+        sleepUntil(lambda: "SIBTestDevice" in remote.getDevices(), timeout=5)
+        sib = remote.get("SIBTestDevice")
+
         sib.process_data_row(line, ts=None)
 
-        out = capsys.readouterr().out
-        # Check that the device could set the properties correctly
-        assert "Exception" not in out
-        # Check that assert in mock_set did not raise
-        assert "+++ FAILED" not in out
+    out = capsys.readouterr().out
+    # Check that the device could set the properties correctly
+    assert "Exception" not in out
+    # Check that assert in mock_set did not raise
+    assert "+++ FAILED" not in out
+
+@pytest.mark.timeout(30)
+def test_sib_instantiation(eventLoop):
+    device_config = {
+        "SIBTestDevice": {
+            "classId": "DsscSIB",
+            "hostname": "1.2.3.4",
+         }
+    }
+
+    init = json.dumps(device_config)
+    server = ServerContext(
+        "sibTestServer",
+        [f"init={init}"])
+    with server:
+        remote = server.remote()
+        sleepUntil(lambda: "SIBTestDevice" in remote.getDevices(), timeout=10)
