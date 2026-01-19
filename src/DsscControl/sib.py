@@ -177,8 +177,8 @@ class DsscSIB(PythonDevice):
             .reconfigurable()
             .commit(),
 
-            INT32_ELEMENT(expected).key("log")
-            .displayedName("LOG Mode")
+            INT32_ELEMENT(expected).key("logLevel")
+            .displayedName("Log Level")
             .description("Logging mode. 0: readings logging is disabled; 1: "
                          "logs only SIB-related sensor data; 2: sends only "
                          "ASIC calibrated data; 3: sends SIB sensor and ASIC "
@@ -637,7 +637,7 @@ class DsscSIB(PythonDevice):
 
             self.authenticate()  # authenticate
 
-            configuration = Hash('som', self['som'], 'log', self['log'])
+            configuration = Hash('som', self['som'], 'log', self['logLevel'])
             self.configure_sib(configuration)  # send initial configuration
 
             self.socket.settimeout(1)
@@ -717,7 +717,7 @@ class DsscSIB(PythonDevice):
                 self.reset_last_updated()  # reset "last updated" counters
             except socket.timeout as e:
                 if counter > 0:
-                    if self['log'] > 0:
+                    if self['logLevel'] > 0:
                         # if LOG > 0 updates are expected all the time
                         counter -= 1
                         self.logger.debug(f"Listener caught this: {e}")
@@ -884,6 +884,6 @@ class DsscSIB(PythonDevice):
             som = configuration['som']
             self.socket.send(f"SOM {som};{DsscSIB.cmnd_terminator}".encode())
 
-        if configuration.has('log'):
-            log = configuration['log']
-            self.socket.send(f"LOG {log};{DsscSIB.cmnd_terminator}".encode())
+        if configuration.has('logLevel'):
+            log_level = configuration['logLevel']
+            self.socket.send(f"LOG {log_level};{DsscSIB.cmnd_terminator}".encode())
