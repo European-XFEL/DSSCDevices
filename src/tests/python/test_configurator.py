@@ -6,6 +6,7 @@ import DsscControl.configurator  # Used so to mock shutdowns
 from karabo.middlelayer import (
     call,
     connectDevice,
+    sleep,
     Device,
     Hash,
     Slot,
@@ -16,10 +17,9 @@ from karabo.middlelayer import (
 )
 from karabo.middlelayer.testing import (
     AsyncDeviceContext,
-    event_loop,
+    check_device_package_properties,
     create_device_server,
 )
-
 
 from DsscControl.configurator import DsscConfigurator
 
@@ -40,7 +40,7 @@ class MockPPT(Device):
         self.init_done = True
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="module")
 @pytest.mark.timeout(30)
 async def test_apply_configuration(monkeypatch):
     q1_did = create_instanceId()
@@ -112,6 +112,8 @@ async def test_apply_configuration(monkeypatch):
             mock_mdl_ifm
         )
 
+        await sleep(1)
+
         # Check initialization was correct
         assert proxy.monitoredDevices == "Q1, Q3, Q4"
 
@@ -136,12 +138,14 @@ async def test_apply_configuration(monkeypatch):
         await waitUntil(lambda: proxy.state == State.ACTIVE)
         await waitUntilNew(proxy.actualGainConfiguration)
 
+        await sleep(1)
+
         assert proxy.actualGainConfiguration == "bing"
         assert proxy.gainConfigurationState == State.ON.value
 
 
-@pytest.mark.asyncio
-async def test_fix_config_string(event_loop):
+@pytest.mark.asyncio(loop_scope="module")
+async def test_fix_config_string():
     configurator_id = create_instanceId()
 
     configurator = DsscConfigurator(
@@ -185,9 +189,9 @@ async def test_fix_config_string(event_loop):
         assert ret["data"] == "/path/to/FIXED/FIXED_Arthur.conf"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio(loop_scope="module")
 @pytest.mark.timeout(30)
-async def test_missing_proxies(event_loop):
+async def test_missing_proxies():
     configurator_id = create_instanceId()
     configurator = DsscConfigurator(
         {
@@ -214,11 +218,7 @@ async def test_missing_proxies(event_loop):
         assert proxy.gainConfigurationState == State.ERROR.value
 
 
-@pytest.mark.asyncio
-@pytest.mark.timeout(30)
-async def test_server_loads_device(event_loop):
-    serverId = create_instanceId()
-    server = create_device_server(serverId, [DsscConfigurator])
-    async with AsyncDeviceContext(server=server) as ctx:
-        server_instance = ctx.instances["server"]
-        assert "DsscConfigurator" in server_instance.plugins
+def test_property_code_guidelines():
+   keys = check_device_package_properties(DsscControl.configurator)
+   msg = f"The following does not comply with Karabo: {keys}"
+   assert not keys, msg
