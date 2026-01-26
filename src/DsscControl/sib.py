@@ -701,7 +701,8 @@ class DsscSIB(PythonDevice):
     def consumer(self):
         while True:
             data_row, ts = self.data_queue.get()
-            self.process_data_row(data_row, ts)
+            data = self.process_data(data_row)
+            self.set_properties(data, ts)
 
     def listener(self):
         data = ""
@@ -754,11 +755,7 @@ class DsscSIB(PythonDevice):
         h = Hash()
         epsilon = self['epsilon']
         try:
-            for key, value in result.named.items():
-                if not isinstance(value, str) and abs(value) == 65535:
-                    # 65535 means NaN
-                    value = math.nan
-
+            for key, value in result.items():
                 if self.is_update_required(key, value, epsilon):
                     # valid update
                     h[key] = value
@@ -792,92 +789,75 @@ class DsscSIB(PythonDevice):
 
         return True
 
-    def process_data_row(self, data, ts):
+    @staticmethod
+    def process_data(data: str) -> dict:
         data = data.replace('|', '!')  # '|' cannot be parsed correctly
+        result = dict()
 
         if 'SIB_MASTER' in data:  # LOG data
             if data.startswith('LOG['):
-                result = DsscSIB.log_parser.parse(data)
+                result = DsscSIB.log_parser.parse(data).named
             elif data.startswith('SIB_MASTER'):
-                result = DsscSIB.log_v2_parser.parse(data)
-            else:
-                return
-            if result is not None:
-                self.set_properties(result, ts)
+                result = DsscSIB.log_v2_parser.parse(data).named
 
         elif data.startswith('LOG['):
-            result = DsscSIB.log_counter_v2_parser.parse(data)
-            if result is not None:
-                self.set_properties(result, ts)
+            result = DsscSIB.log_counter_v2_parser.parse(data).named
 
         elif data.startswith('SIB['):
             if 'LastTrainID:' in data:
-                result = DsscSIB.last_trainid_parser.parse(data)
+                result = DsscSIB.last_trainid_parser.parse(data).named
             elif 'T_STATUS:' in data:
                 if 'Therm:' in data:
-                    result = DsscSIB.tstatus_v2_parser.parse(data)
+                    result = DsscSIB.tstatus_v2_parser.parse(data).named
                 else:
-                    result = DsscSIB.tstatus_parser.parse(data)
+                    result = DsscSIB.tstatus_parser.parse(data).named
             elif 'VCCSUM:' in data:
-                result = DsscSIB.vccsum_parser.parse(data)
+                result = DsscSIB.vccsum_parser.parse(data).named
             elif 'PPFC_T1:' in data:
-                result = DsscSIB.ppfc_parser.parse(data)
+                result = DsscSIB.ppfc_parser.parse(data).named
             elif 'IOB_T1:' in data:
-                result = DsscSIB.iob_parser.parse(data)
+                result = DsscSIB.iob_parser.parse(data).named
             elif 'MG:' in data:
-                result = DsscSIB.mg_parser.parse(data)
+                result = DsscSIB.mg_parser.parse(data).named
             elif 'DP1:' in data:
-                result = DsscSIB.t1_v2_parser.parse(data)
+                result = DsscSIB.t1_v2_parser.parse(data).named
             elif 'H1:' in data:
-                result = DsscSIB.t1_parser.parse(data)
+                result = DsscSIB.t1_parser.parse(data).named
             elif 'NTC' in data:
-                result = DsscSIB.ntc_parser.parse(data)
-            else:
-                # no match -> data won't be parsed
-                return
-
-            if result is not None:
-                self.set_properties(result, ts)
+                result = DsscSIB.ntc_parser.parse(data).named
 
         elif data.startswith('ASIC'):
-            # ASIC data
-            result = DsscSIB.asic_trainid_parser.parse(data)
-            if result is not None:
-                self.set_properties(result, ts)
+            result = DsscSIB.asic_trainid_parser.parse(data).named
 
         elif data.startswith('(0)'):
-            # ASIC data
-            h = Hash()
-            epsilon = self['epsilon']
             for row in data.rstrip(';').split(';'):
-                result = DsscSIB.asic_parser.parse(row)
+                res = DsscSIB.asic_parser.parse(row)
 
-                if result is None:
+                if res is None:
                     continue
 
-                if 'asic_nr' not in result.named:
+                if 'asic_nr' not in res.named:
                     continue
 
-                asic_nr = result.named['asic_nr']
+                asic_nr = res.named['asic_nr']
                 if not (0 <= asic_nr < DsscSIB.ASICS):
                     continue
 
-                for k, value in result.named.items():
+                for k, value in res.named.items():
                     if k == 'asic_nr':
                         continue  # not a Karabo parameter
                     key = k.replace('ASICXX', f'asic{asic_nr:02d}')
 
-                    if abs(value) == 65535:
-                        value = math.nan  # 65535 means NaN
-                    if self.is_update_required(key, value, epsilon):
-                        h[key] = value
+                    result[key] = value
 
-            try:
-                if not h.empty():
-                    self.logger.debug(f"Setting {h}")
-                    self.set(h, ts)  # bulk set
-            except Exception as e:
-                self.logger.warning(f"Could not set {h}. {e}")
+        # Sanitize unitialized values to NaN
+        # The SIB sets unitialized values to either + or - 65535
+        # Convert this to NaN to highlight to operators that these are unset
+        for key in result.keys():
+            if result[key] in (65535, -65535):
+                result[key] = float('nan')
+
+        return result
 
     def configure_sib(self, configuration):
         if configuration.has('som'):
