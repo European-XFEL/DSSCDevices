@@ -833,10 +833,7 @@ class DsscSIB(PythonDevice):
             for row in data.rstrip(';').split(';'):
                 res = DsscSIB.asic_parser.parse(row)
 
-                if res is None:
-                    continue
-
-                if 'asic_nr' not in res.named:
+                if res is None or 'asic_nr' not in res.named:
                     continue
 
                 asic_nr = res.named['asic_nr']
@@ -853,9 +850,9 @@ class DsscSIB(PythonDevice):
         # Sanitize unitialized values to NaN
         # The SIB sets unitialized values to either + or - 65535
         # Convert this to NaN to highlight to operators that these are unset
-        for key in result.keys():
+        for key in result:
             if result[key] in (65535, -65535):
-                result[key] = float('nan')
+                result[key] = math.nan
 
         return result
 
