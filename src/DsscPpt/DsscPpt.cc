@@ -2056,7 +2056,9 @@ namespace karabo {
         ss << hex << "0x" << sern;
 
         string serialStr = ss.str();
-        if (sern > 0x180000) {
+        if (sern > 0x1f0000) {
+            serialStr += " PPTv3";
+        } else if (sern > 0x180000) {
             serialStr += " PPTv2";
         } else {
             serialStr += " PPTv1";
