@@ -20,6 +20,7 @@
 #include <atomic>
 #include <vector>
 #include <sstream>
+#include <fstream>
 
 
 /**
@@ -288,6 +289,7 @@ namespace karabo {
         void updateTestEnvironment();
         void updateTestEnvironment(const std::string &environment);
         void readSerialNumber();
+        void validateConfigForSensor();
 
         void loadLastFileETHConfig();
 
@@ -478,6 +480,25 @@ namespace karabo {
             }
 
             return res;
+        }
+
+        bool isPatternInFile(const std::string& filename, const std::string pattern) {
+            std::ifstream file(filename);
+            if (!file.is_open()) {
+                return false;
+            }
+
+            bool patternInFile = false;
+            std::string line;
+            while (std::getline(file, line)) {
+                if (line.find(pattern) != std::string::npos) {
+                    std::cout << pattern << " found in " << filename << std::endl;
+                    patternInFile = true;
+                    break;
+                }
+            }
+            file.close();
+            return patternInFile;
         }
         
         bool m_keepAcquisition;
