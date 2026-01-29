@@ -1792,6 +1792,8 @@ namespace karabo {
 
             this->updateState(State::OFF, Hash("status", "Connected to PPT"));
 
+            validateConfigForSensor();
+
         } 
     }
 
@@ -2040,14 +2042,12 @@ namespace karabo {
 
         string firmware;
         string linux;
-        bool isDEPFET;
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
 
             sern = m_ppt->readSerialNumber();
             firmware = m_ppt->readBuildStamp();
             linux = m_ppt->readLinuxBuildStamp();
-            isDEPFET = m_ppt->isDEPFET();
 
             printPPTErrorMessages();
         }
@@ -2067,8 +2067,31 @@ namespace karabo {
         h.set<string>("pptSerial", serialStr);
         h.set<string>("firmwareRev", firmware);
         h.set<string>("linuxRev", linux);
-        h.set<bool>("isDEPFET", isDEPFET);
         this->set(h);
+    }
+
+
+    void DsscPpt::validateConfigForSensor() {
+        bool isDetectorDEPFET;
+
+        {
+            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            isDetectorDEPFET = m_ppt->isDEPFET();
+        }
+        this->set<bool>("isDEPFET", isDetectorDEPFET);
+
+        // DEPFET has the CompCoarse in the pixel registers
+        // MiniSDD has CSA in the JTAG registers
+        const std::string pixelRegFilename = this->get<string>("pixelRegisterFilePath");
+        const std::string jtagRegFilename = this->get<string>("jtagRegisterFilePath");
+
+        bool isConfigDEPFET = isPatternInFile(pixelRegFilename, "CompCoarse");
+        bool isConfigMiniSDD = isPatternInFile(jtagRegFilename, "CSA");
+
+        if(!(isDetectorDEPFET && isConfigDEPFET) ||
+           !(!isDetectorDEPFET && isConfigMiniSDD)) {
+            this->updateState(State::ERROR, Hash("status", "Wrong Config for this sensor"));
+        }
     }
 
 
