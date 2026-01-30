@@ -94,6 +94,7 @@ class DsscControl(Device):
     async def framesToSend(self, value):
         self.framesToSend = value
         await self.set_many_remote(self.ppt_dev, numFramesToSendOut=self.framesToSend)
+        self.status = f"Set {self.framesToSend.value} frames"
 
     @UInt16(displayedName="Preburst Vetos", defaultValue=10,
             allowedStates={State.ON})
@@ -130,8 +131,9 @@ class DsscControl(Device):
         # Keeps track of state updates in state fusion
         self._last_status_update: str = None
 
-        # Background task initialized in connectDevices
+        # Background tasks initialized in connectDevices
         self.state_fusion_task = None
+        self.frame_monitoring_task = None
 
     async def onInitialization(self):
         await self.connectDevices()
@@ -162,6 +164,10 @@ class DsscControl(Device):
         if self.state_fusion_task is not None:
             self.state_fusion_task.cancel()
             self.state_fusion_task = None
+
+        if self.frame_monitoring_task is not None:
+            self.frame_monitoring_task.cancel()
+            self.frame_monitoring_task = None
 
         self.state = State.CHANGING
         self.status = "Connecting to devices..."
@@ -210,6 +216,7 @@ class DsscControl(Device):
         self.run_controller = await connectDevice(self.runController)
 
         self.state_fusion_task = background(self.state_fusion())
+        self.frame_monitoring_task = background(self.monitor_frames())
         self.status = "Done connecting to devices"
 
     @Slot(displayedName="Init PPT devices",
@@ -322,6 +329,35 @@ class DsscControl(Device):
     async def onException(self, slot, exception, traceback):
         self.state = State.ERROR
         self.status = f"{slot}: {exception}"
+
+    async def monitor_frames(self):
+        """Monitor frames accross PPTs.
+
+        While frames are expected to be set here, it happens that they're set
+        manually on a PPT device.
+        This background task monitors frames and update all if any changes.
+
+        The timestamp is checked to ensure that changes coming from remote
+        devices are newer than ours, and not due to us changing the value here.
+        (This allows smooth update of frames to send from remote devices and
+        from here.)
+        """
+        while True:
+            frames = {ppt.deviceId: ppt.numFramesToSendOut
+                      for ppt in self.ppt_dev}
+
+            for did, frames_to_send in frames.items():
+                if (frames_to_send != self.framesToSend
+                    and frames_to_send.timestamp > self.framesToSend.timestamp):
+                    self.framesToSend = frames_to_send
+                    await self.set_many_remote(
+                        self.ppt_dev,
+                        numFramesToSendOut=self.framesToSend
+                    )
+                    self.status = f"Set {self.framesToSend.value} frames from {did}"
+                    break
+
+            await waitUntilNew(*frames.values())
 
     async def state_fusion(self):
         """Fuse the states of PPTs and Power Procedure into allowed states."""
