@@ -60,6 +60,16 @@ class MockDevice(Device):
 
 @pytest.mark.asyncio
 @pytest.mark.timeout(30)
+async def test_server_loads_device():
+    serverId = create_instanceId()
+    server = create_device_server(serverId, [DsscControl])
+    async with AsyncDeviceContext(server=server) as ctx:
+        server_instance = ctx.instances["server"]
+        assert "DsscControl" in server_instance.plugins
+
+
+@pytest.mark.asyncio
+@pytest.mark.timeout(30)
 async def test_set_locks_and_free_on_destruction():
     """
     acquire;
@@ -272,13 +282,3 @@ async def test_frames_monitoring():
         assert q2_device.numFramesToSendOut == 5
         assert q3_device.numFramesToSendOut == 5
         assert q4_device.numFramesToSendOut == 5
-
-
-@pytest.mark.asyncio
-@pytest.mark.timeout(30)
-async def test_server_loads_device():
-    serverId = create_instanceId()
-    server = create_device_server(serverId, [DsscControl])
-    async with AsyncDeviceContext(server=server) as ctx:
-        server_instance = ctx.instances["server"]
-        assert "DsscControl" in server_instance.plugins
