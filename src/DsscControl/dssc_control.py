@@ -293,22 +293,6 @@ class DsscControl(Device):
     async def acquireBursts(self):
         await gather(*(ppt.startBurstAcquisition() for ppt in self.ppt_dev))
 
-    # SOFT POWER PROCEDURE INTERLOCK
-    # As part of soft interlocks, the power procedure is locked, such that it
-    # can only be operated from here. Its slots are replicated here with added
-    # states, such that they cannot be called while data is being sent.
-
-    # This disables the devices locks, which may lead to hardware damage when
-    # using DEPFET sensors.
-    expertMode = Bool(displayedName="Expert Mode - High Risk of Damage",
-                      description="This is a DET EXPERT parameter. Safety "
-                                  "features of this device will be disabled. "
-                                  "This can lead to substantial hardware damage!"
-                                  " Do not do this unless you are instructed so "
-                                  "by a member of the DET group!",
-                      defaultValue=False,
-                      accessMode=AccessMode.INITONLY)
-
     async def set_many_remote(self, devices: List['proxy'], **kwargs):
         coros = [setWait(dev, **kwargs) for dev in devices]
         try:
@@ -358,6 +342,22 @@ class DsscControl(Device):
                     break
 
             await waitUntilNew(*frames.values())
+
+    # SOFT POWER PROCEDURE INTERLOCK
+    # As part of soft interlocks, the power procedure is locked, such that it
+    # can only be operated from here. Its slots are replicated here with added
+    # states, such that they cannot be called while data is being sent.
+
+    # This disables the devices locks, which may lead to hardware damage when
+    # using DEPFET sensors.
+    expertMode = Bool(displayedName="Expert Mode - High Risk of Damage",
+                      description="This is a DET EXPERT parameter. Safety "
+                                  "features of this device will be disabled. "
+                                  "This can lead to substantial hardware damage!"
+                                  " Do not do this unless you are instructed so "
+                                  "by a member of the DET group!",
+                      defaultValue=False,
+                      accessMode=AccessMode.INITONLY)
 
     async def state_fusion(self):
         """Fuse the states of PPTs and Power Procedure into allowed states."""
@@ -456,8 +456,9 @@ class DsscControl(Device):
 
     async def onDestruction(self):
         # Clear all locks on remote devices if locked by us.
+        coros = []
         for px in [*self.ppt_dev, self.power_procedure]:
-            if px.lockedBy == self.deviceId:
+            if px is not None and px.lockedBy == self.deviceId:
                 coros.append(px.slotClearLock())
         try:
             await gather(*coros)

@@ -6,12 +6,14 @@ from karabo.middlelayer import (
     Device,
     isSet,
     Overwrite,
+    shutdown,
     sleep,
     Slot,
     State,
     String,
     UInt32,
     waitUntil,
+    waitUntilNew,
 )
 from karabo.middlelayer.testing import (
     AsyncDeviceContext,
@@ -49,6 +51,97 @@ class MockDevice(Device):
     async def numFramesToSendOut(self, value):
         self.numFramesToSendOut = value
         print(f"{self.deviceId} frames is now {self.numFramesToSendOut.value}")
+
+    @Slot(description="Mocking PPT property")
+    async def runXFEL(self):
+        self.state = State.ACQUIRING
+        print(f"{self.deviceId} acquiring: {self.state}")
+
+
+@pytest.mark.asyncio
+@pytest.mark.timeout(30)
+async def test_server_loads_device():
+    serverId = create_instanceId()
+    server = create_device_server(serverId, [DsscControl])
+    async with AsyncDeviceContext(server=server) as ctx:
+        server_instance = ctx.instances["server"]
+        assert "DsscControl" in server_instance.plugins
+
+
+@pytest.mark.asyncio
+@pytest.mark.timeout(30)
+async def test_set_locks_and_free_on_destruction():
+    """
+    acquire;
+    proxies should be acquiring, and locked by controller_id;
+    shutdown controller_id;
+    proxies should be acquiring, but free of locks.
+    """
+    q1_did = create_instanceId()
+    q1_device = MockDevice(
+        {"deviceId": q1_did, "fullConfigFileName": "/path/to/conf.conf"}
+    )
+    q2_did = create_instanceId()
+    q2_device = MockDevice(
+        {"deviceId": q2_did, "fullConfigFileName": "/path/to/conf.conf"}
+    )
+    q3_did = create_instanceId()
+    q3_device = MockDevice(
+        {"deviceId": q3_did, "fullConfigFileName": "/path/to/conf.conf"}
+    )
+    q4_did = create_instanceId()
+    q4_device = MockDevice(
+        {"deviceId": q4_did, "fullConfigFileName": "/path/to/conf.conf"}
+    )
+
+    daq_controller_id = create_instanceId()
+    daq_controller = MockDevice(
+        {"deviceId": daq_controller_id}
+    )
+
+    power_proc_id = create_instanceId()
+    power_proc = MockDevice(
+        {"deviceId": power_proc_id}
+    )
+
+    controller_id = create_instanceId()
+    controller = DsscControl(
+        {
+            "deviceId": controller_id,
+            "pptConfig": [
+                {"deviceId": q1_did, "quadrantId": "Q1", "connectIt": True},
+                {"deviceId": q2_did, "quadrantId": "Q2", "connectIt": False},
+                {"deviceId": q3_did, "quadrantId": "Q3", "connectIt": True},
+                {"deviceId": q4_did, "quadrantId": "Q4", "connectIt": True},
+            ],
+            "runController": daq_controller_id,
+            "powerProcedure": power_proc_id,
+
+        }
+    )
+
+    instances = {
+        controller_id: controller,
+        daq_controller_id: daq_controller,
+        power_proc_id: power_proc,
+        q1_did: q1_device,
+        q2_did: q2_device,
+        q3_did: q3_device,
+        q4_did: q4_device,
+    }
+    async with AsyncDeviceContext(**instances) as ctx:
+        ctl = await connectDevice(controller_id)
+        pproc = await connectDevice(power_proc_id)
+
+        await waitUntil(lambda: ctl.state == State.ON)
+        await ctl.startDataSending()
+
+        await waitUntilNew(pproc.lockedBy)
+        assert power_proc.lockedBy == controller_id
+
+        await shutdown(ctl)
+        assert q1_device.state == State.ACQUIRING
+        assert not power_proc.lockedBy
 
 
 @pytest.mark.asyncio
@@ -189,13 +282,3 @@ async def test_frames_monitoring():
         assert q2_device.numFramesToSendOut == 5
         assert q3_device.numFramesToSendOut == 5
         assert q4_device.numFramesToSendOut == 5
-
-
-@pytest.mark.asyncio
-@pytest.mark.timeout(30)
-async def test_server_loads_device():
-    serverId = create_instanceId()
-    server = create_device_server(serverId, [DsscControl])
-    async with AsyncDeviceContext(server=server) as ctx:
-        server_instance = ctx.instances["server"]
-        assert "DsscControl" in server_instance.plugins
