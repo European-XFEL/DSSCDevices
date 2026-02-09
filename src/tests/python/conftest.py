@@ -5,7 +5,6 @@
 # IF YOU REQUIRE ANY LICENSING AND COPYRIGHT TERMS, PLEASE ADD THEM HERE.
 # Karabo itself is licensed under the terms of the MPL 2.0 license.
 import pytest
-
 from karabo.middlelayer.testing import KaraboTestLoopPolicy
 
 

@@ -1,17 +1,15 @@
 import uuid
 
 import pytest
-
-import DsscControl.configurator  # Used so to mock shutdowns
 from karabo.middlelayer import (
-    call,
-    connectDevice,
-    sleep,
     Device,
     Hash,
     Slot,
-    String,
     State,
+    String,
+    call,
+    connectDevice,
+    sleep,
     waitUntil,
     waitUntilNew,
 )
@@ -21,6 +19,7 @@ from karabo.middlelayer.testing import (
     create_device_server,
 )
 
+import DsscControl.configurator  # Used so to mock shutdowns
 from DsscControl.configurator import DsscConfigurator
 
 

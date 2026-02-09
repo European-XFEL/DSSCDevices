@@ -3,12 +3,7 @@ Author: kirchgessner
 Creation date: April 1, 2017, 01:41 PM
 Copyright (c) European XFEL GmbH Hamburg. All rights reserved.
 """
-from asyncio import (
-    CancelledError,
-    gather,
-    TimeoutError,
-    wait_for,
-)
+from asyncio import CancelledError, TimeoutError, gather, wait_for
 from collections import ChainMap
 from typing import List
 
@@ -37,7 +32,6 @@ from karabo.middlelayer import (
 
 from ._version import version as deviceVersion
 from .schemata import PptRowSchema
-
 
 NUM_QUADRANTS = 4
 NUM_MODULES = 16

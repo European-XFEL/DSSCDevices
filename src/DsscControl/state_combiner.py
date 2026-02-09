@@ -5,9 +5,16 @@
 
 from asyncio import gather
 
-from karabo.middlelayer import (AccessMode, Device, State, StateSignifier,
-                                VectorString, background, connectDevice,
-                                waitUntilNew)
+from karabo.middlelayer import (
+    AccessMode,
+    Device,
+    State,
+    StateSignifier,
+    VectorString,
+    background,
+    connectDevice,
+    waitUntilNew,
+)
 
 from ._version import version as dver
 

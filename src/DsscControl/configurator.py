@@ -3,7 +3,6 @@
 This device monitors several PPTs and ensures they have the same configuration.
 """
 import re
-
 from asyncio import Lock, TimeoutError, sleep, wait_for
 from pathlib import Path
 from typing import Dict
@@ -26,8 +25,8 @@ from karabo.middlelayer import (
     connectDevice,
     getDevices,
     instantiateFromName,
-    slot,
     shutdown,
+    slot,
     waitUntilNew,
 )
 

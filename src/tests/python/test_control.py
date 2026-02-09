@@ -2,16 +2,16 @@ import uuid
 
 import pytest
 from karabo.middlelayer import (
-    connectDevice,
     Device,
-    isSet,
     Overwrite,
-    shutdown,
-    sleep,
     Slot,
     State,
     String,
     UInt32,
+    connectDevice,
+    isSet,
+    shutdown,
+    sleep,
     waitUntil,
     waitUntilNew,
 )
@@ -20,7 +20,6 @@ from karabo.middlelayer.testing import (
     create_device_server,
     event_loop,
 )
-
 
 from DsscControl.dssc_control import DsscControl
 

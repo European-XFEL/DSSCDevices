@@ -1,8 +1,9 @@
 # Test the DsscASICreset device.
 import pytest
+from karabo.middlelayer import Hash
 
 from DsscControl.DsscASICreset import DsscASICreset
-from karabo.middlelayer import Hash
+
 
 class mock_proxy:
     def __init__(self, deviceId: str):

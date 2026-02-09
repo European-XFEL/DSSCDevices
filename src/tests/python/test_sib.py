@@ -1,9 +1,8 @@
 import json
-import pytest
-
 from math import isnan
 
-from karabo.bound.testing import eventLoop, ServerContext, sleepUntil
+import pytest
+from karabo.bound.testing import ServerContext, eventLoop, sleepUntil
 
 from DsscControl.sib import DsscSIB
 

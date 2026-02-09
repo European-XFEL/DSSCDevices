@@ -11,11 +11,22 @@ import time
 from queue import Full, Queue
 
 import parse
-
 from karabo.bound import (
-    FLOAT_ELEMENT, INT32_ELEMENT, KARABO_CLASSINFO, NODE_ELEMENT,
-    OVERWRITE_ELEMENT, SLOT_ELEMENT, STRING_ELEMENT, UINT64_ELEMENT, Hash,
-    MetricPrefix, PythonDevice, State, Unit, Worker)
+    FLOAT_ELEMENT,
+    INT32_ELEMENT,
+    KARABO_CLASSINFO,
+    NODE_ELEMENT,
+    OVERWRITE_ELEMENT,
+    SLOT_ELEMENT,
+    STRING_ELEMENT,
+    UINT64_ELEMENT,
+    Hash,
+    MetricPrefix,
+    PythonDevice,
+    State,
+    Unit,
+    Worker,
+)
 
 from ._version import version as deviceVersion
 

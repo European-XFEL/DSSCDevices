@@ -14,6 +14,7 @@
 # who's crazy enough to have such preveto, what the hell are ya doing to my baby?
 import numpy as np
 from karabo.middlelayer import *
+
 q1m1 = 'SCS_DET_DSSC2/DET/0CH0:output'
 q1m2 = 'SCS_DET_DSSC2/DET/1CH0:output'
 q1m3 = 'SCS_DET_DSSC2/DET/2CH0:output'

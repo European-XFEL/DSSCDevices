@@ -2,36 +2,35 @@ import asyncio
 import datetime
 import os
 import time
-
 from asyncio import CancelledError
 from collections import ChainMap
 
 from karabo.middlelayer import (
     AccessMode,
-    allCompleted,
     Bool,
     Configurable,
-    connectDevice,
     Device,
-    gather,
     Hash,
     Node,
     OutputChannel,
-    setWait,
-    sleep,
     Slot,
-    slot,
     State,
     String,
     UInt32,
     VectorHash,
     VectorString,
+    allCompleted,
+    connectDevice,
+    gather,
+    setWait,
+    sleep,
+    slot,
     waitUntil,
 )
 
 from ._version import version as deviceVersion
-from .schemata import PptRowSchema2
 from .scenes.asic_reset_scene import get_scene
+from .schemata import PptRowSchema2
 
 
 class DsscASICreset(Device):
