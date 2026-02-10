@@ -8,6 +8,7 @@ from collections import ChainMap
 from typing import List
 
 from karabo.middlelayer import (
+    AccessLevel,
     AccessMode,
     Assignment,
     Bool,
@@ -34,7 +35,6 @@ from ._version import version as deviceVersion
 from .schemata import PptRowSchema
 
 NUM_QUADRANTS = 4
-NUM_MODULES = 16
 
 POWER_PROCEDURE_ALLOWED_STATES = [
     State.UNKNOWN,  # Detector not connected to. (PPT)
@@ -96,13 +96,13 @@ class DsscControl(Device):
         self.numPreBurstVetos = value
         await self.set_many_remote(self.ppt_dev, numPreBurstVetos=self.numPreBurstVetos)
 
-    runController = String(displayedName="DAQ RunController",
-                           description="Used for taking darks",
-                           assignment=Assignment.MANDATORY)
-
-    powerProcedure = String(displayedName="Power Procedure",
-                            description="Used for soft interlock",
-                            assignment=Assignment.MANDATORY)
+    powerProcedure = String(
+        displayedName="Power Procedure",
+        description="Used for soft interlock",
+        assignment=Assignment.MANDATORY,
+        requiredAccessLevel=AccessLevel.EXPERT,
+        accessMode=AccessMode.INITONLY,
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -111,10 +111,8 @@ class DsscControl(Device):
         self.ppt_devices = [None for i in range(NUM_QUADRANTS)]
         self.ppt_dev = []  # short list of active ppt devices
 
-        # DAQ proxies for darks taking
-        self.run_controller = None
-        self.ppt_dev_QuadMap = {}  # index map of connected ppt devices
-        self.proc_dev_indx = {}
+        # Index map of connected ppt devices
+        self.ppt_dev_QuadMap = {}   # TODO: can this be refactored out?
 
         # Proxy for power procedure
         self.power_procedure = None
@@ -131,25 +129,6 @@ class DsscControl(Device):
 
     async def onInitialization(self):
         await self.connectDevices()
-
-    async def startAcquisition(self):
-        # TODO: Refactor to use karaboDevices/daqController
-        if self.run_controller.state != State.MONITORING:
-            self.status = "XFEL DAQ not in monitoring state"
-            if self.run_controller.state == State.ACQUIRING:
-                await self.stopAcquisition()
-
-        await self.run_controller.record()
-        await waitUntil(lambda: self.run_controller.globalState.daqGlobalState == State.ACQUIRING)
-
-    async def stopAcquisition(self):
-        # TODO: Refactor to use karaboDevices/daqController
-        if self.run_controller.globalState.daqGlobalState != State.ACQUIRING:
-            self.status = "XFEL DAQ not in acquiring state"
-            return
-
-        await self.run_controller.tune()
-        await waitUntil(lambda: self.run_controller.globalState == State.MONITORING)
 
     @Slot(displayedName="Update devices list",
           description="Connect to devices",
@@ -207,7 +186,6 @@ class DsscControl(Device):
                               "Instantiate it or contact DET OCD.")
                 return
 
-        self.run_controller = await connectDevice(self.runController)
 
         self.state_fusion_task = background(self.state_fusion())
         self.frame_monitoring_task = background(self.monitor_frames())
