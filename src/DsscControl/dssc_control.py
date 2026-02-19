@@ -74,12 +74,6 @@ class DsscControl(Device):
                              defaultValue="",
                              accessMode=AccessMode.READONLY)
 
-    @UInt16(displayedName="Quantity of Trains", defaultValue=20,
-            allowedStates={State.ON})
-    async def numBurstTrains(self, value):
-        self.numBurstTrains = value
-        await self.set_many_remote(self.ppt_dev, numBurstTrains=value)
-
     @UInt16(
         displayedName="Frames to send",
         defaultValue=400,
@@ -104,6 +98,22 @@ class DsscControl(Device):
         accessMode=AccessMode.INITONLY,
     )
 
+    ccML = String(
+        displayedName="CCML",
+        description="Used for darks and soft interlock: prevents veto change while acquiring",
+        assignment=Assignment.OPTIONAL,
+        requiredAccessLevel=AccessLevel.EXPERT,
+        accessMode=AccessMode.INITONLY,
+    )
+
+    daqController = String(
+        displayedName="DAQ Controller",
+        description="Used for taking darks",
+        assignment=Assignment.OPTIONAL,
+        requiredAccessLevel=AccessLevel.EXPERT,
+        accessMode=AccessMode.INITONLY,
+    )
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -116,6 +126,9 @@ class DsscControl(Device):
 
         # Proxy for power procedure
         self.power_procedure = None
+
+        # Optional proxy for clock and control
+        self.ccml = None
 
         # Reference to background tasks, used to cancel them
         self.task = None
@@ -165,7 +178,7 @@ class DsscControl(Device):
                             for i, r in enumerate(self.pptConfig.value) if r[2]]
         self.ppt_dev = list(done.values())
 
-        connected_ppt_devices = [] 
+        connected_ppt_devices = []
         for pptdev in self.ppt_dev:
             for row in self.pptConfig.value:
                 if pptdev.deviceId == row[0]:
@@ -186,6 +199,11 @@ class DsscControl(Device):
                               "Instantiate it or contact DET OCD.")
                 return
 
+        try:
+            self.ccml = await wait_for(connectDevice(self.ccML), timeout=3)
+        except (KaraboError, TimeoutError):
+            # It's all right, this is a nice to have not a requirement.
+            self.log.INFO(f"CCML not found in toplogy, not locking on acquisition.")
 
         self.state_fusion_task = background(self.state_fusion())
         self.frame_monitoring_task = background(self.monitor_frames())
@@ -259,11 +277,89 @@ class DsscControl(Device):
         self.log.INFO("Stop PPT acquisition")
         self.status = "PPTs stopped"
 
+    @UInt16(displayedName="Quantity of Trains", defaultValue=20,
+            allowedStates={State.ON})
+    async def numBurstTrains(self, value):
+        self.numBurstTrains = value
+        await self.set_many_remote(self.ppt_dev, numBurstTrains=value)
+
     @Slot(displayedName="Run Burst Acquisition",
           description="Start Burst Acquisition of selected number of trains",
           allowedStates={State.ON})
     async def acquireBursts(self):
         await gather(*(ppt.startBurstAcquisition() for ppt in self.ppt_dev))
+
+    @Slot(
+        displayedName="Take darks",
+        description="Set 800 frames, no veto, and take dark run",
+        # allowedStates={State.ON, State.ACQUIRING},
+        allowedStates={State.OFF},
+    )
+    async def takeDarks(self):
+        background(self.take_darks_impl())
+
+    async def take_darks_impl(self):
+        # Get all devices
+        try:
+            daq_controller = await wait_for(connectDevice(self.daqController), timeout=3)
+            run_controller = await wait_for(connectDevice(daq_controller.runController), timeout=3)
+        except TimeoutError:  # Well, we won't be handling darks then
+            self.log.INFO(f"DAQ or RUN contoller not found in topology, cannot handle taking darks.")
+            self.status = "Cannot take dark runs: DAQ or RUN Controller not set."
+            return
+
+        if self.ccml is None:
+            self.log.INFO("CCML not set, cannot handle taking darks.")
+            self.status = "Cannot take dark runs: CCML not set."
+            return
+
+        if self.state == State.ACQUIRING:
+            await self.stopDataSending()  # For setting frames and veto pattern
+
+        # Store settings
+        previous_frames = self.framesToSend
+        previous_run_type = run_controller.experiment
+        previous_veto_pattern = self.ccml.vetoMode
+
+        # Apply Dark run settings
+        self.framesToSend = 800
+        run_controller.experiment = "Darks"  # DSSC darks is always "Darks"
+        self.ccml.vetoMode = "Do not veto any"
+        await self.ccml.applyPattern()
+        self.status = "Set 800 frames, dark run type, and no veto pattern."
+
+        # Take Run
+        try:
+            await daq_controller.start()
+        except KaraboError:  # DAQ not in monitoring
+            self.state = State.ERROR
+            self.status = "Could not start dark run"
+            return
+
+        await waitUntil(lambda: daq_controller.state == State.ACQUIRING)
+
+        await self.acquireBursts()
+        # TODO: maybe check the a ppt's state instead?
+        while self.state != State.ACQUIRING:
+            await processEvents()
+        while self.state != State.ON:
+            await processEvents()
+
+        # await self.startDataSending()
+        # await sleep(self.numBurstTrains.value / 10)  # wait for the specified trains
+        # await self.stopDataSending()
+
+        await daq_controller.stop()
+
+        # Restore settings
+        run_controller.experiment = previous_run_type
+        self.ccml.vetoMode = previous_veto_pattern
+        await self.ccml.applyPattern()
+        self.framesToSend = previous_frames
+
+        self.status = (f"Restored frames ({previous_frames}), "
+                       f"run type ({run_controller.experiment}), "
+                       f"and veto pattern ({self.ccml.vetoMode.value}).")
 
     async def set_many_remote(self, devices: List['proxy'], **kwargs):
         coros = [setWait(dev, **kwargs) for dev in devices]
@@ -410,15 +506,17 @@ class DsscControl(Device):
                 if self.power_procedure.deviceId == source:
                     coros = (lock(ppt) for ppt in self.ppt_dev
                              if not ppt.lockedBy)
-                    await gather(*coros)
                 if "PPTs" in source and not self.power_procedure.lockedBy:
-                    await lock(self.power_procedure)
+                    coros = [lock(self.power_procedure)]
+                if "PPTs" in source and self.ccml is not None:
+                        coros.append(lock(self.ccml))
+                await gather(*coros)
 
             if self.state in {State.OFF, State.ON}:
                 # Idling, free all locks that may exist.
                 coros = []
-                for px in [*self.ppt_dev, self.power_procedure]:
-                    if px.lockedBy == self.deviceId:
+                for px in [*self.ppt_dev, self.power_procedure, self.ccml]:
+                    if px is not None and px.lockedBy == self.deviceId:
                         coros.append(px.slotClearLock())
                 await gather(*coros)
 
@@ -429,7 +527,7 @@ class DsscControl(Device):
     async def onDestruction(self):
         # Clear all locks on remote devices if locked by us.
         coros = []
-        for px in [*self.ppt_dev, self.power_procedure]:
+        for px in [*self.ppt_dev, self.power_procedure, self.ccml]:
             if px is not None and px.lockedBy == self.deviceId:
                 coros.append(px.slotClearLock())
         try:
