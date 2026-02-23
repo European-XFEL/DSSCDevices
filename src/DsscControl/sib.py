@@ -648,7 +648,7 @@ class DsscSIB(PythonDevice):
 
             self.authenticate()  # authenticate
 
-            configuration = Hash('som', self['som'], 'log', self['logLevel'])
+            configuration = Hash('som', self['som'], 'logLevel', self['logLevel'])
             self.configure_sib(configuration)  # send initial configuration
 
             self.socket.settimeout(1)
@@ -742,7 +742,7 @@ class DsscSIB(PythonDevice):
 
             ts = self.getActualTimestamp()
             data += new_data  # concatenate to old data
-            self.logger.debug(f"Data lenght: tot={len(data)} "
+            self.logger.debug(f"Data length: tot={len(data)} "
                            f"new={len(new_data)} Bytes")
             data_split = data.split(DsscSIB.cmnd_terminator)
             if data.endswith(DsscSIB.cmnd_terminator):
