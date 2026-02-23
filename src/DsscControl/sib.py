@@ -643,10 +643,15 @@ class DsscSIB(PythonDevice):
             self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.socket.settimeout(5)
             self.socket.connect((hostname, port))  # connect
-            reply = self.socket.recv(self.BUFFER_SIZE)
+            reply = self.socket.recv(self.BUFFER_SIZE).decode().strip()
             self.logger.info(f"Connected to SIB. Reply: {reply}")
 
-            self.authenticate()  # authenticate
+
+            fw_version = ""
+            if "buildnumber" in reply.lower():
+               fw_version = reply.split()[-1]
+
+            self.authenticate(fw_version)
 
             configuration = Hash('som', self['som'], 'logLevel', self['logLevel'])
             self.configure_sib(configuration)  # send initial configuration
@@ -657,7 +662,7 @@ class DsscSIB(PythonDevice):
             self.logger.error(f"Cannot connect to SIB: {e}")
             return
 
-    def authenticate(self):
+    def authenticate(self, fw_version):
         try:
             # Stop logging
             self.socket.send(f"LOG 0;{DsscSIB.cmnd_terminator}".encode())
@@ -677,8 +682,12 @@ class DsscSIB(PythonDevice):
             on_connect = self.socket.recv(self.BUFFER_SIZE)
 
             self.socket.send(f"VER;{DsscSIB.cmnd_terminator}".encode())
-            fw_version = self.socket.recv(self.BUFFER_SIZE).decode().strip()
-            self.set("version", fw_version)
+            try:
+                fw_version = self.socket.recv(self.BUFFER_SIZE).decode().strip()
+            except TimeoutError:
+                self.logger.info("SIB did not reply on version request")
+            finally:
+                self.set("version", fw_version)
 
             self.logger.info(f"Authentication successful. Reply: {on_connect} - {fw_version}")
         except Exception as e:
