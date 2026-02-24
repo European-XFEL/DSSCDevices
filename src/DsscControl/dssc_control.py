@@ -43,14 +43,14 @@ POWER_PROCEDURE_ALLOWED_STATES = [
 ]
 
 DEVICE_STATES = [
-    State.UNKNOWN,  # Devices not connected to (proxies or PPT to HW)
-    State.OFF,  # Mapping the power procedure State.PASSIVE to OFF
-    State.CHANGING,  # Used when creating proxies or inherited from PPT or power procedure
-    State.ON,  # Detector initialized (inherited from PPT)
+    State.UNKNOWN,    # Devices not connected to (proxies or PPT to HW)
+    State.OFF,        # Mapping the power procedure State.PASSIVE to OFF
+    State.CHANGING,   # Used when creating proxies or inherited from PPT or power procedure
+    State.ON,         # Detector initialized (inherited from PPT)
     State.ACQUIRING,  # Detector acquiring (fuses PPT ACQUIRING and STARTED)
-    State.ERROR,  # Any exceptions on this device, PPT, or power procedure
-    State.INIT,  # Creating proxies
-    State.ACTIVE,  # Internal, used when doing procedures (eg. darks or trim)
+    State.ERROR,      # Any exceptions on this device, PPT, or power procedure
+    State.INIT,       # Creating proxies
+    State.ACTIVE,     # Internal, used when doing procedures (eg. darks or trim)
 ]
 
 
@@ -174,6 +174,10 @@ class DsscControl(Device):
                     break
 
         self.connectedPptDev = ", ".join(sorted(connected_ppt_devices))
+
+        if self.expertMode:
+            self.log.INFO("EXPERT MODE: NOT LOCKING DEVICES")
+            self.status = "EXPERT MODE: NOT LOCKING DEVICES"
 
         try:
             self.power_procedure = await wait_for(connectDevice(self.powerProcedure), timeout=3)
@@ -404,23 +408,23 @@ class DsscControl(Device):
 
             failures_left = 10  # Reset the counter on success
 
-            # Update locks on remote devices
-            if self.state in {State.ERROR, State.ACQUIRING, State.CHANGING}:
-                # Set the appropriate locks depending on the source of changes.
-                if self.power_procedure.deviceId == source:
-                    coros = (lock(ppt) for ppt in self.ppt_dev
-                             if not ppt.lockedBy)
-                    await gather(*coros)
-                if "PPTs" in source and not self.power_procedure.lockedBy:
-                    await lock(self.power_procedure)
+            if not self.expertMode:  # Update locks on remote devices
+                if self.state in {State.ERROR, State.ACQUIRING, State.CHANGING}:
+                    # Set the appropriate locks depending on the source of changes.
+                    if self.power_procedure.deviceId == source:
+                        coros = (lock(ppt) for ppt in self.ppt_dev
+                                 if not ppt.lockedBy)
+                        await gather(*coros)
+                    if "PPTs" in source and not self.power_procedure.lockedBy:
+                        await lock(self.power_procedure)
 
-            if self.state in {State.OFF, State.ON}:
-                # Idling, free all locks that may exist.
-                coros = []
-                for px in [*self.ppt_dev, self.power_procedure]:
-                    if px.lockedBy == self.deviceId:
-                        coros.append(px.slotClearLock())
-                await gather(*coros)
+                if self.state in {State.OFF, State.ON}:
+                    # Idling, free all locks that may exist.
+                    coros = []
+                    for px in [*self.ppt_dev, self.power_procedure]:
+                        if px.lockedBy == self.deviceId:
+                            coros.append(px.slotClearLock())
+                    await gather(*coros)
 
         else:  # Loop exited after 10 consecutive failures
             self.status = "State Fusion failed 10 times in a row!"
