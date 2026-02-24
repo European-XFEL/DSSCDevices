@@ -14,6 +14,7 @@ from karabo.middlelayer import (
     Device,
     DeviceClientBase,
     Hash,
+    KaraboValue,
     Overwrite,
     Slot,
     State,
@@ -24,7 +25,7 @@ from karabo.middlelayer import (
     background,
     connectDevice,
     getDevices,
-    instantiateFromName,
+    instantiateDevice,
     shutdown,
     slot,
     waitUntilNew,
@@ -212,7 +213,11 @@ class DsscConfigurator(DeviceClientBase, Device):
                         desc = fnames[0]
                         self.log.INFO(f"Strange: configuration {desc} is correct, but not know to me")  # noqa
 
-                    self.actualGainConfiguration = desc.value
+                    # Could be string or TableValue
+                    if isinstance(desc, KaraboValue):
+                        desc = desc.value
+
+                    self.actualGainConfiguration = desc
                     self.gainConfigurationState = State.ON.value
 
             configs = [ppt.fullConfigFileName for ppt in self.ppts.values()]
@@ -273,7 +278,7 @@ class DsscConfigurator(DeviceClientBase, Device):
 
         # Using the ConfigurationManager, instantiate the PPTs
         coros = {
-            qid: instantiateFromName(did, name="default")
+            qid: instantiateDevice(did, name="base")
             for qid, did in dids.items()
         }
         done, _, errors = await allCompleted(**coros)
