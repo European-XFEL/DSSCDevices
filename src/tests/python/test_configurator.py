@@ -107,11 +107,12 @@ async def test_apply_configuration(monkeypatch):
 
         monkeypatch.setattr(
             DsscControl.configurator,
-            "instantiateFromName",
+            "instantiateDevice",
             mock_mdl_ifm
         )
 
-        await sleep(1)
+        # waitUntilNew(proxy.monitoredDevices) does not work here
+        await sleep(5)
 
         # Check initialization was correct
         assert proxy.monitoredDevices == "Q1, Q3, Q4"

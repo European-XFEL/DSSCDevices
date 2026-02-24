@@ -38,7 +38,9 @@ A middlelayer device used to set and monitor configurations across quadrants.
 The different quadrants must have the same configuration applied.  
 This device monitors that and shows the configuration in its scene in big letters.  
 It also eases applying known configuration through a drop-down menu, then restarting the PPT devices.  
-Its architecture is kept simple to eventually merge this within the Control device.
+
+This works with the `KaraboConfigurationManager` and expects to load from it a previously human-vetted
+`base` configuration.
 
 ### DSSC SIB
 
