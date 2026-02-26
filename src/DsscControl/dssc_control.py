@@ -421,7 +421,7 @@ class DsscControl(Device):
                 if self.state in {State.OFF, State.ON}:
                     # Idling, free all locks that may exist.
                     coros = []
-                    for px in [*self.ppt_dev, self.power_procedure]:
+                    for px in (*self.ppt_dev, self.power_procedure):
                         if px.lockedBy == self.deviceId:
                             coros.append(px.slotClearLock())
                     await gather(*coros)
