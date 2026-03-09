@@ -4914,7 +4914,7 @@ namespace karabo {
         payload.set("success", false);
 
         if ("overview" == which) {
-            payload.set("data", getControlScene(this->getInstanceId(), this->get<std::string>("quadrantId")));
+            payload.set("data", getControlScene(this->getInstanceId(), this->get<std::string>("quadrantId"), this->get<bool>("isDEPFET")));
             payload.set("success", true);
         } else if ("configurator" == which) {
             payload.set("data", getConfiguratorScene(this->getInstanceId(), this->get<std::string>("quadrantId")));

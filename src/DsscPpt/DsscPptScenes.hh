@@ -1,6 +1,6 @@
 #include <sstream>
 
-std::string getControlScene(const std::string& instanceId, const std::string& quadrantId) {
+std::string getControlScene(const std::string& instanceId, const std::string& quadrantId, const bool isDepfet) {
     std::ostringstream ret;
 
     ret << ""
@@ -195,13 +195,15 @@ std::string getControlScene(const std::string& instanceId, const std::string& qu
         << "<svg:rect krb:class=\"DisplayComponent\" krb:widget=\"DisplayLabel\" krb:keys=\"" << instanceId << ".selPixelSignal\" x=\"970\" y=\"70\" width=\"121\" height=\"31\" "
         << "/>"
         << "<svg:rect krb:class=\"EditableApplyLaterComponent\" krb:widget=\"EditableComboBox\" krb:keys=\"" << instanceId << ".selPixelSignal\" x=\"810\" y=\"70\" width=\"160\" height=\"31\" "
-        << "/>"
-        << "</svg:svg>"
+        << "/>";
 
-        << "";
+        if(isDepfet) {
+            ret << "<svg:rect krb:class=\"Label\" x=\"130\" y=\"20\" width=\"751\" height=\"21\" krb:text=\"DEPFET\" krb:font=\"Source Sans Pro,10,-1,5,75,0,0,0,0,0\" krb:foreground=\"#ff1313\" krb:frameWidth=\"0\" krb:background=\"transparent\"/>";
+        }
+
+        ret << "</svg:svg>";
     return ret.str();
 }
-
 
 std::string getConfiguratorScene(const std::string& instanceId, const std::string& quadrantId) {
     std::ostringstream ret;

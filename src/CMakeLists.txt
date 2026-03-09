@@ -91,7 +91,7 @@ if (BUILD_TESTS)
        test-${CMAKE_PROJECT_NAME}
        tests/c++/testrunner.cc   # The test runner entry point
        tests/c++/testDsscPpt.cc
-
+       tests/c++/testPPTScenes.cc
     )
 
     include("../cmake/find_dep.cmake")
