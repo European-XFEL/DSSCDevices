@@ -646,10 +646,9 @@ class DsscSIB(PythonDevice):
             reply = self.socket.recv(self.BUFFER_SIZE).decode().strip()
             self.logger.info(f"Connected to SIB. Reply: {reply}")
 
-
             fw_version = ""
             if "buildnumber" in reply.lower():
-               fw_version = reply.split()[-1]
+                fw_version = reply.split()[-1]
 
             self.authenticate(fw_version)
 
@@ -681,13 +680,14 @@ class DsscSIB(PythonDevice):
             self.socket.send(f"{password}{DsscSIB.cmnd_terminator}".encode())
             on_connect = self.socket.recv(self.BUFFER_SIZE)
 
-            self.socket.send(f"VER;{DsscSIB.cmnd_terminator}".encode())
-            try:
-                fw_version = self.socket.recv(self.BUFFER_SIZE).decode().strip()
-            except TimeoutError:
-                self.logger.info("SIB did not reply on version request")
-            finally:
-                self.set("version", fw_version)
+            if not fw_version:
+                try:
+                    self.socket.send(f"VER;{DsscSIB.cmnd_terminator}".encode())
+                    fw_version = self.socket.recv(self.BUFFER_SIZE)
+                    fw_version = fw_version.decode().strip()
+                except TimeoutError:
+                    self.logger.info("SIB did not reply on version request")
+            self.set("version", fw_version)
 
             self.logger.info(f"Authentication successful. Reply: {on_connect} - {fw_version}")
         except Exception as e:
@@ -752,7 +752,7 @@ class DsscSIB(PythonDevice):
             ts = self.getActualTimestamp()
             data += new_data  # concatenate to old data
             self.logger.debug(f"Data length: tot={len(data)} "
-                           f"new={len(new_data)} Bytes")
+                              f"new={len(new_data)} Bytes")
             data_split = data.split(DsscSIB.cmnd_terminator)
             if data.endswith(DsscSIB.cmnd_terminator):
                 # complete data -> process all
