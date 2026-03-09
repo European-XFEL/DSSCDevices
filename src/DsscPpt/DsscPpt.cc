@@ -895,7 +895,7 @@ namespace karabo {
                 .description("Quadrant Id")
                 .tags("other")
                 .assignmentMandatory()
-                .options(utils::DsscModuleInfo::getQuadrantIdList(), ",")
+                .options("FENICE,Q1,Q2,Q3,Q4,SM,SQ")
                 .reconfigurable()
                 .expertAccess()
                 .commit();
