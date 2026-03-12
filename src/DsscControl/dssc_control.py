@@ -176,7 +176,7 @@ class DsscControl(Device):
         self.connectedPptDev = ", ".join(sorted(connected_ppt_devices))
 
         if self.expertMode:
-            self.log.INFO("EXPERT MODE: NOT LOCKING DEVICES")
+            self.logger.info("EXPERT MODE: NOT LOCKING DEVICES")
             self.status = "EXPERT MODE: NOT LOCKING DEVICES"
 
         try:
@@ -185,9 +185,9 @@ class DsscControl(Device):
             if not self.expertMode:
                 self.state = State.ERROR
                 self.status = "Power Procedure not available"
-                self.log.INFO("DOC personel: this device relies on MDL "
-                              f"{self.powerProcedure}, which was not found. "
-                              "Instantiate it or contact DET OCD.")
+                self.logger.info("DOC personel: this device relies on MDL "
+                                 f"{self.powerProcedure}, which was not found. "
+                                 "Instantiate it or contact DET OCD.")
                 return
 
 
@@ -210,13 +210,13 @@ class DsscControl(Device):
                 if ppt_device.state in [State.OFF, State.ON, State.STOPPED]:
                     to_init.append(ppt_device.initSystem())
             await gather(*to_init)
-            self.log.INFO("Init PPT")
+            self.logger.info("Init PPT")
             await self.set_many_remote(self.ppt_dev,
                                numBurstTrains=self.numIterations,
                                numFramesToSendOut=self.framesToSend)
             self.status = "PPT devices initialized"
         except Exception as e:
-            self.log.ERROR(f"Exception caught: {e}")
+            self.logger.error(f"Exception caught: {e}")
 
     @Slot(displayedName="Check ASICs/Reset on PPT devices",
           description="Check ASICs/Reset on all PPT devices",
@@ -227,7 +227,7 @@ class DsscControl(Device):
         for ppt_device in self.ppt_dev:
             to_checkReset.append(ppt_device.checkASICReset())
         await gather(*to_checkReset)
-        self.log.INFO("Check ASICs/Reset")
+        self.logger.info("Check ASICs/Reset")
         self.status = "ASICs are reset on all PPTs"
 
     @Slot(displayedName="Start Data sending",
@@ -260,7 +260,7 @@ class DsscControl(Device):
                 to_stop.append(device.stopStandalone())
         await gather(*to_stop)
 
-        self.log.INFO("Stop PPT acquisition")
+        self.logger.info("Stop PPT acquisition")
         self.status = "PPTs stopped"
 
     @Slot(displayedName="Run Burst Acquisition",
@@ -399,11 +399,11 @@ class DsscControl(Device):
             except TimeoutError:
                 pass  # Timeout due to forcing state update monitoring just above
             except CancelledError:
-                self.log.DEBUG("State fusion cancelled")
+                self.logger.debug("State fusion cancelled")
                 return  # eg. the task gets cancelled
             except Exception as e:
                 # Handle issues such as PPTs out of sync
-                self.log.WARN(f"Exception in state fusion:\n {e}")
+                self.logger.warn(f"Exception in state fusion:\n {e}")
                 failures_left -= 1
 
             failures_left = 10  # Reset the counter on success
@@ -439,4 +439,4 @@ class DsscControl(Device):
         try:
             await gather(*coros)
         except KaraboError as e:  # A proxy went down before this device
-            self.log.WARN(str(e))
+            self.logger.warn(str(e))
