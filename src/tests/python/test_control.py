@@ -285,16 +285,15 @@ async def test_frames_monitoring():
 
 
 def test_no_elif_in_state_fusion():
-    # We are doing the unorthodox thing of disallowing elifs and continuein the
-    # state fusion. This is to ensure that all branches are tested, to avoid
-    # code from potentially skipping other, important, updates or checks.
+    # We are doing the unorthodox thing of disallowing elifs and continue in
+    # the state fusion. This is to ensure that all branches are tested, to
+    # avoid code from potentially skipping other, important, updates or checks.
     # Comments are okay, though.
     msg = "{}? In the state fusion? line {}? This time of the year?"
     src = inspect.getsource(DsscControl.state_fusion)
 
     for lineno, line in enumerate(src.splitlines()):
-        line = line.strip()
-        if "elif" in line and not line.startswith("#"):
+        if "elif" in line.partition("#")[0]:
             assert False, msg.format("elif", lineno)
-        if "continue" in line and not line.startswith("#"):
+        if "continue" in line.partition("#")[0]:
             assert False, msg.format("continue", lineno)
