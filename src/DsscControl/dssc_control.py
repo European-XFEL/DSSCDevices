@@ -403,7 +403,7 @@ class DsscControl(Device):
                 return  # eg. the task gets cancelled
             except Exception as e:
                 # Handle issues such as PPTs out of sync
-                self.logger.warn(f"Exception in state fusion:\n {e}")
+                self.logger.warning(f"Exception in state fusion:\n {e}")
                 failures_left -= 1
 
             failures_left = 10  # Reset the counter on success
@@ -439,4 +439,4 @@ class DsscControl(Device):
         try:
             await gather(*coros)
         except KaraboError as e:  # A proxy went down before this device
-            self.logger.warn(str(e))
+            self.logger.warning(str(e))
