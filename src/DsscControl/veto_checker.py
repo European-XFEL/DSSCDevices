@@ -9,6 +9,7 @@ from queue import Queue
 from typing import List, Optional, Tuple, Union
 
 import numpy as np
+from calngUtils import shmem_utils
 from karabo.middlelayer import (AccessMode, Configurable, Device, Hash,
                                 InputChannel, Node, OutputChannel, Overwrite,
                                 State, String, UInt32, VectorString,
@@ -131,6 +132,7 @@ class DsscVetoCheck(Device):
     async def onInitialization(self):
         self.ccmon_proxy = await connectDevice(self.ccmon)
         self.ppt_proxy = await connectDevice(self.pptControl)
+        self.shmem_handler = shmem_utils.ShmemCircularBufferReceiver()
         background(self.monitor_properties)
         background(self.state_timer)
         self.status = "Waiting for data"
@@ -141,6 +143,10 @@ class DsscVetoCheck(Device):
         raw=True,
     )
     async def input(self, det_data: Hash, meta: Hash):
+        # Do smart things here to convert from shmemhandles to data
+        self.shmem_handler.dereference_shmem_handles(det_data)
+
+        # Process input
         async with self.lock:
             self.last_update_time = time.time()
             asic_states, asic_vetos, ppt_veto = self.validate_asic_vetos(
@@ -148,6 +154,8 @@ class DsscVetoCheck(Device):
                 self.is_ppt_sending_dummy
             )
             ok, msg, data = self.validate_data(det_data, self.sim_data)
+
+        # Update outputs
 
         if self.state == State.PASSIVE:
             self.state = State.PROCESSING
