@@ -31,5 +31,6 @@ authors = [
     {name = "European XFEL Detector Group"},
     {name = "European XFEL Controls Group"},
 ]
+dependencies = ["natsort"]
 description = "Control Interface for the DSSC Detector"
 readme = "README.md"
