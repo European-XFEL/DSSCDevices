@@ -7,6 +7,8 @@ from asyncio import Lock, TimeoutError, sleep, wait_for
 from pathlib import Path
 from typing import Dict
 
+from natsort import natsorted
+
 from karabo.middlelayer import (
     AccessMode,
     Bool,
@@ -121,7 +123,7 @@ class DsscConfigurator(DeviceClientBase, Device):
 
     async def onInitialization(self):
         self.state = State.INIT
-        configs = [row[0] for row in self.availableGainConfigurations.value]
+        configs = natsorted([row[0] for row in self.availableGainConfigurations.value])
 
         self.__class__.targetGainConfiguration = Overwrite(
             options=configs,
