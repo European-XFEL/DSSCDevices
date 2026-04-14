@@ -182,11 +182,11 @@ async def test_fix_config_string():
         proxy = await connectDevice(configurator_id)
         ret = await call(proxy, "requestConfiguration", "Q2")
         assert isinstance(ret, Hash)
-        assert ret["data"] == "/path/to/Q2/Lancelot.conf"
+        assert ret["data"] == "/path/to/Q2/Q2_Arthur.conf"
 
-        configurator.targetGainConfiguration = "Arthur"
+        configurator.targetGainConfiguration = "Bedivere"
         ret = await call(proxy, "requestConfiguration", "FIXED")
-        assert ret["data"] == "/path/to/FIXED/FIXED_Arthur.conf"
+        assert ret["data"] == "/path/to/FIXED/Bedivere.conf"
 
 
 @pytest.mark.asyncio(loop_scope="module")
