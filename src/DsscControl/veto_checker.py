@@ -269,14 +269,14 @@ class DsscVetoCheck(Device):
         while True:
             async with self.lock:
                 self.sim_data = self.veto_pattern_to_sim_data(
-                    self.ccmon_proxy.veto_sim_memory.value,
+                    self.ccmon_proxy.veto_memory.value,
                     self.ppt_proxy.numPreBurstVetos.value,
                     self.ppt_proxy.numFramesToSendOut.value,
                 )
             self.is_ppt_sending_dummy = self.ppt_proxy.send_dummy_dr_data
 
             await waitUntilNew(
-                self.ccmon_proxy.veto_sim_memory,
+                self.ccmon_proxy.veto_memory,
                 self.ppt_proxy.numPreBurstVetos,
                 self.ppt_proxy.numFramesToSendOut,
                 self.ppt_proxy.send_dummy_dr_data,
