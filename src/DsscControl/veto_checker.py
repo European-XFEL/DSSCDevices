@@ -208,7 +208,7 @@ class DsscVetoCheck(Device):
         is_dummy: bool
     ) -> Union[List[str], List[int], int]:
         d = det_data["detector.data"]
-        ppt_veto = d[0] + d[1] * 256  # 2 uint8_t to uint16_t
+        ppt_veto = int(d[0]) + int(d[1]) * 256  # 2 uint8_t to uint16_t
 
         if is_dummy:
             return [State.UNKNOWN] * 16, [0] * 16, 0
@@ -216,7 +216,7 @@ class DsscVetoCheck(Device):
         asic_states = []
         asic_vetos = []
         for idx in range(0, 16):
-            asic_veto = d[162 + idx*16] + (d[163 + idx*16] * 256)
+            asic_veto = int(d[162 + idx*16]) + (int(d[163 + idx*16]) * 256)
             asic_state = State.ON
             if asic_veto != ppt_veto:
                 asic_state = State.ERROR
