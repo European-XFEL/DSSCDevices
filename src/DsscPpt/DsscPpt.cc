@@ -186,7 +186,7 @@ namespace karabo {
                 .description("Query the hardware for detector type. True means DEPFET, False means miniSDD.")
                 .displayedName("DEPFET Sensor")
                 .readOnly()
-                .defaultValue(true)  // The more sensitive type of detector.
+                .defaultValue(false)  // MiniSDD until proven otherwise, reduces confusion when PPT uninitialized
                 .commit();
 
         STRING_ELEMENT(expected).key("linuxBinaryName")
