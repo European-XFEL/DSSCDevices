@@ -306,7 +306,7 @@ namespace karabo {
                 .allowedStates(State::ON, State::STOPPED, State::OFF, State::STARTED, State::ACQUIRING)
                 .commit();
 
-        UINT32_ELEMENT(expected).key("lastTrainId")
+        UINT64_ELEMENT(expected).key("lastTrainId")
                 .displayedName("Last Train ID from PPT")
                 .description("Holds 4LSB of last train ID from PPT registers. Trigger readout before use")
                 .readOnly().defaultValue(0)
