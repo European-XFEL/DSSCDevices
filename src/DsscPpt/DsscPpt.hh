@@ -18,6 +18,7 @@
 #include "DsscConfigHashWriter.hh"
 
 #include <atomic>
+#include <mutex>
 #include <vector>
 #include <sstream>
 
@@ -52,51 +53,6 @@ namespace karabo {
         return camelCased;
    }
         
-    class SmartMutex : public std::mutex {
-
-    public:
-        using std::mutex::mutex;
-
-        void unlock() {
-            m_origin = "";
-            std::mutex::unlock();         
-        }
-
-        void trylock(const std::string & info) {
-            std::chrono::milliseconds interval(100);
-            int ncounts = 0;
-            while(!try_lock()){
-                std::this_thread::sleep_for(interval);
-                ++ncounts;
-                if(ncounts>50){
-                    std::cout << "---- SmarMutex could not lock mutex during 5 sec at " << info << ". Has been reserved by " << m_origin << std::endl;
-                    ncounts = 0;
-                }
-            }
-            m_origin = info;
-        }
-        std::string m_origin;
-    };
-
-    class DsscScopedLock {
-
-    public:
-
-        DsscScopedLock(SmartMutex * mutex, const std::string & info = "")
-            : m_mutex(mutex) {
-            m_mutex->trylock(info);
-        }
-
-        ~DsscScopedLock() {
-            m_mutex->unlock();
-        }
-
-    private:
-        SmartMutex * m_mutex;
-    };
-
-    /** DSSC Patch Panel Transceiver C++ Karabo device
-     */
     class DsscPpt : public karabo::core::Device {
 
     public:
@@ -172,6 +128,11 @@ namespace karabo {
 
         void open();
         void close();
+
+        // Acquire m_accessToPptMutex, waiting up to lockMaxWaitTime.
+        // On timeout, logs, disconnects via close(), and throws.
+        std::unique_lock<std::timed_mutex> acquirePptLock(const std::string& origin);
+
         void stopAcquisition();
         void startAcquisition();
         void startBurstAcquisition();
@@ -483,7 +444,7 @@ namespace karabo {
         bool m_keepAcquisition;
         bool m_keepPolling;
         std::shared_ptr<std::thread> m_pollThread;
-        SmartMutex m_accessToPptMutex;
+        std::timed_mutex m_accessToPptMutex;
         std::mutex m_outMutex;
         PPT_Pointer m_ppt; // Use your main PPT class here
         karabo::data::Schema m_schema;

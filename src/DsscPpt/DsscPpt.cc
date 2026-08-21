@@ -50,14 +50,19 @@ using namespace karabo::core;
 #define BOOL_CAST boost::lexical_cast<bool>
 
 
+// Wait up to this long for a lock on m_accessToPptMutex (see acquirePptLock()).
+// The lock is used across the various threads doing their operations.
+// libPPT blocks forever waiting for replies, which in turns starves other threads.
+// Replies from the PPT are expected within a few seconds (time read or set registers, done one per call).
+// Waiting this long is representative, but we're rounding this to lockMaxWaitTime to be gentle.
+constexpr std::chrono::milliseconds lockMaxWaitTime = std::chrono::milliseconds(5000);
+
 namespace karabo {
 
 
     KARABO_REGISTER_FOR_CONFIGURATION(Device, DsscPpt)
 
     void DsscPpt::expectedParameters(Schema& expected) {
-
-        cout << "Started Expected Parameters " << endl;
 
         STRING_ELEMENT(expected).key("selEnvironment")
                 .displayedName("Environment")
@@ -1279,8 +1284,8 @@ namespace karabo {
         }
         
 
-        {        
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        {
+            auto lock = acquirePptLock(__func__);
 
             setQSFPEthernetConfig();
 
@@ -1419,20 +1424,21 @@ namespace karabo {
             }
         }
 
-        if (regType == "jtag") {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            if (moduleSetNames.size() > 1) {
-                m_ppt->programJtag();
-            } else {
-                m_ppt->programJtagSingle(moduleSetNames.front());
-            }
-        } else if (regType == "pixel") {
-            if (programDefault) {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                m_ppt->programPixelRegsAllAtOnce();
-            } else {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
-                m_ppt->programPixelRegs();
+        {
+            auto lock = acquirePptLock(__func__);
+
+            if (regType == "jtag") {
+                if (moduleSetNames.size() > 1) {
+                    m_ppt->programJtag();
+                } else {
+                    m_ppt->programJtagSingle(moduleSetNames.front());
+                }
+            } else if (regType == "pixel") {
+                if (programDefault) {
+                    m_ppt->programPixelRegsAllAtOnce();
+                } else {
+                    m_ppt->programPixelRegs();
+                }
             }
         }
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " " << regType << " Configuration Received";
@@ -1481,7 +1487,7 @@ namespace karabo {
         }
 
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->programSequencers();
         }
 
@@ -1528,7 +1534,7 @@ namespace karabo {
 
     void DsscPpt::disableAllDummyData() {
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->disableAllDummyData();
         }
         updateGuiOtherParameters();
@@ -1540,7 +1546,7 @@ namespace karabo {
 
         {
             set<bool>("send_dummy_dr_data", true);
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->enableDummyDRData(true);
         }
 
@@ -1726,7 +1732,7 @@ namespace karabo {
 
 
     void DsscPpt::acquisitionStateOnEntry() {
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
         m_ppt->enableXFELControl(true);
         updateGuiPLLParameters();
         runXFEL();
@@ -1734,13 +1740,13 @@ namespace karabo {
 
 
     void DsscPpt::acquisitionStateOnExit() {
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
         stopAcquisition();
     }
 
 
     void DsscPpt::manualAcquisitionStateOnEntry() {
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
         m_ppt->enableXFELControl(false);
         updateGuiPLLParameters();
     }
@@ -1748,7 +1754,7 @@ namespace karabo {
 
     void DsscPpt::setLogoConfig(bool en) {
         int value = en ? 1 : 0;
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
         m_ppt->setLogoConfig("LOC_PWRD", value);
     }
 
@@ -1803,7 +1809,7 @@ namespace karabo {
         set<bool>("continuous_mode", run);
         {
             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " runContMode mutex";
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->runContinuousMode(run);
         }
     }
@@ -1815,7 +1821,7 @@ namespace karabo {
         set<bool>("disable_sending", false);
         {
             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " runAcquisition mutex";
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->disableSending(false);
         }
 
@@ -1862,7 +1868,7 @@ namespace karabo {
           unsigned long long first_burstTrainId;
           {
             //boost::mutex::scoped_lock lock(m_accessToPptMutex);
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             first_burstTrainId = m_ppt->getCurrentTrainID();
           }
         
@@ -1877,7 +1883,7 @@ namespace karabo {
               
               {
                   //boost::mutex::scoped_lock lock(m_accessToPptMutex);
-                  DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                  auto lock = acquirePptLock(__func__);
                   current_trainId = m_ppt->getCurrentTrainID();
               }
 
@@ -1951,7 +1957,7 @@ namespace karabo {
         // Disable the acquisition of sim data if enabled, as it will otherwise
         // remain active in subsequent acquisitions.
         if(this->get<bool>("send_dummy_dr_data")) {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->enableDummyDRData(false);
         }
 
@@ -2030,7 +2036,7 @@ namespace karabo {
 
 
     void DsscPpt::updateNumFramesToSend() {
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
         m_ppt->setNumFramesToSend(get<unsigned int>("numFramesToSendOut"));
     }
 
@@ -2042,7 +2048,7 @@ namespace karabo {
         string linux;
         bool isDEPFET;
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
 
             sern = m_ppt->readSerialNumber();
             firmware = m_ppt->readBuildStamp();
@@ -2117,7 +2123,7 @@ namespace karabo {
     void DsscPpt::storeFullConfigFile() {
         auto fileName = get<string>("fullConfigFileName");
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             checkPathExists(fileName);
             m_ppt->storeFullConfigFile(fileName);
         }
@@ -2126,7 +2132,7 @@ namespace karabo {
         void DsscPpt::storeFullConfigUnder() {
         auto fileName = get<string>("saveConfigFileToName");
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             checkPathExists(fileName);
             m_ppt->storeFullConfigFile(fileName);
         }
@@ -2285,7 +2291,7 @@ namespace karabo {
                     configRegister =  m_ppt->getRegisters("epc");
                     configRegister->setSignalValue(selModSet, SplitVec.back(), sigName, it.second);
                     {
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        auto lock = acquirePptLock(__func__);
                         m_ppt->programEPCRegister(selModSet);
                     }
                 }else if(it.first.substr(0,4) == "IOBR"){
@@ -2294,7 +2300,7 @@ namespace karabo {
                     const uint32_t module = get<uint32_t>("selModule");
                     setActiveModule(module);
                     {
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        auto lock = acquirePptLock(__func__);
                         m_ppt->programIOBRegister(selModSet);
                     }
                 }else if(it.first.substr(0,4) == "Jtag"){
@@ -2303,7 +2309,7 @@ namespace karabo {
                     setActiveModule(module);
                     configRegister->setSignalValue(selModSet, SplitVec.back(), sigName, it.second);                
                     {
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        auto lock = acquirePptLock(__func__);
                         m_ppt->programJtagSingle(selModSet);
                     }                
                 }else{
@@ -2320,7 +2326,7 @@ namespace karabo {
     void DsscPpt::doFastInit() {
         DSSC::StateChangeKeeper keeper(this, State::ON);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->enablePRBStaticVoltage(false);
             m_ppt->fastASICInitTestSystem();
         }
@@ -2340,7 +2346,7 @@ namespace karabo {
         }
 
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
 
             int rc = m_ppt->initSingleModule(currentModule);
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
@@ -2392,7 +2398,7 @@ namespace karabo {
         }
 
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
 
             m_ppt->setGlobalDecCapSetting((SuS::DSSC_PPT::DECCAPSETTING)1);
 
@@ -2426,7 +2432,7 @@ namespace karabo {
         if (checkAllIOBStatus() == 0) return false;
 
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->initIOBs();
         }
 
@@ -2437,7 +2443,7 @@ namespace karabo {
     bool DsscPpt::initChip() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " initChip";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->initChip();
         }
 
@@ -2471,7 +2477,7 @@ namespace karabo {
 
         enableDPChannels(0);
 
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
 
         m_ppt->resetAll(true);
         std::this_thread::sleep_for(1000ms);
@@ -2484,7 +2490,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " resetDatapath";
 
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->datapathReset(true);
             std::this_thread::sleep_for(1000ms);
             m_ppt->datapathReset(false);
@@ -2497,7 +2503,7 @@ namespace karabo {
     void DsscPpt::resetEPC() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " resetEPC";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->epcReset(true);
             std::this_thread::sleep_for(1000ms);
             m_ppt->epcReset(false);
@@ -2510,7 +2516,7 @@ namespace karabo {
     void DsscPpt::resetIOBs() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " resetIOBs";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
 
             //m_ppt->setASICReset(true); this is wrong // ALSO CHECKS IF TEST SYSTEM IN mANNHEIM
             m_ppt->iobReset(true);
@@ -2524,7 +2530,7 @@ namespace karabo {
     void DsscPpt::resetASICs() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " resetASICs";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
 
             m_ppt->setASICReset_TestSystem(true); // required in test system important to minimize current consumption
             //m_ppt->iobReset(true); // ???????????????????????? Nonsense. wrong
@@ -2552,6 +2558,17 @@ namespace karabo {
             //throw KARABO_NETWORK_EXCEPTION("FEM close() failure: attempt to close the existing connection failed");
         }
         this->updateState(State::UNKNOWN);
+    }
+
+
+    std::unique_lock<std::timed_mutex> DsscPpt::acquirePptLock(const std::string& origin) {
+        std::unique_lock<std::timed_mutex> lock(m_accessToPptMutex, std::defer_lock);
+        if (!lock.try_lock_for(lockMaxWaitTime)) {
+            KARABO_LOG_FRAMEWORK_ERROR << getInstanceId() << "Failed to get access to PPT at " << origin;
+            close();
+            throw KARABO_LOCK_EXCEPTION("Failed to get access to PPT at " + origin);
+        }
+        return lock;
     }
 
 
@@ -2617,7 +2634,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Programming IOB  FPGA!";
 
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->setASICReset(true); //important to minimize current consumption
             m_ppt->programIOBFPGA(iobNumber);
         }
@@ -2649,7 +2666,7 @@ namespace karabo {
 
 
     void DsscPpt::programAvailableLMKs() {
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
         m_ppt->programLMKs();
     }
 
@@ -2662,7 +2679,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Programing LMK of IOB " + toString(iobNumber);
         m_ppt->setActiveModule(iobNumber);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->programLMK();
         }
 
@@ -2698,7 +2715,7 @@ namespace karabo {
         int numPRBsfound = 0;
         m_ppt->setActiveModule(iobNumber);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             numPRBsfound = m_ppt->checkCurrentIOBPRBStatus(false);
         }
         string keyName = "iob" + toString(iobNumber) + "Status.numPRBsFound";
@@ -2714,7 +2731,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Reset Aurora";
         m_ppt->setActiveModule(iobNumber);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->auroraTXReset();
         }
         checkIOBAuroraReady(iobNumber);
@@ -2748,7 +2765,7 @@ namespace karabo {
     void DsscPpt::programEPCConfig() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program EPC Config ";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->programEPCRegisters();
         }
 
@@ -2766,7 +2783,7 @@ namespace karabo {
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program IOB " << toString(m_ppt->activeIOBs) << " config";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->programIOBRegisters(); // includes already the readback
         }
 
@@ -2784,7 +2801,7 @@ namespace karabo {
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program IOB Config " << iobNumber;
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->programIOBRegister(to_string(iobNumber)); // includes already the readback
         }
 
@@ -2853,22 +2870,22 @@ namespace karabo {
 
         if (selRegStr.compare("epc") == 0) {
             {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 m_ppt->programEPCRegister(selModSet);
             }
         } else if (selRegStr.compare("iob") == 0) {
             if (setActiveModule(module)) {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 m_ppt->programIOBRegister(selModSet);
             }
         } else if (selRegStr.compare("jtag") == 0) {
             if (setActiveModule(module)) {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 m_ppt->programJtagSingle(selModSet);
             }
         } else if (selRegStr.compare("pixel") == 0) {
             if (setActiveModule(module)) {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 m_ppt->programPixelRegs();
             }
         }
@@ -2926,7 +2943,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program ASIC JTAG Chain " + toString(iobNumber);
         m_ppt->setActiveModule(iobNumber);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->programJtag(readBack);
         }
 
@@ -2944,7 +2961,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program Pixel Registers to Default Values at IOB " << iobNumber;
         m_ppt->setActiveModule(iobNumber);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->programPixelRegsAllAtOnce(false);
         }
 
@@ -2965,7 +2982,7 @@ namespace karabo {
         m_ppt->setActiveModule(iobNumber);
 
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->programPixelRegs(readBack);
         }
 
@@ -3021,7 +3038,7 @@ namespace karabo {
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program Sequencers";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->programSequencers(readBack);
         }
 
@@ -3038,7 +3055,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Readback IOB " + toString(iobNumber) + " Config Registers";
         m_ppt->setActiveModule(iobNumber);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             rc = m_ppt->readBackIOBRegister();
         }
 
@@ -3075,7 +3092,7 @@ namespace karabo {
 
     int DsscPpt::checkAllIOBStatus() {
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->getAvailableIOBoards();
         }
 
@@ -3094,7 +3111,7 @@ namespace karabo {
         bool allOk = true;
 
         for (auto && activeIOB : m_ppt->activeIOBs) {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->setActiveModule(activeIOB);
             allOk &= (m_ppt->checkIOBDataFailed() == 0);
             setASICChannelReadoutFailure(activeIOB);
@@ -3105,7 +3122,7 @@ namespace karabo {
 
     void DsscPpt::readLastPPTTrainID() {
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             set<unsigned int>("lastTrainId", m_ppt->getCurrentTrainID());
         }
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Read last Train ID: " << get<unsigned int>("lastTrainId");
@@ -3115,7 +3132,7 @@ namespace karabo {
     bool DsscPpt::checkPPTDataFailed() {
         bool allOk = true;
         for (auto && activeIOB : m_ppt->activeIOBs) {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->setActiveModule(activeIOB);
             unsigned short failed = m_ppt->getActiveChannelFailure();
             set<unsigned short>("pptChannelFailed.failedChannel" + to_string(activeIOB), failed);
@@ -3128,7 +3145,7 @@ namespace karabo {
     void DsscPpt::checkASICReset() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Check correct ASIC Reset";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->checkCorrectASICReset();
         }
         if (!checkPPTDataFailed()) {
@@ -3147,7 +3164,7 @@ namespace karabo {
 
             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " IOB " + toString(iobNumber) + " Found";
             {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 m_ppt->setDPEnabled(iobNumber, true);
             }
 
@@ -3172,7 +3189,7 @@ namespace karabo {
     void DsscPpt::fillSramAndReadout() {
         unsigned short pattern = get<unsigned short>("sramPattern");
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->fillSramAndReadout(pattern, true);
         }
     }
@@ -3188,7 +3205,7 @@ namespace karabo {
     bool DsscPpt::isIOBAvailable(int iobNumber) {
         bool isAvailable;
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             isAvailable = m_ppt->isIOBAvailable(iobNumber);
         }
         return isAvailable;
@@ -3200,7 +3217,7 @@ namespace karabo {
         bool ready = false;
         m_ppt->setActiveModule(iobNumber);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             ready = m_ppt->isAuroraReady();
         }
 
@@ -3241,7 +3258,7 @@ namespace karabo {
 
             {
                 KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Updating flash memory...please wait";
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 m_ppt->sendFlashFirmware();
             }
         }
@@ -3268,7 +3285,7 @@ namespace karabo {
 
             {
                 KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Updating flash memory...please wait";
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 m_ppt->sendFlashLinux();
             }
         }
@@ -3298,7 +3315,7 @@ namespace karabo {
             pptSendFile("IOB_Firmware.xsvf");
 
             {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 m_ppt->sendUpdateIOBFirmware();
             }
         }
@@ -3312,7 +3329,7 @@ namespace karabo {
     void DsscPpt::pptSendFile(const string & fileName) {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " FTP Send File: " << fileName;
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->sendFileFtp(fileName);
         }
 
@@ -3323,7 +3340,7 @@ namespace karabo {
     void DsscPpt::readEPCRegisters() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ReadBack EPC Registers";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->readBackEPCRegisters();
         }
 
@@ -3336,7 +3353,7 @@ namespace karabo {
     void DsscPpt::readEPCPLLRegisters() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " ReadBack EPC PLL Registers";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->readBackEPCRegister("PLLReadbackRegister");
             m_ppt->readBackEPCRegister("CLOCK_FANOUT_CONTROL");
         }
@@ -3421,7 +3438,7 @@ namespace karabo {
         m_ppt->setActiveModule(iobNumber);
         string keyName = "iob" + toString(iobNumber) + "Status.iobTemp";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             set<int>(keyName, m_ppt->readIOBTemperature_TestSystem());
         }
     }
@@ -3434,7 +3451,7 @@ namespace karabo {
 
         m_ppt->setActiveModule(iobNumber);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
 
             string iobSerial = m_ppt->getIOBSerial();
             set<string>(serialkey, iobSerial);
@@ -3754,7 +3771,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Configure System";
         int rc = SuS::DSSC_PPT::ERROR_OK;
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             rc = m_ppt->initSystem();
         }
         if (rc == SuS::DSSC_PPT::ERROR_IOB_NOT_FOUND) {
@@ -3773,7 +3790,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start Stand Alone Mode";
         set<bool>("xfelMode", false);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->enableXFELControl(false);
         }
         getEPCParamsIntoGui("Multi_purpose_Register");
@@ -3785,7 +3802,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start XFEL Mode";
         set<bool>("xfelMode", true);
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->enableXFELControl(true);
         }
 
@@ -3797,7 +3814,7 @@ namespace karabo {
     void DsscPpt::startManualReadout() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start manual readout";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->startSingleReadout();
         }
     }
@@ -3807,7 +3824,7 @@ namespace karabo {
     void DsscPpt::startManualBurstBtn() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start manual burst";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->startBurst();
         }
     }
@@ -3816,7 +3833,7 @@ namespace karabo {
     void DsscPpt::readoutTestPattern() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Start readout TestPattern";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->startTestPattern();
         }
     }
@@ -3827,7 +3844,7 @@ namespace karabo {
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable Internal DAC Mode";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->setIntDACMode();
         }
     }
@@ -3838,7 +3855,7 @@ namespace karabo {
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable Normal Mode";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->setNormalMode();
         }
     }
@@ -3849,7 +3866,7 @@ namespace karabo {
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable Pixel Injection Mode";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->setPixelInjectionMode();
         }
     }
@@ -3861,7 +3878,7 @@ namespace karabo {
         const string injectionModeStr = get<string>("injectionMode");
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable InjectionMode " << injectionModeStr;
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->setInjectionMode(m_ppt->getInjectionMode(injectionModeStr));
         }
 
@@ -3872,7 +3889,7 @@ namespace karabo {
         DSSC::StateChangeKeeper keeper(this);
         const auto value = get<unsigned int>("injectionValue");
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->setInjectionDAC(value);
         }
 
@@ -3910,7 +3927,7 @@ namespace karabo {
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Update LMK Output for ASIC " << lmkNumber << " on iob " << module;
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             m_ppt->setActiveModule(module);
             m_ppt->programLMKASIC(lmkNumber, true, false);
             m_ppt->programLMKASIC(lmkNumber, false, false);
@@ -3957,7 +3974,7 @@ namespace karabo {
     void DsscPpt::updateStartWaitOffset() {
         int start_wait_offset = get<int>("sequence.start_wait_offs");
 
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
 
         m_ppt->updateStartWaitOffset(start_wait_offset);
     }
@@ -3983,7 +4000,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Update Sequence Counters";
         {
             {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
 
                 m_ppt->updateCounterValues(start_wait_time, start_wait_offs, gdps_on_time, iprogLength, burstLength, refpulseLength,
                                            fet_on_time, clr_on_time, clr_cycle, clrDuty, SW_PWR_ON,
@@ -4154,7 +4171,7 @@ namespace karabo {
             channelsVec.erase(std::unique(channelsVec.begin(), channelsVec.end()), channelsVec.end());
 
             {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 for (size_t i = 0; i < channelsVec.size(); i++) {
                     m_ppt->programEPCRegister("10GE_Engine" + toString(channelsVec.at(i)) + "_Control");
                 }
@@ -4182,7 +4199,7 @@ namespace karabo {
                 int channel = INT_CAST(tokens[1].at(2));
                 bool enable = filtered.getAs<bool>(path);
                 {
-                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                    auto lock = acquirePptLock(__func__);
                     m_ppt->setDPEnabled(channel, enable);
                 }
             }
@@ -4218,31 +4235,31 @@ namespace karabo {
                 if (path.compare("numFramesToSendOut") == 0) {
                     unsigned int numFrames = filtered.getAs<unsigned int>(path);
                     {
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        auto lock = acquirePptLock(__func__);
                         m_ppt->setNumFramesToSend(numFrames);
                     }
                 } else if (path.compare("ethernetOutputRate") == 0) {
                     unsigned int megabits = filtered.getAs<unsigned int>(path);
                     {
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        auto lock = acquirePptLock(__func__);
                         m_ppt->setEthernetOutputDatarate(megabits);
                     }
                 } else if (path.compare("numPreBurstVetos") == 0) {
                     unsigned int numVetos = filtered.getAs<unsigned int>(path);
                     cout << "numPreBurstVetos changed" << numVetos << endl;
                     {
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        auto lock = acquirePptLock(__func__);
                         m_ppt->setBurstVetoOffset(numVetos);
                     }
                 } else if (path.compare("selEnvironment") == 0) {
                     string setupName = filtered.getAs<string>(path);
                     updateTestEnvironment(setupName);
                 } else if (path.compare("selPRBActivePowers") == 0) {
-                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                    auto lock = acquirePptLock(__func__);
                     m_ppt->setPRBPowerSelect(filtered.getAs<string>(path), true);
                 } else if (path.compare("numActiveASICs") == 0) {
                     int numASICs = filtered.getAs<int>(path);
-                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                    auto lock = acquirePptLock(__func__);
                     m_ppt->setNumberOfActiveAsics(numASICs);
 
 
@@ -4256,14 +4273,14 @@ namespace karabo {
                     bool enable = filtered.getAs<bool>(path);
                     if (path.compare("xfelMode") == 0) {
                         {
-                            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                            auto lock = acquirePptLock(__func__);
                             m_ppt->enableXFELControl(enable);
                         }
                     } else if (path.compare("disable_sending") == 0) {
                         {
                             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << (enable ? " Disable Data Sending" : " Enable Data Sending");
                             bool disable = enable;
-                            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                            auto lock = acquirePptLock(__func__);
                             m_ppt->disableSending(disable);
                             //  if(disable){
                             //    this->updateState(karabo::data::State::STARTED);
@@ -4274,7 +4291,7 @@ namespace karabo {
                     } else if (path.compare("continuous_mode") == 0) {
                         {
                             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << (enable ? " Enable Continuous Mode" : " Disable Continuous Mode");
-                            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                            auto lock = acquirePptLock(__func__);
                             m_ppt->runContinuousMode(enable);
                             //  m_ppt->disableSending(true);
                             //  if(enable){
@@ -4284,12 +4301,12 @@ namespace karabo {
                             //  }
                         }
                     } else if (path.compare("clone_eth0_to_eth1") == 0) {
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        auto lock = acquirePptLock(__func__);
                         m_ppt->setEPCParam("DataRecv_to_Eth0_Register", "0", "clone_eth0_to_eth1", enable);
                         m_ppt->programEPCRegister("DataRecv_to_Eth0_Register");
                     } else if (path.compare("send_dummy_packets") == 0) {
                         {
-                            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                            auto lock = acquirePptLock(__func__);
                             m_ppt->enableDummyPackets(enable);
                         }
                     } else if (path.compare("send_dummy_dr_data") == 0) {
@@ -4297,12 +4314,12 @@ namespace karabo {
                             KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " No Datapath enabled, enable at least one datapath to recieve dummy data from datareciever";
                         }
                         {
-                            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                            auto lock = acquirePptLock(__func__);
                             m_ppt->enableDummyDRData(enable);
                         }
                     } else if (path.compare("send_raw_data") == 0) {
                         {
-                            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                            auto lock = acquirePptLock(__func__);
                             m_ppt->setSendRawData(enable, false, !enable);
                         }
                     } else if (path.compare("ASIC_send_dummy_data") == 0) {
@@ -4319,7 +4336,7 @@ namespace karabo {
                                 iobFoundCnt++;
                                 m_ppt->setActiveModule(i);
                                 {
-                                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                                    auto lock = acquirePptLock(__func__);
                                     m_ppt->enableDummyAsicData(enable);
                                 }
                             }
@@ -4351,14 +4368,14 @@ namespace karabo {
                     bool enD0Mode = filtered.getAs<bool>(path);
                     bool bypCompr = get<bool>("bypassCompression");
                     {
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        auto lock = acquirePptLock(__func__);
                         m_ppt->setD0Mode(enD0Mode, bypCompr);
                     }
                 } else if (path.compare("bypassCompression") == 0) {
                     bool bypCompr = filtered.getAs<bool>(path);
                     bool enD0Mode = get<bool>("enD0Mode");
                     {
-                        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                        auto lock = acquirePptLock(__func__);
                         m_ppt->setD0Mode(enD0Mode, bypCompr);
                     }
                 }
@@ -4562,8 +4579,7 @@ namespace karabo {
 
     void DsscPpt::programLMKsAuto() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program LMKs automatically";
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
-
+        auto lock = acquirePptLock(__func__);
         m_ppt->programLMKsDefault();
     }
 
@@ -4572,7 +4588,7 @@ namespace karabo {
 
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Acquisition started";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             int rc = m_ppt->start();
             if (rc != SuS::DSSC_PPT::ERROR_OK) {
                 KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " DSSC failed to start: " << m_ppt->errorString;
@@ -4581,7 +4597,7 @@ namespace karabo {
         }
         while (m_keepAcquisition) {
             {
-                DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                auto lock = acquirePptLock(__func__);
                 cout << '-';
                 cout.flush();
             }
@@ -4589,7 +4605,7 @@ namespace karabo {
         }
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Acquisition stopped";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             int rc = m_ppt->stop();
             if (rc != SuS::DSSC_PPT::ERROR_OK)
                 KARABO_LOG_FRAMEWORK_WARN << getInstanceId() << " PPT failed to stop: " << m_ppt->errorString;
@@ -4603,14 +4619,13 @@ namespace karabo {
 
 
     void DsscPpt::restorePoweredPixels() {
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
         m_ppt->restorePoweredPixels();
     }
 
 
     void DsscPpt::setCurrentQuarterOn() {
         DSSC::StateChangeKeeper keeper(this);
-
         static const vector<string> quarterStr{"0-3", "4-7", "8-11", "12-15", "16-19", "20-23", "24-27", "28-31", "32-35", "36-39", "40-43", "44-47", "48-51", "52-55", "56-59", "60-63"};
 
         const auto quarter = get<unsigned int>("pixelsColSelect");
@@ -4623,7 +4638,8 @@ namespace karabo {
         const auto quarterPixelsStr = utils::positionVectorToList(quarterPixels);
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " in columns " << quarterStr[quarter];
 
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
+
         m_ppt->enableMonBusForPixels(quarterPixels);
         m_ppt->enableInjection(true, quarterPixelsStr, true);
     }
@@ -4639,7 +4655,8 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable " << m_ppt->getInjectionModeName(m_ppt->getInjectionMode()) << " in columns " << colString;
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Enable in pixels " << quarterPixelsStr.substr(0, 30) << "  ...";
 
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
+
         m_ppt->enableMonBusCols(colString);
         m_ppt->enableInjection(true, quarterPixelsStr, true);
     }
@@ -4686,7 +4703,7 @@ namespace karabo {
                 
                 int pptTemp;
                 {
-                    DsscScopedLock lock(&m_accessToPptMutex, __func__);
+                    auto lock = acquirePptLock(__func__);
                     m_ppt->readBackEPCRegister("Eth_Output_Data_Rate");
                     pptTemp = m_ppt->readFPGATemperature();
                  }
@@ -4708,7 +4725,7 @@ namespace karabo {
     void DsscPpt::programPLL() {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Program PLL";
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             if (get<bool>("pptPLL.internalPLL")) {
                 m_ppt->clockPLLSelect(true);
             } else {
@@ -4756,7 +4773,7 @@ namespace karabo {
 
         string resFreqString;
         {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
+            auto lock = acquirePptLock(__func__);
             resFreqString = m_ppt->programClocking(XFELClockSource, useInternalPLL,
                                                    multiplier, intVal, fracVal, modVal);
         }
@@ -4798,8 +4815,7 @@ namespace karabo {
 
 
     void DsscPpt::checkQSFPConnected() {
-        //boost::mutex::scoped_lock lock(m_accessToPptMutex);
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
+        auto lock = acquirePptLock(__func__);
         set<string>("connectedETHChannels", m_ppt->getConnectedETHChannels());
     }
 
@@ -4834,19 +4850,17 @@ namespace karabo {
 
 
     void DsscPpt::setThrottleDivider() {
-        //
+        auto lock = acquirePptLock(__func__);
         uint32_t throttle_divider = get<uint32_t>("ethThrottleDivider");
         m_ppt->setEthernetOutputThrottleDivider(throttle_divider);
     }
 
 
     void DsscPpt::enableDPChannels(uint16_t enOneHot) {
-        {
-            DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            for (int i = 0; i < 4; i++) {
-                bool enable = (enOneHot & (1 << i)) != 0;
-                m_ppt->setDPEnabled(i + 1, enable);
-            }
+        auto lock = acquirePptLock(__func__);
+        for (int i = 0; i < 4; i++) {
+            bool enable = (enOneHot & (1 << i)) != 0;
+            m_ppt->setDPEnabled(i + 1, enable);
         }
         updateGuiEnableDatapath();
     }
@@ -4855,8 +4869,9 @@ namespace karabo {
     void DsscPpt::startSingleCycle() {
         const auto iterations = get<unsigned int>("singleCycleFields.iterations");
         const auto slow_mode = get<unsigned int>("singleCycleFields.moduloValue");
+ 
+        auto lock = acquirePptLock(__func__);
 
-        DsscScopedLock lock(&m_accessToPptMutex, __func__);
         m_ppt->setEPCParam("Single_Cycle_Register", "all", "iterations", iterations);
         m_ppt->setEPCParam("Single_Cycle_Register", "all", "slow_mode", slow_mode);
         m_ppt->setEPCParam("Single_Cycle_Register", "all", "continuous_mode", 0);
