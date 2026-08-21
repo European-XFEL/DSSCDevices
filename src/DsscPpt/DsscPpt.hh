@@ -22,23 +22,7 @@
 #include <vector>
 #include <sstream>
 
-
-/**
- * The main Karabo namespace
- */
-//#define STATE_RUN karabo::data::State::STARTED,karabo::data::State::ACQUIRING
-//#define STATE_ON karabo::data::State::ON,karabo::data::State::STOPPED
-//#define STATE_INIT karabo::data::State::OFF
-//#define STATE_OFF karabo::data::State::UNKNOWN
-
 #include "../version.hh"  // provides PACKAGE_VERSION common to all devices
-
-/**
- * States: UNKNOWN -> connect -> OFF -> progIOB/initSystem ->
- *         STOPPED -> xfelMode/ContMode -> ON ->
- *         sendData -> ACQUIRING
- */
-
 
 
 namespace karabo {

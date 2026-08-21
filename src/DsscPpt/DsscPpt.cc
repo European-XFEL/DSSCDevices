@@ -1723,14 +1723,7 @@ namespace karabo {
         KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " PollThread joined...";
     }
 
-
-    /*void DsscPpt::idleStateOnEntry() {
-        if (m_ppt->isOpen()) {
-            startPolling();
-        }
-    }//*/
-
-
+    
     void DsscPpt::acquisitionStateOnEntry() {
         auto lock = acquirePptLock(__func__);
         m_ppt->enableXFELControl(true);
@@ -4904,16 +4897,16 @@ namespace karabo {
         }
 
         if(success) {
-	    KARABO_LOG_FRAMEWORK_INFO << "Received "
-		                      << this->get<std::string>("fullConfigFileName")
-				      << " ("
-				      << reply.get<std::string>("human")
-				      << " ) from "
-				      << remoteConfigurator;
+            KARABO_LOG_FRAMEWORK_INFO << "Received "
+                                      << this->get<std::string>("fullConfigFileName")
+                                      << " ("
+                                      << reply.get<std::string>("human")
+                                      << " ) from "
+                                      << remoteConfigurator;
 	} else {
             KARABO_LOG_FRAMEWORK_ERROR << "Remote Configurator \""
-		                       << remoteConfigurator
-				       << "\" cannot be reached.";
+                                       << remoteConfigurator
+                                       << "\" cannot be reached.";
         }
         return success;
     }
