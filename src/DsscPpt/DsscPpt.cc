@@ -3106,9 +3106,9 @@ namespace karabo {
     void DsscPpt::readLastPPTTrainID() {
         {
             DsscScopedLock lock(&m_accessToPptMutex, __func__);
-            set<unsigned int>("lastTrainId", m_ppt->getCurrentTrainID());
+            set<unsigned long long>("lastTrainId", m_ppt->getCurrentTrainID());
         }
-        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Read last Train ID: " << get<unsigned int>("lastTrainId");
+        KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Read last Train ID: " << get<unsigned long long>("lastTrainId");
     }
 
 
