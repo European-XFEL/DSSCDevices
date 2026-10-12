@@ -213,7 +213,7 @@ class DsscConfigurator(DeviceClientBase, Device):
                         desc, *_ = row[0]
                     else:
                         desc = fnames[0]
-                        self.log.INFO(f"Strange: configuration {desc} is correct, but not know to me")  # noqa
+                        self.log.INFO(f"Strange: configuration {desc} is correct, but not known to me")  # noqa
 
                     # Could be string or TableValue
                     if isinstance(desc, KaraboValue):
