@@ -71,8 +71,10 @@ class DsscStateCombiner(Device):
 
             if state == State.ERROR:
                 # Hey, could we be off, when chiller in error and sib is off?
-                if (all_states['BeckhoffChiller'] == State.ERROR and
-                        all_states['BeckhoffDigitalInput'] == State.OFF):
+                # This only applies to big detectors. DSSCsm is cooled with
+                # a ThorlabsTed4015, not a BeckhoffChiller
+                if (all_states.get('BeckhoffChiller') == State.ERROR and
+                        all_states.get('BeckhoffDigitalInput') == State.OFF):
                     state = State.PASSIVE
             if state != self.state:
                 # Use current timestamp for the combined state, otherwise on
