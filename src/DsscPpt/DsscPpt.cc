@@ -4684,16 +4684,21 @@ namespace karabo {
             KARABO_LOG_FRAMEWORK_INFO << getInstanceId() << " Hardware polling started";
             while (m_keepPolling) {
                 
-                int pptTemp;
+                uint32_t pptTemp;
+                uint32_t outputRate;
                 {
                     DsscScopedLock lock(&m_accessToPptMutex, __func__);
                     m_ppt->readBackEPCRegister("Eth_Output_Data_Rate");
                     pptTemp = m_ppt->readFPGATemperature();
-                 }
+                    outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")/(1E6/128.0);
+                }
 
-                uint32_t outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")/(1E6/128.0);
-                this->set("ethOutputRate", outputRate);
-                this->set<int>("pptTemp", pptTemp);
+                if(outputRate != this->get<uint32_t>("ethOutputRate")) {
+                    this->set("ethOutputRate", outputRate);
+                }
+                if(pptTemp != this->get<uint32_t>("pptTemp")) {
+                    this->set<uint32_t>("pptTemp", pptTemp);
+                }
 
                 std::this_thread::sleep_for(5000ms);
             }
