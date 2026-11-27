@@ -4693,12 +4693,14 @@ namespace karabo {
                     outputRate = m_ppt->getEPCParam("Eth_Output_Data_Rate", "0", "Eth_Output_Data_Rate")/(1E6/128.0);
                 }
 
-                if(outputRate != this->get<uint32_t>("ethOutputRate")) {
-                    this->set("ethOutputRate", outputRate);
+                Hash h;
+                if (outputRate != this->get<uint32_t>("ethOutputRate")) {
+                    h->set("ethOutputRate", outputRate);
                 }
-                if(pptTemp != this->get<uint32_t>("pptTemp")) {
-                    this->set<uint32_t>("pptTemp", pptTemp);
+                if (pptTemp != this->get<uint32_t>("pptTemp")) {
+                    h->set<uint32_t>("pptTemp", pptTemp);
                 }
+                this->set(h)
 
                 std::this_thread::sleep_for(5000ms);
             }
