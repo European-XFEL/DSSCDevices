@@ -4695,12 +4695,12 @@ namespace karabo {
 
                 Hash h;
                 if (outputRate != this->get<uint32_t>("ethOutputRate")) {
-                    h->set("ethOutputRate", outputRate);
+                    h.set("ethOutputRate", outputRate);
                 }
                 if (pptTemp != this->get<uint32_t>("pptTemp")) {
-                    h->set<uint32_t>("pptTemp", pptTemp);
+                    h.set<uint32_t>("pptTemp", pptTemp);
                 }
-                this->set(h)
+                if (!h.empty()) { this->set(h); }
 
                 std::this_thread::sleep_for(5000ms);
             }
